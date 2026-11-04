@@ -5,9 +5,27 @@ const path = require('node:path');
 function configureTestIsolation({ app, session }, pkg, env = process.env) {
   if (env.MINDEX_ISOLATED_TEST !== '1') return null;
   if (pkg.mindexTestBuild !== true) throw new Error('Isolation requires a test package');
-  const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'mindex-isolated-'));
+  // A test runner may keep its own random fixture across restarts. No arbitrary
+  // paths or pre-existing unmarked directories are accepted.
+  const token = env.MINDEX_TEST_PROFILE_TOKEN;
+  let profile;
+  if (token !== undefined) {
+    if (!/^[a-f0-9]{32}$/.test(token)) throw new Error('Invalid test profile token');
+    profile = path.join(fs.realpathSync(os.tmpdir()), 'mindex-isolated-upgrade-' + token);
+    const marker = path.join(profile, 'fixture-only.json');
+    if (!fs.existsSync(profile)) {
+      fs.mkdirSync(profile, { mode: 0o700 });
+      fs.writeFileSync(marker, JSON.stringify({ token, appId: 'kr.mindex.app.test' }), { flag: 'wx', mode: 0o600 });
+    }
+    if (fs.lstatSync(profile).isSymbolicLink() || fs.lstatSync(marker).isSymbolicLink()) throw new Error('Unsafe test profile');
+    const saved = JSON.parse(fs.readFileSync(marker, 'utf8'));
+    if (saved.token !== token || saved.appId !== 'kr.mindex.app.test') throw new Error('Unrecognized test profile');
+  } else profile = fs.mkdtempSync(path.join(os.tmpdir(), 'mindex-isolated-'));
   for (const name of ['userData', 'sessionData', 'logs', 'crashDumps']) {
-    const dir = path.join(profile, name); fs.mkdirSync(dir); app.setPath(name, dir);
+    const dir = path.join(profile, name);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+    if (!fs.lstatSync(dir).isDirectory() || fs.lstatSync(dir).isSymbolicLink()) throw new Error('Unsafe test profile directory');
+    app.setPath(name, dir);
   }
   app.commandLine.appendSwitch('disable-background-networking');
   app.commandLine.appendSwitch('host-resolver-rules', 'MAP * ~NOTFOUND');

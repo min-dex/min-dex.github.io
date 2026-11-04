@@ -1,0 +1,65 @@
+// Disposable TEST installation only; all records and credentials are synthetic.
+const { _electron }=require('playwright');
+const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const hash=value=>crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
+async function main(){
+ const [exe,proof,phase,sha,version]=process.argv.slice(2);
+ assert(['seed','restart','upgrade'].includes(phase));
+ let record=phase==='seed'?{token:crypto.randomBytes(16).toString('hex'),rows:{}}:JSON.parse(fs.readFileSync(proof));
+ const originalRows=JSON.stringify(record.rows);
+ const app=await _electron.launch({executablePath:path.resolve(exe),env:{...process.env,MINDEX_ISOLATED_TEST:'1',MINDEX_TEST_PROFILE_TOKEN:record.token}});
+ try {
+  const native=await app.evaluate(({app})=>({profile:app.getPath('userData'),version:app.getVersion(),isolation:globalThis.__mindexTestIsolation,packaged:app.isPackaged}));
+  assert(native.packaged&&native.isolation.networkBlocked);
+  assert.equal(native.version,version);
+  const expected=path.join(fs.realpathSync(os.tmpdir()),'mindex-isolated-upgrade-'+record.token,'userData');
+  assert.equal(native.profile,expected);
+  if(record.profile)assert.equal(record.profile,native.profile);
+  const page=await app.firstWindow();
+  await page.waitForFunction(()=>typeof fetchWorshipServiceListRows==='function'&&!!window.MINDEX_SERVER_STORAGE);
+  const info=await page.evaluate(()=>window.mindexElectron.getBuildInfo());
+  assert(info.testBuild);assert.equal(info.build.sourceCommit,sha);
+  await page.exposeFunction('fixtureRpc',(name,args)=>{
+   const scope=args.p_scope==='shared'?'shared':args.p_scope+':'+args.p_token;
+   const rows=record.rows[scope]||{};
+   if(name==='mindex_state_read_v1')return {data:Object.values(rows),error:null};
+   assert.equal(name,'mindex_state_write_v1');assert.equal(phase,'seed','Readback must not mutate saved records');
+   assert.equal(args.p_revision,'0');assert(!rows[args.p_key]);
+   const row={key:args.p_key,value:args.p_value,revision:'1',requestId:args.p_request_id};
+   (record.rows[scope]||= {})[row.key]=row;return {data:row,error:null};
+  });
+  const data=await page.evaluate(async seed=>{
+   const service={id:'fixture-worship',service_date:'2026-11-04',service_alias:'설치 보존 시험'};
+   const client=window.supabase.createClient('https://fixture.invalid','fixture-public-id',{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async (url,options)=>{
+    if(!String(url).includes('/rest/v1/mindex_worship_service')||(options?.method||'GET')!=='GET')throw Error('Unexpected fixture request');
+    return new Response(JSON.stringify([service]),{status:200,headers:{'Content-Type':'application/json'}});
+   }}});
+   state.client=client;
+   const storage=window.MINDEX_SERVER_STORAGE;
+   await storage.initialize({rpc:(name,args)=>window.fixtureRpc(name,args)},'upgrade-fixture');
+   const draft={schema:1,module:'service',id:service.id,value:{service,items:[{id:'synthetic-item',raw_title:'저장 전 제목\n원문 보존 & < >',raw_body:'가상 내용\n두 번째 줄'}],serviceTypes:[]},fields:[]};
+   const values={
+    'mindex.editor.draft.v2:service:fixture-worship:rehearsal':JSON.stringify(draft),
+    'mindex.editor.recovery.v1:service:fixture-worship:rehearsal':JSON.stringify({schema:1,module:'service',id:service.id,draft,current:{service,items:[],serviceTypes:[]},createdAt:'2026-11-04T00:00:00.000Z'}),
+    'mindex.theme':'dark','mindex.music.fadeStop':'true'
+   };
+   if(seed)for(const [key,value]of Object.entries(values))await storage.setItem('local',key,value);
+   const actual=Object.fromEntries(Object.keys(values).map(key=>[key,storage.getItem('local',key)]));
+   for(const key in values)if(actual[key]!==values[key])throw Error('Raw fixture mismatch: '+key);
+   const restored=JSON.parse(actual[Object.keys(values)[0]]);
+   const textarea=document.createElement('textarea');textarea.value=restored.value.items[0].raw_body;document.body.append(textarea);
+   if(textarea.value!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
+   return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:textarea.value,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};
+  },phase==='seed');
+  assert.equal(data.identity.length,64);
+  if(phase==='seed'){
+   record={...record,profile:native.profile,data,hashes:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)]))};
+   fs.writeFileSync(proof,JSON.stringify(record,null,2));
+  }else{
+   assert.deepEqual(data,record.data);assert.equal(JSON.stringify(record.rows),originalRows);
+   assert.deepEqual(Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)])),record.hashes);
+  }
+  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,hashes:record.hashes}));
+ }finally{await app.close();}
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});

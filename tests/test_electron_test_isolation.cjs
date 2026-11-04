@@ -29,3 +29,28 @@ test('native security changes trigger unsigned platform validation before main',
  assert.ok(draft.includes('--draft'));
  assert.doesNotMatch(workflow,/continue-on-error:/);
 });
+
+
+test('persistent fixture is test-only, token-scoped and rejects symlink paths',()=>{
+ const os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
+ const token=crypto.randomBytes(16).toString('hex');
+ const profile=path.join(fs.realpathSync(os.tmpdir()),'mindex-isolated-upgrade-'+token);
+ const app={setPath(){},commandLine:{appendSwitch(){}},whenReady:()=>new Promise(()=>{}),on(){}};
+ const env={MINDEX_ISOLATED_TEST:'1',MINDEX_TEST_PROFILE_TOKEN:token};
+ try {
+  assert.throws(()=>configureTestIsolation({app},{},env),/test package/);
+  assert.throws(()=>configureTestIsolation({app},{mindexTestBuild:true},{...env,MINDEX_TEST_PROFILE_TOKEN:'../original'}),/Invalid/);
+  const first=configureTestIsolation({app},{mindexTestBuild:true},env);
+  fs.writeFileSync(path.join(profile,'userData','fixture'),'preserved');
+  assert.equal(configureTestIsolation({app},{mindexTestBuild:true},env).profile,first.profile);
+  assert.equal(fs.readFileSync(path.join(profile,'userData','fixture'),'utf8'),'preserved');
+  if(process.platform!=='win32'){
+   fs.rmdirSync(path.join(profile,'logs'));
+   fs.symlinkSync(os.tmpdir(),path.join(profile,'logs'));
+   assert.throws(()=>configureTestIsolation({app},{mindexTestBuild:true},env),/Unsafe/);
+   fs.unlinkSync(path.join(profile,'logs'));
+  }
+  fs.writeFileSync(path.join(profile,'fixture-only.json'),'{}');
+  assert.throws(()=>configureTestIsolation({app},{mindexTestBuild:true},env),/Unrecognized/);
+ } finally {fs.rmSync(profile,{recursive:true,force:true});}
+});

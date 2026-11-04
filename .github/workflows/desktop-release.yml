@@ -21,6 +21,8 @@ on:
       - tools/minimatch-compat/**
       - tests/verify_candidate_package.cjs
       - tests/test_desktop_youtube_local.cjs
+      - tests/test_desktop_upgrade.cjs
+      - tests/install_test_fixture.py
       - tests/test_electron_updater.cjs
       - tests/test_minimatch_compat.cjs
       - tests/test_electron_test_isolation.cjs
@@ -36,7 +38,7 @@ jobs:
   build:
     name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -63,6 +65,27 @@ jobs:
       - run: pnpm audit --audit-level=moderate
       - run: python tools/broadcast-engine/prepare.py
       - run: pnpm electron:check
+      - name: Prepare prior-version TEST installation with synthetic records
+        if: ${{ !inputs.publish_release }}
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          npm install --prefix "$RUNNER_TEMP/mindex-qa" --ignore-scripts --no-audit --no-fund playwright@1.58.0
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            pnpm exec electron-builder --config electron-builder.test.cjs --win nsis --x64 --publish never -c.extraMetadata.version=0.9.0-test -c.directories.output=dist/prior-test
+            installer="dist/prior-test/Mindex-Test-0.9.0-test-win-x64.exe"
+          else
+            arch="$(node -p process.arch)"
+            pnpm exec electron-builder --config electron-builder.test.cjs --mac dmg --"$arch" --publish never -c.extraMetadata.version=0.9.0-test -c.directories.output=dist/prior-test
+            installer="dist/prior-test/Mindex-Test-0.9.0-test-mac-$arch.dmg"
+          fi
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/install-fixture.json"
+          exe="$(node -p 'JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP+"/install-fixture.json")).exe')"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" seed "$GITHUB_SHA" 0.9.0-test
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" 0.9.0-test
+          rm -rf dist/prior-test
       - name: Build isolated unsigned test installers
         if: ${{ !inputs.publish_release }}
         run: pnpm electron:test:${{ matrix.platform }}
@@ -86,6 +109,20 @@ jobs:
             if [[ "$(uname -m)" == arm64 ]]; then app="$arm"; else app="$intel"; fi
             node tests/test_desktop_youtube_local.cjs "$PWD/$app/MacOS/Mindex Test" "$PWD/$app/Resources/broadcast-engine/ffmpeg"
           fi
+      - name: Install candidate over TEST fixture and verify preservation
+        if: ${{ !inputs.publish_release }}
+        shell: bash
+        run: |
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            installer="dist/test/Mindex-Test-1.0.0-test-win-x64.exe"
+          else
+            installer="dist/test/Mindex-Test-1.0.0-test-mac-$(node -p process.arch).dmg"
+          fi
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/install-fixture.json"
+          exe="$(node -p 'JSON.parse(require("fs").readFileSync(process.env.RUNNER_TEMP+"/install-fixture.json")).exe')"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" upgrade "$GITHUB_SHA" 1.0.0-test
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" 1.0.0-test
       - name: Build signed packages (no public release)
         if: ${{ inputs.publish_release }}
         shell: bash
