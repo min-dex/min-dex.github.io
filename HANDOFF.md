@@ -1,3 +1,13 @@
+## 2026-11-04 Final web/native integration candidate
+
+The candidate now includes main `ff65ef9b`: output freeze, staged current-service
+refresh and the preserved four-icon window-control row. Native YouTube composition,
+local RTMPS acceptance and isolated TEST installation/upgrade preservation remain
+included. Windows fixture lookup uses native path joining to avoid MSYS rewriting.
+The combined commit requires a fresh full web and native gate; prior component
+results do not certify this combined source. Development channel remains active;
+no real YouTube broadcast, production data write or formal publication is authorized.
+
 ## 2026-11-04 1.0.0 방송 시험 후보 동결
 
 공개 웹 기준 `89e2bd0c`까지 밝기·첫소절·문서 송출·디졸브와 예배 노하우 문서를 통합했다. 40분 CI 한도와 실제 편집창 수명주기 fixture를 유지한다. 후보 브랜치 CI의 웹 검사와 Desktop Packages의 미서명 패키지 검사를 분리한다. 설치 앱의 전체 웹 런타임을 Git 원본과 대조하고 시험 프로필에서 합성 화면을 로컬 RTMPS로 수신한다. 실제 장비·채널·서명 배포 승인은 별도이며 이전 후보의 수신 기록은 아래 이력에 보존한다.

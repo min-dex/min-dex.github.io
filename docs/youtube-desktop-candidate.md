@@ -1,3 +1,13 @@
+## 2026-11-04 Final web/native integration candidate
+
+The candidate now includes main `ff65ef9b`: output freeze, staged current-service
+refresh and the preserved four-icon window-control row. Native YouTube composition,
+local RTMPS acceptance and isolated TEST installation/upgrade preservation remain
+included. Windows fixture lookup uses native path joining to avoid MSYS rewriting.
+The combined commit requires a fresh full web and native gate; prior component
+results do not certify this combined source. Development channel remains active;
+no real YouTube broadcast, production data write or formal publication is authorized.
+
 ## 설치 보존 시험 계약
 
 TEST 패키지만 명시적 격리 모드에서 무작위 토큰으로 만든 시스템 임시 폴더를 재사용할 수 있다. 임의 경로·표식 없는 폴더·심볼릭 링크는 거부한다. 외부 통신·재생·권한·업데이트 차단은 유지한다.
