@@ -1202,7 +1202,8 @@ are unchanged; this is CSS layout only.
 ## Consistent counts and reviewed duplicate navigation ·2026-11-05
 
 Home Praise counts the same selectable explicit same_song groups as the complete
-Praise list, excluding only valid retiredInto sources. Native counting uses the
+Praise list, excluding only valid retiredInto sources. The home count labels this
+basis as 같은 곡 기준. Native counting uses the
 existing catalogue's ID/relation metadata, never a second lyric/audio payload
 fetch. Category filters still show their own subset. Service/Section/Element/Slide
 UI labels read 예배/섹션/항목/슬라이드. Default empty setlist reasons use concise

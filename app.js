@@ -16452,7 +16452,7 @@ function renderHomeStart() {
       detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceNavigationName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
     {id:"bulletin", label:"주보", icon:"newspaper", value:servicesReady ? `${departments.length}개 부서` : "—", unit:"예배와 연결된 주보",
       detail:state.serviceError ? "주보 목록을 불러오지 못했습니다." : departments.join(" · ") || (servicesReady ? "연결된 주보가 없습니다." : "주보 목록 불러오는 중…")},
-    {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"등록된 곡",
+    {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"같은 곡 기준",
       detail:stats?.errors.songs ? "곡 수를 불러오지 못했습니다." : songCount != null ? "가사 · 버전 · 악보 · 음원" : "곡 수 조회 중…", retry:stats?.errors.songs},
     {id:"scripture", label:"말씀", icon:"book-open", value:editionCount != null ? `${editionCount}개 역본` : "—", unit:"설치된 역본과 본문",
       detail:stats?.errors.editions ? "역본 수를 불러오지 못했습니다." : editionCount != null ? editionNames.join(" · ") || "설치된 역본이 없습니다." : "역본 수 조회 중…", retry:stats?.errors.editions},
