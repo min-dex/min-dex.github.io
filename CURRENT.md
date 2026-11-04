@@ -1,3 +1,13 @@
+## 2026-11-04 Background/audio follow-up candidate
+
+Approved web candidate `6947c5bf` is integrated after verified native candidate
+`e4905211`. Element-owned backgrounds retain playback and bounded cold-load
+retries; the supplied final dawn MP3 remains byte-identical. Package acceptance
+checks its pinned SHA-256 as well as every tracked renderer blob. Full web/native
+checks and isolated TEST upgrade preservation must pass on the combined SHA.
+Actual YouTube broadcasting, production data writes, signing/notarization and
+formal publication remain excluded. Web publication is confirmed separately.
+
 ## 2026-11-04 Final web/native integration candidate
 
 The candidate now includes main `ff65ef9b`: output freeze, staged current-service
