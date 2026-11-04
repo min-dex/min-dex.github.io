@@ -828,6 +828,18 @@ function presenterOutputTransitionTiming(root, frameState = {}, videoEndFade = f
 }
 
 // Root-owned BGV playback is independent of the changing content layers.
+// Keep paused controller metadata requests out of the output media range cache.
+function presenterBackgroundVideoPreviewSource(source) {
+  try {
+    const url = new URL(source);
+    if (url.protocol === "https:" && url.hostname.endsWith(".supabase.co") && url.pathname.startsWith("/storage/v1/object/public/")) {
+      url.searchParams.set("mindexPreview", "1");
+      return url.href;
+    }
+  } catch {}
+  return source;
+}
+
 function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   const selector = ":scope > .presenter-output-background-video";
   const videos = () => [...root.querySelectorAll(selector)];

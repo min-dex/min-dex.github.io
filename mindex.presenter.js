@@ -4202,7 +4202,7 @@ function renderPresenterSlideFrame(slide, options = {}) {
     <section class="presenter-slide presenter-slide--${escapeAttr(slideClass)}${extraClasses ? ` ${escapeAttr(extraClasses)}` : ""}" data-element-type="${escapeAttr(presenterSlideElementType(slide))}" data-slide-layout="${escapeAttr(presenterSlideLayout(slide))}"${sectionKey ? ` data-section-key="${escapeAttr(sectionKey)}"` : ""}${presenterRole ? ` data-presenter-role="${escapeAttr(presenterRole)}"` : ""}${backgroundStyle}>
       ${design?.logo ? `<img class="presenter-service-design-mark" src="${escapeAttr(design.logo)}" alt="" aria-hidden="true" />` : ""}
       ${renderPresenterSlideMeta(slide)}
-      ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterSlideBackgroundVideoSource(slide, options.noChromakey))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
+      ${options.previewStage && presenterSlideBackgroundVideoSource(slide, options.noChromakey) ? `<video class="presenter-output-background-video" src="${escapeAttr(presenterBackgroundVideoPreviewSource(presenterSlideBackgroundVideoSource(slide, options.noChromakey)))}" muted playsinline preload="metadata" aria-hidden="true"></video>` : ""}
       ${body}
       ${options.noChromakey && (!transitionLogo || slide?.songInstrumental) ? renderPresenterSongPosition(slide, options) : ""}
     </section>

@@ -73,6 +73,12 @@ def main():
                   check(grouped.map(e=>e.id).join(',')==='first-song,second-song,reading','unordered RPC rows changed service order');
                   check(normalizeServiceItemsInCurrentOrder(grouped).map(e=>e.id).join(',')==='first-song,second-song,reading','hydration compaction changed persisted order');
                   check(JSON.stringify([sections,elements])===before,'grouping mutated server rows');
+                  const publicVideo='https://fixture.supabase.co/storage/v1/object/public/media/loop.mp4?keep=value';
+                  const previewVideo=presenterBackgroundVideoPreviewSource(publicVideo);
+                  check(previewVideo===publicVideo+'&mindexPreview=1','preview did not isolate its stable public-media cache key');
+                  check(presenterBackgroundVideoPreviewSource(previewVideo)===previewVideo,'preview key changed on repeated render');
+                  for(const source of ['tests/fixtures/praise-background.webm','https://example.com/video.mp4?token=keep','https://fixture.supabase.co/storage/v1/object/sign/media/loop.mp4?token=keep'])check(presenterBackgroundVideoPreviewSource(source)===source,'preview changed external or signed media');
+                  check(presenterSlideBackgroundVideoSource({backgroundVideo:publicVideo},true)===publicVideo,'output canonical source changed');
                   const presentation={backgroundVideo:'tests/fixtures/praise-background.webm'};
                   const memo=serializeServiceItemMemo({elementType:'title_person',presentation,note:'보존'});
                   check(parseServiceItemMemo(memo).presentation.backgroundVideo===presentation.backgroundVideo,'memo lost video');

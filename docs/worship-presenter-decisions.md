@@ -5745,3 +5745,12 @@ separate lifecycle and may recreate controller-owned media.
 
 Freeze and refresh controls occupy their own two-button row. The existing four
 window/safety icons retain their single row in both presenter views.
+
+### Controller preview range-cache isolation · 2026-11-04
+
+Paused controller metadata previews use the stable `mindexPreview=1` query only
+for HTTPS Supabase public-storage media. This prevents their range-cache entries
+from stalling a concurrent output player. Output URLs, persisted configuration,
+video bytes, playback continuity and dissolve durations remain unchanged. Existing
+query parameters are preserved; signed/private/external and relative sources are
+untouched. The key is stable across renders, never a timestamp or retry nonce.
