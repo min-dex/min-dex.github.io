@@ -10,6 +10,9 @@ def check_background_startup(browser, url):
     page.route('**/*supabase*/**', lambda route: route.abort())
     page.goto(url+'?output=presenter')
     page.wait_for_function("typeof applyPresenterBackgroundVideo === 'function'")
+    # Module availability precedes output init, which replaces document.body.
+    # Start the media fixture only after its real host has been initialized.
+    page.wait_for_selector("#presenterOutputRoot", state="attached")
     page.clock.install()
     held = []
     page.route('**/praise-background.webm?startup=*', lambda route: held.append(route))

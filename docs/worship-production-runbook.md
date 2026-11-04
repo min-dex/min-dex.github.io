@@ -155,3 +155,9 @@ Playwright route는 HTTP cache를 비활성화하므로 cold/warm 실측에 사�
 --label before --output <비공개 결과 폴더>` (한 줄). WebKit도 같은 방식으로
 실행한다. Cloud Python/Playwright 환경을 사용하며 기본 검사에는 넣지 않는다.
 공개/로컬 결과를 직접적인 개선율로 섞지 않고 동일 조건 결과끼리 비교한다.
+
+초기화 검사는 함수 존재만으로 준비 완료를 판단하지 않는다. 송출 문서는 모듈
+로딩 뒤 body를 구성하므로, `#presenterOutputRoot` 생성 후 영상 fixture와
+가상 시계를 설치한다. 그 전에 fixture를 붙이면 초기화가 fixture를 지워
+건강한 영상 로딩 실패처럼 보일 수 있다. 기존 느린 decode·재시도·타임아웃·
+늦은 응답 보호 검사는 그대로 유지한다.
