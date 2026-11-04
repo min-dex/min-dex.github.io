@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-compact-praise-controls",
+  "version": "20261104-song-registration-ready",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a9632e17da9f4123342f7a7e9f7284201605fc700872a6cd381a4bba35ad136d",
-  "runtime_sha256": "2d842ad54e4da9202663bfe954b78982b0340b6b09e8701b20e723f631467d31",
-  "source_bytes": 1357113,
-  "runtime_bytes": 968595,
-  "source_gzip": 311085,
-  "runtime_gzip": 243946
+  "source_sha256": "97b558fa04ebbff51b1cc06ee685d1190923f78ac23771163612253e7b362844",
+  "runtime_sha256": "aa787a3b2d97c5c7dbbcb3ab0772fe6d32a6c356bfaf98097296808ace16a35b",
+  "source_bytes": 1359970,
+  "runtime_bytes": 970768,
+  "source_gzip": 311837,
+  "runtime_gzip": 244579
 }

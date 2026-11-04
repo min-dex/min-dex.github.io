@@ -2,13 +2,13 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('nod
 const src=fs.readFileSync(require('node:path').join(__dirname,'../app.js'),'utf8');
 const take=(start,end)=>src.slice(src.indexOf(start),src.indexOf(end,src.indexOf(start)));
 let answer=null,inserts=0;
-const c={String,Number,window:{prompt:()=>answer},praiseServiceCreates:new Set(),state:{config:{url:'fixture'},selectedServiceId:'svc',services:[{id:'svc',type_id:'wednesday'}],songs:[],serviceItems:{},dirty:{}},
- servicePraiseInputMode:()=>"lyrics_db",parseServiceItemMemo:()=>({}),
+const c={String,Number,songCatalogLoaded:true,songLoadPromise:null,serviceSongComposingFields:new WeakSet(),window:{prompt:()=>answer},praiseServiceCreates:new Set(),state:{config:{url:'fixture'},selectedServiceId:'svc',services:[{id:'svc',type_id:'wednesday'}],songs:[],serviceItems:{},dirty:{}},
+ serviceItemRequiresNewHymnalScoreSong:()=>false,servicePraiseInputMode:()=>"lyrics_db",parseServiceItemMemo:()=>({}),
  isSongServiceLabel:x=>/^찬양/.test(x),isSpecialSongServiceItem:x=>x.label==='특송',escapeAttr:String,escapeHtml:String,findDeferredServiceTextInput:()=>null,linkedSongLoadPromises:new Map(),renderServiceSongVersionPicker:()=>"",
- serviceSongPickerResults:()=>c.searchResults,renderServiceSongPickerResult:s=>s.title,searchResults:[],
+ serviceSongPickerResults:(q,i,svc,limit,options)=>options?.unrestricted ? c.unrestrictedResults : c.searchResults,unrestrictedResults:[],renderServiceSongPickerResult:s=>s.title,searchResults:[],
  getServiceItems:()=>c.state.serviceItems.svc,showToast:()=>{},presenterPreparationSongContentHasConnection:x=>x.includes('+'),
  resolveExistingPraiseSongForServiceInputAfterCatalogLoad:async()=>null,requireClient:()=>true,
- stripHymnNo:x=>({title:x}),presenterPreparationSongContent:x=>x,createUuid:()=> 'version',serializeSongMemo:JSON.stringify,
+ stripHymnNo:x=>({title:x}),presenterPreparationSongContent:x=>x,presenterPreparationNumberOnlyHymnReference:x=>/^\d+$/.test(x),createUuid:()=> 'version',serializeSongMemo:JSON.stringify,
  normalizeServerSong:x=>x,sortSongs:()=>0,clearSearchCaches:()=>{},getDefaultVersionId:()=> 'version',normalizeServiceItemsInCurrentOrder:x=>x,
  renderCurrentServiceModuleDetail:()=>{},updateSaveState:()=>{}};
 c.createEmptyPraiseAtomic=async options=>{inserts++;return {id:'new-song',title:options.title}};
@@ -16,6 +16,7 @@ c.linkServiceItemToPraiseSong=(item,song)=>{item.song_id=song.id;item.version_id
 c.state.client={from:()=>({insert:payload=>{inserts++;return {select:()=>({single:async()=>({data:{id:'new-song',...payload}})})}}})};
 vm.createContext(c);
 vm.runInContext(take('function renderServiceSongPicker(', '\nfunction renderServiceSongVersionPicker'),c);
+vm.runInContext(take('function serviceSongRegistrationState(', '\nfunction serviceSongPickerResults'),c);
 vm.runInContext(take('function renderServicePraiseLinkControl(', '\nfunction renderServiceItemLinkControl'),c);
 vm.runInContext(take('async function createPraiseSongFromServiceItem(', '\nfunction selectServiceSongForItem'),c);
 (async()=>{
@@ -33,6 +34,12 @@ vm.runInContext(take('async function createPraiseSongFromServiceItem(', '\nfunct
   assert.doesNotMatch(c.renderServiceSongPicker({...item,song_id:'loading'},2,db),/data-service-song-create/);
  }
 
+ const queryItem={label:'찬양 1',raw_title:'새 곡'};
+ for(const value of ['ㅇ','ㄱㅏ','새 곡 ㄱ'])assert.doesNotMatch(c.renderServiceSongPicker({...queryItem,raw_title:value},0,db),/data-service-song-create/);
+ c.songCatalogLoaded=false;assert.doesNotMatch(c.renderServiceSongPicker(queryItem,0,db),/data-service-song-create/);
+ c.songCatalogLoaded=true;c.songLoadPromise=Promise.resolve();assert.doesNotMatch(c.renderServiceSongPicker(queryItem,0,db),/data-service-song-create/);c.songLoadPromise=null;
+ c.serviceItemRequiresNewHymnalScoreSong=()=>true;assert.doesNotMatch(c.renderServiceSongPicker(queryItem,0,db),/data-service-song-create/);c.serviceItemRequiresNewHymnalScoreSong=()=>false;
+ c.unrestrictedResults=[{title:'기존 곡'}];assert.match(c.renderServiceSongPicker(queryItem,0,db),/이 유형의 자료가 없습니다/);assert.doesNotMatch(c.renderServiceSongPicker(queryItem,0,db),/data-service-song-create/);c.unrestrictedResults=[];
  assert.match(c.renderServicePraiseLinkControl({label:'찬양 3',song_id:'keep'},2),/data-service-db-song="keep"/);
  assert.doesNotMatch(c.renderServicePraiseLinkControl({label:'찬양 3',song_id:'keep'},2),/새 곡 추가/);
  assert.equal(c.renderServicePraiseLinkControl({label:'대표기도'},2),'');
@@ -44,6 +51,9 @@ vm.runInContext(take('async function createPraiseSongFromServiceItem(', '\nfunct
  answer='첫 곡 + 다음 곡';await c.createPraiseSongFromServiceItem(0);assert.equal(inserts,0);
  for(const mode of ['manual_praise','audio_praise']){c.servicePraiseInputMode=()=>mode;await c.createPraiseSongFromServiceItem(0);assert.equal(inserts,0);}
  c.servicePraiseInputMode=()=>"lyrics_db";c.findDeferredServiceTextInput=()=>({value:'새 찬양'});
+ c.songCatalogLoaded=false;await c.createPraiseSongFromServiceItem(0);assert.equal(inserts,0);c.songCatalogLoaded=true;
+ c.unrestrictedResults=[{title:'자료 없는 기존 곡'}];await c.createPraiseSongFromServiceItem(0);assert.equal(inserts,0);c.unrestrictedResults=[];
+ const composingField={value:'새 찬양'};c.findDeferredServiceTextInput=()=>composingField;c.serviceSongComposingFields.add(composingField);await c.createPraiseSongFromServiceItem(0);assert.equal(inserts,0);c.serviceSongComposingFields.delete(composingField);
  answer='다른 제목';await c.createPraiseSongFromServiceItem(0);assert.equal(inserts,1);assert.equal(item.raw_title,'새 찬양');assert.equal(item.song_id,'new-song');assert.equal(item.memo,'medley metadata');assert.equal(item.sort_order,30);assert.equal(sibling.song_id,'existing');
  await c.createPraiseSongFromServiceItem(0);assert.equal(inserts,1);
  console.log('PASS search-only/direct/special/linked buttons, cancel/blank, medley guard, title creation and sibling identity');
