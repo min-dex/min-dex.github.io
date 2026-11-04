@@ -76,7 +76,7 @@ try:
     assert page.locator('.global-playback-trigger').is_visible()
     assert not page.locator('.svc-source-panel').is_visible()
     assert page.evaluate("focusDraft===document.querySelector('[data-service-item-field=raw_title]') && focusDraft.value==='아직 저장하지 않은 제목' && focusAudio===state.serviceMusic.audio && focusAudio.currentTime===42 && focusItems===JSON.stringify(state.serviceItems)")
-    assert '자동 넘김 해제' in page.locator('[data-focus-music-status]').inner_text()
+    assert '자동 넘김 해제' in page.locator('[data-focus-music-status]').inner_text(), page.evaluate("({label:document.querySelector('[data-focus-music-status]').textContent,selected:state.selectedServiceId,owner:state.serviceMusic.ownerServiceId,source:state.serviceMusic.sourceKey,mode:state.serviceMusic.mode,group:state.serviceMusic.timingGroupId,suspended:state.serviceMusic.autoSyncSuspended})")
     assert page.locator('[data-focus-music-label]').inner_text() == '일시정지 · P'
     assert page.evaluate('''()=>{const b=document.querySelector('[data-focus-music="toggle"]');const text=b.firstChild;syncPresenterFocusMusic();return text===b.firstChild}''')
     for playing,pending,icon in ((False,False,'play'),(True,False,'pause'),(False,True,'loader-circle')):
@@ -172,6 +172,12 @@ try:
         }
         return true;
        }""")
+       assert page.locator('.svc-presenter-refresh-tools').evaluate_all("""groups=>groups.filter(g=>g.getBoundingClientRect().width).every(g=>{
+        const buttons=[...g.querySelectorAll('button')];
+        return buttons.length===2 && buttons.every(b=>b.getAttribute('aria-label') && b.getBoundingClientRect().height===35 && b.scrollWidth<=b.clientWidth+1)
+          && Math.abs(buttons[0].getBoundingClientRect().top-buttons[1].getBoundingClientRect().top)<1
+          && g.getBoundingClientRect().right<=innerWidth+1;
+       })""")
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
        assert page.evaluate("""()=>{
         const left=document.querySelector('.module-switcher-tab').getBoundingClientRect();

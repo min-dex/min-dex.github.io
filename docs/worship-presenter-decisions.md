@@ -5710,3 +5710,6 @@ and failed/late reads preserve the old frame and local data. The wait is bounded
 to15 seconds; late results never adopt. Existing image decode gates keep the old
 frame until replacement assets are ready. A physical browser reload remains a
 separate lifecycle and may recreate controller-owned media.
+
+Freeze and refresh controls occupy their own two-button row. The existing four
+window/safety icons retain their single row in both presenter views.
