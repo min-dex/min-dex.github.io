@@ -881,6 +881,7 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   };
   video.addEventListener("loadeddata", reveal);
   video.addEventListener("playing", reveal);
+  video.addEventListener("canplay", reveal);
   const failed = (retryable = false) => {
     if (root._presenterBackgroundGeneration !== generation) return;
     window.clearTimeout(timer);
@@ -900,7 +901,7 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   video.addEventListener("error", () => failed(Boolean(video.error?.code)));
   root._cancelPresenterBackgroundTransition = () => {
     window.clearTimeout(timer);
-    video.removeEventListener("loadeddata", reveal); video.removeEventListener("playing", reveal);
+    video.removeEventListener("loadeddata", reveal); video.removeEventListener("playing", reveal); video.removeEventListener("canplay", reveal);
     if (!revealed) dispose(video);
   };
   // New footage is above existing background videos but below the content layers.
@@ -911,7 +912,7 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
     // Cold media requests can exceed eight seconds; keep decoded outgoing footage
     // during the bounded wait and one retry instead of abandoning a healthy load.
     timer = window.setTimeout(() => failed(true), 30000);
-    video.play()?.catch(error => {
+    video.play()?.then(reveal).catch(error => {
       if (loadingAttempt !== attempt || revealed) return;
       failed(["AbortError", "NetworkError", "NotSupportedError"].includes(error?.name));
     });

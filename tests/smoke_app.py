@@ -97,6 +97,46 @@ def injected_index_html() -> str:
 
 
 class MindexSmokeHandler(SimpleHTTPRequestHandler):
+    def send_head(self):
+        self._media_bytes_remaining = None
+        path = Path(self.translate_path(urlsplit(self.path).path))
+        media = path.suffix.lower() in {'.mp3', '.m4a', '.mp4', '.webm', '.mov', '.m4v', '.wav', '.ogg'}
+        span = re.fullmatch(r'bytes=(\d*)-(\d*)', self.headers.get('Range', ''))
+        if not media or not span or not any(span.groups()) or not path.is_file():
+            return super().send_head()
+        stream = path.open('rb')
+        size = path.stat().st_size
+        first, last = span.groups()
+        start = int(first) if first else max(0, size-int(last))
+        end = min(int(last), size-1) if first and last else size-1
+        if not size or start > end or start >= size or (not first and not int(last)):
+            stream.close()
+            self.send_response(416)
+            self.send_header('Content-Range', f'bytes */{size}')
+            self.send_header('Content-Length', '0')
+            self.end_headers()
+            return None
+        self.send_response(206)
+        self.send_header('Content-Type', self.guess_type(str(path)))
+        self.send_header('Accept-Ranges', 'bytes')
+        self.send_header('Content-Range', f'bytes {start}-{end}/{size}')
+        self.send_header('Content-Length', str(end-start+1))
+        self.end_headers()
+        stream.seek(start)
+        self._media_bytes_remaining = end-start+1
+        return stream
+
+    def copyfile(self, source, outputfile):
+        remaining = self._media_bytes_remaining
+        if remaining is None:
+            return super().copyfile(source, outputfile)
+        while remaining:
+            chunk = source.read(min(65536, remaining))
+            if not chunk:
+                break
+            outputfile.write(chunk)
+            remaining -= len(chunk)
+
     def do_GET(self) -> None:
         try:
             parsed = urlsplit(self.path)

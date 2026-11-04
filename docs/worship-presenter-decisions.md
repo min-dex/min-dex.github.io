@@ -5723,6 +5723,10 @@ decoded incoming frame starts the dissolve. A second failed attempt falls back
 without reviving stale events; unsupported/invalid sources never retry indefinitely.
 Safety/key/emergency cancellation still removes pending media immediately. These
 local playback retries do not reload the page or write operational data.
+Readiness is checked after media events (`loadeddata`, `playing`, `canplay`) and
+after the play promise resolves. A port that updates readyState after an earlier
+event must still reveal the decoded incoming frame and retire the outgoing node
+after the same800ms dissolve. Stale generations never reveal or clean up new media.
 
 ## Output freeze and current-service refresh ·2026-11-04
 

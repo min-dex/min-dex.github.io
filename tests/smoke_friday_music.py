@@ -1,9 +1,18 @@
 import os
 os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+from pathlib import Path
+from urllib.parse import urljoin
+from urllib.request import Request, urlopen
 
 server, url = start_local_app_server()
 try:
+    media='assets/presenter/dawn-free-prayer-69c12c677944.mp3'
+    with urlopen(Request(urljoin(url,media),headers={'Range':'bytes=0-31'})) as response:
+        assert response.status==206
+        assert response.headers['Content-Range']=='bytes 0-31/79675315'
+        assert response.read()==Path(media).read_bytes()[:32]
+    print('PASS real MP3 HTTP range206 and original bytes',flush=True)
     with sync_playwright() as p:
         for engine in ('chrome', 'webkit'):
             browser = launch_chromium(p) if engine == 'chrome' else p.webkit.launch()
@@ -17,7 +26,7 @@ try:
               await new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => reject(Error('Dawn metadata timeout')), 15000);
                 audio.onloadedmetadata = () => { clearTimeout(timeout); resolve(); };
-                audio.onerror = () => { clearTimeout(timeout); reject(Error('Dawn decode failed')); };
+                audio.onerror = () => { clearTimeout(timeout); reject(Error('Dawn decode failed '+JSON.stringify({code:audio.error?.code,message:audio.error?.message,ready:audio.readyState,network:audio.networkState,canPlay:audio.canPlayType('audio/mpeg')}))); };
                 audio.load();
               });
               if (Math.abs(audio.duration - 3143.9335) > 0.1) throw Error('Wrong final dawn duration');

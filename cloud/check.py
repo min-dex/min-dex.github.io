@@ -271,7 +271,7 @@ SMOKES = (
     "smoke_boot_loading_indicator.py",
 )
 
-GOVERNANCE_TESTS = ("test_praise_id_transition.py", "test_readonly_bookkeeping.py", "solid_audit.py", "test_pages_gate.py", "test_cloud_check.py", "test_check_plan.py", "test_reuse_checks.py", "test_check_scope.py", "test_release_queue.py")
+GOVERNANCE_TESTS = ("test_praise_id_transition.py", "test_readonly_bookkeeping.py", "solid_audit.py", "test_pages_gate.py", "test_cloud_check.py", "test_smoke_media_http.py", "test_check_plan.py", "test_reuse_checks.py", "test_check_scope.py", "test_release_queue.py")
 
 
 def selected_tests(shard_index=0, shard_count=1, *, smokes=None, node_tests=None):
