@@ -265,6 +265,7 @@ function renderSingleSongRelations(song) {
 
 // Release bootstrap checks server phase before enabling native storage.
 let singleSongActivationPending = null;
+const singleSongCatalogReadReceipts = new WeakMap();
 async function ensureSingleSongActivation() {
   if (globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY !== true || !state.client) return false;
   const client = state.client;
@@ -285,6 +286,7 @@ async function ensureSingleSongActivation() {
     state.singleSongStorage = 'native';
     state.singleSongCatalog = catalog;
     state.singleSongRepository = prepared.repository;
+    singleSongCatalogReadReceipts.set(catalog, {client, repository:prepared.repository, status:prepared.status});
     state.singleSongClient = client;
     state.songs = catalog.ids().map(id => catalog.appSong(id));
     state.selectedSongId = state.selectedVersionId = null;
@@ -311,6 +313,22 @@ function installSingleSongSession(records, repository, {worshipStorage = "native
   state.singleSongRepository = repository;
   state.songs = catalog.ids().map(id => catalog.appSong(id));
   clearSearchCaches();
+}
+
+async function reuseVerifiedSingleSongCatalog(context) {
+  const catalog = context.singleSongCatalog, client = context.client;
+  const receipt = catalog && singleSongCatalogReadReceipts.get(catalog);
+  if (!receipt?.status || receipt.client !== client || receipt.repository !== context.singleSongRepository
+    || context.saving || Object.values(context.dirty || {}).some(Boolean)) return false;
+  const response = await client.rpc('get_praise_storage_status_v1');
+  if (response.error) throw new Error('찬양 목록의 최신 상태를 확인하지 못했습니다. 다시 시도해 주세요.');
+  const status = response.data;
+  return context.client === client && context.singleSongCatalog === catalog
+    && context.singleSongRepository === receipt.repository && !context.saving
+    && !Object.values(context.dirty || {}).some(Boolean) && status?.phase === 'native'
+    && status.protocol === 1 && (!status.idFormat || status.idFormat === '4-4-4-4')
+    && status.epoch === receipt.status.epoch
+    && status.manifest === receipt.status.manifest && status.recordCount === receipt.status.recordCount;
 }
 
 async function readSingleSongs(ids) {

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261104-prayer-original-restored",
+  "version": "20261105-app-loading-catalog",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "7119506c8cdaa9ec7af7d01c3fc0313be51e5ae28037e4619c2583474067ed74",
-  "runtime_sha256": "560261ad7cced1d25f737e7ec6171b37212f780905a846585f76a2bfefaec441",
-  "source_bytes": 1357113,
-  "runtime_bytes": 968595,
-  "source_gzip": 311087,
-  "runtime_gzip": 243946
+  "source_sha256": "b6b762b69cc3fdb2b89ecbbba79973b1874ac1c4afc39b3f0660211173f8a42c",
+  "runtime_sha256": "7c8430bf807d778ecf76a592aea1c6405e19e5e296f7139517b4a16c589f02db",
+  "source_bytes": 1357163,
+  "runtime_bytes": 968643,
+  "source_gzip": 311103,
+  "runtime_gzip": 243965
 }

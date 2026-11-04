@@ -3113,7 +3113,7 @@ function scheduleBackgroundSongLoad() {
 async function loadSongsOnce(context = {}) {
   await ensureSingleSongActivation();
   if (state.singleSongRepository) {
-    await loadSongsForIds(state.singleSongCatalog.ids());
+    if (!await reuseVerifiedSingleSongCatalog(state)) await loadSongsForIds(state.singleSongCatalog.ids());
     songCatalogLoaded = songCatalogSummaryLoaded = true;
     clearSearchCaches();
     if (context.searchOnly) { if (isGlobalSearchActive()) renderGlobalSearchList(); return; }

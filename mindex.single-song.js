@@ -243,8 +243,29 @@
       mutate: req => rpc('mutate_single_praise_v1', {req}),
     });
   }
-  // Read-only bootstrap. A missing rollout RPC is the only legacy fallback.
+  // A cached snapshot is usable only after a fresh server manifest confirms it.
+  const activationSnapshots = new WeakMap(), activationReads = new WeakMap();
   async function loadActivation(client) {
+    if (!activationReads.has(client)) {
+      const pending = readActivation(client, activationSnapshots.get(client)).then(prepared => {
+        if (prepared.phase === 'native') activationSnapshots.set(client, {
+          status: copy(prepared.status), records: copy(prepared.records),
+        });
+        else activationSnapshots.delete(client);
+        return prepared;
+      }).catch(error => { activationSnapshots.delete(client); throw error; });
+      activationReads.set(client, pending);
+    }
+    const pending = activationReads.get(client);
+    try {
+      const prepared = await pending;
+      // Concurrent consumers must never share mutable records or a repository.
+      return {...prepared, records: copy(prepared.records),
+        ...(prepared.status ? {status: copy(prepared.status), repository: createRpcRepository(client)} : {})};
+    } finally { if (activationReads.get(client) === pending) activationReads.delete(client); }
+  }
+  // Read-only bootstrap. A missing rollout RPC is the only legacy fallback.
+  async function readActivation(client, cached) {
     const statusResponse = await client.rpc('get_praise_storage_status_v1');
     if (statusResponse.error) {
       if (statusResponse.error.code === 'PGRST202' && /get_praise_storage_status_v1/.test(statusResponse.error.message || '')) return {phase:'legacy',records:[]};
@@ -256,6 +277,10 @@
     if (status.phase === 'legacy') return {phase:'legacy',records:[]};
     if (status.phase === 'maintenance') fail('찬양 저장소 전환 중입니다. 잠시 후 다시 열어 주세요.');
     if (!Number.isSafeInteger(status.recordCount) || status.recordCount < 1 || typeof status.epoch !== 'string' || typeof status.manifest !== 'string') fail('INVALID_CATALOG_MANIFEST');
+    if (cached && cached.status.epoch === status.epoch && cached.status.manifest === status.manifest
+      && cached.status.recordCount === status.recordCount) {
+      return {phase:'native', records:copy(cached.records), status};
+    }
     const records = [], seen = new Set(); let after = null, pageSize = 100;
     while (records.length < status.recordCount) {
       const response = await client.rpc('get_single_praise_catalog_page_v1', {after_id:after,page_size:pageSize,expected_epoch:status.epoch,expected_manifest:status.manifest});
