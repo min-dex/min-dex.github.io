@@ -42,6 +42,10 @@ class PagesGate(unittest.TestCase):
         self.assertTrue(any('cloud/check.py' in step.get('run', '') for step in check['steps']))
         self.assertEqual(workflow['permissions'], {'contents': 'read'})
         self.assertEqual(check['permissions'], {'contents': 'read', 'actions': 'read'})
+        self.assertEqual(check['steps'][0]['with']['sparse-checkout'], 'cloud')
+        hydrate = next(step for step in check['steps'] if step.get('name') == 'Hydrate full tested source only when checks are required')
+        self.assertEqual(hydrate['run'], 'git sparse-checkout disable')
+        self.assertLess(1, check['steps'].index(hydrate))
         reuse_step = next(step for step in check['steps'] if step.get('id') == 'verified')
         self.assertEqual(reuse_step['run'], 'python3 cloud/reuse_checks.py')
         for step in check['steps'][2:]:
@@ -63,6 +67,14 @@ class PagesGate(unittest.TestCase):
         self.assertEqual(deploy['steps'][-1]['uses'], 'actions/deploy-pages@v4')
         # Default success() dependency semantics block failed/cancelled parents.
         self.assertNotIn('always()', deploy['if'])
+        timing = workflow['jobs']['timing']
+        self.assertEqual(timing['needs'], ['scope', 'offline-web', 'deploy-pages'])
+        self.assertEqual(timing['if'], 'always()')
+        self.assertEqual(timing['permissions'], {'contents':'read', 'actions':'read'})
+        self.assertEqual(timing['steps'][0]['with']['sparse-checkout'], 'cloud')
+        self.assertEqual(timing['steps'][1]['run'], 'python3 cloud/record_ci_timing.py')
+        self.assertEqual(timing['steps'][2]['uses'], 'actions/upload-artifact@v4')
+        self.assertEqual(timing['steps'][2]['with']['retention-days'], 14)
 
     def test_default_branch_seed_does_not_repeat_checks_or_browser_setup(self):
         workflow = yaml.safe_load((ROOT / '.github/workflows/cloud-check.yml').read_text())

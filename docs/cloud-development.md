@@ -382,3 +382,14 @@ Pages·공개 확인은 별도이며, 시간표가 오래됐으면 완료된 동
   승인 검토가 거부한 경로를 다른 도구로 재시도하지 않는다.
 - 기존 exact-SHA 검증 재사용은 SHA·scope·필수 성공 조건이 일치할 때만 사용한다.
   코드가 바뀐 후보, 개별 component PASS나 로컬 PASS에는 확대 적용하지 않는다.
+
+## Sparse bootstrap and automatic release timing ·2026-11-04
+
+Follow [배포 다운로드·시간 기록 계약](release-observability.md). Start a persistent
+release journal before preparation; run commands through the recorded phase wrapper,
+link the same release ID to FIFO joins/rejoins, and finish only after public readback
+and owned slot return. Queue/auth/repair/handoff time remains in one timeline.
+CI bootstraps only cloud scripts before exact-SHA reuse; non-reusable candidates
+hydrate the complete tested tree. CI timing metadata is archived separately after
+checks/Pages, with unchanged required gates. Neither timing nor sparse checkout
+proves a speed improvement until measured in a subsequent actual run.

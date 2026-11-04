@@ -31,6 +31,11 @@ Keep deployment and credential access out of setup scripts and default tests.
 
 ## Shared release queue
 
+Read docs/release-observability.md. Start one release journal before preparation,
+use recorded phase commands and link its ID across queue joins/rejoins. Preserve
+auth/repair waits and CI timing artifacts; close only after public readback and
+own slot return. Mark external-tool boundaries instead of inventing timestamps.
+
 Prefer one coordinated batch of ready, approved changes over a release per chat.
 The user authorizes routine coordination messages with other Mindex chats to
 batch their ready, approved changes and report the shared result. Maintain all
