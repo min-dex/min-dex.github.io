@@ -15,6 +15,7 @@ const {webcrypto}=require('node:crypto');
  vm.runInNewContext(source,sandbox);
  const bridge=window.MINDEX_SERVER_STORAGE,db=new Map(),writes=[];
  let release,block=false,fail=false,lose=false;const faults=new Map();
+ db.set('shared:mindex.ui.presenterThumbScale',{key:'mindex.ui.presenterThumbScale',value:'2',revision:'1',requestId:'old-shared-scale'});
  const client={rpc:async(name,args)=>{
   const scope=args.p_scope;
   if(name==='mindex_state_read_v1')return {data:[...db].filter(([k])=>k.startsWith(scope+':')).map(([,v])=>v)};
@@ -97,6 +98,13 @@ const {webcrypto}=require('node:crypto');
  assert.equal(writes.at(-1).p_request_id,lostRequest);
  assert.equal(db.get('device:mindex.editor.draft.v2:service:lost').revision,'1');
  assert.equal(bridge.getItem('local','mindex.editor.draft.v2:service:lost'),'kept');
+ // View scale is private to this device/browser profile; stale shared values never seed it.
+ assert.equal(bridge.getItem('local','mindex.ui.presenterThumbScale'),null);
+ await bridge.setItem('local','mindex.ui.presenterThumbScale','1.5');
+ assert.equal(writes.at(-1).p_scope,'device');
+ assert.equal(bridge.getItem('local','mindex.ui.presenterThumbScale'),'1.5');
+ assert.equal(db.get('shared:mindex.ui.presenterThumbScale').value,'2');
+ assert.equal(db.get('device:mindex.ui.presenterThumbScale').value,'1.5');
  // Permission failures and confirmed content conflicts never enter automatic retry.
  timers.clear();faults.set('mindex.private.denied',{code:'42501',message:'permission denied'});
  await assert.rejects(bridge.setItem('local','mindex.private.denied','retained'));

@@ -393,3 +393,11 @@ server-state DB tests also pass. Runtime/client code is unchanged.
 동일 오류의 상태 갱신이 재시도/충돌 확인 버튼의 DOM과 키보드 포커스를
 반복 교체하지 않는다. 보관 성공 또는 충돌 해소 후에만 실패 안내를 없앤다.
 이 회복은 보관 요청 확인이며 예배 저장 RPC나 편집 내용의 자동 적용을 뜻하지 않는다.
+
+## Controller view scale isolation ·2026-11-04
+
+`mindex.ui.presenterThumbScale` uses the device namespace, scoped by the browser
+profile identity. It is not a shared worship/project setting. Existing shared
+scale values are ignored, not copied to other devices; without a device value
+the controller starts at 100%. Legacy browser-local scale migrates to device.
+The output window and Remote do not receive this controller view setting.
