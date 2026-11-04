@@ -1,6 +1,6 @@
 // Only connection identity is bootstrapped in browser storage. App values use RPC.
 (() => {
- const shared=new Set(['mindex.worshipBackgroundRegistry','mindex.theme','mindex.ui.presenterThumbScale','mindex.music.fadeStop']);
+ const shared=new Set(['mindex.worshipBackgroundRegistry','mindex.theme','mindex.music.fadeStop']);
  const refreshing=new Set(),refreshWanted=new Set();
  const ephemeral=new Map(),queued=new Map(),failures=new Map(),writers=new Map();
  let connection=null,ready=false,timer=null,flushing=null,stores=null,initializing=null,live=null,refreshTimer=null,localChannel=null;
