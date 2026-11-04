@@ -75,6 +75,10 @@ async function main(){
   assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
   for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
   console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
- }finally{await app.close();}
+ }finally{
+  // Test teardown discards only the recovered synthetic editor, not persisted records.
+  for(const page of app.windows())await page.close({runBeforeUnload:false});
+  await app.close();
+ }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
