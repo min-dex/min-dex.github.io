@@ -5695,3 +5695,18 @@ See `firstline-subtitle-audit-20261104.md` for the read-only catalog scope and l
 For this union service, consecutive authored white-design frames (including scripture reading) and consecutive still-image frames also use this brightness-preserving dissolve. Other scripture/media exclusions remain unchanged; keyed/emergency/safety frames and video transitions retain their guards.
 
 The inline scripture audit distinguishes focused-rail refresh (raw input must survive) from closing the editor, moving focus out, reloading the aggregate and reopening (persisted canonical reference must be displayed). Both exact-value assertions and no-additional-write checks are required; this is a fixture lifecycle correction, not a scripture normalization change.
+
+## Output freeze and current-service refresh ·2026-11-04
+
+Freeze holds slide/content navigation for the current output session; video and
+audio continue. Controller, Remote and output-local/automatic navigation respect
+the same flag. Blackout, transparent, emergency and stop remain usable.
+
+Screen refresh reads only the current service aggregate and its linked songs; it
+does not reload the page or rewrite operational data. It stages reads before
+adoption and automatically releases its temporary hold on completion or failure,
+retaining an existing manual freeze. Dirty inputs, pending saves, context changes
+and failed/late reads preserve the old frame and local data. The wait is bounded
+to15 seconds; late results never adopt. Existing image decode gates keep the old
+frame until replacement assets are ready. A physical browser reload remains a
+separate lifecycle and may recreate controller-owned media.

@@ -1839,7 +1839,7 @@ function refreshPresenterOutputConnectionState() {
 }
 
 function publishPresenterState(options = {}) {
-  const payload = presenterStatePayload();
+  const payload = globalThis.MindexPresenterRefresh?.payload(presenterStatePayload()) || presenterStatePayload();
   if (!options.force && !payload.serviceId && !payload.slides.length) return;
   if (isPresenterOutputWindowOpen()) MindexPresenterHistory.record(payload);
   publishPresenterPayload(payload, options);
@@ -2556,6 +2556,7 @@ function normalizePresenterPayload(payload) {
     serviceTitle: payload?.serviceTitle || "",
     serviceDate: payload?.serviceDate || payload?.service_date || "",
     chromakey: Boolean(payload?.chromakey),
+    outputFrozen: Boolean(payload?.outputFrozen),
     emergencyMode: Boolean(payload?.emergencyMode),
     transitionLogo: normalizePresenterTransitionLogo(payload?.transitionLogo),
     presentationDesign: normalizePresenterServiceDesign(payload?.presentationDesign),
@@ -2578,15 +2579,12 @@ function normalizePresenterPayload(payload) {
 
 function normalizeLiveScripturePayload(value) {
   if (!value?.active || !value?.slide) return null;
-  return {
-    reference: value.reference || value.slide.title || "",
-    active: true,
-    slide: value.slide,
-  };
+  return { reference: value.reference || value.slide.title || '', active: true, slide: value.slide };
 }
 
 function applyPresenterActionToPayload(payload, action, options = {}) {
   const next = normalizePresenterPayload(payload);
+  if (next.outputFrozen && ['next', 'prev', 'first', 'last', 'jump'].includes(action) && !(action === 'jump' && (Number(options.index) === -1 || (next.safetyBlank && Number(options.index) === next.index)))) return next;
   const requestedIndex = Number(options.index);
   const appliesJump = action !== "jump"
     || requestedIndex === -1
@@ -2643,6 +2641,7 @@ function presenterLastNavigableIndex(slides = []) {
 function renderPresenterOutput(payload, options = {}) {
   const root = document.getElementById("presenterOutputRoot");
   if (!root) return;
+  if (globalThis.MindexPresenterRefresh?.output(root, payload)) return;
   applyPresenterOutputViewportScale(root);
   clearPresenterOutputAutoAdvanceTimer();
   const slides = Array.isArray(payload?.slides) ? payload.slides : [];
@@ -3246,6 +3245,7 @@ function fitPresenterSermonTitlePreviews(host) {
 
 function bindPresenterOutputAutoAdvance(root, payload, slide, options = {}, token = presenterOutputRenderState.token) {
   clearPresenterOutputAutoAdvanceTimer();
+  if (payload?.outputFrozen) return;
   bindPresenterVideoTimelineCatchUp(root, payload, slide, options, token);
   bindPresenterOutputAutoAdvanceOnEnd(root, payload, slide, options);
   bindPresenterOutputAutoAdvanceAt(payload, slide, options, token);

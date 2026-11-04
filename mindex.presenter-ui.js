@@ -205,6 +205,7 @@ function renderPresenterScreenManagement(serviceId, slides = []) {
       <button type="button" class="icon-btn svc-presenter-launch" data-presenter-action="${live ? 'stop' : 'open'}" data-service-id="${escapeAttr(serviceId)}" aria-label="${live ? '송출 종료' : '송출 시작'}"><i data-lucide="${live ? 'screen-share-off' : 'screen-share'}"></i><span>${live ? '송출 종료' : '송출 시작'}</span></button>
       <button type="button" class="icon-btn svc-presenter-fullscreen svc-presenter-window-button" data-presenter-action="fullscreen" data-service-id="${escapeAttr(serviceId)}" aria-label="송출 화면 전체 화면" ${live ? '' : 'disabled'}><i data-lucide="maximize"></i><span>전체 화면</span></button>
       ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
+      ${globalThis.MindexPresenterRefresh?.controls(serviceId, slides) || ''}
       ${toggle('black', '암전', 'eye-off')}
       ${toggle('transparent', '투명', 'layers')}
       <button type="button" class="icon-btn svc-presenter-emergency" data-presenter-action="emergency" data-service-id="${escapeAttr(serviceId)}" aria-pressed="${Boolean(own && state.presenter.emergencyMode)}" aria-label="비상 모드${own && state.presenter.emergencyMode ? ' 해제' : ''}" title="검은 배경 · 크로마키 양식" ${own && slides.length ? '' : 'disabled'}><i data-lucide="triangle-alert" aria-hidden="true"></i><span>비상 모드${own && state.presenter.emergencyMode ? ' 켜짐' : ''}</span></button>
