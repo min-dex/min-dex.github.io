@@ -1,3 +1,26 @@
+## Verified reload read-cache ·2026-11-05
+
+Anonymous/public clients may explicitly opt into a disposable committed catalog
+snapshot in `mindex.catalog-cache.js`. A SHA-256 connection key scopes it to the
+project URL and public connection key without storing the key in plaintext.
+Authentication-required connections retain memory-only activation. Every startup
+still requires a fresh successful native protocol/ID-format/epoch/manifest/count
+response. There is no offline or TTL trust. Matching disk snapshots also require
+schema/size/checksum/count/strict-ID-order and full catalog validation before any
+adoption. Selected readers, presenter preflight, dirty/client guards and the
+atomic save path remain authoritative. Only validated server reads are cached;
+forms, editor drafts and recovery journals are never written to this cache.
+
+Cache failure is a miss, not an app failure. Reads are bounded to250ms; writes
+are background work with a64MiB cap. Clear/failure generations prevent pending
+writes from resurrecting a removed cache. Source changes require a new schema
+if their representation/validation cannot safely read old snapshots. The existing
+parallel full read and final manifest check remain the uncached fallback.
+`test_catalog_cache_activation.cjs` and real Chromium/WebKit
+`smoke_catalog_read_cache.py` cover these boundaries. Measure a truly empty
+profile separately from a restarted profile with HTTP cache and a matching
+snapshot; do not call a warm connection measurement a first-visit improvement.
+
 ## Bounded cold catalog reads ·2026-11-05
 
 Catalogs above400 records use three lexical keyset ranges through the existing
@@ -10,7 +33,8 @@ order. Exact total count, strict global ID order, catalog validation and fresh
 final epoch/manifest checks precede installation. Every worker settles before
 failure is exposed, so retries cannot overlap abandoned workers. Small catalogs
 retain serial reads. Each range retains same-cursor timeout fallback200→100→25.
-No persistent cache, new API, schema or permission change. Selected-record reads,
+The range reader introduces no new API, schema or permission change. The optional
+reload read-cache above is a separate transport path. Selected-record reads,
 presenter preflight and the existing draft/client guards remain authoritative.
 Regression: `test_parallel_catalog.cjs`, existing activation browser suite.
 

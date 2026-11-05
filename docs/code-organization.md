@@ -493,3 +493,8 @@ The controller owns the reversible session toggle, and output payloads carry it.
 Home overview startup defers unopened service bodies. `MINDEX_SERVICE_ENTRY`
 owns the weekly dashboard readiness boundary and reuses `loadServiceItems` with
 three bounded workers; it does not reload or replace the entire services list.
+
+`mindex.catalog-cache.js` loads before `mindex.single-song.js` and owns only a
+disposable, connection-scoped native Praise read snapshot. It performs no startup
+I/O itself. Praise storage/content-live opt in only for non-auth-required clients;
+the single-song boundary owns fresh-server and full-catalog validation/adoption.

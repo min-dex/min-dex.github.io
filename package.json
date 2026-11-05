@@ -64,6 +64,7 @@
       "mindex.content-live.js",
       "mindex.service-list-live.js",
       "mindex.archive-live.js",
+      "mindex.catalog-cache.js",
       "mindex.single-song.js",
       "mindex.praise-selection.js",
       "mindex.praise-storage.js",

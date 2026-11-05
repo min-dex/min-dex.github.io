@@ -278,7 +278,7 @@ async function ensureSingleSongActivation() {
     return singleSongActivationPending.promise;
   }
   const promise = (async () => {
-    const prepared = await globalThis.MindexSingleSong.loadActivation(client);
+    const prepared = await globalThis.MindexSingleSong.loadActivation(client,{persistent:state.config?.authRequired === false});
     if (state.client !== client) throw new Error("PRAISE_STORAGE_CLIENT_CHANGED");
     if (prepared.phase === 'legacy') return false;
     if (state.saving || Object.values(state.dirty || {}).some(Boolean)) throw new Error("미저장 입력을 보존한 뒤 다시 열어 주세요.");

@@ -257,15 +257,23 @@
   }
   // A cached snapshot is usable only after a fresh server manifest confirms it.
   const activationSnapshots = new WeakMap(), activationReads = new WeakMap();
-  async function loadActivation(client) {
+  async function loadActivation(client, {persistent = false} = {}) {
     if (!activationReads.has(client)) {
-      const pending = readActivation(client, activationSnapshots.get(client)).then(prepared => {
+      const pending = readActivation(client, activationSnapshots.get(client), persistent === true).then(prepared => {
         if (prepared.phase === 'native') activationSnapshots.set(client, {
           status: copy(prepared.status), records: copy(prepared.records),
         });
         else activationSnapshots.delete(client);
+        if (persistent === true) {
+          if (prepared.phase === 'native' && !prepared.fromReadCache) void root.MindexCatalogCache?.write(client,prepared);
+          else if (prepared.phase !== 'native') void root.MindexCatalogCache?.remove(client);
+        }
         return prepared;
-      }).catch(error => { activationSnapshots.delete(client); throw error; });
+      }).catch(error => {
+        activationSnapshots.delete(client);
+        if (persistent === true) void root.MindexCatalogCache?.remove(client);
+        throw error;
+      });
       activationReads.set(client, pending);
     }
     const pending = activationReads.get(client);
@@ -277,7 +285,7 @@
     } finally { if (activationReads.get(client) === pending) activationReads.delete(client); }
   }
   // Read-only bootstrap. A missing rollout RPC is the only legacy fallback.
-  async function readActivation(client, cached) {
+  async function readActivation(client, cached, persistent) {
     const statusResponse = await client.rpc('get_praise_storage_status_v1');
     if (statusResponse.error) {
       if (statusResponse.error.code === 'PGRST202' && /get_praise_storage_status_v1/.test(statusResponse.error.message || '')) return {phase:'legacy',records:[]};
@@ -291,7 +299,22 @@
     if (!Number.isSafeInteger(status.recordCount) || status.recordCount < 1 || typeof status.epoch !== 'string' || typeof status.manifest !== 'string') fail('INVALID_CATALOG_MANIFEST');
     if (cached && cached.status.epoch === status.epoch && cached.status.manifest === status.manifest
       && cached.status.recordCount === status.recordCount) {
-      return {phase:'native', records:copy(cached.records), status};
+      return {phase:'native', records:copy(cached.records), status,fromReadCache:true};
+    }
+    if (persistent && root.MindexCatalogCache) {
+      let snapshot;
+      try { snapshot=await root.MindexCatalogCache.read(client,status); } catch {}
+      if (snapshot) {
+        try {
+          if (snapshot.status?.protocol!==status.protocol || snapshot.status.phase!=='native' || snapshot.status.idFormat!==status.idFormat
+            || snapshot.status.epoch!==status.epoch || snapshot.status.manifest!==status.manifest
+            || snapshot.status.recordCount!==status.recordCount || !Array.isArray(snapshot.records)
+            || snapshot.records.length!==status.recordCount) fail('INVALID_CATALOG_MANIFEST');
+          if (snapshot.records.some((r,i)=>!code(r.id)||(i && r.id<=snapshot.records[i-1].id))) fail('INVALID_CATALOG_PAGE');
+          createCatalog(snapshot.records);
+          return {phase:'native',records:snapshot.records,status,fromReadCache:true};
+        } catch { void root.MindexCatalogCache.remove(client); }
+      }
     }
     const records = status.recordCount <= 400 ? await readCatalogRange(client, status, null, null)
       : await readParallelCatalog(client, status);

@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261105-home-audio-accuracy",
+  "version": "20261105-verified-catalog-read-cache",
   "options": {
     "compress": false,
     "mangle": {
