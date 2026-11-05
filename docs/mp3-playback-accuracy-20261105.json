@@ -218,5 +218,103 @@
         "position": 1.0016666666666667
       }
     ]
+  },
+  "linuxAbsoluteOriginRepair": {
+    "status": "candidate_mac_and_untrimmed_reference_simulation_verified_linux_pending",
+    "failedRun": 41987199597,
+    "failedJob": 127110692682,
+    "linuxObserved": {
+      "score": 1,
+      "validationScore": 1,
+      "decoderLag": -576,
+      "referenceFrames": 1057536,
+      "rawFrames": 192384,
+      "sampleRate": 48000,
+      "absoluteAnchor1Correlation": 0.7618859270276629
+    },
+    "diagnosis": "The reference window itself retained codec priming. Its 1105-frame excess over Chromium equals encoder delay576 plus MPEG Layer III synthesis delay529. Alignment to that reference alone was insufficient.",
+    "change": "Classify reference trim using frame count, encoder metadata, decoded length and measured lag. Only verified untrimmed relationship applies encoder+synthesis origin to first buffer base and subsequent prefix. Unknown/ambiguous origins reject precise preparation and keep native fallback. No browser identity branch.",
+    "primarySource": "https://github.com/GStreamer/gstreamer/blob/main/subprojects/gst-plugins-good/gst/audioparsers/gstmpegaudioparse.c",
+    "validation": [
+      "Mac Chromium/WebKit existing lifecycle, independent PCM anchors1/1421/3161s all pass unchanged .995 threshold and golden fixture",
+      "Controlled untrimmed reference +1105 frames reproduces lag-576; origin correction then passes all three independent PCM anchors",
+      "Unit: measured trim1105/576/0 and unknown-origin rejection"
+    ],
+    "localLatencyRepeat": [
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": false,
+        "wallMs": 41.80000001192093,
+        "audioMs": 2.6666666666666665,
+        "playPromiseMs": 13.199999988079071,
+        "position": 1.002788
+      },
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": true,
+        "wallMs": 30.80000001192093,
+        "audioMs": 0,
+        "playPromiseMs": 2.599999964237213,
+        "position": 1.002779
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": false,
+        "wallMs": 161.5,
+        "audioMs": 128,
+        "playPromiseMs": 136.0999999642372,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": true,
+        "wallMs": 28.80000001192093,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 4.100000023841858,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": false,
+        "wallMs": 495,
+        "audioMs": 426.6666666666667,
+        "playPromiseMs": 220,
+        "position": 1.1823089583194815
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": true,
+        "wallMs": 312,
+        "audioMs": 309.33333333333337,
+        "playPromiseMs": 5,
+        "position": 1.1732582083204761
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": false,
+        "wallMs": 591.9999999999999,
+        "audioMs": 525.3333333333334,
+        "playPromiseMs": 570.0000000000001,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": true,
+        "wallMs": 28.000000000000114,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 5,
+        "position": 1.0016666666666667
+      }
+    ],
+    "audioAssetChanges": 0,
+    "worshipWrites": 0
   }
 }

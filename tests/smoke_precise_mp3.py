@@ -21,7 +21,7 @@ def main():
                 page.route('**/*', lambda r: r.continue_() if r.request.url.startswith((origin + '/', 'blob:')) else r.abort())
                 page.goto(url + '?mindexSmokeRaw=1')
                 page.wait_for_function("typeof runServiceMusicAction === 'function' && !document.body.classList.contains('ui-booting')")
-                result = page.evaluate('''async ({source, fingerprints}) => {
+                result = page.evaluate('''async ({source, fingerprints, engine}) => {
                     const assert = (ok, message) => { if (!ok) throw Error(message); };
                     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
                     const until = async (predicate, message) => {
@@ -38,8 +38,9 @@ def main():
                     await a.mindexPreciseAudio.prepare();
                     const t = a.mindexPreciseAudio.transport;
                     assert(t && t.decoder.calibration.score > .995, 'verified frame alignment');
-                    for (const anchor of fingerprints.anchors) {
-                        const part = await t.decoder.chunk(Math.floor(anchor.time / t.decoder.chunkSeconds));
+                    const verifyPositions = async decoder => {
+                        for (const anchor of fingerprints.anchors) {
+                        const part = await decoder.chunk(Math.floor(anchor.time / decoder.chunkSeconds));
                         const start = Math.round((anchor.time - part.start) * fingerprints.sampleRate);
                         const left = part.buffer.getChannelData(0), right = part.buffer.getChannelData(1);
                         let dot = 0, actualPower = 0, referencePower = 0;
@@ -49,7 +50,29 @@ def main():
                             dot += actual * expected; actualPower += actual * actual; referencePower += expected * expected;
                         }
                         const correlation = dot / Math.sqrt(actualPower * referencePower);
-                        assert(correlation > .995, `absolute PCM location ${anchor.time}: correlation=${correlation}; calibration=${JSON.stringify(t.decoder.calibration)}`);
+                        assert(correlation > .995, `absolute PCM location ${anchor.time}: correlation=${correlation}; calibration=${JSON.stringify(decoder.calibration)}`);
+                    }
+                    };
+                    await verifyPositions(t.decoder);
+                    if (engine === 'chromium') {
+                        // Reproduce the observed Linux reference length (+1105)
+                        // without changing raw-frame decoding or golden samples.
+                        const context = t.context;
+                        const untrimmedContext = {
+                            sampleRate:context.sampleRate,
+                            createBuffer:context.createBuffer.bind(context),
+                            async decodeAudioData(bytes) {
+                                const header = String.fromCharCode(...new Uint8Array(bytes).subarray(0,200));
+                                const buffer = await context.decodeAudioData(bytes);
+                                if (!header.includes('Xing')) return buffer;
+                                const untrimmed = context.createBuffer(buffer.numberOfChannels,buffer.length+1105,buffer.sampleRate);
+                                for (let c=0;c<buffer.numberOfChannels;c++) untrimmed.copyToChannel(buffer.getChannelData(c),c,1105);
+                                return untrimmed;
+                            }
+                        };
+                        const untrimmed = await new MindexMp3Index.IndexedMp3(t.decoder.index,untrimmedContext).prepare();
+                        assert(untrimmed.calibration.decoderLag === -576 && untrimmed.referenceOrigin === 1105,'untrimmed reference reproduced');
+                        await verifyPositions(untrimmed);
                     }
                     const binding = {serviceMusicSource:source, serviceMusicServiceId:'isolated-precise-mp3', serviceMusicLabel:'QA', serviceMusicRepeatAllowed:'false'};
                     await runServiceMusicAction('toggle', binding);
@@ -112,7 +135,7 @@ def main():
                     a.pause(); a.removeAttribute('src'); a.load();
                     MindexMp3Index.parse = parse;
                     return {duration:end, calibration:t.decoder.calibration, sourceReleased:true};
-                }''', {'source':SOURCE, 'fingerprints':fingerprints})
+                }''', {'source':SOURCE, 'fingerprints':fingerprints, 'engine':engine})
                 print(engine, 'PASS', result, flush=True)
                 browser.close()
     finally:

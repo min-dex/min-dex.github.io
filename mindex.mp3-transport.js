@@ -78,6 +78,23 @@
     }
     return { score, decoderLag, validationScore: correlation(nominal - decoderLag, size) };
   }
+  function referenceOrigin(index, frameCount, length, sampleRate, decoderLag) {
+    const ratio = sampleRate / index.sampleRate;
+    const encoder = Math.round(index.delay * ratio);
+    // MPEG Layer III synthesis delay, not a browser-specific adjustment.
+    // GStreamer documents the same 529-sample codec delay:
+    // https://github.com/GStreamer/gstreamer/blob/main/subprojects/gst-plugins-good/gst/audioparsers/gstmpegaudioparse.c
+    const synthesis = Math.round(529 * ratio);
+    const trimmed = Math.round((frameCount - index.metadataFrames) * index.samples * ratio) - length;
+    if (encoder <= 0) throw Error("MP3 absolute origin is ambiguous without encoder delay");
+    if (Math.abs(trimmed - encoder) <= 1 || Math.abs(trimmed - encoder - synthesis) <= 1) {
+      return { origin: 0, trimmed, encoder, synthesis };
+    }
+    if (Math.abs(trimmed) <= 1 && Math.abs(decoderLag + encoder) <= 1) {
+      return { origin: encoder + synthesis, trimmed, encoder, synthesis };
+    }
+    throw Error("Unverified MP3 absolute origin: " + JSON.stringify({trimmed, encoder, synthesis, decoderLag}));
+  }
   class IndexedMp3 {
     constructor(index, context) {
       this.index = index;
@@ -120,7 +137,10 @@
       if (alignment.score < .995 || alignment.validationScore < .995) {
         throw Error("MP3 decoder alignment could not be verified: " + JSON.stringify(diagnostics));
       }
-      this.prefix = (i.metadataFrames * i.samples + i.delay) * ratio + alignment.decoderLag;
+      const origin = referenceOrigin(i, end, reference.length, sr, alignment.decoderLag);
+      this.referenceOrigin = origin.origin;
+      diagnostics.absoluteOrigin = origin;
+      this.prefix = (i.metadataFrames * i.samples + i.delay) * ratio + alignment.decoderLag + origin.origin;
       this.calibration = diagnostics;
       this.first = reference;
       return this;
@@ -143,7 +163,7 @@
       let decoded, base;
       if (number === 0) {
         decoded = this.first;
-        base = 0;
+        base = -this.referenceOrigin;
       } else {
         const first = Math.max(1, Math.floor((start + this.prefix) * i.sampleRate / sr / i.samples) - 8), last = Math.min(i.offsets.length, Math.ceil((end + this.prefix) * i.sampleRate / sr / i.samples) + 8);
         decoded = await this.raw(first, last);
@@ -163,6 +183,7 @@
   globalThis.MindexMp3Index = {
     parse: parseMp3,
     measureAlignment,
+    referenceOrigin,
     IndexedMp3: IndexedMp3
   };
 })();

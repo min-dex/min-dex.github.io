@@ -24,3 +24,12 @@ assert.ok(rejected.validationScore < .995, 'independent window must reject trunc
 const silence = new Float32Array(12000);
 assert.ok(measureAlignment(reference,silence,10000,0,4032).score < .995);
 console.log('PASS signed frame delays, independent-window corruption rejection, silent calibration rejection');
+
+const { referenceOrigin } = scope.MindexMp3Index;
+const index = {sampleRate:48000, delay:576, samples:1152, metadataFrames:1};
+assert.equal(referenceOrigin(index,919,1056431,48000,529).origin,0);
+assert.equal(referenceOrigin(index,919,1056960,48000,0).origin,0);
+assert.equal(referenceOrigin(index,919,1057536,48000,-576).origin,1105);
+assert.throws(() => referenceOrigin(index,919,1057536,48000,529),/Unverified/);
+assert.throws(() => referenceOrigin({...index,delay:0},919,1057536,48000,0),/ambiguous/);
+console.log('PASS measured gapless trim states and unknown-origin rejection');
