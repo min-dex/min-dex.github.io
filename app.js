@@ -873,8 +873,11 @@ function bindElectronDesktopEvents() {
 }
 
 async function loadInitialData() {
-  // Establish the active ID protocol before any worship projection or summary.
-  await ensureSingleSongActivation();
+  // Start detached home reads, but activate IDs before any adoption/projection.
+  const initialReads = state.module === "home" ? window.MINDEX_SERVICE_ENTRY.prepareInitialReads() : null;
+  try { await ensureSingleSongActivation(); }
+  catch (error) { initialReads?.discard(); throw error; }
+  if (!isServiceDataModule()) initialReads?.discard();
   const pending = [];
   if (state.module === "praise" || state.selectedSongId) {
     pending.push(loadSongs());
@@ -3925,19 +3928,7 @@ function shouldDeferPastWorshipServiceLoad(serviceId) {
 }
 
 function initialWorshipElementServiceIds(services = []) {
-  const pinned = new Set([state.selectedServiceId, state.presenter.serviceId].filter(Boolean));
-  const loadHomeWeek = state.module === "home";
-  const from = loadHomeWeek ? localDateStringWithOffset(new Date(), 0) : "";
-  const to = loadHomeWeek ? localDateStringWithOffset(new Date(), WORSHIP_INITIAL_ELEMENT_HOME_DAYS) : "";
-  return services
-    .filter((service) => {
-      if (!service?.id) return false;
-      if (pinned.has(service.id)) return !shouldDeferPastWorshipServiceLoad(service.id);
-      if (!loadHomeWeek) return false;
-      const date = String(service.date || service.service_date || "").trim();
-      return date && (!from || date >= from) && (!to || date <= to);
-    })
-    .map((service) => service.id);
+  return window.MINDEX_SERVICE_ENTRY.initialElementIds(services);
 }
 
 function worshipServiceListQuery(query) {
@@ -4523,14 +4514,7 @@ function worshipAppServiceTypeId(typeId) {
 }
 
 async function loadWorshipData() {
-  const [types, services] = await Promise.all([
-    fetchCachedSupabasePaged("mindex_worship_service_types", WORSHIP_SERVICE_TYPE_SELECT, (query) =>
-      query.order("sort_order", { ascending: true })).catch((error) => {
-        console.warn("Could not load worship service types; using defaults.", error);
-        return [];
-      }),
-    fetchWorshipServiceListRows(),
-  ]);
+  const [types, services] = await window.MINDEX_SERVICE_ENTRY.readInitialLists();
 
   const resolvedTypes = types.length ? types : defaultWorshipServiceTypes();
   state.serviceTypes = resolvedTypes.map(normalizeWorshipServiceType);
@@ -16403,12 +16387,13 @@ async function loadHomeOverviewStats({ force = false } = {}) {
   if (stats.promise) return stats.promise;
   if (!force && stats.readAt && Date.now() - stats.readAt < 60000) return;
   const abort = new AbortController();
-  const timer = setTimeout(() => abort.abort(), 15000);
+  let timer;
   const refresh = () => {
     if (state.client === client && state.module === "home" && refs.detailPane.querySelector(".home-overview") && !isGlobalSearchActive()) renderHomeStart();
   };
   stats.promise = (async () => {
     await ensureSingleSongActivation();
+    timer = setTimeout(() => abort.abort(), 15000);
     const results = await Promise.allSettled([
       state.singleSongCatalog ? Promise.resolve({count:state.singleSongCatalog.displayCount()}) : client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
       client.from("mindex_bible_translations").select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
@@ -27562,6 +27547,11 @@ function renderServiceDashboard(options = {}) {
     return;
   }
 
+  const initialLoad = window.MINDEX_SERVICE_ENTRY.dashboardLoadState();
+  if (initialLoad) {
+    refs.detailPane.innerHTML = initialLoad;
+    return;
+  }
   const services = getServiceDashboardServices();
   const q = normalizeSearchValue(state.search);
   const title = options.title || SERVICE_HOME_WEEK_TITLE;

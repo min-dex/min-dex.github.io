@@ -4,7 +4,6 @@ Uses normal browser HTTP cache, a local bookkeeping fixture and a fail-closed
 allowlist of read-only RPCs. Writes only aggregate metrics and catalog hashes.
 Never use a user's existing browser context. See worship-production-runbook.md.
 """
-"""Explicit read-only app latency probe. No HTTP routing, env files or user profiles."""
 import argparse,collections,json,os,sys,time
 from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
@@ -28,7 +27,7 @@ GUARD=r'''(() => {
   }
   if(!allowed(u,method)){loadingAudit.blocked++;return new Response('{"message":"Read-only probe"}',{status:403,headers:{'Content-Type':'application/json'}})}
   const started=performance.now();
-  try{const response=await native(input,init);const copy=response.clone();void copy.arrayBuffer().then(body=>loadingAudit.requests.push({name,method,ms:performance.now()-started,bytes:body.byteLength,status:response.status}));return response;}
+  try{const response=await native(input,init);const copy=response.clone();void copy.arrayBuffer().then(body=>loadingAudit.requests.push({name,method,startMs:started,endMs:performance.now(),ms:performance.now()-started,bytes:body.byteLength,status:response.status}));return response;}
   catch(e){loadingAudit.requests.push({name,method,ms:performance.now()-started,error:e.name});throw e;}
  };
  const open=XMLHttpRequest.prototype.open,send=XMLHttpRequest.prototype.send;
@@ -55,8 +54,14 @@ with sync_playwright() as p:
     page.goto(args.url+'#preset=gwc&module=home',wait_until='domcontentloaded',timeout=60000)
     page.wait_for_function("typeof state!=='undefined'&&!document.body.classList.contains('ui-booting')",timeout=90000)
     result['shellReadyMs']=page.evaluate('performance.now()')
-    page.wait_for_function("state.services.length>0&&!serviceDataLoadPromise",timeout=120000)
-    return page.evaluate("({release:window.MINDEX_RELEASE,songs:state.songs.length,services:state.services.length,serviceError:!!state.serviceError,connectionError:!!state.connectionError})")
+    try:
+     page.wait_for_function("state.services.length>0&&!serviceDataLoadPromise&&homeOverviewStats?.songs!=null&&homeOverviewStats?.editions!=null&&!homeOverviewStats.promise&&state.calendarLoaded",timeout=120000)
+    except Exception:
+     print(page.evaluate("({module:state.module,type:state.selectedServiceTypeId,services:state.services.length,servicePending:!!serviceDataLoadPromise,serviceError:!!state.serviceError,stats:homeOverviewStats&&{songs:homeOverviewStats.songs,editions:homeOverviewStats.editions,errors:homeOverviewStats.errors,pending:!!homeOverviewStats.promise},calendarLoaded:state.calendarLoaded,calendarError:!!state.calendarError,blocked:loadingAudit.blocked,requests:loadingAudit.requests.filter(r=>r.status>=400||r.error)})"),flush=True)
+     raise
+    page.evaluate("new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))")
+    result['homeReadyMs']=page.evaluate('performance.now()')
+    return page.evaluate("({release:window.MINDEX_RELEASE,songs:state.songs.length,services:state.services.length,logicalSongs:homeOverviewStats?.songs,editions:homeOverviewStats?.editions,serviceError:!!state.serviceError,connectionError:!!state.connectionError})")
    result['metrics']['home']=timed(page,'home',home)
    def praise():
     page.evaluate("switchModule('praise')")

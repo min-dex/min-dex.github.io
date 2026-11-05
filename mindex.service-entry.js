@@ -1,5 +1,77 @@
-// Refresh one entered service using a detached snapshot. Never persist or touch transport.
+// Detached startup reads and entered-service refresh. Never persist or touch transport.
 (() => {
+  let initialReads = null;
+  function readWorshipEntryLists() {
+    return Promise.all([
+      fetchCachedSupabasePaged("mindex_worship_service_types", WORSHIP_SERVICE_TYPE_SELECT,
+        query => query.order("sort_order", { ascending: true })).catch(error => {
+          console.warn("Could not load worship service types; using defaults.", error);
+          return [];
+        }),
+      fetchWorshipServiceListRows(),
+    ]);
+  }
+  function prepareInitialReads() {
+    const receipt = {client:state.client};
+    // Settle immediately: a list failure must not reject unhandled while the
+    // catalog is loading. No worship rows or UI state are adopted here.
+    receipt.promise = readWorshipEntryLists().then(value => ({value}), error => ({error}));
+    initialReads = receipt;
+    return {discard() { if (initialReads === receipt) initialReads = null; }};
+  }
+  async function readInitialLists() {
+    const receipt = initialReads, client = state.client;
+    initialReads = null;
+    const result = receipt?.client === client ? await receipt.promise
+      : await readWorshipEntryLists().then(value => ({value}), error => ({error}));
+    if (state.client !== client) throw Error("연결이 변경되었습니다. 입력을 보존한 뒤 다시 열어 주세요.");
+    if (result.error) throw result.error;
+    return result.value;
+  }
+  function initialElementIds(services = []) {
+    const pinned = new Set([state.selectedServiceId, state.presenter.serviceId].filter(Boolean));
+    const loadHomeWeek = ["home", "service"].includes(state.module) && state.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID;
+    const from = loadHomeWeek ? localDateStringWithOffset(new Date(), 0) : "";
+    const to = loadHomeWeek ? localDateStringWithOffset(new Date(), WORSHIP_INITIAL_ELEMENT_HOME_DAYS) : "";
+    return services
+      .filter((service) => {
+        if (!service?.id) return false;
+        if (pinned.has(service.id)) return !shouldDeferPastWorshipServiceLoad(service.id);
+        if (!loadHomeWeek) return false;
+        const date = String(service.date || service.service_date || "").trim();
+        return date && (!from || date >= from) && (!to || date <= to);
+      })
+      .map((service) => service.id);
+  }
+  let dashboardReads = null;
+  function dashboardLoadState() {
+    if (!canUseClientData()) return "";
+    const missing = initialElementIds(state.services).filter(id => !state.loadedWorshipServiceIds.has(id)
+      && !serviceViewHasProtectedSurface(id));
+    if (!missing.length) return "";
+    const failed = missing.find(id => serviceViewLoadErrors.has(id));
+    if (failed) return renderServiceViewLoadState(state.services.find(service => service.id === failed));
+    if (!serviceDataLoadPromise && !dashboardReads) {
+      const receipt = {client:state.client};
+      dashboardReads = receipt;
+      let next = 0, failedRead = false;
+      const worker = async () => {
+        while (!failedRead && receipt.client === state.client && next < missing.length) {
+          const id = missing[next++];
+          try { await loadServiceItems(id); }
+          catch { failedRead = true; }
+        }
+      };
+      receipt.promise = Promise.all(Array.from({length:Math.min(3,missing.length)},worker)).finally(() => {
+        if (dashboardReads !== receipt) return;
+        dashboardReads = null;
+        if (receipt.client === state.client && ["home","service"].includes(state.module)
+          && state.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID && !state.selectedServiceId
+          && !isGlobalSearchActive()) renderCurrentServiceModuleDetail();
+      });
+    }
+    return renderLoadingDetail();
+  }
   let busy = false;
   const deletedNotices = new Set();
   let entryToken = 0;
@@ -134,5 +206,5 @@
     }
     return false;
   }
-  window.MINDEX_SERVICE_ENTRY = { check, enter, invalidate };
+  window.MINDEX_SERVICE_ENTRY = { check, enter, invalidate, prepareInitialReads, readInitialLists, initialElementIds, dashboardLoadState };
 })();

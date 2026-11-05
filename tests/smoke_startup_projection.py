@@ -14,6 +14,7 @@ try:
    result=page.evaluate('''async()=>{
     const check=(ok,msg)=>{if(!ok)throw Error(msg)};
     // Metadata lookup must select the same version without running any builders.
+    const originalRender=render;
     const build=materializePublicWorshipTemplate;
     for(const type of Object.keys(PUBLIC_WORSHIP_TEMPLATE_VERSIONS)) {
      for(const date of ['2025-01-01','2026-10-11','2026-10-18','2027-01-01']) {
@@ -35,6 +36,9 @@ try:
     loadSongsForIdsInBackground=()=>{};render=()=>{};
     const original=projectWorshipServiceItemsFromTemplate;const calls=[];
     projectWorshipServiceItemsFromTemplate=(service,items)=>{calls.push(service?.id);return original(service,items)};
+    await loadWorshipData();
+    check(calls.length===0&&!state.loadedWorshipServiceIds.has('current'),'home overview eagerly hydrated service bodies');
+    state.selectedServiceTypeId=SERVICE_WEEK_PANEL_ID;
     await loadWorshipData();
     check(JSON.stringify(calls)==='["current"]','unopened archives projected '+calls.length);
     check(state.services.length===201,'archive list lost');
@@ -65,7 +69,35 @@ try:
     check(!rendered[0].loaded,'list loading render lost');
     check(rendered[1].loaded&&rendered[1].restored&&!rendered[1].error&&!rendered[1].dirty,'final render before restored/current state');
     check(serviceDataLoadPromise===null,'load lock not released');
-    return {archives:200,initialProjections:1,lazyItems:actual.length};
+    // The week view uses the existing per-service loader and its locks; it
+    // never reloads unrelated services, editor state or live transport.
+    render=originalRender;canUseClientData=()=>true;state.client={};
+    ensureSingleSongActivation=async()=>true;preloadPresenterServiceScripturesBeforeOutput=async()=>{};
+    state.loadedWorshipServiceIds.clear();state.serviceError='';
+    let releaseRows;fetchWorshipRowsForServiceIds=async()=>new Promise(resolve=>releaseRows=()=>resolve({sections:[],elements:[]}));
+    state.forms=[{id:"draft",lyrics:"원문 그대로"}];state.dirty.forms=true;
+    const formsBefore=JSON.stringify(state.forms),transportBefore=JSON.stringify([state.presenter,state.serviceMusic]);
+    const serviceBefore=state.services;
+    renderHomeDetail();await new Promise(resolve=>setTimeout(resolve,0));
+    check(!refs.detailPane.querySelector('.service-week-board'),'unloaded weekly content shown as ready');
+    check(serviceItemLoadPromises.has('current')&&releaseRows,'week view did not request real service rows');
+    releaseRows();await Promise.all([...serviceItemLoadPromises.values()]);
+    await new Promise(resolve=>setTimeout(resolve,0));
+    check(state.loadedWorshipServiceIds.has('current')&&refs.detailPane.querySelector('.service-week-board'),'loaded week view missing');
+    check(state.services===serviceBefore,'week load replaced unrelated service collection');
+    check(JSON.stringify(state.forms)===formsBefore&&JSON.stringify([state.presenter,state.serviceMusic])===transportBefore,'week load changed editor/transport');
+    state.loadedWorshipServiceIds.clear();let failures=0;
+    fetchWorshipRowsForServiceIds=async()=>{failures++;throw Error('fixture offline')};
+    renderHomeDetail();await Promise.allSettled([...serviceItemLoadPromises.values()]);
+    await new Promise(resolve=>setTimeout(resolve,0));
+    check(serviceViewLoadErrors.has('current')&&!refs.detailPane.querySelector('.service-week-board'),'failed week rendered false readiness');
+    renderHomeDetail();check(failures===1,'failed week restarted automatically');
+    serviceViewLoadErrors.delete('current');fetchWorshipRowsForServiceIds=async()=>({sections:[],elements:[]});
+    renderHomeDetail();await Promise.all([...serviceItemLoadPromises.values()]);
+    await new Promise(resolve=>setTimeout(resolve,0));
+    check(refs.detailPane.querySelector('.service-week-board'),'week retry did not recover');
+    check(JSON.stringify(state.forms)===formsBefore,'week retry changed lyric draft');
+    return {archives:200,overviewProjections:0,explicitWeekProjections:1,lazyItems:actual.length};
    }''')
    print('PASS',engine,result,'version identity, lazy template equality, grouped saved-row preservation',flush=True)
    browser.close()

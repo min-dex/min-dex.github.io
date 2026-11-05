@@ -293,12 +293,12 @@
       && cached.status.recordCount === status.recordCount) {
       return {phase:'native', records:copy(cached.records), status};
     }
-    const records = [], seen = new Set(); let after = null, pageSize = 100;
+    const records = [], seen = new Set(); let after = null, pageSize = 200;
     while (records.length < status.recordCount) {
       const response = await client.rpc('get_single_praise_catalog_page_v1', {after_id:after,page_size:pageSize,expected_epoch:status.epoch,expected_manifest:status.manifest});
       // Retry a timed-out read at the same cursor, with a bounded smaller batch.
       // All manifest checks remain mandatory; never install a partial catalog.
-      if (response.error?.code === '57014' && pageSize > 25) { pageSize = 25; continue; }
+      if (response.error?.code === '57014' && pageSize > 25) { pageSize = pageSize === 200 ? 100 : 25; continue; }
       if (response.error) fail('PRAISE_STORAGE_CHANGED');
       const page = response.data;
       if (page?.epoch !== status.epoch || page.manifest !== status.manifest || !Array.isArray(page.records) || !page.records.length || page.records.length > pageSize) fail('INVALID_CATALOG_PAGE');
