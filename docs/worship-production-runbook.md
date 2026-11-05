@@ -173,3 +173,8 @@ Playwright route는 HTTP cache를 비활성화하므로 cold/warm 실측에 사�
 예배별 중복 방지 loader로 불러오고, 준비 전에는 로딩 화면을 표시한다. 읽기 실패를
 빈 순서나 기본 template로 대신 표시하지 않고 재시도를 제공한다. 미저장 입력과
 재생 상태 보존은 `smoke_startup_projection.py`의 Chromium/WebKit 검사로 확인한다.
+
+첫 방문의 full catalog 병목은 기존 keyset RPC를 최대3개씩 읽어 줄인다.
+동일 서버·브라우저 조건의 전후 측정으로 검증하고, 전체 원본 해시·논리적 곡수·
+초안 보호·최종 manifest와 실패 후 worker 종료를 확인한다. ID 개수로 cursor를
+추정하거나 첫 화면 표시만으로 데이터 준비가 끝났다고 보고하지 않는다.

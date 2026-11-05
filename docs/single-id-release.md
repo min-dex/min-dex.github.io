@@ -1,3 +1,19 @@
+## Bounded cold catalog reads ·2026-11-05
+
+Catalogs above400 records use three lexical keyset ranges through the existing
+read-only RPC: (start, SONG-HYMN-N), (SONG-HYMN-N, SONG-HYMN-T), and
+(SONG-HYMN-T, end). The boundary strings cannot be valid IDs. This covers all
+supported ID forms, including sparse ranges and legacy IDs; it does not infer
+an ID list from counts. Each range has at most one request in flight. Full pages
+are validated before boundary overlap is dropped, then ranges concatenate in
+order. Exact total count, strict global ID order, catalog validation and fresh
+final epoch/manifest checks precede installation. Every worker settles before
+failure is exposed, so retries cannot overlap abandoned workers. Small catalogs
+retain serial reads. Each range retains same-cursor timeout fallback200→100→25.
+No persistent cache, new API, schema or permission change. Selected-record reads,
+presenter preflight and the existing draft/client guards remain authoritative.
+Regression: `test_parallel_catalog.cjs`, existing activation browser suite.
+
 ## Home startup read overlap ·2026-11-05
 
 Native catalog reads use the existing server-supported maximum of200 records per

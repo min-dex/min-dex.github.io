@@ -14,6 +14,7 @@ NODE_TESTS = (
     "test_praise_classification.cjs",
     "test_praise_groups.cjs",
     "test_single_song.cjs",
+    "test_parallel_catalog.cjs",
     "test_initial_worship_reads.cjs",
     "test_praise_selection.cjs",
     "test_remote_core.mjs",
