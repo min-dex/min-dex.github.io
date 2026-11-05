@@ -293,25 +293,44 @@
       && cached.status.recordCount === status.recordCount) {
       return {phase:'native', records:copy(cached.records), status};
     }
-    const records = [], seen = new Set(); let after = null, pageSize = 200;
-    while (records.length < status.recordCount) {
-      const response = await client.rpc('get_single_praise_catalog_page_v1', {after_id:after,page_size:pageSize,expected_epoch:status.epoch,expected_manifest:status.manifest});
-      // Retry a timed-out read at the same cursor, with a bounded smaller batch.
-      // All manifest checks remain mandatory; never install a partial catalog.
-      if (response.error?.code === '57014' && pageSize > 25) { pageSize = pageSize === 200 ? 100 : 25; continue; }
-      if (response.error) fail('PRAISE_STORAGE_CHANGED');
-      const page = response.data;
-      if (page?.epoch !== status.epoch || page.manifest !== status.manifest || !Array.isArray(page.records) || !page.records.length || page.records.length > pageSize) fail('INVALID_CATALOG_PAGE');
-      for (const r of page.records) {
-        if (!code(r.id) || seen.has(r.id) || (after !== null && r.id <= after)) fail('INVALID_CATALOG_PAGE');
-        seen.add(r.id);records.push(r);after=r.id;
-      }
-      if (page.after !== after || records.length > status.recordCount) fail('INVALID_CATALOG_PAGE');
-    }
+    const records = status.recordCount <= 400 ? await readCatalogRange(client, status, null, null)
+      : await readParallelCatalog(client, status);
+    if (records.length !== status.recordCount || records.some((r,i) => i && r.id <= records[i-1].id)) fail('INVALID_CATALOG_PAGE');
     const final = await client.rpc('get_praise_storage_status_v1');
     if (final.error || final.data?.phase !== 'native' || final.data.epoch !== status.epoch || final.data.manifest !== status.manifest || final.data.recordCount !== records.length) fail('PRAISE_STORAGE_CHANGED');
     createCatalog(records); // Validate before any caller replaces its visible state.
     return {phase:'native',records,status,repository:createRpcRepository(client)};
+  }
+  async function readParallelCatalog(client, status) {
+    const bounds = [null, 'SONG-HYMN-N', 'SONG-HYMN-T', null];
+    // Drain every worker on failure before allowing a retry/new activation.
+    const results = await Promise.allSettled(bounds.slice(0,3).map((from,i) =>
+      readCatalogRange(client, status, from, bounds[i+1])));
+    for (const result of results) if (result.status === 'rejected') throw result.reason;
+    return results.flatMap(result => result.value);
+  }
+  // Half-open lexical ranges cover every supported ID, including legacy IDs.
+  // Boundaries are not valid IDs. Validate full pages before discarding overlap.
+  async function readCatalogRange(client, status, from, to) {
+    const records = []; let after = from, pageSize = 200;
+    while (records.length < status.recordCount) {
+      const response = await client.rpc('get_single_praise_catalog_page_v1', {after_id:after,page_size:pageSize,expected_epoch:status.epoch,expected_manifest:status.manifest});
+      if (response.error?.code === '57014' && pageSize > 25) { pageSize = pageSize === 200 ? 100 : 25; continue; }
+      if (response.error) fail('PRAISE_STORAGE_CHANGED');
+      const page = response.data;
+      if (page?.epoch !== status.epoch || page.manifest !== status.manifest || !Array.isArray(page.records) || page.records.length > pageSize) fail('INVALID_CATALOG_PAGE');
+      let last = after;
+      for (const r of page.records) {
+        if (!code(r.id) || (last !== null && r.id <= last)) fail('INVALID_CATALOG_PAGE');
+        last = r.id;
+      }
+      if ((page.after ?? null) !== (page.records.length ? last : null)) fail('INVALID_CATALOG_PAGE');
+      for (const r of page.records) if (!to || r.id < to) records.push(r);
+      if (records.length > status.recordCount) fail('INVALID_CATALOG_PAGE');
+      if (page.records.length < pageSize || (to && last >= to)) break;
+      after = last;
+    }
+    return records;
   }
   function parseMemo(value) {
     if (value && typeof value === 'object') return copy(value);
