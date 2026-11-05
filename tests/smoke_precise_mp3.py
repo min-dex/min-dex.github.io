@@ -19,6 +19,11 @@ def main():
                 result = page.evaluate('''async source => {
                     const assert = (ok, message) => { if (!ok) throw Error(message); };
                     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+                    const until = async (predicate, message) => {
+                        const deadline = performance.now() + 15000;
+                        while (!predicate() && performance.now() < deadline) await wait(25);
+                        assert(predicate(), message);
+                    };
                     prepareServiceAudio([source]);
                     const a = getServiceMusicAudio(source);
                     if (!Number.isFinite(a.duration)) await new Promise((resolve, reject) => {
@@ -39,12 +44,14 @@ def main():
                     for (const position of [1434.9715, 1200, 1885, 1420]) {
                         seek.value = String(position); seek.dispatchEvent(new Event('input', {bubbles:true}));
                     }
-                    await wait(500);
+                    await until(() => !a.seeking, 'latest seek settles');
+                    await wait(100);
                     assert(!a.seeking && !a.paused && a.currentTime >= 1420 && a.currentTime < 1421, 'last seek wins');
                     assert(t.nodes.length <= 2 && t.decoder.cache.size <= 3, 'bounded decoder');
                     // Cross a decoded window boundary without restarting the clock.
                     a.currentTime = 1439.8;
-                    await wait(750);
+                    await until(() => !a.seeking, 'boundary seek settles');
+                    await wait(350);
                     assert(a.currentTime > 1440 && a.currentTime < 1441 && !a.error, 'continuous window handoff');
                     stopServiceMusicPlayback({render:false});
                     const stopped = a.currentTime;
@@ -60,7 +67,8 @@ def main():
                     a.pause(); await promise; await wait(100);
                     assert(a.paused && !t.nodes.length, 'stop cannot resurrect playback');
                     const end = a.duration;
-                    a.loop = false; a.currentTime = end - .1; await a.play(); await wait(350);
+                    a.loop = false; a.currentTime = end - .1; await a.play();
+                    await until(() => a.ended, 'end event arrives');
                     assert(a.ended && a.paused && a.currentTime === end, 'natural end');
                     a.removeAttribute('src'); a.load(); await wait(100);
                     assert(!a.mindexPreciseAudio.transport && !t.nodes.length, 'release cached source');

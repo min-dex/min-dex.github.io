@@ -32,5 +32,83 @@
     "Cold download still takes network time; single play request waits for preparation",
     "Only verified long MP3 metadata uses indexed transport; unsupported media keeps native playback with notice",
     "Full shared gate, deployment and public PCM readback pending"
-  ]
+  ],
+  "firstSoundLatency": {
+    "method": "Same local asset; actual serviceMusic; first nonzero AudioWorklet PCM at requested 1s position; fresh browser for each case. Cold=not prepared, warm=preparation complete. Internet download latency not included.",
+    "measurements": [
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": false,
+        "wallMs": 42,
+        "audioMs": 13.333333333333334,
+        "playPromiseMs": 14,
+        "position": 1.010847
+      },
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": true,
+        "wallMs": 28.600000023841858,
+        "audioMs": 0,
+        "playPromiseMs": 2.699999988079071,
+        "position": 1.002762
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": false,
+        "wallMs": 133.39999997615814,
+        "audioMs": 101.33333333333333,
+        "playPromiseMs": 109.30000001192093,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": true,
+        "wallMs": 27.399999976158142,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 2.699999988079071,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": false,
+        "wallMs": 432,
+        "audioMs": 365.33333333333337,
+        "playPromiseMs": 167,
+        "position": 1.1736497500096448
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": true,
+        "wallMs": 321,
+        "audioMs": 320,
+        "playPromiseMs": 24,
+        "position": 1.173883666691836
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": false,
+        "wallMs": 364,
+        "audioMs": 296,
+        "playPromiseMs": 342.0000000000001,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": true,
+        "wallMs": 30.000000000000114,
+        "audioMs": 26.666666666666643,
+        "playPromiseMs": 4,
+        "position": 1.0016666666666667
+      }
+    ],
+    "interpretation": "Warm WebKit improves; warm Chromium similar; local Chromium cold increases ~91 ms. No claim that all first playback is faster."
+  }
 }
