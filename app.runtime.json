@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261105-home-startup-overlap",
+  "version": "20261105-mp3-seek-accuracy",
   "options": {
     "compress": false,
     "mangle": {

@@ -18,11 +18,14 @@ function currentPresenterAudioContext(serviceId = state.presenter.serviceId) {
 function getServiceMusicAudio(source = "") {
   const prepared = takePreparedServiceAudio(source);
   if (!state.serviceMusic.audio || prepared) {
-    const audio = prepared || new Audio();
+    const audio = prepared || globalThis.MindexPreciseAudio?.attach(new Audio()) || new Audio();
     const on = (event, handle) => audio.addEventListener(event, () => {
       if (state.serviceMusic.audio === audio) handle();
     });
     audio.preload = "auto";
+    on("mindexprecisionunavailable", () => {
+      showToast("정밀 탐색을 준비하지 못해 기본 음원 재생을 사용합니다.");
+    });
     on("pause", () => {
       scheduleServiceMusicResume("pause");
     });
@@ -58,6 +61,7 @@ function getServiceMusicAudio(source = "") {
       syncServiceMusicSyncedLyricsWithCurrentTime();
     });
     state.serviceMusic.audio = audio;
+    audio.mindexPreciseAudio?.activate();
   }
   if (!state.serviceMusic.fadeStop) state.serviceMusic.audio.volume = state.serviceMusic.volumeLevel / 5;
   return state.serviceMusic.audio;

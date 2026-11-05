@@ -191,6 +191,7 @@ SMOKES = (
     "smoke_home_start.py",
     "smoke_ui_polish_consistency.py",
     "smoke_music_seek.py",
+    "smoke_precise_mp3.py",
     "smoke_controller_music_layout.py",
     "smoke_citation_translation_editor.py",
     "smoke_disclosure_persistence.py",

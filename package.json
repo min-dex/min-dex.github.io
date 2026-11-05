@@ -75,6 +75,7 @@
       "mindex.presenter.js",
       "mindex.presenter-lifetime.js",
       "mindex.presenter-praise.js",
+      "mindex.mp3-transport.js",
       "mindex.presenter-live.js",
       "mindex.presenter-board.js",
       "mindex.presenter-history.js",
