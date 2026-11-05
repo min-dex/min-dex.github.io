@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261105-ui-prayer-v5",
+  "version": "20261105-home-startup-overlap",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "bf3e2879768f74c6d6d3e3737078d2baaa9414f80ccd75d02b65f366b7904153",
-  "runtime_sha256": "9ecfd3207e0a5f4927616597db74a0a205b0e7fd3b40c98300f69b132cfccfb8",
-  "source_bytes": 1356511,
-  "runtime_bytes": 968376,
-  "source_gzip": 311011,
-  "runtime_gzip": 243959
+  "source_sha256": "4cf3bce6fb0bb62895ca71d0c3e7add15d6f36dc5c2ec7ee08f13fde23780de9",
+  "runtime_sha256": "f53a87253248bfedd6d6d34b5290ef7e83ba0c8ef5afdcac9c18c020de5a7177",
+  "source_bytes": 1355945,
+  "runtime_bytes": 967999,
+  "source_gzip": 310976,
+  "runtime_gzip": 243921
 }

@@ -10,7 +10,7 @@ is a maintenance contract, not a request to split large files mechanically.
 1. Shared constants, design tokens, worship model and persistence helpers.
 2. `mindex.presenter-praise.js`, then `mindex.presenter.js` (including slide-model constants).
 3. `mindex.presenter-live.js`, `mindex.presenter-board.js`, `mindex.presenter-controller.js`.
-4. Existing adapters and domain modules, then `app.js` bootstrap.
+4. Existing adapters and domain modules, including `mindex.service-entry.js`, then `app.js` bootstrap.
 
 The exact ordered list remains in `index.html`. Modules are downloaded in parallel
 and executed in that order; source and compiled app use the same dependencies.
@@ -46,6 +46,11 @@ The order is checked by `tests/solid_audit.py`.
   compaction, and save-row construction, validation, preservation, and ordering.
   It loads before `app.js`; its helpers run after app bootstrap. It does not
   perform database I/O or access controller state/DOM directly.
+- `mindex.service-entry.js` owns entered-service refresh and the detached initial
+  home service-list/type read receipt. It loads before `app.js`; functions use app
+  dependencies only after bootstrap calls them. Prefetch does not adopt worship
+  records or bypass ID activation. The existing app loader owns projection and
+  the existing atomic client owns persistence.
 - `app.js` owns bootstrap, state, persistence orchestration, DOM events and canonical shared helpers.
 - `mindex.presenter-praise.js` owns song/score slide composition and form planning.
 - `mindex.presenter-live.js` owns music transport, synchronized lyrics and live scripture actions.
@@ -484,3 +489,7 @@ layout regression with `smoke_presenter_left_input.py` and its atomic-save compa
 Presenter emergency mode derives temporary text views and frame classes in
 `mindex.presenter-ui.js`; the control-board render key lives with those view helpers.
 The controller owns the reversible session toggle, and output payloads carry it.
+
+Home overview startup defers unopened service bodies. `MINDEX_SERVICE_ENTRY`
+owns the weekly dashboard readiness boundary and reuses `loadServiceItems` with
+three bounded workers; it does not reload or replace the entire services list.

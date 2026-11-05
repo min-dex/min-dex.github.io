@@ -1,3 +1,29 @@
+## Home startup read overlap ·2026-11-05
+
+Native catalog reads use the existing server-supported maximum of200 records per
+page. SQL timeout57014 reduces the page at the same cursor to100, then25; a
+further failure stops. Every record/order/count and final epoch/manifest check
+remains mandatory. No new RPC, DB/schema/permission or operational-data change.
+
+At home startup, service-type/list reads may start detached while the full native
+catalog is loading. `mindex.service-entry.js` owns a one-use, client-bound receipt;
+`app.js` still waits for ID activation before adopting services or projecting any
+worship items. Early errors settle immediately, and activation failure/navigation
+away discards the receipt. Client changes cannot install a previous response.
+Other module startup and explicit presenter freshness reads retain their paths.
+
+The home overview reads service metadata only. Unopened upcoming service bodies
+are deferred until the weekly dashboard or a service is entered. Weekly reads
+reuse the per-service coalescing loader with at most three workers; loading and
+retry states must precede real saved-row rendering. Protected local surfaces,
+service collections, forms and presenter transport remain intact.
+
+The home summary's15-second read budget starts after activation, when its own
+queries begin. A slow catalog must not pre-abort a not-yet-started Bible count.
+Logical group counts, selected readers, drafts, forms, transport and save paths
+are preserved. Regression coverage: `test_initial_worship_reads.cjs`,
+`smoke_single_song_activation.py`, `smoke_home_startup_budget.py`.
+
 ## Verified in-session catalog reuse ·2026-11-05
 
 The native bootstrap still completes and validates the entire catalog before home

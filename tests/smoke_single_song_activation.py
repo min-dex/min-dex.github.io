@@ -63,7 +63,7 @@ try:
     broken=true;blocked=false;try{await MindexSingleSong.loadActivation(client)}catch{blocked=true}
     check(blocked,'failed status reused cached snapshot');broken=false;
     const beforeRetry=calls;await MindexSingleSong.loadActivation(client);
-    check(calls===beforeRetry+5,'failed status retained trusted snapshot');
+    check(calls===beforeRetry+4,'failed status retained trusted snapshot');
     const previousStatus=status;
     const isolatedCalls=[];
     let epoch='2',manifest='new',phase='native';
@@ -72,9 +72,9 @@ try:
       if(name==='get_praise_storage_status_v1')return {data:{...previousStatus(),epoch,manifest,phase}};
       const reply=await client.rpc(name,args);return {data:{...reply.data,epoch,manifest}};
     }};
-    await MindexSingleSong.loadActivation(isolated);check(isolatedCalls.length===5,'different client reused snapshot');
-    manifest='changed';await MindexSingleSong.loadActivation(isolated);check(isolatedCalls.length===10,'changed manifest reused snapshot');
-    epoch='3';await MindexSingleSong.loadActivation(isolated);check(isolatedCalls.length===15,'changed epoch reused snapshot');
+    await MindexSingleSong.loadActivation(isolated);check(isolatedCalls.length===4,'different client reused snapshot');
+    manifest='changed';await MindexSingleSong.loadActivation(isolated);check(isolatedCalls.length===8,'changed manifest reused snapshot');
+    epoch='3';await MindexSingleSong.loadActivation(isolated);check(isolatedCalls.length===12,'changed epoch reused snapshot');
     phase='maintenance';blocked=false;try{await MindexSingleSong.loadActivation(isolated)}catch{blocked=true}
     check(blocked,'maintenance served cached snapshot');
     const originalLoad=loadServiceData,originalAtomic=worshipAtomicClient;
@@ -100,10 +100,19 @@ try:
       return client.rpc(name,args);
     }};
     const recovered=await MindexSingleSong.loadActivation(smallClient);
-    check(recovered.records.length===201&&pageCalls[0].size===100&&pageCalls[1].size===25&&pageCalls[0].after===pageCalls[1].after&&pageCalls.slice(1).every(p=>p.size===25),'timeout retry changed cursor or lost records');
+    check(recovered.records.length===201&&pageCalls[0].size===200&&pageCalls[1].size===100&&pageCalls[0].after===pageCalls[1].after&&pageCalls.slice(1).every(p=>p.size===100),'timeout retry changed cursor or lost records');
+    const fallbackCalls=[];
+    const fallback=await MindexSingleSong.loadActivation({rpc:async(name,args)=>{
+      if(name==='get_single_praise_catalog_page_v1'){
+        fallbackCalls.push({size:args.page_size,after:args.after_id});
+        if(args.page_size>25)return {error:{code:'57014'}};
+      }
+      return client.rpc(name,args);
+    }});
+    check(fallback.records.length===201&&JSON.stringify(fallbackCalls.slice(0,3).map(r=>r.size))==='[200,100,25]'&&fallbackCalls.slice(0,3).every(r=>r.after===null),'bounded fallback changed cursor or skipped data');
     let repeated=0;blocked=false;
     try{await MindexSingleSong.loadActivation({rpc:async(name,args)=>name==='get_single_praise_catalog_page_v1'?(repeated++,{error:{code:'57014'}}):client.rpc(name,args)})}catch{blocked=true}
-    check(blocked&&repeated===2,'persistent timeout retried indefinitely or installed partial records');
+    check(blocked&&repeated===3,'persistent timeout retried indefinitely or installed partial records');
     const missing=await MindexSingleSong.loadActivation({rpc:async()=>({error:{code:'PGRST202',message:'get_praise_storage_status_v1 not found'}})});check(missing.phase==='legacy','explicit absent RPC');
     return 'PASS default-off, maintenance/network/drift fail closed, draft retention, paginated native install, coalescing and project boundary';
    }'''),flush=True);b.close()

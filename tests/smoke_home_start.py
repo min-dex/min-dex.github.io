@@ -101,14 +101,18 @@ try:
     assert page.locator('.home-recent-list button').first.bounding_box()['height']==80
    page.set_viewport_size({'width':1280,'height':800})
    page.locator('[data-home-recent-view="work"]').click()
+   # This navigation fixture has complete local week data. The next case
+   # explicitly clears one service to verify stalled-read protection.
+   page.evaluate("state.loadedWorshipServiceIds=new Set(state.services.map(service=>service.id))")
    # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
    page.locator('#songList [data-service-list="public"]').click()
    assert page.evaluate('state.selectedServiceTypeId')=='__list'
-   page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
+   page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;state.loadedWorshipServiceIds.delete('next');loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
    page.locator('#songList [data-service-id="next"]').click()
    page.wait_for_function("state.module==='presenter'&&state.selectedServiceId==='next'",timeout=3000)
+   page.wait_for_selector('[data-service-view-loading="next"]',state="attached",timeout=3000)
    assert page.locator('[data-service-view-loading="next"]').count()==1
    assert page.evaluate('!isPresenterOutputWindowOpen()')
    page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
