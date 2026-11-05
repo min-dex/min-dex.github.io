@@ -310,3 +310,34 @@ decisions. Use [current decisions](worship-presenter-decisions.md),
   header audio attachment in `memo.audioAsset`. This is for quick MR/BGM playback
   beside the element header and must not change presenter slide rendering,
   score/lyrics input mode, or `memo.asset` media-element behavior.
+
+
+## Long MP3 playback candidate · 2026-11-05
+
+Long MP3 media (at least ten minutes) uses frame-indexed, bounded decoding for
+service music when its Xing/LAME timing can be verified. Existing audio bytes,
+service records, lyric timing and asset references remain unchanged. Short clips
+and other codecs retain the native element. This transport is not a certification
+of musical joins or subjective sound quality.
+
+`mindex.mp3-transport.js` owns an optional adapter on the service audio element.
+Only the selected audio prepares decoded windows; other warmed elements keep
+their native preload. Encoded media is limited to 128 MiB, decoded windows to
+three 20-second buffers plus the initial alignment reference. Decoder alignment
+is measured against the metadata-bearing opening, never inferred from browser
+name. Unverified alignment fails preparation rather than silently claiming an
+accurate seek. Download, calibration, and unsupported-file errors remain visible
+through the existing play rejection path; they do not rewrite the source file.
+
+The transport resumes its AudioContext within the play gesture, waits for ready
+audio, and checks cancellation before starting. Seeking uses one audio clock,
+invalidates scheduled old windows, and only the latest request can play. Paused
+seeks stay paused. Volume, loop/end, and the existing timing synchronizer continue
+to use the same service audio owner. Source removal releases decoder references.
+
+Local Chromium/WebKit tests cover actual controller seeking, latest-seek wins,
+window boundaries, pause/resume, end, pending cancellation and disposal. A private
+AudioWorklet capture of the published prayer asset reduced the reproduced native
+~10-second seek error to 0–3 ms relative to the captured playback clock. This is
+a local PCM measurement, not an operating deployment or an auditory evaluation.
+Publication requires the shared full gate and operational readback.
