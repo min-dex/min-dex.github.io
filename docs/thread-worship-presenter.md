@@ -325,9 +325,9 @@ Only the selected audio prepares decoded windows; other warmed elements keep
 their native preload. Encoded media is limited to 128 MiB, decoded windows to
 three 20-second buffers plus the initial alignment reference. Decoder alignment
 is measured against the metadata-bearing opening, never inferred from browser
-name. Unverified alignment fails preparation rather than silently claiming an
-accurate seek. Download, calibration, and unsupported-file errors remain visible
-through the existing play rejection path; they do not rewrite the source file.
+name. Unverified alignment never silently claims an accurate seek. Download, calibration,
+and unsupported-file failures retain native playback with a visible accuracy
+notice; they do not make previously playable media unusable or rewrite its bytes.
 
 The transport resumes its AudioContext within the play gesture, waits for ready
 audio, and checks cancellation before starting. Seeking uses one audio clock,

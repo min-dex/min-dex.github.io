@@ -1,0 +1,36 @@
+{
+  "status": "local_verified_not_deployed",
+  "date": "2026-11-05",
+  "base": "63dd38801528bde6ad182623e8687153c2e7eee3",
+  "assetSha256": "bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87",
+  "productionWrites": 0,
+  "audioAssetChanges": 0,
+  "method": "actual serviceMusic transport and AudioWorklet PCM capture, compared to independent ffmpeg PCM decode",
+  "boundaryResults": [
+    {
+      "engine": "chromium",
+      "clock_error_ms": 0.0,
+      "min_100ms_correlation": 0.9999743523388283,
+      "windows": 40,
+      "pass": true
+    },
+    {
+      "engine": "webkit",
+      "clock_error_ms": 2.6666666666666665,
+      "min_100ms_correlation": 0.999983770635345,
+      "windows": 40,
+      "pass": true
+    }
+  ],
+  "checks": [
+    "Chromium/WebKit: real seek input, rapid seek last-wins, bounded buffers, continuous handoff, pause/resume/end, cold play cancellation, prepare-then-play, release, unsupported metadata native playback notice",
+    "Chromium/WebKit: smoke_friday_music, smoke_music_seek, smoke_children_audio_db",
+    "runtime hash/version, desktop packaging, runtime boundaries, playback transition ownership, solid audit"
+  ],
+  "limits": [
+    "No subjective listening claim",
+    "Cold download still takes network time; single play request waits for preparation",
+    "Only verified long MP3 metadata uses indexed transport; unsupported media keeps native playback with notice",
+    "Full shared gate, deployment and public PCM readback pending"
+  ]
+}

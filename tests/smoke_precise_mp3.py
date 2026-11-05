@@ -76,6 +76,15 @@ def main():
                     await a.play(); await wait(100);
                     assert(!a.paused && a.currentTime < 1, 'one click starts after preparation');
                     a.pause(); a.removeAttribute('src'); a.load(); await wait(100);
+                    const parse = MindexMp3Index.parse;
+                    let notices = 0;
+                    a.addEventListener('mindexprecisionunavailable', () => notices++);
+                    MindexMp3Index.parse = () => { throw Error('Unsupported test metadata'); };
+                    a.src = source;
+                    await a.play();
+                    assert(!a.paused && !a.mindexPreciseAudio.transport && notices === 1, 'unsupported timing retains native playback with notice');
+                    a.pause(); a.removeAttribute('src'); a.load();
+                    MindexMp3Index.parse = parse;
                     return {duration:end, calibration:t.decoder.calibration, sourceReleased:true};
                 }''', SOURCE)
                 print(engine, 'PASS', result, flush=True)

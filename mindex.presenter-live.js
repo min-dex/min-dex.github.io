@@ -23,6 +23,9 @@ function getServiceMusicAudio(source = "") {
       if (state.serviceMusic.audio === audio) handle();
     });
     audio.preload = "auto";
+    on("mindexprecisionunavailable", () => {
+      showToast("정밀 탐색을 준비하지 못해 기본 음원 재생을 사용합니다.");
+    });
     on("pause", () => {
       scheduleServiceMusicResume("pause");
     });
