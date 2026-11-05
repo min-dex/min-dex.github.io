@@ -27,7 +27,7 @@ GUARD=r'''(() => {
   }
   if(!allowed(u,method)){loadingAudit.blocked++;return new Response('{"message":"Read-only probe"}',{status:403,headers:{'Content-Type':'application/json'}})}
   const started=performance.now();
-  try{const response=await native(input,init);const copy=response.clone();void copy.arrayBuffer().then(body=>loadingAudit.requests.push({name,method,startMs:started,endMs:performance.now(),ms:performance.now()-started,bytes:body.byteLength,status:response.status}));return response;}
+  try{const response=await native(input,init);const headersMs=performance.now();const copy=response.clone();void copy.arrayBuffer().then(body=>{let sqlstate=null;if(!response.ok&&u.hostname.endsWith('.supabase.co')){try{const code=JSON.parse(new TextDecoder().decode(body)).code;if(/^[A-Z0-9]{5}$/.test(code))sqlstate=code;}catch{}}loadingAudit.requests.push({name,method,startMs:started,headersMs,endMs:performance.now(),ms:performance.now()-started,bytes:body.byteLength,status:response.status,sqlstate});});return response;}
   catch(e){loadingAudit.requests.push({name,method,ms:performance.now()-started,error:e.name});throw e;}
  };
  const open=XMLHttpRequest.prototype.open,send=XMLHttpRequest.prototype.send;

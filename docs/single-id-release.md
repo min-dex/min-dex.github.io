@@ -1,3 +1,27 @@
+## Private activation snapshot ownership ·2026-11-06
+
+`loadActivation` keeps validated prepared records inside its private pending/
+snapshot maps without cloning the same whole catalog between those two internal
+containers. A memory hit likewise reuses the private prepared input. Every
+external caller still receives a detached records/status copy and a separate
+repository. Concurrent consumers, later editable returns and failed activations
+cannot mutate another consumer or a retained snapshot. The persistent cache
+writer only serializes these internal server records; it never mutates them.
+Catalog validation, public `createCatalog` defensive copies, checksum, fresh
+status/manifest/count checks, dirty/client checks and all save paths are unchanged.
+
+Same-source Chromium/WebKit comparisons retain identical full catalog hashes.
+Cold/restarted initialization removes one whole-array copy; repeat in-session
+activation removes two internal whole-array copies while retaining one required
+consumer copy. Measured clone CPU was reduced by about22–45ms in these samples,
+not seconds of network latency. Do not attribute cold wall-time variation to this
+small CPU change. Regression: `test_catalog_cache_activation.cjs` and real IDB
+`smoke_catalog_read_cache.py`. Optional `measure_home_entry.py --profile-phases`
+records static resources, response-header wait, parse/clone CPU and long tasks;
+measurement hooks affect timing and are absent from production.
+`--include-invalidated` changes only its disposable local cache signature to
+exercise the full-read fallback; it never changes a production manifest.
+
 ## Verified reload read-cache ·2026-11-05
 
 Anonymous/public clients may explicitly opt into a disposable committed catalog

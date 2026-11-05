@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261105-verified-catalog-read-cache",
+  "version": "20261106-private-activation-snapshot",
   "options": {
     "compress": false,
     "mangle": {

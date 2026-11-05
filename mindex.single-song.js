@@ -261,7 +261,8 @@
     if (!activationReads.has(client)) {
       const pending = readActivation(client, activationSnapshots.get(client), persistent === true).then(prepared => {
         if (prepared.phase === 'native') activationSnapshots.set(client, {
-          status: copy(prepared.status), records: copy(prepared.records),
+          // Prepared rows are private to this loader. Only detached copies leave it.
+          status: copy(prepared.status), records: prepared.records,
         });
         else activationSnapshots.delete(client);
         if (persistent === true) {
@@ -299,7 +300,7 @@
     if (!Number.isSafeInteger(status.recordCount) || status.recordCount < 1 || typeof status.epoch !== 'string' || typeof status.manifest !== 'string') fail('INVALID_CATALOG_MANIFEST');
     if (cached && cached.status.epoch === status.epoch && cached.status.manifest === status.manifest
       && cached.status.recordCount === status.recordCount) {
-      return {phase:'native', records:copy(cached.records), status,fromReadCache:true};
+      return {phase:'native', records:cached.records, status,fromReadCache:true};
     }
     if (persistent && root.MindexCatalogCache) {
       let snapshot;

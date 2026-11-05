@@ -16,7 +16,12 @@ function client(change={}){const calls=[];return {calls,rpc:async(name,args)=>{c
 (async()=>{
  const a=client();await api.loadActivation(a,{persistent:true});assert.equal(a.calls.length,3);assert.equal(writes,1);
  const b=client();const [x,y]=await Promise.all([api.loadActivation(b,{persistent:true}),api.loadActivation(b,{persistent:true})]);assert.equal(b.calls.length,1);assert.deepEqual(x.records,records);assert.notEqual(x.repository,y.repository);assert.equal(writes,1);
- x.records[0].metadata.title='draft';assert.equal(y.records[0].metadata.title,'fixture1');
+ x.records[0].metadata.title='draft';x.status.manifest='local-only';assert.equal(y.records[0].metadata.title,'fixture1');
+ const z=await api.loadActivation(b,{persistent:true});assert.deepEqual(z.records,records);assert.equal(z.status.manifest,'fixture');
+ z.records[1].content.name='edited';assert.deepEqual((await api.loadActivation(b)).records,records,'later consumers changed the private memory snapshot');
+ assert.notEqual(z.records,y.records);assert.notEqual(z.records[0].content,y.records[0].content);assert.equal(writes,1,'private memory reuse rewrote persistent snapshot');
+ const originalClone=global.structuredClone;let fullCopies=0;try{global.structuredClone=value=>{if(Array.isArray(value)&&value.length===records.length&&value[0]?.id)fullCopies++;return originalClone(value)};const isolated=await api.loadActivation(b);isolated.records[0].metadata.title='another draft';assert.equal(fullCopies,1,'memory hit must keep its consumer copy without recopying private snapshots');}finally{global.structuredClone=originalClone;}
+ assert.deepEqual((await api.loadActivation(b)).records,records);
  await y.repository.read([records[0].id]);assert.equal(b.calls.at(-1),'get_single_praise_records_v1','selected readers must stay fresh');
  const before=reads;const authenticated=client();await api.loadActivation(authenticated);assert.equal(reads,before);assert.equal(authenticated.calls.length,3,'persistence must be explicit opt-in');
  const changed=client({epoch:'2',manifest:'updated'});await api.loadActivation(changed,{persistent:true});assert.equal(changed.calls.length,3,'server epoch/manifest change reused disk cache');
