@@ -110,5 +110,113 @@
       }
     ],
     "interpretation": "Warm WebKit improves; warm Chromium similar; local Chromium cold increases ~91 ms. No claim that all first playback is faster."
+  },
+  "linuxAlignmentRepair": {
+    "status": "candidate_mac_verified_linux_pending",
+    "failedSharedSha": "60552745a34e7a890d7279db5c09f880ad316c48",
+    "failedRun": 41984371967,
+    "failedJob": 127101611226,
+    "hypothesis": "Old signed delay range -4..1152 samples may omit platform decoder priming differences. Original failure did not log score or delay, so Linux cause is not yet established.",
+    "change": "Metadata-derived bidirectional search ±4032 samples for this asset. 4096-sample search plus independent 4096-sample verification; both correlations must be >=.995. Browser identity is unused.",
+    "diagnostics": [
+      "searchRadius",
+      "decoderLag",
+      "score",
+      "validationScore",
+      "referenceFrames",
+      "rawFrames",
+      "referenceSampleRate",
+      "rawSampleRate",
+      "sourceSampleRate",
+      "frame"
+    ],
+    "macResults": {
+      "chromium": {
+        "lag": 529,
+        "score": 0.9999999944,
+        "validationScore": 0.9999999938
+      },
+      "webkit": {
+        "lag": 0,
+        "score": 1,
+        "validationScore": 1
+      }
+    },
+    "absolutePositionGuard": "Independent ffmpeg decoded sparse PCM fingerprints at 1s,1421s,3161s, each >.995 correlation. Asset SHA pinned.",
+    "unitCases": "Signed delays ±2257,±1728,±529,0; separate-window corruption and silence rejected.",
+    "latencyLocalRepeat": [
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": false,
+        "wallMs": 36.40000003576279,
+        "audioMs": 2.6666666666666665,
+        "playPromiseMs": 10.800000011920929,
+        "position": 1.002784
+      },
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": true,
+        "wallMs": 35.799999952316284,
+        "audioMs": 10.666666666666668,
+        "playPromiseMs": 2.399999976158142,
+        "position": 1.010886
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": false,
+        "wallMs": 153.89999997615814,
+        "audioMs": 122.66666666666666,
+        "playPromiseMs": 129.0999999642372,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": true,
+        "wallMs": 27.69999998807907,
+        "audioMs": 26.666666666666657,
+        "playPromiseMs": 2.599999964237213,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": false,
+        "wallMs": 431,
+        "audioMs": 362.6666666666667,
+        "playPromiseMs": 169,
+        "position": 1.1717163333087228
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": true,
+        "wallMs": 311,
+        "audioMs": 309.33333333333337,
+        "playPromiseMs": 6,
+        "position": 1.1738257916877046
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": false,
+        "wallMs": 372,
+        "audioMs": 301.3333333333333,
+        "playPromiseMs": 347.0000000000001,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": true,
+        "wallMs": 28,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 5.000000000000114,
+        "position": 1.0016666666666667
+      }
+    ]
   }
 }

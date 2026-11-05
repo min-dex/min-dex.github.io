@@ -60,6 +60,24 @@
       end: p
     };
   }
+  function measureAlignment(reference, decoded, nominal, start, radius) {
+    const size = 4096;
+    function correlation(position, offset = 0) {
+      if (position + offset < 0 || position + offset + size > reference.length || start + offset + size > decoded.length) return -1;
+      let dot = 0, left = 0, right = 0;
+      for (let k = 0; k < size; k++) {
+        const a = decoded[start + offset + k], b = reference[position + offset + k];
+        dot += a * b; left += a * a; right += b * b;
+      }
+      return dot / Math.sqrt(left * right + 1e-30);
+    }
+    let score = -1, decoderLag = 0;
+    for (let lag = -radius; lag <= radius; lag++) {
+      const value = correlation(nominal - lag);
+      if (value > score) { score = value; decoderLag = lag; }
+    }
+    return { score, decoderLag, validationScore: correlation(nominal - decoderLag, size) };
+  }
   class IndexedMp3 {
     constructor(index, context) {
       this.index = index;
@@ -88,29 +106,22 @@
       const frame = Math.max(1, Math.floor(((at - sr) / ratio + i.metadataFrames * i.samples + i.delay) / i.samples));
       const raw = await this.raw(frame, Math.min(i.offsets.length, frame + Math.ceil(4 * i.sampleRate / i.samples))), a = raw.getChannelData(0), u = Math.round(sr);
       const nominal = Math.round((frame * i.samples - i.metadataFrames * i.samples - i.delay) * ratio) + u;
-      let best = -Infinity, lag = 0, energy = 0;
-      for (let k = 0; k < 1024; k++) energy += a[u + k] ** 2;
-      for (let d = -4; d <= Math.ceil(1152 * ratio); d++) {
-        const p = nominal - d;
-        if (p < 0 || p + 1024 > ref.length) continue;
-        let dot = 0, power = 0;
-        for (let k = 0; k < 1024; k++) {
-          dot += a[u + k] * ref[p + k];
-          power += ref[p + k] ** 2;
-        }
-        const score = dot / Math.sqrt(energy * power + 1e-30);
-        if (score > best) {
-          best = score;
-          lag = d;
-        }
-      }
-      if (best < .995) throw Error("MP3 decoder alignment could not be verified");
-      this.prefix = (i.metadataFrames * i.samples + i.delay) * ratio + lag;
-      this.calibration = {
-        score: best,
-        decoderLag: lag,
-        sampleRate: sr
+      // Header-bearing and raw-frame decoders can trim their leading samples
+      // differently. Search both directions, then verify a separate window.
+      // The range derives from MPEG frame/encoder padding, not browser identity.
+      const searchRadius = Math.ceil((i.metadataFrames * i.samples + i.delay + 2 * i.samples) * ratio);
+      const alignment = measureAlignment(ref, a, nominal, u, searchRadius);
+      const diagnostics = {
+        ...alignment, searchRadius, sampleRate: sr, sourceSampleRate: i.sampleRate,
+        referenceFrames: reference.length, rawFrames: raw.length,
+        referenceSampleRate: reference.sampleRate, rawSampleRate: raw.sampleRate,
+        metadataFrames: i.metadataFrames, encoderDelay: i.delay, frame
       };
+      if (alignment.score < .995 || alignment.validationScore < .995) {
+        throw Error("MP3 decoder alignment could not be verified: " + JSON.stringify(diagnostics));
+      }
+      this.prefix = (i.metadataFrames * i.samples + i.delay) * ratio + alignment.decoderLag;
+      this.calibration = diagnostics;
       this.first = reference;
       return this;
     }
@@ -151,6 +162,7 @@
   }
   globalThis.MindexMp3Index = {
     parse: parseMp3,
+    measureAlignment,
     IndexedMp3: IndexedMp3
   };
 })();

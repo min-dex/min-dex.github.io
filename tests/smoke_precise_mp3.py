@@ -1,11 +1,16 @@
 """Offline long-MP3 transport regression. Never opens or saves a worship record."""
 import os
+import json
+import hashlib
+from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from smoke_app import start_local_app_server, sync_playwright, launch_chromium
 
 SOURCE = './assets/presenter/dawn-free-prayer-bac443d20c02.mp3'
 
 def main():
+    fingerprints = json.loads((Path(__file__).parent / 'fixtures/prayer-audio-timing-fingerprints.json').read_text())
+    assert hashlib.sha256(Path(SOURCE).read_bytes()).hexdigest() == fingerprints['assetSha256']
     server, url = start_local_app_server()
     try:
         with sync_playwright() as p:
@@ -16,7 +21,7 @@ def main():
                 page.route('**/*', lambda r: r.continue_() if r.request.url.startswith((origin + '/', 'blob:')) else r.abort())
                 page.goto(url + '?mindexSmokeRaw=1')
                 page.wait_for_function("typeof runServiceMusicAction === 'function' && !document.body.classList.contains('ui-booting')")
-                result = page.evaluate('''async source => {
+                result = page.evaluate('''async ({source, fingerprints}) => {
                     const assert = (ok, message) => { if (!ok) throw Error(message); };
                     const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
                     const until = async (predicate, message) => {
@@ -33,6 +38,19 @@ def main():
                     await a.mindexPreciseAudio.prepare();
                     const t = a.mindexPreciseAudio.transport;
                     assert(t && t.decoder.calibration.score > .995, 'verified frame alignment');
+                    for (const anchor of fingerprints.anchors) {
+                        const part = await t.decoder.chunk(Math.floor(anchor.time / t.decoder.chunkSeconds));
+                        const start = Math.round((anchor.time - part.start) * fingerprints.sampleRate);
+                        const left = part.buffer.getChannelData(0), right = part.buffer.getChannelData(1);
+                        let dot = 0, actualPower = 0, referencePower = 0;
+                        for (let k = 0; k < anchor.samples.length; k++) {
+                            const at = start + k * anchor.stride;
+                            const actual = (left[at] + right[at]) / 2, expected = anchor.samples[k];
+                            dot += actual * expected; actualPower += actual * actual; referencePower += expected * expected;
+                        }
+                        const correlation = dot / Math.sqrt(actualPower * referencePower);
+                        assert(correlation > .995, `absolute PCM location ${anchor.time}: correlation=${correlation}; calibration=${JSON.stringify(t.decoder.calibration)}`);
+                    }
                     const binding = {serviceMusicSource:source, serviceMusicServiceId:'isolated-precise-mp3', serviceMusicLabel:'QA', serviceMusicRepeatAllowed:'false'};
                     await runServiceMusicAction('toggle', binding);
                     assert(!a.paused, 'initial play');
@@ -94,7 +112,7 @@ def main():
                     a.pause(); a.removeAttribute('src'); a.load();
                     MindexMp3Index.parse = parse;
                     return {duration:end, calibration:t.decoder.calibration, sourceReleased:true};
-                }''', SOURCE)
+                }''', {'source':SOURCE, 'fingerprints':fingerprints})
                 print(engine, 'PASS', result, flush=True)
                 browser.close()
     finally:
