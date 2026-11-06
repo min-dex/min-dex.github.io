@@ -109,6 +109,29 @@ try:
      page.locator('#width-host').evaluate('e=>e.style.width="360px"')
      assert page.locator('[data-service-song-create]').evaluate("e=>{const a=e.getBoundingClientRect(),r=e.closest('.svc-board-subgroup-controls').getBoundingClientRect();return a.left>=r.left-1&&a.right<=r.right+1}")
      page.locator('#width-host').evaluate('e=>e.style.width="960px"')
+   # The same existing song excluded by a media mode must not become a new song.
+   page.evaluate("""()=>{const item=state.serviceItems[state.selectedServiceId][0];window.pickerMemoBefore=item.memo;item.memo=serializeServiceItemMemo({...parseServiceItemMemo(item.memo),inputMode:'children_audio'});}""")
+   field.fill('나의 주 크고 놀라운 하나님');field.evaluate('e=>scheduleServiceSongPickerPreview(e)');page.wait_for_timeout(250)
+   assert page.locator('[data-service-song-create]').count()==0
+   assert '이 유형의 자료가 없습니다' in page.locator('#width-host .svc-song-picker').inner_text()
+   page.evaluate('state.serviceItems[state.selectedServiceId][0].memo=pickerMemoBefore')
+   # IME start removes an already visible action; composing input never creates one.
+   page.evaluate("""()=>{const host=document.querySelector('#width-host');host.addEventListener('compositionstart',handleServiceSongComposition);host.addEventListener('compositionend',handleServiceSongComposition);host.addEventListener('input',e=>scheduleServiceSongPickerPreview(e.target,{composing:e.isComposing}));}""")
+   field.fill('zzzz등록확인용찬양');page.wait_for_timeout(250)
+   assert page.locator('[data-service-song-create]').count()==1
+   field.evaluate("e=>{e.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true}));e.value='ㅇ';e.dispatchEvent(new InputEvent('input',{bubbles:true,isComposing:true,data:'ㅇ'}));}")
+   page.wait_for_timeout(250);assert page.locator('[data-service-song-create]').count()==0
+   field.evaluate("e=>{e.value='zzzz등록확인용찬양';e.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));}")
+   page.wait_for_timeout(250);assert page.locator('[data-service-song-create]').count()==1
+   field.fill('ㅇ');page.wait_for_timeout(250);assert page.locator('[data-service-song-create]').count()==0
+   # A delayed previous catalog request cannot restore a registration action over newer text.
+   field.evaluate("e=>{window.originalLoadSongs=loadSongs;window.originalCanUse=canUseClientData;songCatalogLoaded=false;canUseClientData=()=>true;loadSongs=()=>new Promise(r=>window.finishPickerLoad=()=>{songCatalogLoaded=true;r()});}")
+   field.fill('zzzz늦은검색');page.wait_for_function("typeof finishPickerLoad==='function'")
+   assert page.locator('[data-service-song-create]').count()==0
+   field.fill('나의 주 크고 놀라운 하나님');page.evaluate('finishPickerLoad()');page.wait_for_timeout(250)
+   assert page.locator('[data-service-song-create]').count()==0
+   assert field.input_value()=='나의 주 크고 놀라운 하나님'
+   page.evaluate('loadSongs=originalLoadSongs;canUseClientData=originalCanUse')
    assert page.evaluate("searchItemBefore===JSON.stringify(state.serviceItems[state.selectedServiceId][0])")
    print('PASS',engine,'live search creation appears/disappears without committing draft')
    page.evaluate("""()=>{

@@ -101,14 +101,18 @@ try:
     assert page.locator('.home-recent-list button').first.bounding_box()['height']==80
    page.set_viewport_size({'width':1280,'height':800})
    page.locator('[data-home-recent-view="work"]').click()
+   # This navigation fixture has complete local week data. The next case
+   # explicitly clears one service to verify stalled-read protection.
+   page.evaluate("state.loadedWorshipServiceIds=new Set(state.services.map(service=>service.id))")
    # The original sidebar routes remain functional, including stalled data.
    page.locator('#songList [data-service-week]').click()
    assert page.locator('.service-week-board').count()==2
    page.locator('#songList [data-service-list="public"]').click()
    assert page.evaluate('state.selectedServiceTypeId')=='__list'
-   page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
+   page.evaluate("()=>{window.homeOriginalLoadItems=loadServiceItems;state.loadedWorshipServiceIds.delete('next');loadServiceItems=()=>new Promise(()=>{});state.presenter.outputWindow=null}")
    page.locator('#songList [data-service-id="next"]').click()
    page.wait_for_function("state.module==='presenter'&&state.selectedServiceId==='next'",timeout=3000)
+   page.wait_for_selector('[data-service-view-loading="next"]',state="attached",timeout=3000)
    assert page.locator('[data-service-view-loading="next"]').count()==1
    assert page.evaluate('!isPresenterOutputWindowOpen()')
    page.evaluate("()=>{loadServiceItems=window.homeOriginalLoadItems;state.module='home';state.selectedServiceId=null;state.selectedServiceTypeId=null;clearDirtyState();render()}")
@@ -193,8 +197,10 @@ try:
      check(state.module==='praise'&&!document.querySelector('.home-start'),'late totals replaced navigation');
      check(homeOverviewStats.songs===1133&&homeOverviewStats.editions===2,'source-qualified totals');
      check(JSON.stringify([state.songs,state.bibleTranslations,state.selectedBibleTranslationId,state.selectedBookCode,songCatalogLoaded])===before,'summary changed reader/catalogue state');
-     check(calls[0].fields==='id'&&calls[0].options.head&&calls[0].options.count==='exact','song count downloaded catalogue');
-     check(!calls[1].fields.includes('*')&&!calls[1].fields.includes('text'),'edition query fetched bodies');
+     const songQuery=calls.find(call=>call.table==='mindex_songs');
+     const editionQuery=calls.find(call=>call.table==='mindex_bible_translations');
+     check(songQuery.fields==='id'&&songQuery.options.head&&songQuery.options.count==='exact','song count downloaded catalogue');
+     check(!editionQuery.fields.includes('*')&&!editionQuery.fields.includes('text'),'edition query fetched bodies');
      state.module='home';renderHomeStart();
      check(calls.length===2,'summary ignored freshness window');
      responses.mindex_songs=Promise.resolve({error:{message:'offline'}});
@@ -209,6 +215,14 @@ try:
     } finally {state.client=originalClient;canUseClientData=originalCanRead;homeOverviewStats=null;}
    }""")
    print(engine,result,flush=True)
+   page.evaluate("""async()=>{
+    const old={catalog:state.singleSongCatalog,client:state.client,read:canUseClientData,activation:ensureSingleSongActivation};
+    const rows=['SONG-CONT-9000-0001','SONG-CONT-9000-0002','SONG-CONT-9001-0001'].map((id,i)=>({id,metadata:{title:'검증 곡 '+i},content:{forms:[]},relations:{same_song:i<2?['SONG-CONT-9000-0001','SONG-CONT-9000-0002'].filter(x=>x!==id):[]}}));
+    let calls=0;try{state.singleSongCatalog=MindexSingleSong.createCatalog(rows);state.client={from:()=>{calls++;return {select(){return this},eq(){return this},abortSignal:async()=>({data:[],error:null})}}};canUseClientData=()=>true;ensureSingleSongActivation=async()=>{};homeOverviewStats=null;
+     const before=JSON.stringify(state.songs);await loadHomeOverviewStats({force:true});
+     if(homeOverviewStats.songs!==2||calls!==1||before!==JSON.stringify(state.songs))throw Error('Home must count complete logical groups without loading lyric records');
+    }finally{state.singleSongCatalog=old.catalog;state.client=old.client;canUseClientData=old.read;ensureSingleSongActivation=old.activation;homeOverviewStats=null;}
+   }""")
    result=page.evaluate("""async()=>{
     const original=state.client,canRead=canUseClientData;
     const calls=[];

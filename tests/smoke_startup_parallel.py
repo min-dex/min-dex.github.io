@@ -18,15 +18,13 @@ def main():
                     for mode in ('home', 'controller', 'output'):
                         page = browser.new_page()
                         page.route('**/*supabase.co/**', lambda r: r.abort())
-                        if mode == 'controller':
-                            page.add_init_script("sessionStorage.setItem('mindex.ui.module','presenter')")
                         held = []
                         requested = []
                         errors = []
                         page.route('**/mindex.icons.js?*', lambda r: held.append(r))
                         page.on('request', lambda r: requested.append(r.url))
                         page.on('pageerror', lambda e: errors.append(str(e)))
-                        page.goto(url + ('?output=presenter' if mode == 'output' else ''), wait_until='domcontentloaded')
+                        page.goto(url + ('?output=presenter' if mode == 'output' else '#module=presenter' if mode == 'controller' else ''), wait_until='domcontentloaded')
                         page.wait_for_function(f"!!document.querySelector('link[as=script][href*=\"{app_asset}\"]')")
                         page.wait_for_timeout(200)
                         assert held and any('/'+app_asset+'?' in u for u in requested)

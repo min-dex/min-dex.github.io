@@ -40,9 +40,34 @@ const sermon=steps.find(s=>s.sectionKey==='sermon');assert.ok(sermon.elements.so
 const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'image',name:'다니엘기도회 공동기도.png',url:'./assets/presenter/daniel-common-prayer-template-7473226f8525.png'}})};
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');
 assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
-assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('69c12c677944.mp3'));
-assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('69c12c677944'));
+assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('f9ebf1aeed23.mp3'));
+assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('f9ebf1aeed23'));
+// Only an explicitly reviewed duplicate is projected away; original rows stay intact.
+const fri={id:'10000000-0000-4000-8000-000000000098',type_id:'friday',date:'2026-11-06',alias:'온세대 월삭예배',_worshipSourceRef:{created_from:'mindex_template'}};
+const monthly={id:'10000000-0000-4000-8000-000000000099',type_id:'monthly',date:fri.date,alias:fri.alias,_worshipSourceRef:{navigation_duplicate_of:fri.id}};
+state.services=[fri,monthly];const originalPair=JSON.stringify(state.services);
+assert.equal(serviceUpcomingDisplayServices(state.services).length,1);assert.equal(serviceUpcomingDisplayServices(state.services)[0].id,fri.id);
+assert.equal(getHomeNextService(new Date('2026-11-06T12:00:00')).id,fri.id);
+assert.equal(JSON.stringify(state.services),originalPair);
+for(const changed of [{...monthly,alias:'다른 예배'},{...monthly,date:'2026-11-07'},{...monthly,_worshipSourceRef:{...monthly._worshipSourceRef,start_time:'19:00'}},{...monthly,_worshipSourceRef:{navigation_duplicate_of:'missing'}},{...monthly,_worshipSourceRef:{}}]){
+ state.services=[fri,changed];assert.equal(serviceUpcomingDisplayServices(state.services).length,2,'A distinct or unreviewed service must remain visible');
+}
+state.services=[fri];assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:fri.alias}),true);
+assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:'다른 월삭예배'}),false);
+assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:''}),false);
+state.services=[{...fri,_worshipSourceRef:{start_time:'05:00'}}];assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:fri.alias}),false);
 console.log('PASS linked replacements preserve absence, route all three card layouts and setlist status to the actual service');
 `,c);
 
-assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-69c12c677944.mp3')).digest('hex'),'69c12c677944b1dc38ee666e2758f26631ef6075a2d88202d2567e0ca8bfe0f5','Approved final dawn audio must match the supplied file');
+assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3')).digest('hex'),'f9ebf1aeed2385f27d61a3ad48908d2dad2cc0ca0a547a20b54a8a4aded7ddd3','Restored dawn audio must match the verified candidate');
+
+// Lossless packet preservation: only 144 silent MP3 frames were removed.
+{
+ const original = fs.readFileSync('assets/presenter/dawn-free-prayer.mp3');
+ const restored = fs.readFileSync('assets/presenter/dawn-free-prayer-7838168016b7.mp3');
+ assert.equal(require('node:crypto').createHash('sha256').update(original).digest('hex'), 'b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9');
+ assert.deepEqual(restored.subarray(428), Buffer.concat([original.subarray(237,27630669), original.subarray(27644493)]), 'Every retained original audio packet must be byte-identical');
+}
+
+// Existing explicit v5 references remain valid; only the default changes.
+assert.equal(require("node:crypto").createHash("sha256").update(fs.readFileSync("assets/presenter/dawn-free-prayer-bac443d20c02.mp3")).digest("hex"),"bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87");

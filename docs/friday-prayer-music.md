@@ -27,14 +27,39 @@
 
 ## Audio
 
-- Dawn music (user-approved final edit, 2026-11-04):
-  `assets/presenter/dawn-free-prayer-69c12c677944.mp3`, 79,675,315 bytes, 3143.9335 seconds,
-  stereo 44.1kHz. SHA-256:
-  `69c12c677944b1dc38ee666e2758f26631ef6075a2d88202d2567e0ca8bfe0f5`.
-  This is the supplied final MP3, copied byte-for-byte. The reviewed edit
-  overlaps 12 transitions with a short incoming fade and outgoing tail.
-  The `dawn.free` key resolves to this immutable asset; explicit attached audio
-  retains precedence. Playback still requires an operator action.
+- Current dawn default (2026-11-06, user-approved r2):
+  `assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3`, 87,865,100 bytes,
+  SHA-256 `f9ebf1aeed2385f27d61a3ad48908d2dad2cc0ca0a547a20b54a8a4aded7ddd3`; stereo48kHz, decoded3169.543625s unchanged.
+  Six localized interpolations total7ms relative to the v5 PCM master;
+  all other master samples, performance, levels and duration are unchanged.
+  MP3 delivery is lossy re-encoding, not byte-identical outside edits. Ambiguous
+  source transients remain unchanged; no blanket auditory-perfection claim.
+  Only `dawn.free` selects r2. Keep the immutable v5 URL and explicit attachments;
+  do not rewrite worship records, audio links, order, timing or media metadata.
+  Local source verification stays private. Independent decoded anchor fixtures
+  and default/explicit-source regression expectations follow the approved file.
+
+
+- Dawn prayer audio v5 historical reference (2026-11-05):
+  `assets/presenter/dawn-free-prayer-bac443d20c02.mp3`, 87,865,148 bytes, 3169.543625 seconds decoded,
+  stereo48kHz. SHA-256 `bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87`.
+  Built from the first supplied original (SHA-256
+  `b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9`).
+  User-approved scope is inter-song transitions for congregational prayer;
+  song interiors, their rests, performances and levels remain original.
+  Ten explicit boundary windows are edited; three instrumental transitions remain
+  original. No amplitude-triggered cutting, whole-file normalization, EQ or time
+  stretching. Eleven retained PCM spans including the ending exactly match source
+  before MP3 quality0 delivery encoding. Delivery is lossy, not packet-identical.
+  Rejected earlier candidates are not selected. Version5 restores the complete
+  incoming phrase at transition4 (incoming source starts882.8s), and transition3
+  ends its outgoing tail before the incoming first phrase. Complete source phrases
+  are preserved in unchanged master spans at both repaired transitions; local
+  source/output transcription is supporting evidence, not human auditory review.
+  Full decode, source preservation and player/source-isolation checks are separate
+  from release/public readback. Private maps and evidence remain outside Git.
+  `dawn.free` selects the immutable file. Explicit attachments keep precedence.
+  No worship records, audio synchronization or media links are rewritten.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`

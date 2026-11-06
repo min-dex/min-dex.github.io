@@ -5,7 +5,7 @@ try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
    b=launch_chromium(p) if engine=='chromium' else p.webkit.launch();page=b.new_page();page.goto(url);page.wait_for_function("!document.body.classList.contains('ui-booting')")
-   page.evaluate('''()=>{const service={id:'qa',type_id:'qa'},item={id:'qa-item',service_id:'qa',label:'찬양 1',raw_title:'',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};state.services=[service];state.selectedServiceId='qa';state.serviceItems={qa:[item]};state.songs=[];canUseClientData=()=>false;window.qaItem=item;window.qaBefore=JSON.stringify(item);const host=document.createElement('main');host.id='qa';host.style='padding:30px;width:400px';host.innerHTML=renderServiceEditorTitleControl(item,0,{},serviceItemEditorModel(item,{service}));document.body.replaceChildren(host)}''')
+   page.evaluate('''()=>{const service={id:'qa',type_id:'qa'},item={id:'qa-item',service_id:'qa',label:'찬양 1',raw_title:'',memo:serializeServiceItemMemo({elementType:'praise',inputMode:'lyrics_db'})};state.services=[service];state.selectedServiceId='qa';state.serviceItems={qa:[item]};state.songs=[];songCatalogLoaded=true;canUseClientData=()=>false;window.qaItem=item;window.qaBefore=JSON.stringify(item);const host=document.createElement('main');host.id='qa';host.style='padding:30px;width:400px';host.innerHTML=renderServiceEditorTitleControl(item,0,{},serviceItemEditorModel(item,{service}));document.body.replaceChildren(host)}''')
    field=page.locator('#qa input[data-service-item-field="raw_title"]')
    assert field.get_attribute('placeholder')=='찬양 DB에서 검색'
    assert not page.locator('.svc-song-picker').is_visible()

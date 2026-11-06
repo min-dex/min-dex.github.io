@@ -873,8 +873,11 @@ function bindElectronDesktopEvents() {
 }
 
 async function loadInitialData() {
-  // Establish the active ID protocol before any worship projection or summary.
-  await ensureSingleSongActivation();
+  // Start detached home reads, but activate IDs before any adoption/projection.
+  const initialReads = state.module === "home" ? window.MINDEX_SERVICE_ENTRY.prepareInitialReads() : null;
+  try { await ensureSingleSongActivation(); }
+  catch (error) { initialReads?.discard(); throw error; }
+  if (!isServiceDataModule()) initialReads?.discard();
   const pending = [];
   if (state.module === "praise" || state.selectedSongId) {
     pending.push(loadSongs());
@@ -1617,6 +1620,8 @@ function bindDetailInteractionRoot(root, options = {}) {
   if (options.presenterBoard) root.addEventListener("dblclick", handlePresenterBoardDoubleClick);
   root.addEventListener("keydown", handleDetailKeydown, { capture: true });
   root.addEventListener("input", handleDetailInput);
+  root.addEventListener("compositionstart", handleServiceSongComposition);
+  root.addEventListener("compositionend", handleServiceSongComposition);
   root.addEventListener("focusin", (event) => {
     warmServiceSlotMusic(event.target);
     if (event.target?.matches?.("[data-presenter-preparation-field]")) {
@@ -3113,7 +3118,7 @@ function scheduleBackgroundSongLoad() {
 async function loadSongsOnce(context = {}) {
   await ensureSingleSongActivation();
   if (state.singleSongRepository) {
-    await loadSongsForIds(state.singleSongCatalog.ids());
+    if (!await reuseVerifiedSingleSongCatalog(state)) await loadSongsForIds(state.singleSongCatalog.ids());
     songCatalogLoaded = songCatalogSummaryLoaded = true;
     clearSearchCaches();
     if (context.searchOnly) { if (isGlobalSearchActive()) renderGlobalSearchList(); return; }
@@ -3923,19 +3928,7 @@ function shouldDeferPastWorshipServiceLoad(serviceId) {
 }
 
 function initialWorshipElementServiceIds(services = []) {
-  const pinned = new Set([state.selectedServiceId, state.presenter.serviceId].filter(Boolean));
-  const loadHomeWeek = state.module === "home";
-  const from = loadHomeWeek ? localDateStringWithOffset(new Date(), 0) : "";
-  const to = loadHomeWeek ? localDateStringWithOffset(new Date(), WORSHIP_INITIAL_ELEMENT_HOME_DAYS) : "";
-  return services
-    .filter((service) => {
-      if (!service?.id) return false;
-      if (pinned.has(service.id)) return !shouldDeferPastWorshipServiceLoad(service.id);
-      if (!loadHomeWeek) return false;
-      const date = String(service.date || service.service_date || "").trim();
-      return date && (!from || date >= from) && (!to || date <= to);
-    })
-    .map((service) => service.id);
+  return window.MINDEX_SERVICE_ENTRY.initialElementIds(services);
 }
 
 function worshipServiceListQuery(query) {
@@ -4475,9 +4468,7 @@ function worshipServiceExistsForTarget(target = {}) {
   const targetTypeId = worshipAppServiceTypeId(target.typeId);
   const targetDate = String(target.date || "").trim();
   if (!targetTypeId || !targetDate) return true;
-  return state.services.some((service) =>
-    worshipAppServiceTypeId(service.type_id) === targetTypeId
-    && String(service.date || "").trim() === targetDate);
+  return state.services.some(service => worshipServiceMatchesAutoTarget(service, target));
 }
 
 function autoWorshipServicePayload(target = {}) {
@@ -4523,14 +4514,7 @@ function worshipAppServiceTypeId(typeId) {
 }
 
 async function loadWorshipData() {
-  const [types, services] = await Promise.all([
-    fetchCachedSupabasePaged("mindex_worship_service_types", WORSHIP_SERVICE_TYPE_SELECT, (query) =>
-      query.order("sort_order", { ascending: true })).catch((error) => {
-        console.warn("Could not load worship service types; using defaults.", error);
-        return [];
-      }),
-    fetchWorshipServiceListRows(),
-  ]);
+  const [types, services] = await window.MINDEX_SERVICE_ENTRY.readInitialLists();
 
   const resolvedTypes = types.length ? types : defaultWorshipServiceTypes();
   state.serviceTypes = resolvedTypes.map(normalizeWorshipServiceType);
@@ -7535,10 +7519,11 @@ async function saveDirtyServiceTypes() {
 }
 
 async function worshipElementTypedStateColumns() {
-  return {
-    inputMode: await detectTableColumnSupport("mindex_worship_elements", "input_mode"),
-    contentState: await detectTableColumnSupport("mindex_worship_elements", "content_state"),
-  };
+  const [inputMode, contentState] = await Promise.all([
+    detectTableColumnSupport("mindex_worship_elements", "input_mode"),
+    detectTableColumnSupport("mindex_worship_elements", "content_state"),
+  ]);
+  return { inputMode, contentState };
 }
 
 async function saveWorshipServiceInstance(service, options = {}) {
@@ -9586,7 +9571,7 @@ function handleDetailInput(event) {
     syncServiceScriptureInputError(serviceField);
     if (isDeferredServiceTextInput(serviceField)) {
       if (isServiceSongTitleInputField(serviceField)) {
-        scheduleServiceSongPickerPreview(serviceField);
+        scheduleServiceSongPickerPreview(serviceField, { composing: event.isComposing });
         return;
       }
       if (isPresenterEnterCommittedServiceInput(serviceField)) {
@@ -10524,41 +10509,6 @@ function clearDeferredServiceTextPreview(field) {
   deferredServiceTextPreviewTimers.delete(key);
 }
 
-// Search the input draft without committing it to the service or live output.
-function scheduleServiceSongPickerPreview(field) {
-  const key = deferredServiceTextPreviewKey(field);
-  clearDeferredServiceTextPreview(field);
-  const serviceId = field.dataset.serviceId || state.selectedServiceId;
-  const index = Number(field.dataset.serviceItemIndex);
-  const itemId = getServiceItems(serviceId)[index]?.id;
-  const renderPreview = (message = "") => {
-    if (!field.isConnected || state.selectedServiceId !== serviceId) return;
-    const item = getServiceItems(serviceId)[index];
-    if (!item || item.id !== itemId) return;
-    const picker = field.closest(".svc-edit-title-wrap")?.querySelector(".svc-song-picker");
-    if (!picker) return;
-    const service = state.services.find((candidate) => candidate.id === serviceId);
-    const draft = { ...item, raw_title: field.value, song_id: null, version_id: null, song_version_id: null };
-    const model = { ...serviceItemEditorModel(draft, { service }), linkedSong: null, songVersions: [] };
-    picker.outerHTML = message
-      ? `<div class="svc-song-picker"><span class="svc-song-picker-hint">${escapeHtml(message)}</span></div>`
-      : renderServiceSongPicker(draft, index, model);
-  };
-  deferredServiceTextPreviewTimers.set(key, window.setTimeout(async () => {
-    deferredServiceTextPreviewTimers.delete(key);
-    if (!field.isConnected) return;
-    if (String(field.value).trim() && !songCatalogLoaded && canUseClientData()) {
-      renderPreview("찬양 목록 불러오는 중");
-      try {
-        await loadSongs({ searchOnly: true });
-      } catch (error) {
-        renderPreview("찬양 목록을 불러오지 못했습니다. 다시 입력해 주세요.");
-        return;
-      }
-    }
-    renderPreview();
-  }, 150));
-}
 
 function scheduleDeferredServiceTextPreview(field) {
   if (!field?.isConnected || isDeferredServiceScriptureReferenceInput(field)) return;
@@ -12770,7 +12720,7 @@ async function createPraiseSongFromServiceItem(index) {
   const field = () => findDeferredServiceTextInput(serviceId,index,"raw_title");
   const inputTitle = String(field()?.value ?? item.raw_title ?? "").trim()
     || String(window.prompt("새 곡 제목을 입력해 주세요.","") || "").trim();
-  if (!inputTitle) return;
+  if (!inputTitle || serviceSongComposingFields.has(field()) || /[ㄱ-ㅎㅏ-ㅣ]/u.test(inputTitle)) return;
   if (presenterPreparationSongContentHasConnection(inputTitle)) { showToast("연결곡은 찬양 DB에 새 곡으로 만들지 않고 예배 항목에만 둡니다.","info"); return; }
   const client = state.client, project = state.config.url;
   const before = JSON.stringify(item), fieldBefore = field()?.value;
@@ -12786,6 +12736,10 @@ async function createPraiseSongFromServiceItem(index) {
     if (!song) {
       if (presenterPreparationNumberOnlyHymnReference(presenterPreparationSongContent(inputTitle))) {
         throw new Error("해당 번호의 찬송가를 찾지 못했습니다. 번호와 판본을 확인해 주세요. 입력은 유지됩니다.");
+      }
+      if (serviceSongRegistrationState(inputTitle, item, service) !== "ready") {
+        showToast("새 곡 등록 전에 찬양 목록과 입력 유형을 확인해 주세요. 입력은 유지됩니다.", "info");
+        return;
       }
       if (!requireClient()) return;
       const title = stripHymnNo(presenterPreparationSongContent(inputTitle)).title.trim();
@@ -16433,22 +16387,14 @@ async function loadHomeOverviewStats({ force = false } = {}) {
   const stats = homeOverviewStats;
   if (stats.promise) return stats.promise;
   if (!force && stats.readAt && Date.now() - stats.readAt < 60000) return;
-  const abort = new AbortController();
-  const timer = setTimeout(() => abort.abort(), 15000);
   const refresh = () => {
     if (state.client === client && state.module === "home" && refs.detailPane.querySelector(".home-overview") && !isGlobalSearchActive()) renderHomeStart();
   };
   stats.promise = (async () => {
-    await ensureSingleSongActivation();
-    const results = await Promise.allSettled([
-      state.singleSongCatalog ? Promise.resolve({count:state.singleSongCatalog.ids().length}) : client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
-      client.from("mindex_bible_translations").select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
-    ]);
+    const [songs, editions] = await window.MINDEX_SERVICE_ENTRY.readHomeOverviewTotals(client);
     if (state.client !== client || homeOverviewStats !== stats) return;
-    const songs = results[0];
     stats.errors.songs = songs.status !== "fulfilled" || Boolean(songs.value.error) || !Number.isInteger(songs.value.count) || songs.value.count < 0;
     if (!stats.errors.songs) stats.songs = songs.value.count;
-    const editions = results[1];
     stats.errors.editions = editions.status !== "fulfilled" || Boolean(editions.value.error) || !Array.isArray(editions.value.data);
     if (!stats.errors.editions) {
       const rows = editions.value.data.filter(row => row.canonical_source);
@@ -16456,7 +16402,6 @@ async function loadHomeOverviewStats({ force = false } = {}) {
       stats.names = homeBibleEditionNames(rows);
     }
   })().catch(() => { stats.errors = { songs:true, editions:true }; }).finally(() => {
-    clearTimeout(timer);
     stats.readAt = Date.now();
     stats.promise = null;
     refresh();
@@ -16467,12 +16412,12 @@ async function loadHomeOverviewStats({ force = false } = {}) {
 function renderHomeStart() {
   const now = new Date();
   const stats = homeOverviewStats?.client === state.client ? homeOverviewStats : null;
-  const songCount = stats?.songs ?? (songCatalogLoaded ? state.songs.length : null);
+  const songCount = stats?.songs ?? (songCatalogLoaded ? groupPraiseSongs(state.songs.filter(isSelectablePraiseSong)).length : null);
   const editionCount = stats?.editions ?? (state.bibleTranslations.length ? state.bibleTranslations.length : null);
   const editionNames = stats?.editions != null ? stats.names : homeBibleEditionNames(state.bibleTranslations);
   const week = recentServiceWeeks(now)[0];
   const servicesReady = state.serviceTypes.length > 0 && !state.serviceError;
-  const services = state.services.filter(service => !service._expected && !serviceIsNoGathering(service));
+  const services = serviceUpcomingDisplayServices(state.services).filter(service => !service._expected && !serviceIsNoGathering(service));
   const thisWeek = services.filter(service => service.date >= toLocalDateStr(week.start) && service.date <= toLocalDateStr(week.end));
   const next = getHomeNextService(now);
   const bulletins = services.filter(serviceSupportsBulletin);
@@ -16483,7 +16428,7 @@ function renderHomeStart() {
       detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceNavigationName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
     {id:"bulletin", label:"주보", icon:"newspaper", value:servicesReady ? `${departments.length}개 부서` : "—", unit:"예배와 연결된 주보",
       detail:state.serviceError ? "주보 목록을 불러오지 못했습니다." : departments.join(" · ") || (servicesReady ? "연결된 주보가 없습니다." : "주보 목록 불러오는 중…")},
-    {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"등록된 곡",
+    {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"같은 곡 기준",
       detail:stats?.errors.songs ? "곡 수를 불러오지 못했습니다." : songCount != null ? "가사 · 버전 · 악보 · 음원" : "곡 수 조회 중…", retry:stats?.errors.songs},
     {id:"scripture", label:"말씀", icon:"book-open", value:editionCount != null ? `${editionCount}개 역본` : "—", unit:"설치된 역본과 본문",
       detail:stats?.errors.editions ? "역본 수를 불러오지 못했습니다." : editionCount != null ? editionNames.join(" · ") || "설치된 역본이 없습니다." : "역본 수 조회 중…", retry:stats?.errors.editions},
@@ -19218,8 +19163,10 @@ function scriptureReferenceProblem(result) {
 }
 
 async function validateScriptureReferences(value, translation = null) {
-  await ensureBibleBookLookups();
-  if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
+  await Promise.all([
+    ensureBibleBookLookups(),
+    !state.bibleTranslations.length && !state.bibleReaderError ? loadBibleTranslations({ silent: true }) : null,
+  ]);
   // A choice resolved before the catalogue loaded may now be available.
   translation = translation?.retiredId
     ? serviceBibleTranslationById(translation.retiredId)
@@ -19786,11 +19733,7 @@ function cleanSongTitleForSave(song) {
 // Retired duplicates remain readable by ID for historical worship output.
 // Only an explicit, valid same-song successor suppresses new selection.
 function isSelectablePraiseSong(song) {
-  const targetId = song?.metadata?.retiredInto;
-  if (!song?._singleSongRecord || typeof targetId !== "string" || targetId === song.id) return true;
-  const target = songById(targetId);
-  return !(target?._singleSongRecord && !target.metadata?.retiredInto
-    && (song.same_song_ids || []).includes(targetId));
+  return globalThis.MindexSingleSong.isSelectableSong(song, songById);
 }
 
 function getFilteredSongs() {
@@ -20658,35 +20601,7 @@ function confirmUnsavedChangesAction() {
 
 async function discardUnsavedChanges() {
   const dirtyModules = getDirtyModules();
-  if (dirtyModules.praise && state.module === "praise") {
-    const song = getSelectedSong(), client = state.client, project = state.config.url;
-    const versionId = getSelectedVersionId();
-    const before = JSON.stringify({song, forms:state.forms});
-    try {
-      if (!song || !client || state.saving) return false;
-      const result = await client.rpc("get_praise_snapshot_v1", {sid:song.id});
-      if (result.error) throw result.error;
-      const fresh = praiseSnapshotSong(result.data);
-      if (fresh.id !== song.id) throw new Error("PRAISE_SNAPSHOT_MISMATCH");
-      if (project !== state.config.url || client !== state.client || getSelectedSong() !== song || versionId !== getSelectedVersionId()
-          || before !== JSON.stringify({song, forms:state.forms})) {
-        showToast("확인 중 입력이 바뀌어 이동하지 않았습니다. 입력은 유지됩니다.", "error");
-        return false;
-      }
-      state.songs = state.songs.map(item => item === song ? fresh : item);
-      praisePendingSaves.delete(song);
-      state.selectedVersionId = fresh.versions.some(item => item.id === versionId) ? versionId : getDefaultVersionId(fresh);
-      state.forms = normalizeForms((getSelectedVersion()?.forms || []).map(form => withLocalId({...form, song_id:state.selectedVersionId})));
-      state.dirty.song = state.dirty.forms = false;
-      clearSearchCaches();
-      captureCleanFingerprint("praise");
-      updateSaveState();
-      return true;
-    } catch {
-      showToast("최신 내용을 확인하지 못해 이동하지 않았습니다. 입력은 유지됩니다. 다시 시도해 주세요.", "error");
-      return false;
-    }
-  }
+  if (dirtyModules.praise && state.module === "praise") return discardPraiseEditorChanges();
   clearDirtyState();
   updateSaveState();
   await reloadDiscardedChanges(dirtyModules);
@@ -20696,6 +20611,11 @@ async function discardUnsavedChanges() {
 }
 
 async function confirmSaveBeforeLeaving() {
+  // An inline or explicit worship save may already own the current draft.
+  // Let its receipt settle before deciding whether there is anything left to save.
+  while (activeServiceSavePromise) {
+    await activeServiceSavePromise.catch(() => {});
+  }
   if (!hasDirtyChanges({ reconcile: true })) return true;
   const action = await confirmUnsavedChangesAction();
   if (action === "cancel") return false;
@@ -24175,7 +24095,7 @@ function getServiceDashboardServices(base = new Date()) {
   const weeks = recentServiceWeeks(base);
   const start = weeks[0].start;
   const end = weeks[1].end;
-  const upcoming = getFilteredServices().filter((service) => {
+  const upcoming = serviceUpcomingDisplayServices(getFilteredServices()).filter((service) => {
     return worshipServiceOverlapsDates(service, start, end);
   });
   return sortServicesByDate([...upcoming, ...getExpectedServicesInRange(start, end)]);
@@ -24203,7 +24123,7 @@ function serviceTimeWindow(service, baseDate = new Date()) {
 function getHomeNextService(baseDate = new Date()) {
   const now = new Date(baseDate);
   if (Number.isNaN(now.getTime())) return null;
-  const candidates = state.services
+  const candidates = serviceUpcomingDisplayServices(state.services)
     .filter(service => !serviceIsNoGathering(service))
     .map((service) => ({ service, window: serviceTimeWindow(service, baseDate) }))
     .filter(({ window }) => window && window.end >= now);
@@ -24257,7 +24177,7 @@ function getServiceSidebarServices() {
   const today = upcomingServiceBaseDate();
   const end = new Date(today);
   end.setDate(today.getDate() + SERVICE_FUTURE_LOOKAHEAD_DAYS);
-  const upcoming = getFilteredServices().filter((service) => {
+  const upcoming = serviceUpcomingDisplayServices(getFilteredServices()).filter((service) => {
     return worshipServiceOverlapsDates(service, today, end);
   });
   return sortServicesByDate([...upcoming, ...getExpectedServicesInRange(today, end)]).slice(0, 36);
@@ -24269,7 +24189,7 @@ function getRecentServiceShortcuts(limit = 8) {
 
 function getUpcomingServiceShortcuts(limit = 8, baseDate = new Date()) {
   const today = upcomingServiceBaseDate(baseDate);
-  return sortServicesByDate(state.services.filter((service) => {
+  return sortServicesByDate(serviceUpcomingDisplayServices(state.services).filter((service) => {
     return worshipAppServiceTypeId(service.type_id) !== "external" && worshipServicePeriod(service, today).end >= toLocalDateStr(today);
   })).slice(0, limit);
 }
@@ -24284,7 +24204,7 @@ function homeSidebarServiceWeekRange(baseDate = new Date()) {
 
 function getHomeSidebarRecentServiceShortcuts(limit = 8, baseDate = new Date()) {
   const { start, end } = homeSidebarServiceWeekRange(baseDate);
-  return sortServicesByDate(state.services.filter((service) => {
+  return sortServicesByDate(serviceUpcomingDisplayServices(state.services).filter((service) => {
     return worshipAppServiceTypeId(service.type_id) !== "external" && worshipServiceOverlapsDates(service, start, end);
   })).slice(0, limit);
 }
@@ -25212,7 +25132,7 @@ function renderWorshipWeekStatus(entry) {
       ${!details.replacement && details.context ? `<span class="svc-setlist-leader">${escapeHtml(details.context)}</span>` : ""}
     </div></header>
     <div class="svc-setlist-week-status"><strong>${escapeHtml(details.replacement ? details.context : status === "기록 없음" ? "집회 여부 미확인" : status)}</strong>
-      ${!details.replacement && entry.weeklyReason && entry.weeklyReason !== "집회 여부 미확인" && entry.weeklyReason !== details.name ? `<span>${escapeHtml(entry.weeklyReason)}</span>` : ""}
+      ${!details.replacement && entry.weeklyReason && entry.weeklyReason !== "집회 여부 미확인" && entry.weeklyReason !== details.name ? `<span>${escapeHtml(worshipSetlistStatusReason(entry))}</span>` : ""}
       ${serviceId ? `<button type="button" class="svc-setlist-status-open" data-setlist-open-service="${escapeAttr(serviceId)}">예배 열기 →</button>` : ""}</div>
   </article>`;
 }
@@ -25464,10 +25384,10 @@ function renderServiceTemplatesDetail() {
         </div>
       </div>
       <div class="svc-template-level-grid">
-        ${renderWorshipTemplateLevelCard("Service", summary.levelCounts.service)}
-        ${renderWorshipTemplateLevelCard("Section", summary.levelCounts.section)}
-        ${renderWorshipTemplateLevelCard("Element", summary.levelCounts.element)}
-        ${renderWorshipTemplateLevelCard("Slide", summary.levelCounts.slide)}
+        ${renderWorshipTemplateLevelCard("예배", summary.levelCounts.service)}
+        ${renderWorshipTemplateLevelCard("섹션", summary.levelCounts.section)}
+        ${renderWorshipTemplateLevelCard("항목", summary.levelCounts.element)}
+        ${renderWorshipTemplateLevelCard("슬라이드", summary.levelCounts.slide)}
       </div>
       ${summary.templateTotal ? renderWorshipTemplateInventory() : ""}
       <div class="svc-template-draft-grid">
@@ -25488,7 +25408,7 @@ function buildWorshipTemplateDraftSummary(types = []) {
     if (!service) return;
     const typeId = service.type_id;
     if (!sectionsByType[typeId]) sectionsByType[typeId] = new Map();
-    const title = String(section.title || section.section_key || "Section").trim();
+    const title = String(section.title || section.section_key || "섹션").trim();
     const current = sectionsByType[typeId].get(title) || { title, count: 0, orderTotal: 0 };
     current.count += 1;
     current.orderTotal += Number(section.sort_order) || 0;
@@ -25605,7 +25525,7 @@ function renderWorshipTemplateSectionRow(item, index, templatesById, itemsByTemp
       <span class="svc-template-inventory-no">${index + 1}</span>
       <div class="svc-template-inventory-section-main">
         <div class="svc-template-inventory-section-title">
-          <strong title="${escapeAttr(section.name || item.default_title || "Section")}">${escapeHtml(section.name || item.default_title || "Section")}</strong>
+          <strong title="${escapeAttr(section.name || item.default_title || "섹션")}">${escapeHtml(section.name || item.default_title || "섹션")}</strong>
           ${flags ? `<small>${escapeHtml(flags)}</small>` : ""}
         </div>
         <div class="svc-template-chip-list">${elementChips}</div>
@@ -26615,7 +26535,7 @@ function renderPresenterSectionEditorLayer(service) {
       <section class="presenter-section-editor" role="dialog" aria-label="${escapeAttr(`${context.sectionTitle} 수정`)}">
         <header class="presenter-section-editor-head">
           <div>
-            <span class="svc-prep-editor-kicker">Section</span>
+            <span class="svc-prep-editor-kicker">섹션</span>
             <h3>${escapeHtml(context.sectionTitle)}</h3>
           </div>
           <button class="icon-btn" type="button" data-presenter-section-editor-close aria-label="편집기 닫기" title="편집기 닫기">
@@ -26708,8 +26628,8 @@ function renderServicePrepEditorDialog(service) {
         ${renderPastServiceEditingNotice(service)}
         <div class="svc-prep-editor-body">
           <div class="svc-authoring-tools">
-            ${renderServiceAuthoringPanel("Service", "예배 정보", renderServiceMetaEditor(service))}
-            ${renderServiceAuthoringPanel("Section", "기본 섹션 추가", renderServiceOrderTemplate(typeObj))}
+            ${renderServiceAuthoringPanel("예배", "예배 정보", renderServiceMetaEditor(service))}
+            ${renderServiceAuthoringPanel("섹션", "기본 섹션 추가", renderServiceOrderTemplate(typeObj))}
           </div>
           <section class="svc-prep-editor-section" aria-label="예배 순서 편집">
             ${renderServiceEditorHeader("")}
@@ -27156,6 +27076,15 @@ function renderServiceSongPicker(item, index, model = serviceItemEditorModel(ite
   if (!query) return `<div class="svc-song-picker" hidden></div>`;
   const results = serviceSongPickerResults(query, item, model.service);
   if (!results.length) {
+    const availability = serviceSongRegistrationState(query, item, model.service);
+    if (availability === "typing") return `<div class="svc-song-picker" hidden></div>`;
+    if (availability !== "ready") {
+      const message = availability === "existing"
+        ? "검색된 곡에 이 유형의 자료가 없습니다."
+        : availability === "hymn" ? "해당 번호의 찬송가를 찾지 못했습니다. 번호와 판본을 확인해 주세요."
+        : "찬양 목록 확인이 필요합니다.";
+      return `<div class="svc-song-picker"><span class="svc-song-picker-hint">${message}</span></div>`;
+    }
     return `<div class="svc-song-picker"><span class="svc-song-picker-warning">검색 결과 없음</span><button class="svc-song-create" type="button" data-service-song-create="${index}">새 곡 등록</button></div>`;
   }
   return `
@@ -27233,13 +27162,14 @@ function renderServiceManualPraiseLyricsEditor(item, index, options = {}) {
     </label>`;
 }
 
-function serviceSongPickerResults(query, item = {}, service = selectedServiceForEditor(), limit = 6) {
+
+function serviceSongPickerResults(query, item = {}, service = selectedServiceForEditor(), limit = 6, { unrestricted = false } = {}) {
   const normalizedQuery = presenterPreparationSongContent(query);
   const directMatch = resolveExistingPraiseSongForServiceInput(normalizedQuery, item, service);
   const tokens = getSearchTokens(normalizedQuery);
   if (!tokens.length) return [];
-  const requiresNewHymnal = serviceItemRequiresNewHymnalScoreSong(item);
-  const requiresChildren = servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio";
+  const requiresNewHymnal = !unrestricted && serviceItemRequiresNewHymnalScoreSong(item);
+  const requiresChildren = !unrestricted && servicePraiseInputMode(item, parseServiceItemMemo(item.memo), service) === "children_audio";
   if (presenterPreparationNumberOnlyHymnReference(normalizedQuery)) {
     return directMatch && isSelectablePraiseSong(directMatch)
       && (!requiresNewHymnal || serviceSongHasScore(directMatch)) ? [songForHymnNumberResult(directMatch)] : [];
@@ -27587,6 +27517,11 @@ function renderServiceDashboard(options = {}) {
     return;
   }
 
+  const initialLoad = window.MINDEX_SERVICE_ENTRY.dashboardLoadState();
+  if (initialLoad) {
+    refs.detailPane.innerHTML = initialLoad;
+    return;
+  }
   const services = getServiceDashboardServices();
   const q = normalizeSearchValue(state.search);
   const title = options.title || SERVICE_HOME_WEEK_TITLE;
@@ -29935,7 +29870,7 @@ function renderLiveScriptureControl(serviceId) {
 }
 
 const SERVICE_SLOT_MUSIC = Object.freeze({
-  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-69c12c677944.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
+  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
   "prayer.meeting.free": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "자율기도 음악", repeatAllowed: false },
 });
 

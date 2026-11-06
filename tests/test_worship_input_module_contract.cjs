@@ -15,6 +15,9 @@ const runtimeSources = [
 ].map((path) => ({ path, source: readRuntimeSource(path) }));
 
 const extractedHandlers = [
+  'handleServiceSongComposition',
+  'scheduleServiceSongPickerPreview',
+  'serviceSongRegistrationState',
   'handleServiceManagementDetailClick',
   'handleDetailServiceWorkspaceClick',
   'handleServiceItemDetailClick',

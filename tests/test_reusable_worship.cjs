@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const c={console,document:{addEventListener(){}},localStorage:{getItem(){return null}},setTimeout,clearTimeout,URL,URLSearchParams,crypto:require('node:crypto').webcrypto};c.window=c;c.__mindexRuntimeStarted=true;c.location={search:'',hash:'',pathname:'/'};vm.createContext(c);
-for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.presenter-praise.js','mindex.presenter-board.js','mindex.presenter-media-state.js','mindex.keynote-html.js','mindex.presenter-controller.js','mindex.worship-input.js','mindex.worship-source.js','mindex.setlist-links.js','mindex.bulletin.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
+for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.presenter-praise.js','mindex.presenter-board.js','mindex.presenter-media-state.js','mindex.keynote-html.js','mindex.presenter-controller.js','mindex.worship-input.js','mindex.worship-source.js','mindex.worship-week.js','mindex.setlist-links.js','mindex.bulletin.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
 c.assert=assert;
 vm.runInContext(`
 const sid='10000000-0000-4000-8000-000000000001';

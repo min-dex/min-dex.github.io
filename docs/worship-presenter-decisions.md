@@ -1,3 +1,11 @@
+## Dawn prayer r2 default asset ·2026-11-06
+
+User approved the six-point (7ms total) pop-corrected r2 MP3 for the shared dawn
+free-prayer default. Change the immutable default source only; retain v5 asset
+bytes/URL and explicit authored attachments. No worship record, section order,
+media link or synchronization data is rewritten. Duration remains3169.543625s.
+See `friday-prayer-music.md` for exact asset identity and verification limits.
+
 ## Shared music volume during output (2026-10-30)
 
 The media management popover and inline music player share one0–100% volume
@@ -5754,3 +5762,21 @@ from stalling a concurrent output player. Output URLs, persisted configuration,
 video bytes, playback continuity and dissolve durations remain unchanged. Existing
 query parameters are preserved; signed/private/external and relative sources are
 untouched. The key is stable across renders, never a timestamp or retry nonce.
+
+
+### New-song search readiness ·2026-11-04
+
+A new-song registration action requires a complete catalog, no pending catalog
+load, a nonempty committed search without isolated Korean jamo, and no match in
+the unrestricted catalog. IME composition immediately removes a stale action;
+compositionend restarts the draft-only search. A result excluded only because
+score/audio material is unavailable shows a material hint, never a registration
+action. Delayed search completions must still own the same field/query/item and
+may not overwrite newer input results. The creation handler rechecks readiness
+after its existing duplicate-resolution load. Existing native save, linked song,
+forms, worship rows and output are untouched by search previews.
+
+The draft search lifecycle and registration readiness belong to the existing
+`mindex.worship-input.js` input owner. The app retains only event wiring, picker
+rendering and the existing creation/save boundary. Architecture ratchets are
+lowered after the extraction; they are not raised to accommodate this change.

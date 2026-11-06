@@ -19,6 +19,13 @@ Linux 검증과 Pages 배포를 완료했다. 다른 기기의 기존 자료는 
   공용 DB의 audio_set/audioTiming만 사용한다. 삭제·배포 결과는 아래 완료 기록을 따른다.
 - 성경/정적 데이터 캐시: 이미 서버에 원본이 있으므로 중복 서버 업로드 금지.
   메모리 캐시만 허용하며 localStorage를 authoritative fallback으로 사용하지 않는다.
+- 찬양 committed-read 전송 캐시 예외(2026-11-05): 로그인 필수 연결을 제외한
+  공개 읽기의 검증 완료 snapshot만 별도 IndexedDB에 폐기 가능한 사본으로 둔다.
+  매 실행의 서버 protocol/phase/idFormat/epoch/manifest/count 확인과 사본 checksum·
+  전체 catalog 검증이 모두 성공해야 사용한다. 오프라인·TTL fallback은 없고,
+  오류·불일치·손상·저장소 거부 시 기존 서버 조회로 돌아간다. 초안/설정/저장
+  journal은 이 캐시에 넣지 않으며 저장 기준은 계속 서버다. 다른 성경/정적
+  데이터의 메모리 전용 규칙과 인증·접속 bootstrap 정책은 그대로 유지한다.
 - 인증·접속 식별자는 데이터가 아니라 서버 접근에 필요한 bootstrap 정보다.
   토큰/키는 로그·문서·공개 저장소로 출력하거나 일반 상태 테이블에 이관하지 않는다.
 
@@ -401,3 +408,14 @@ profile identity. It is not a shared worship/project setting. Existing shared
 scale values are ignored, not copied to other devices; without a device value
 the controller starts at 100%. Legacy browser-local scale migrates to device.
 The output window and Remote do not receive this controller view setting.
+
+## Native Praise discard · 2026-11-06
+
+- Native 판본의 ‘저장 안 함’은 legacy snapshot RPC 대신 현재 repository에서
+  해당 ID만 다시 읽고 검증한다. 성공 시 같은 catalog 항목과 편집 화면만 교체한다.
+- 조회 실패, 연결·repository·선택·입력 변경, 저장 시작, 더 최신 catalog revision은
+  폐기를 취소한다. 다른 판본의 관계·초안·예배 데이터는 변경하지 않는다.
+- 응답 유실 등 미확정 native 저장은 조회만으로 해결됐다고 판단하지 않는다.
+  기존 요청으로 다시 저장해 결과를 확인하기 전까지 폐기·이동을 막는다.
+- Offline Chromium/WebKit 실제 가사 입력·저장 안 함 대화상자 및 경합 검증 통과.
+  운영 쓰기 없음. 공유 release의 exact-SHA gate·배포 검증은 별도다.

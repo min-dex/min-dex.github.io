@@ -365,7 +365,7 @@ function prepareServiceAudio(sources) {
   }
   for (const source of wanted) {
     if (presenterPreparedAudio.has(source)) continue;
-    const audio = new Audio();
+    const audio = globalThis.MindexPreciseAudio?.attach(new Audio()) || new Audio();
     audio.preload = "auto";
     presenterPreparedAudio.set(source, audio);
     audio.src = source;

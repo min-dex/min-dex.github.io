@@ -1,0 +1,320 @@
+{
+  "status": "local_verified_not_deployed",
+  "date": "2026-11-05",
+  "base": "63dd38801528bde6ad182623e8687153c2e7eee3",
+  "assetSha256": "bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87",
+  "productionWrites": 0,
+  "audioAssetChanges": 0,
+  "method": "actual serviceMusic transport and AudioWorklet PCM capture, compared to independent ffmpeg PCM decode",
+  "boundaryResults": [
+    {
+      "engine": "chromium",
+      "clock_error_ms": 0.0,
+      "min_100ms_correlation": 0.9999743523388283,
+      "windows": 40,
+      "pass": true
+    },
+    {
+      "engine": "webkit",
+      "clock_error_ms": 2.6666666666666665,
+      "min_100ms_correlation": 0.999983770635345,
+      "windows": 40,
+      "pass": true
+    }
+  ],
+  "checks": [
+    "Chromium/WebKit: real seek input, rapid seek last-wins, bounded buffers, continuous handoff, pause/resume/end, cold play cancellation, prepare-then-play, release, unsupported metadata native playback notice",
+    "Chromium/WebKit: smoke_friday_music, smoke_music_seek, smoke_children_audio_db",
+    "runtime hash/version, desktop packaging, runtime boundaries, playback transition ownership, solid audit"
+  ],
+  "limits": [
+    "No subjective listening claim",
+    "Cold download still takes network time; single play request waits for preparation",
+    "Only verified long MP3 metadata uses indexed transport; unsupported media keeps native playback with notice",
+    "Full shared gate, deployment and public PCM readback pending"
+  ],
+  "firstSoundLatency": {
+    "method": "Same local asset; actual serviceMusic; first nonzero AudioWorklet PCM at requested 1s position; fresh browser for each case. Cold=not prepared, warm=preparation complete. Internet download latency not included.",
+    "measurements": [
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": false,
+        "wallMs": 42,
+        "audioMs": 13.333333333333334,
+        "playPromiseMs": 14,
+        "position": 1.010847
+      },
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": true,
+        "wallMs": 28.600000023841858,
+        "audioMs": 0,
+        "playPromiseMs": 2.699999988079071,
+        "position": 1.002762
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": false,
+        "wallMs": 133.39999997615814,
+        "audioMs": 101.33333333333333,
+        "playPromiseMs": 109.30000001192093,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": true,
+        "wallMs": 27.399999976158142,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 2.699999988079071,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": false,
+        "wallMs": 432,
+        "audioMs": 365.33333333333337,
+        "playPromiseMs": 167,
+        "position": 1.1736497500096448
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": true,
+        "wallMs": 321,
+        "audioMs": 320,
+        "playPromiseMs": 24,
+        "position": 1.173883666691836
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": false,
+        "wallMs": 364,
+        "audioMs": 296,
+        "playPromiseMs": 342.0000000000001,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": true,
+        "wallMs": 30.000000000000114,
+        "audioMs": 26.666666666666643,
+        "playPromiseMs": 4,
+        "position": 1.0016666666666667
+      }
+    ],
+    "interpretation": "Warm WebKit improves; warm Chromium similar; local Chromium cold increases ~91 ms. No claim that all first playback is faster."
+  },
+  "linuxAlignmentRepair": {
+    "status": "candidate_mac_verified_linux_pending",
+    "failedSharedSha": "60552745a34e7a890d7279db5c09f880ad316c48",
+    "failedRun": 41984371967,
+    "failedJob": 127101611226,
+    "hypothesis": "Old signed delay range -4..1152 samples may omit platform decoder priming differences. Original failure did not log score or delay, so Linux cause is not yet established.",
+    "change": "Metadata-derived bidirectional search ±4032 samples for this asset. 4096-sample search plus independent 4096-sample verification; both correlations must be >=.995. Browser identity is unused.",
+    "diagnostics": [
+      "searchRadius",
+      "decoderLag",
+      "score",
+      "validationScore",
+      "referenceFrames",
+      "rawFrames",
+      "referenceSampleRate",
+      "rawSampleRate",
+      "sourceSampleRate",
+      "frame"
+    ],
+    "macResults": {
+      "chromium": {
+        "lag": 529,
+        "score": 0.9999999944,
+        "validationScore": 0.9999999938
+      },
+      "webkit": {
+        "lag": 0,
+        "score": 1,
+        "validationScore": 1
+      }
+    },
+    "absolutePositionGuard": "Independent ffmpeg decoded sparse PCM fingerprints at 1s,1421s,3161s, each >.995 correlation. Asset SHA pinned.",
+    "unitCases": "Signed delays ±2257,±1728,±529,0; separate-window corruption and silence rejected.",
+    "latencyLocalRepeat": [
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": false,
+        "wallMs": 36.40000003576279,
+        "audioMs": 2.6666666666666665,
+        "playPromiseMs": 10.800000011920929,
+        "position": 1.002784
+      },
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": true,
+        "wallMs": 35.799999952316284,
+        "audioMs": 10.666666666666668,
+        "playPromiseMs": 2.399999976158142,
+        "position": 1.010886
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": false,
+        "wallMs": 153.89999997615814,
+        "audioMs": 122.66666666666666,
+        "playPromiseMs": 129.0999999642372,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": true,
+        "wallMs": 27.69999998807907,
+        "audioMs": 26.666666666666657,
+        "playPromiseMs": 2.599999964237213,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": false,
+        "wallMs": 431,
+        "audioMs": 362.6666666666667,
+        "playPromiseMs": 169,
+        "position": 1.1717163333087228
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": true,
+        "wallMs": 311,
+        "audioMs": 309.33333333333337,
+        "playPromiseMs": 6,
+        "position": 1.1738257916877046
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": false,
+        "wallMs": 372,
+        "audioMs": 301.3333333333333,
+        "playPromiseMs": 347.0000000000001,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": true,
+        "wallMs": 28,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 5.000000000000114,
+        "position": 1.0016666666666667
+      }
+    ]
+  },
+  "linuxAbsoluteOriginRepair": {
+    "status": "candidate_mac_and_untrimmed_reference_simulation_verified_linux_pending",
+    "failedRun": 41987199597,
+    "failedJob": 127110692682,
+    "linuxObserved": {
+      "score": 1,
+      "validationScore": 1,
+      "decoderLag": -576,
+      "referenceFrames": 1057536,
+      "rawFrames": 192384,
+      "sampleRate": 48000,
+      "absoluteAnchor1Correlation": 0.7618859270276629
+    },
+    "diagnosis": "The reference window itself retained codec priming. Its 1105-frame excess over Chromium equals encoder delay576 plus MPEG Layer III synthesis delay529. Alignment to that reference alone was insufficient.",
+    "change": "Classify reference trim using frame count, encoder metadata, decoded length and measured lag. Only verified untrimmed relationship applies encoder+synthesis origin to first buffer base and subsequent prefix. Unknown/ambiguous origins reject precise preparation and keep native fallback. No browser identity branch.",
+    "primarySource": "https://github.com/GStreamer/gstreamer/blob/main/subprojects/gst-plugins-good/gst/audioparsers/gstmpegaudioparse.c",
+    "validation": [
+      "Mac Chromium/WebKit existing lifecycle, independent PCM anchors1/1421/3161s all pass unchanged .995 threshold and golden fixture",
+      "Controlled untrimmed reference +1105 frames reproduces lag-576; origin correction then passes all three independent PCM anchors",
+      "Unit: measured trim1105/576/0 and unknown-origin rejection"
+    ],
+    "localLatencyRepeat": [
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": false,
+        "wallMs": 41.80000001192093,
+        "audioMs": 2.6666666666666665,
+        "playPromiseMs": 13.199999988079071,
+        "position": 1.002788
+      },
+      {
+        "engine": "chromium",
+        "precise": false,
+        "warm": true,
+        "wallMs": 30.80000001192093,
+        "audioMs": 0,
+        "playPromiseMs": 2.599999964237213,
+        "position": 1.002779
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": false,
+        "wallMs": 161.5,
+        "audioMs": 128,
+        "playPromiseMs": 136.0999999642372,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "chromium",
+        "precise": true,
+        "warm": true,
+        "wallMs": 28.80000001192093,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 4.100000023841858,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": false,
+        "wallMs": 495,
+        "audioMs": 426.6666666666667,
+        "playPromiseMs": 220,
+        "position": 1.1823089583194815
+      },
+      {
+        "engine": "webkit",
+        "precise": false,
+        "warm": true,
+        "wallMs": 312,
+        "audioMs": 309.33333333333337,
+        "playPromiseMs": 5,
+        "position": 1.1732582083204761
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": false,
+        "wallMs": 591.9999999999999,
+        "audioMs": 525.3333333333334,
+        "playPromiseMs": 570.0000000000001,
+        "position": 1.0016666666666667
+      },
+      {
+        "engine": "webkit",
+        "precise": true,
+        "warm": true,
+        "wallMs": 28.000000000000114,
+        "audioMs": 26.66666666666667,
+        "playPromiseMs": 5,
+        "position": 1.0016666666666667
+      }
+    ],
+    "audioAssetChanges": 0,
+    "worshipWrites": 0
+  }
+}

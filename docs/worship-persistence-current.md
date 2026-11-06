@@ -27,6 +27,13 @@ contract and its deployment receipts are authoritative.
 - Offline browser fixtures now exercise RPC rollback, frozen-request replay,
   conflict review, draft isolation and save queues. A resolved uncertain request
   requires reload; it never acknowledges a newer editable draft.
+- Navigation requested during a worship save waits for the existing save to
+  settle before checking for unsaved changes. A completed save can proceed
+  directly. New edits and failed saves still use the usual unsaved-changes guard.
+- Independent cold reads for typed element columns and Bible reference metadata
+  overlap during save preparation. Both checks still finish before the values
+  are used. Recovery, journal confirmation, and revision checks retain their
+  existing order.
 - Existing document slide arrays remain readable for fallback/recovery. This
   code cleanup does not remove production content or change DB permissions.
 - `tests/test_worship_store.mjs` and `tests/test_worship_atomic_client.mjs`

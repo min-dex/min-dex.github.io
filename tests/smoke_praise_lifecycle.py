@@ -39,9 +39,9 @@ try:
     mode='ok';const retried=await createEmptyPraiseAtomic({...opts,title:'changed'},'retry');check(requests.at(-1).req.requestId===sent.requestId&&retried.title==='새 곡','unknown create not immutable');
     mode='before';await fails(()=>createEmptyPraiseAtomic(opts,'before'));const before=requests.at(-1).req;mode='ok';await createEmptyPraiseAtomic(opts,'before');check(requests.at(-1).req.songId===before.songId,'pre-send retry identity changed');
     const svc={id:'service',type_id:'fixture'};state.services=[svc];state.selectedServiceId=svc.id;state.module='worship';
-    resolveExistingPraiseSongForServiceInputAfterCatalogLoad=async()=>null;
+    songCatalogLoaded=true;resolveExistingPraiseSongForServiceInputAfterCatalogLoad=async()=>null;
     findDeferredServiceTextInput=()=>null;servicePraiseInputMode=()=> 'lyrics_db';
-    const slot=()=>({id:crypto.randomUUID(),label:'찬양 1',raw_title:'새 곡',memo:'',sort_order:30});
+    const slot=()=>({id:crypto.randomUUID(),label:'찬양 1',raw_title:'fixture'+crypto.randomUUID().replaceAll('-',''),memo:'',sort_order:30});
     let item=slot(),sibling={id:'sibling',raw_title:'보존',sort_order:40,memo:'keep'};state.serviceItems[svc.id]=[item,sibling];
     pause=new Promise(r=>unblock=r);let reached=new Promise(r=>notify=r);let task=createPraiseSongFromServiceItem(0);await Promise.race([reached,new Promise((_,reject)=>setTimeout(()=>reject(Error('RPC not reached: '+messages.join('|'))),3000))]);
     const count=requests.length;await createPraiseSongFromServiceItem(0);check(requests.length===count,'service double click duplicated');item.raw_title='대기 중 바꾼 제목';unblock();await task;pause=null;

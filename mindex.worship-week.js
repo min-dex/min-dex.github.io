@@ -40,13 +40,13 @@
         if(e.candidates.length)return {...e,slotName:name};
         const saved=scheduled.find(s=>s.id===(e.source.service_id||e.source.id)) || scheduled.find(s=>s.service_date===e.source.service_date&&type(s.service_type_id)===id);
         const noGathering=absent(e.source)||absent(saved);
-        return {...e,...(saved?.replacement_service_id ? {source:{...e.source,replacement_service_id:saved.replacement_service_id}} : {}),slotName:name,weeklyStatus:e.source.weekly_status||(noGathering?'집회 없음':'콘티 미등록'),weeklyReason:e.source.weekly_reason||(noGathering?(saved?.service_alias||saved?.title||''):'찬양 목록이 아직 등록되지 않았습니다')};
+        return {...e,...(saved?.replacement_service_id ? {source:{...e.source,replacement_service_id:saved.replacement_service_id}} : {}),slotName:name,weeklyStatus:e.source.weekly_status||(noGathering?'집회 없음':'콘티 미등록'),weeklyReason:e.source.weekly_reason||(noGathering?(saved?.service_alias||saved?.title||''):'찬양 목록이 비어 있습니다.')};
       });
       for(const saved of scheduled) {
         if(saved.id&&actual.some(e=>e.source.service_id===saved.id||e.source.id===saved.id||e.source.id==='worship:'+saved.id))continue;
         if(actual.some(e=>!e.source.service_id&&e.source.service_date===saved.service_date&&type(e.source.service_type_id)===type(saved.service_type_id)))continue;
         const id=type(saved.service_type_id),merged=allGeneration&&['children','youth'].includes(id),noGathering=absent(saved);
-        cells.push({source:{...saved,service_id:saved.id,aliases:saved.service_alias||''},candidates:[],missing:true,slotName:saved.service_type_id==='monthly'?'월삭예배':slots.find(row=>row[0]===id)?.[1],weeklyStatus:merged||noGathering?'집회 없음':'콘티 미등록',weeklyReason:merged?'온세대 찬양예배':noGathering?(saved.service_alias||saved.title||''):'찬양 목록이 아직 등록되지 않았습니다'});
+        cells.push({source:{...saved,service_id:saved.id,aliases:saved.service_alias||''},candidates:[],missing:true,slotName:saved.service_type_id==='monthly'?'월삭예배':slots.find(row=>row[0]===id)?.[1],weeklyStatus:merged||noGathering?'집회 없음':'콘티 미등록',weeklyReason:merged?'온세대 찬양예배':noGathering?(saved.service_alias||saved.title||''):'찬양 목록이 비어 있습니다.'});
       }
       if(cells.length)groups.push({...info(key),entries:cells});
     }
@@ -110,4 +110,33 @@ function serviceNavigationTargetId(service = {}) {
 }
 function resolveServiceNavigationId(id) {
   return serviceNavigationTargetId(state.services.find(service => service.id === id) || {id});
+}
+
+// Explicit duplicate navigation markers never delete records or rewrite history.
+function serviceUpcomingDisplayServices(services) {
+  const all = new Map(state.services.map(service => [service.id, service]));
+  return services.filter(service => {
+    const source = service._worshipSourceRef || service.source_ref || {};
+    const target = all.get(source.navigation_duplicate_of);
+    if (!target || target.id === service.id || target.date !== service.date) return true;
+    const types = [service.type_id, target.type_id].map(worshipAppServiceTypeId).sort().join(':');
+    if (types !== 'friday:monthly' || !String(service.alias || '').trim() || compactSearchValue(service.alias) !== compactSearchValue(target.alias)) return true;
+    const range = row => worshipServiceTimeRange(row, SERVICE_TIME_WINDOWS[worshipAppServiceTypeId(row.type_id)]);
+    return JSON.stringify(range(service)) !== JSON.stringify(range(target));
+  });
+}
+
+function worshipServiceMatchesAutoTarget(service, target) {
+  const actual = worshipAppServiceTypeId(service.type_id), wanted = worshipAppServiceTypeId(target.typeId);
+  if (String(service.date || '').trim() !== String(target.date || '').trim()) return false;
+  if (actual === wanted) return true;
+  if (wanted !== 'monthly' || actual !== 'friday' || !target.alias
+    || compactSearchValue(service.alias) !== compactSearchValue(target.alias)) return false;
+  const range = worshipServiceTimeRange(service, SERVICE_TIME_WINDOWS.friday);
+  return range?.start === SERVICE_TIME_WINDOWS.monthly.start && range?.end === SERVICE_TIME_WINDOWS.monthly.end;
+}
+
+function worshipSetlistStatusReason(entry) {
+  return entry.weeklyStatus === '콘티 미등록' && entry.weeklyReason === '찬양 목록이 아직 등록되지 않았습니다'
+    ? '찬양 목록이 비어 있습니다.' : entry.weeklyReason;
 }

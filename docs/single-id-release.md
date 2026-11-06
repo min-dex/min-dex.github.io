@@ -1,3 +1,138 @@
+## Indexed catalog transport candidate ·2026-11-06
+
+A server that advertises `catalogIndex: 1` may supply a manifest-bound, ordered
+list of active record IDs and revisions from one SQL statement snapshot. The client
+validates the exact count, identity and revision domain. It requests only IDs
+missing from a checksum-verified same-project, same-epoch snapshot or with a
+changed revision. Removed IDs disappear by rebuilding in index order. The batch RPC uses exact active IDs so historical aliases and tombstones cannot
+enter the catalog. Cold profiles use the same index to request disjoint batches of at most 200 IDs,
+with at most three reads in flight and bounded 57014 subdivisions. The client
+requires the expected ID and revision for every fetched row, validates the
+complete catalog and checks fresh final status before installation. It drains
+failed workers before falling back to the existing range transport.
+
+A separately reviewed additive server migration installs the index and batch RPC. The existing clients
+continue to accept status responses with the new optional capability, and the
+new client retains the old path on servers without it. Apply only after the
+live function definitions, read roles and revision invariants have been
+reviewed. All writes that change a published payload must advance its revision
+or change epoch. The explicit rollback removes the capability and index only.
+The isolated PostgreSQL and browser fixtures verify payload parity, access,
+maintenance, read errors, cache corruption and migration rollback. Synthetic
+transfer reductions require public measurement before making latency claims.
+The optional public probe counts by-ID requests without retaining IDs, and can
+seed a disposable local snapshot with one stale revision.
+
+## Private activation snapshot ownership ·2026-11-06
+
+`loadActivation` keeps validated prepared records inside its private pending/
+snapshot maps without cloning the same whole catalog between those two internal
+containers. A memory hit likewise reuses the private prepared input. Every
+external caller still receives a detached records/status copy and a separate
+repository. Concurrent consumers, later editable returns and failed activations
+cannot mutate another consumer or a retained snapshot. The persistent cache
+writer only serializes these internal server records; it never mutates them.
+Catalog validation, public `createCatalog` defensive copies, checksum, fresh
+status/manifest/count checks, dirty/client checks and all save paths are unchanged.
+
+Same-source Chromium/WebKit comparisons retain identical full catalog hashes.
+Cold/restarted initialization removes one whole-array copy; repeat in-session
+activation removes two internal whole-array copies while retaining one required
+consumer copy. Measured clone CPU was reduced by about22–45ms in these samples,
+not seconds of network latency. Do not attribute cold wall-time variation to this
+small CPU change. Regression: `test_catalog_cache_activation.cjs` and real IDB
+`smoke_catalog_read_cache.py`. Optional `measure_home_entry.py --profile-phases`
+records static resources, response-header wait, parse/clone CPU and long tasks;
+measurement hooks affect timing and are absent from production.
+`--include-invalidated` changes only its disposable local cache signature to
+exercise the full-read fallback; it never changes a production manifest.
+
+## Verified reload read-cache ·2026-11-05
+
+Anonymous/public clients may explicitly opt into a disposable committed catalog
+snapshot in `mindex.catalog-cache.js`. A SHA-256 connection key scopes it to the
+project URL and public connection key without storing the key in plaintext.
+Authentication-required connections retain memory-only activation. Every startup
+still requires a fresh successful native protocol/ID-format/epoch/manifest/count
+response. There is no offline or TTL trust. Matching disk snapshots also require
+schema/size/checksum/count/strict-ID-order and full catalog validation before any
+adoption. Selected readers, presenter preflight, dirty/client guards and the
+atomic save path remain authoritative. Only validated server reads are cached;
+forms, editor drafts and recovery journals are never written to this cache.
+
+Cache failure is a miss, not an app failure. Reads are bounded to250ms; writes
+are background work with a64MiB cap. Clear/failure generations prevent pending
+writes from resurrecting a removed cache. Source changes require a new schema
+if their representation/validation cannot safely read old snapshots. The existing
+parallel full read and final manifest check remain the uncached fallback.
+`test_catalog_cache_activation.cjs` and real Chromium/WebKit
+`smoke_catalog_read_cache.py` cover these boundaries. Measure a truly empty
+profile separately from a restarted profile with HTTP cache and a matching
+snapshot; do not call a warm connection measurement a first-visit improvement.
+
+## Bounded cold catalog reads ·2026-11-05
+
+Catalogs above400 records use three lexical keyset ranges through the existing
+read-only RPC: (start, SONG-HYMN-N), (SONG-HYMN-N, SONG-HYMN-T), and
+(SONG-HYMN-T, end). The boundary strings cannot be valid IDs. This covers all
+supported ID forms, including sparse ranges and legacy IDs; it does not infer
+an ID list from counts. Each range has at most one request in flight. Full pages
+are validated before boundary overlap is dropped, then ranges concatenate in
+order. Exact total count, strict global ID order, catalog validation and fresh
+final epoch/manifest checks precede installation. Every worker settles before
+failure is exposed, so retries cannot overlap abandoned workers. Small catalogs
+retain serial reads. Each range retains same-cursor timeout fallback200→100→25.
+The range reader introduces no new API, schema or permission change. The optional
+reload read-cache above is a separate transport path. Selected-record reads,
+presenter preflight and the existing draft/client guards remain authoritative.
+Regression: `test_parallel_catalog.cjs`, existing activation browser suite.
+
+## Home startup read overlap ·2026-11-05
+
+Native catalog reads use the existing server-supported maximum of200 records per
+page. SQL timeout57014 reduces the page at the same cursor to100, then25; a
+further failure stops. Every record/order/count and final epoch/manifest check
+remains mandatory. No new RPC, DB/schema/permission or operational-data change.
+
+At home startup, service-type/list reads may start detached while the full native
+catalog is loading. `mindex.service-entry.js` owns a one-use, client-bound receipt;
+`app.js` still waits for ID activation before adopting services or projecting any
+worship items. Early errors settle immediately, and activation failure/navigation
+away discards the receipt. Client changes cannot install a previous response.
+Other module startup and explicit presenter freshness reads retain their paths.
+
+The home overview reads service metadata only. Unopened upcoming service bodies
+are deferred until the weekly dashboard or a service is entered. Weekly reads
+reuse the per-service coalescing loader with at most three workers; loading and
+retry states must precede real saved-row rendering. Protected local surfaces,
+service collections, forms and presenter transport remain intact.
+
+The home summary starts the lightweight Bible edition query alongside catalog
+activation. Its 15-second budget belongs to that request. Praise counts still
+wait for activation and use the verified logical catalog, or a separate
+15-second budget for the legacy HEAD count. Either result can succeed when the
+other fails. Adoption remains bound to the active connection.
+Logical group counts, selected readers, drafts, forms, transport and save paths
+are preserved. Regression coverage: `test_initial_worship_reads.cjs`,
+`smoke_single_song_activation.py`, `smoke_home_startup_budget.py`.
+
+## Verified in-session catalog reuse ·2026-11-05
+
+The native bootstrap still completes and validates the entire catalog before home
+or service projection. Within the same client session, a fresh successful
+`get_praise_storage_status_v1` response with matching protocol, epoch, manifest and
+recordCount can reuse that validated snapshot. This is not an offline/TTL cache.
+Concurrent activation reads coalesce; every consumer gets independent records and
+a repository. Changed status refetches all pages with the existing bounded timeout
+retry and final manifest check. Failure/maintenance clears trust and fails closed.
+
+The initial Praise list can use its installed full catalog after the same fresh
+status check instead of rereading every record. Replacement catalog/repository,
+client changes, saves or dirty input disqualify this shortcut. Check those guards
+again after the status response. Explicit record reads and presenter preflight
+remain authoritative; no changes to saves, lyric/form normalization or media state.
+Synthetic regression coverage is registered in `smoke_single_song_activation.py`.
+
 ## Production checkpoint ·2026-10-25
 
 Native activation completed:1662 records, epoch2, 4-4-4-4. Compatible client

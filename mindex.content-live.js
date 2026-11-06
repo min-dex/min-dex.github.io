@@ -195,7 +195,7 @@
         for(const record of records)fresh.set(record.id,record);
         catalog=globalThis.MindexSingleSong.createCatalog([...fresh.values()]);
       }else{
-        const prepared=await globalThis.MindexSingleSong.loadActivation(client);
+        const prepared=await globalThis.MindexSingleSong.loadActivation(client,{persistent:state.config?.authRequired === false});
         if(prepared.phase!=='native')throw Error('Praise storage changed during entry');
         catalog=globalThis.MindexSingleSong.createCatalog(prepared.records);
       }

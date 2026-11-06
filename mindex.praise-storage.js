@@ -1,6 +1,59 @@
 // Praise persistence and single-ID lifecycle controller.
 // Loaded before app bootstrap; no I/O until called by the editor.
 
+async function discardPraiseEditorChanges() {
+  const song = getSelectedSong(), client = state.client, project = state.config.url;
+  const repository = state.singleSongRepository;
+  const versionId = getSelectedVersionId();
+  const before = JSON.stringify({song, forms:state.forms});
+  try {
+    if (!song || !client || state.saving) return false;
+    let fresh, nativeRecord;
+    if (song._singleSongRecord) {
+      if (!repository) throw new Error("SINGLE_SONG_REPOSITORY_REQUIRED");
+      // A read cannot settle a request whose commit response was lost.
+      if (praisePendingSaves.has(song) || repository.pendingRecord(song.id)) {
+        showToast("이전 저장 결과를 먼저 확인해야 합니다. 다시 저장한 뒤 이동해 주세요.", "error");
+        return false;
+      }
+      const rows = await repository.read([song.id]);
+      if (rows.length !== 1 || rows[0].id !== song.id) throw new Error("PRAISE_SNAPSHOT_MISMATCH");
+      nativeRecord = rows[0];
+      fresh = globalThis.MindexSingleSong.createCatalog(rows).appSong(song.id);
+    } else {
+      const result = await client.rpc("get_praise_snapshot_v1", {sid:song.id});
+      if (result.error) throw result.error;
+      fresh = praiseSnapshotSong(result.data);
+    }
+    if (fresh.id !== song.id) throw new Error("PRAISE_SNAPSHOT_MISMATCH");
+    if (project !== state.config.url || client !== state.client || getSelectedSong() !== song || versionId !== getSelectedVersionId()
+        || state.module !== "praise" || state.saving
+        || (nativeRecord && (repository !== state.singleSongRepository || praisePendingSaves.has(song) || repository.pendingRecord(song.id)))
+        || before !== JSON.stringify({song, forms:state.forms})) {
+      showToast("확인 중 입력이 바뀌어 이동하지 않았습니다. 입력은 유지됩니다.", "error");
+      return false;
+    }
+    if (nativeRecord) {
+      const catalog = state.singleSongCatalog;
+      if (catalog.get(song.id).revision > nativeRecord.revision) throw new Error("SONG_READ_STALE");
+      state.singleSongCatalog = globalThis.MindexSingleSong.createCatalog(
+        catalog.ids().map(id => id === song.id ? nativeRecord : catalog.get(id)));
+    }
+    state.songs = state.songs.map(item => item === song ? fresh : item);
+    praisePendingSaves.delete(song);
+    state.selectedVersionId = fresh.versions.some(item => item.id === versionId) ? versionId : getDefaultVersionId(fresh);
+    state.forms = normalizeForms((getSelectedVersion()?.forms || []).map(form => withLocalId({...form, song_id:state.selectedVersionId})));
+    state.dirty.song = state.dirty.forms = false;
+    clearSearchCaches();
+    captureCleanFingerprint("praise");
+    updateSaveState();
+    return true;
+  } catch {
+    showToast("최신 내용을 확인하지 못해 이동하지 않았습니다. 입력은 유지됩니다. 다시 시도해 주세요.", "error");
+    return false;
+  }
+}
+
 async function saveSongMeta(liveSong) {
   if (liveSong?._singleSongRecord) {
     if (!state.singleSongRepository) throw new Error("SINGLE_SONG_REPOSITORY_REQUIRED");
@@ -265,6 +318,7 @@ function renderSingleSongRelations(song) {
 
 // Release bootstrap checks server phase before enabling native storage.
 let singleSongActivationPending = null;
+const singleSongCatalogReadReceipts = new WeakMap();
 async function ensureSingleSongActivation() {
   if (globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY !== true || !state.client) return false;
   const client = state.client;
@@ -277,7 +331,7 @@ async function ensureSingleSongActivation() {
     return singleSongActivationPending.promise;
   }
   const promise = (async () => {
-    const prepared = await globalThis.MindexSingleSong.loadActivation(client);
+    const prepared = await globalThis.MindexSingleSong.loadActivation(client,{persistent:state.config?.authRequired === false});
     if (state.client !== client) throw new Error("PRAISE_STORAGE_CLIENT_CHANGED");
     if (prepared.phase === 'legacy') return false;
     if (state.saving || Object.values(state.dirty || {}).some(Boolean)) throw new Error("미저장 입력을 보존한 뒤 다시 열어 주세요.");
@@ -285,6 +339,7 @@ async function ensureSingleSongActivation() {
     state.singleSongStorage = 'native';
     state.singleSongCatalog = catalog;
     state.singleSongRepository = prepared.repository;
+    singleSongCatalogReadReceipts.set(catalog, {client, repository:prepared.repository, status:prepared.status});
     state.singleSongClient = client;
     state.songs = catalog.ids().map(id => catalog.appSong(id));
     state.selectedSongId = state.selectedVersionId = null;
@@ -311,6 +366,22 @@ function installSingleSongSession(records, repository, {worshipStorage = "native
   state.singleSongRepository = repository;
   state.songs = catalog.ids().map(id => catalog.appSong(id));
   clearSearchCaches();
+}
+
+async function reuseVerifiedSingleSongCatalog(context) {
+  const catalog = context.singleSongCatalog, client = context.client;
+  const receipt = catalog && singleSongCatalogReadReceipts.get(catalog);
+  if (!receipt?.status || receipt.client !== client || receipt.repository !== context.singleSongRepository
+    || context.saving || Object.values(context.dirty || {}).some(Boolean)) return false;
+  const response = await client.rpc('get_praise_storage_status_v1');
+  if (response.error) throw new Error('찬양 목록의 최신 상태를 확인하지 못했습니다. 다시 시도해 주세요.');
+  const status = response.data;
+  return context.client === client && context.singleSongCatalog === catalog
+    && context.singleSongRepository === receipt.repository && !context.saving
+    && !Object.values(context.dirty || {}).some(Boolean) && status?.phase === 'native'
+    && status.protocol === 1 && (!status.idFormat || status.idFormat === '4-4-4-4')
+    && status.epoch === receipt.status.epoch
+    && status.manifest === receipt.status.manifest && status.recordCount === receipt.status.recordCount;
 }
 
 async function readSingleSongs(ids) {
