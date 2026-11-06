@@ -9,6 +9,8 @@ import time
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
     "test_product_identity.cjs",
+    "test_internal_updater.cjs",
+    "test_desktop_update_ui.cjs",
     "test_electron_test_isolation.cjs",
     "test_praise_id_aliases.cjs",
     "test_praise_classification.cjs",
@@ -168,6 +170,7 @@ SMOKES = (
     "smoke_bulletin_status_semantics.py",
     "smoke_praise_header_layout.py",
     "smoke_product_info.py",
+    "smoke_internal_update.py",
     "smoke_remote_video.py",
     "smoke_reference_validation.py",
     "smoke_praise_atomic_save.py",

@@ -1,3 +1,82 @@
+## 2026-11-06 Church internal delivery — supersedes signing choice below
+
+The owner chooses unsigned church-only 1.0.0 delivery; equipment acceptance is
+ deferred and actual broadcasts remain prohibited during verification. Keep the
+ signed release command/certificate checks unchanged. The explicit internal
+ configuration keeps Mindex app/profile identity and emits an internal build
+ receipt, separate from isolated TEST packages and formal signed releases.
+
+Internal updates use the app's Update menu and startup notice to find a newer
+ complete `church-vX.Y.Z` GitHub release and open the exact OS/architecture
+ installer. Installation/app replacement is manual on both platforms; no claim
+ of unsigned automatic installation. Prompts defer during output, download
+ action rechecks output and unsaved edits, and no arbitrary URL/command executes.
+ Integrated web source `89fd081c` includes the completed lyric-timing preservation batch.
+Local ARM installer source `f4b9538d` passed package parity, local RTMPS and
+synthetic reinstall/restart data preservation; the combined source still needs
+its own full web and native gate.
+
+Signed updater, rollback and data-store paths remain unchanged. Package parity,
+ synthetic installation/preservation and local RTMPS gates are still required.
+
+## 2026-11-06 1.0.0 signed-release preparation
+
+The owner now requests 1.0.0 delivery with broadcast-room equipment acceptance
+explicitly deferred, and chooses certificate preparation followed by signed
+publication. Actual YouTube broadcasting is not started by this work. Certificates
+are not available/confirmed; do not weaken signing or publish unsigned packages
+as a formal release. Keep the development channel until signing can be qualified.
+
+Candidate includes public main `4bc17d5d` (save-return protection, catalog startup,
+precise MP3 transport and approved r2 dawn default). Update package/audio checks
+to the documented r2 bytes/hash/duration while retaining immutable older assets
+and explicit worship attachments. Installed-app tests additionally check local
+file decoding against independent PCM fingerprints. Intel Mac execution reuses
+the same-run x64 artifact, checks local RTMPS and same-version reinstall/restart
+preservation; it is distinct from ARM/Windows 0.9.0-test to 1.0.0-test upgrades.
+All unsigned checks remain separate from real signing/notarization and signed
+updater qualification. No production data or active worship output is changed.
+
+## 2026-11-04 Latest web and signing preparation candidate
+
+Merged public web source `8849ecfa` into the native candidate after verified
+`32aff00a`. Added an explicit `--no-publish` signed-build path; signing/notary,
+reviewed channel, unused version and clean-checkout requirements remain intact.
+Certificates are not yet available/confirmed. Actual signing, signed-updater
+acceptance, live broadcasting and formal publication remain unperformed.
+Offline preflight and scoped UI checks are separate from the new exact-SHA
+web/native gate. See docs/electron-packaging-plan.md for first-release acceptance.
+
+## 2026-11-04 Background/audio follow-up candidate
+
+Approved shared web candidate `d702a6cd` (including `6947c5bf`, `d2f58911`, `d6e757d8` preview-cache isolation and source-based praise selection guidance) is integrated after verified native candidate
+`e4905211`. Element-owned backgrounds retain playback and bounded cold-load
+retries; the supplied final dawn MP3 remains byte-identical. Package acceptance
+checks its pinned SHA-256 as well as every tracked renderer blob. Full web/native
+checks and isolated TEST upgrade preservation must pass on the combined SHA.
+Actual YouTube broadcasting, production data writes, signing/notarization and
+formal publication remain excluded. Web publication is confirmed separately.
+
+## 2026-11-04 Final web/native integration candidate
+
+The candidate now includes main `ff65ef9b`: output freeze, staged current-service
+refresh and the preserved four-icon window-control row. Native YouTube composition,
+local RTMPS acceptance and isolated TEST installation/upgrade preservation remain
+included. Windows fixture lookup uses native path joining to avoid MSYS rewriting.
+The candidate also includes approved web candidate `9fe4b755` for device-scoped
+controller scale. Native upgrade fixtures verify its namespace, raw value and
+app readback across restarts. The combined commit requires a fresh full web and native gate; prior component
+results do not certify this combined source. Development channel remains active;
+no real YouTube broadcast, production data write or formal publication is authorized.
+
+## 2026-11-04 1.0.0 방송 시험 후보 동결
+
+공개 웹 기준 `89e2bd0c`까지 밝기·첫소절·문서 송출·디졸브와 예배 노하우 문서를 통합했다. 40분 CI 한도와 실제 편집창 수명주기 fixture를 유지한다. 후보 브랜치 CI의 웹 검사와 Desktop Packages의 미서명 패키지 검사를 분리한다. 설치 앱의 전체 웹 런타임을 Git 원본과 대조하고 시험 프로필에서 합성 화면을 로컬 RTMPS로 수신한다. 실제 장비·채널·서명 배포 승인은 별도이며 이전 후보의 수신 기록은 아래 이력에 보존한다.
+
+## 2026-11-03 설치 앱 유튜브 직접 송출 후보
+
+공개 main c9563ca1을 로컬 후보에 통합했다. 방송 메뉴의 키 입력·TLS 전송·차단과 복원·연결 끊김을 검사하는 독립 수신 시험은 `tests/test_desktop_youtube_local.cjs`에 있다. 운영 공개판과 후보를 구분하며 실채널·현장 CH8·서명 배포 승인은 별도다. [사용 방법 및 OS별 검증 범위](docs/youtube-desktop-candidate.md).
+
 ## 2026-11-03 Union-only font and instrumental background candidate
 
 User correction supersedes the global Paperlogy default below: service99df only

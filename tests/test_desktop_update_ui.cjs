@@ -35,3 +35,7 @@ test('renderer reload recovers already-downloaded update without a new download'
  const f=fixture({status:'downloaded',version:'1.2.3',presenterOpen:false});
  await tick();assert.equal(f.counts().downloads,0);assert.equal(f.counts().installs,1);
 });
+
+test('manual internal download preserves edits and never schedules an automatic install',async()=>{
+ const f=fixture({status:'available',version:'1.0.1',manualInstall:true});f.dirty(true);await tick();assert.equal(f.counts().downloads,0);assert.equal(f.counts().installs,0);
+});

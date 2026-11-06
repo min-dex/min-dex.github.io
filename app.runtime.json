@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-audio-text-timing",
+  "version": "20261106-church-internal-update",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "75b934d7f2f53973a3bbcd3a5332d5c236d010609149e1da0c602d0d97dc831c",
-  "runtime_sha256": "ffec388c83cfe1d4094ec3607106e1f34afac745bd2157425086a69a53437c2c",
-  "source_bytes": 1354393,
-  "runtime_bytes": 966798,
-  "source_gzip": 310383,
-  "runtime_gzip": 243410
+  "source_sha256": "5f1634b8798fdb8f9b577dd041bac16afc9c09883bbf24955be11d4698b022a1",
+  "runtime_sha256": "849caf513556476f22a94ed8b9dfc3d5c2029eb5d742c4f8d31992184173a90d",
+  "source_bytes": 1354771,
+  "runtime_bytes": 967098,
+  "source_gzip": 310474,
+  "runtime_gzip": 243501
 }

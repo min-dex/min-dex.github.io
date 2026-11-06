@@ -43,3 +43,5 @@ assets/youtube/
 
 !scripts/product-identity.cjs
 mindex-build.json
+
+!scripts/publish-internal.py

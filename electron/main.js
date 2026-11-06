@@ -13,7 +13,7 @@ let mainWindowEnsureTimer = null;
 function updatesEnabled() {
   let build;
   try { build = require("../mindex-build.json"); } catch { return false; }
-  return build.channel === "release" && app.isPackaged && require("../package.json").mindexTestBuild !== true
+  return ["release", "internal"].includes(build.channel) && !testIsolation && app.isPackaged && require("../package.json").mindexTestBuild !== true
     && process.env.MINDEX_DISABLE_UPDATES !== "1";
 }
 
@@ -193,11 +193,22 @@ function createPresenterWindow({ url, targetRect, alwaysOnTop = false } = {}) {
 function configureAutoUpdater() {
   if (updateController || !updatesEnabled()) return updateController;
   try {
+    const build = require('../mindex-build.json');
+    if (build.channel === 'internal') {
+      updateController = require('./internal-updater').createInternalUpdateController({
+        version: app.getVersion(), platform: process.platform, arch: process.arch,
+        enabled: updatesEnabled,
+        presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()) || require('./youtube-window').isActive(),
+        notify: state => { if(mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('mindex:update-state',state); },
+        openExternal: url => require('electron').shell.openExternal(url),
+      });
+      return updateController;
+    }
     const { autoUpdater } = require("electron-updater");
     updateController = createUpdateController({
       updater: autoUpdater,
       enabled: updatesEnabled,
-      presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()),
+      presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()) || require('./youtube-window').isActive(),
       notify: (state) => {
         if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("mindex:update-state", state);
       },
@@ -220,6 +231,8 @@ function bindUpdateMenu() {
       mainWindow.webContents.send("mindex:check-update-requested");
     },
   }] }));
+  const openBroadcast = require('./youtube-window');
+  menu.append(new MenuItem({label:'방송',submenu:[{label:'유튜브 송출',click:()=>openBroadcast(mainWindow)}]}));
   Menu.setApplicationMenu(menu);
 }
 
