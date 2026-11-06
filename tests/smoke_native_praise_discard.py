@@ -78,10 +78,23 @@ try:
     const slides=fs=>fs.flatMap(x=>x.lyrics.split(/\\n\\s*\\n/).map(text=>({type:'lyrics',text})));
     f.record.content.audio_set={enabled:true,audioUrl:'https://example.invalid/a.wav',audioFingerprint:'hash',duration:80,starts:[1,10,20,30],forms:structuredClone(audioForms),sourceSignature:MindexSongTiming.sourceSignature({forms}),lyricsFingerprint:MindexSongTiming.fingerprint(slides(audioForms))};
     let writes=0;
-    f.repository=MindexSingleSong.createRepository({read:async()=>[structuredClone(f.record)],commit:async req=>{writes++;check(req.expectedRevision===f.record.revision,'revision lost');f.record={...structuredClone(req.record),revision:f.record.revision+1};return structuredClone(f.record)}});
+    let finishCommit;
+    f.repository=MindexSingleSong.createRepository({read:async()=>[structuredClone(f.record)],commit:async req=>{
+     writes++;check(req.expectedRevision===f.record.revision,'revision lost');
+     if(writes===1)await new Promise(resolve=>finishCommit=resolve);
+     f.record={...structuredClone(req.record),revision:f.record.revision+1};return structuredClone(f.record)
+    }});
     f.reset();const audioBefore=structuredClone(f.record.content.audio_set),relations=JSON.stringify(f.record.relations);
     state.forms[0].lyrics='원본가사\\n둘째 줄\\n\\n다음 장';state.dirty.forms=true;
-    await saveAll();check(!state.dirty.forms&&!state.saving,'save failed');
+    const saving=saveAll();
+    check(typeof finishCommit==='function','save did not reach commit');
+    let leaveResult;
+    const leaving=confirmSaveBeforeLeaving().then(result=>leaveResult=result);
+    await Promise.resolve();
+    check(leaveResult===undefined&&!document.querySelector('.unsaved-dialog'),'navigation prompted before the save settled');
+    finishCommit();
+    await saving;await leaving;
+    check(leaveResult===true&&!state.dirty.forms&&!state.saving,'save or navigation failed');
     check(JSON.stringify(f.record.content.audio_set.starts)===JSON.stringify(audioBefore.starts),'cues changed');
     check(f.record.content.audio_set.sourceSignature!==audioBefore.sourceSignature,'text fingerprint not committed');
     check(MindexSongTiming.audioStatus(getSelectedVersion())==='','saved timing invalid');

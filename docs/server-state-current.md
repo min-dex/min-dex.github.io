@@ -417,5 +417,7 @@ The output window and Remote do not receive this controller view setting.
   폐기를 취소한다. 다른 판본의 관계·초안·예배 데이터는 변경하지 않는다.
 - 응답 유실 등 미확정 native 저장은 조회만으로 해결됐다고 판단하지 않는다.
   기존 요청으로 다시 저장해 결과를 확인하기 전까지 폐기·이동을 막는다.
+- 곡 저장 중 이동하면 진행 중인 저장의 처리가 끝난 뒤 미저장 여부를 다시
+  확인한다. 저장 중 입력했거나 실패해 남은 초안은 기존 확인창으로 보호한다.
 - Offline Chromium/WebKit 실제 가사 입력·저장 안 함 대화상자 및 경합 검증 통과.
   운영 쓰기 없음. 공유 release의 exact-SHA gate·배포 검증은 별도다.

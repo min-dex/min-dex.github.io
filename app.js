@@ -18,6 +18,7 @@ const TABLE_COLUMN_SUPPORT_CACHE = new Map();
 let songLoadPromise = null;
 let serviceDataLoadPromise = null;
 let activeServiceSavePromise = null;
+let activePraiseSavePromise = null;
 let calendarLoadPromise = null;
 let scriptureBookLoadPromise = null;
 let scriptureLoadPromise = null;
@@ -6737,6 +6738,13 @@ async function saveAll() {
     return;
   }
 
+  const save = saveSelectedPraise(song);
+  activePraiseSavePromise = save;
+  try { return await save; }
+  finally { if (activePraiseSavePromise === save) activePraiseSavePromise = null; }
+}
+
+async function saveSelectedPraise(song) {
   const publishClient = state.client;
   state.saving = true;
   updateSaveState();
@@ -20611,10 +20619,9 @@ async function discardUnsavedChanges() {
 }
 
 async function confirmSaveBeforeLeaving() {
-  // An inline or explicit worship save may already own the current draft.
-  // Let its receipt settle before deciding whether there is anything left to save.
-  while (activeServiceSavePromise) {
-    await activeServiceSavePromise.catch(() => {});
+  // Let the current save settle before deciding whether there is anything left to save.
+  while (activeServiceSavePromise || activePraiseSavePromise) {
+    await (activeServiceSavePromise || activePraiseSavePromise).catch(() => {});
   }
   if (!hasDirtyChanges({ reconcile: true })) return true;
   const action = await confirmUnsavedChangesAction();
