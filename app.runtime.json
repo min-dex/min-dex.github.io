@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-save-read-overlap",
+  "version": "20261106-audio-text-timing",
   "options": {
     "compress": false,
     "mangle": {
