@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-church-internal-update",
+  "version": "20261106-thanksgiving-artwork",
   "options": {
     "compress": false,
     "mangle": {
