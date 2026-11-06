@@ -93,7 +93,7 @@ const PRESENTER_BACKGROUND_LUMINANCE = Object.freeze({
   "26-S4": 0.836764,
   "26-S5": 0.727394,
   "26-S6": 0.606454,
-  "26-감사특새": 0.020560,
+  "26-감사특새": 0.024457,
   "scripture-reading-cross": 0.009832,
 });
 // END GENERATED BACKGROUND LUMINANCE
