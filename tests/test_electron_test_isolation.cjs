@@ -73,3 +73,15 @@ test('Intel acceptance reuses exact-run artifacts and keeps publication disabled
  assert.match(intel,/name: mindex-mac-test/);assert.doesNotMatch(intel,/run-id:|continue-on-error:|--publish always/);
  for(const name of ['verify_candidate_package.cjs','test_desktop_youtube_local.cjs','test_desktop_upgrade.cjs'])assert.ok(intel.includes(name));
 });
+
+
+test('Intel restores the test subdirectory kept by the upload common root',()=>{
+ const workflow=fs.readFileSync('.github/workflows/desktop-release.yml','utf8');
+ const intel=workflow.split('  verify-intel:')[1].split('  draft-release:')[0];
+ assert.match(intel,/name: mindex-mac-test\n          path: dist\n/);
+ const path=require('node:path');
+ // The upload includes dist/* and dist/test/*: ZIP entries retain test/.
+ const archiveEntry='test/Mindex-Test-1.0.0-test-mac-x64.dmg';
+ assert.equal(path.posix.join('dist',archiveEntry),'dist/test/Mindex-Test-1.0.0-test-mac-x64.dmg');
+ assert.match(intel,/test -f "\$installer"/);
+});

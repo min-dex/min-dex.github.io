@@ -239,7 +239,7 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: mindex-mac-test
-          path: dist/test
+          path: dist
       - name: Verify Intel launch, reinstall preservation and local RTMPS
         shell: bash
         run: |
@@ -247,6 +247,7 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/mindex-qa" --ignore-scripts --no-audit --no-fund playwright@1.58.0
           export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
           installer="dist/test/Mindex-Test-1.0.0-test-mac-x64.dmg"
+          test -f "$installer"
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-fixture.json"
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"intel-fixture.json"))).exe')"
           resources="$(dirname "$(dirname "$exe")")/Resources"
