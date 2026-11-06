@@ -39,10 +39,12 @@ def main():
     if existing.returncode==0: raise RuntimeError('Version already exists; do not replace installers')
     gh('release','create',tag,'--target',sha,'--title',f'Mindex {version} · 교회 내부용','--notes-file',str(notes),'--draft')
     gh('release','upload',tag,*map(str,files),str(receipt),str(sums))
-    uploaded=json.loads(gh('release','view',tag,'--json','assets,isDraft'))
-    assert uploaded['isDraft']
+    uploaded=json.loads(gh('api',f'repos/{repo}/releases/tags/{tag}'))
+    assert uploaded['draft']
     assets={a['name']:a for a in uploaded['assets']}
-    for item in records: assert assets[item['file']]['size']==item['bytes']
+    for item in records:
+        assert assets[item['file']]['size']==item['bytes']
+        assert assets[item['file']].get('digest')=='sha256:'+item['sha256']
     assert json.loads(gh('api',f'repos/{repo}/git/ref/heads/main'))['object']['sha']==sha
     gh('release','edit',tag,'--draft=false','--latest')
     print('Published',tag,sha)
