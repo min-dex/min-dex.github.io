@@ -84,6 +84,99 @@
         return (version?.forms || []).some(v => v.id === f.id && lyricsText(v.lyrics) === lyricsText(f.lyrics));
       });
   }
+  // Rebase text-only edits at the explicit save boundary, never by weakening
+  // playback validation. Old signatures remain the evidence for page ownership.
+  function rebaseAudioSet(version, nextForms = version?.forms) {
+    const original = version?.audio_set;
+    if (!original || original.sourceSignature === sourceSignature({forms:nextForms})) return original;
+    try {
+      const rows = JSON.parse(original.sourceSignature);
+      if (!Array.isArray(rows) || rows.length !== nextForms.length) return original;
+      const previous = rows.map(r => ({id:r[0],part_type:r[1],part_number:r[2],part_variant:r[3],lyrics:r[4]}));
+      if (!validSet(original, {forms:previous})) return original;
+      const paragraphs = text => lyricsText(text).split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean);
+      const maps = [], nextText = nextForms.map(f=>lyricsText(f.lyrics || f.text));
+      let oldOffset=0, newOffset=0;
+      for (let i=0;i<previous.length;i++) {
+        const old=previous[i], next=nextForms[i];
+        if (JSON.stringify(rows[i].slice(0,4)) !== JSON.stringify([next.id||'',next.part_type||'',next.part_number??null,next.part_variant||''])) return original;
+        const a=paragraphs(old.lyrics), b=paragraphs(nextText[i]);
+        if (a.length!==b.length) return original;
+        const ac=a.map(audioText), bc=b.map(audioText);
+        // Detect moves/repeats even when the total number of screens is unchanged.
+        if (bc.some((t,j)=>t!==ac[j] && ac.some((s,k)=>k!==j && s===t))) return original;
+        const x=audioText(old.lyrics), y=audioText(nextText[i]);
+        const mapping=alignTextBoundaries(x,y);
+        if (!mapping) return original;
+        let ax=0,by=0;
+        for(let j=0;j<a.length;j++) {
+          ax+=ac[j].length;by+=bc[j].length;
+          if(mapping[ax]!==by) return original;
+        }
+        maps.push({oldOffset,newOffset,length:x.length,mapping});
+        oldOffset+=x.length;newOffset+=y.length;
+      }
+      const mapOffset = offset => {
+        const part=maps.find(m=>offset>=m.oldOffset&&offset<=m.oldOffset+m.length);
+        return part ? part.newOffset+part.mapping[offset-part.oldOffset] : null;
+      };
+      const source=nextText.join('\n\n');
+      // Offset pairs retain authored whitespace inside each selected audio range.
+      const positions=[];let raw=0;
+      for(const char of source) {
+        const folded=audioText(char);
+        for(let k=0;k<folded.length;k++) positions.push([raw,raw+char.length]);
+        raw+=char.length;
+      }
+      const forms=original.forms.map(f=>{
+        if(f._presenterBlank) return {...f};
+        if(Array.isArray(f.audioSourceRange)) {
+          const start=mapOffset(f.audioSourceRange[0]),end=mapOffset(f.audioSourceRange[1]);
+          if(start==null||end==null||end<=start||!positions[start]||!positions[end-1]) throw Error('range');
+          let left=positions[start][0],right=positions[end-1][1];
+          while(left>0 && !/[\p{L}\p{N}\s]/u.test(source[left-1])) left--;
+          while(right<source.length && !/[\p{L}\p{N}\s]/u.test(source[right])) right++;
+          return {...f,audioSourceRange:[start,end],lyrics:source.slice(left,right).trim()};
+        }
+        const index=previous.findIndex(p=>p.id===f.id);
+        if(index<0) throw Error('form');
+        return {...f,lyrics:nextText[index]};
+      });
+      const slides = fs => fs.flatMap(f=>f._presenterBlank ? [{type:'blank',text:''}] : paragraphs(f.lyrics).map(text=>({type:'lyrics',text})));
+      const oldSlides=slides(original.forms),newSlides=slides(forms);
+      if(original.lyricsFingerprint!==fingerprint(oldSlides) || oldSlides.length!==newSlides.length
+          || oldSlides.some((s,i)=>s.type!==newSlides[i].type || noLead(s)!==noLead(newSlides[i]))) return original;
+      const updated={...original,forms,sourceSignature:sourceSignature({forms:nextForms}),lyricsFingerprint:fingerprint(newSlides)};
+      return validSet(updated,{forms:nextForms}) && !validate(updated,newSlides,true) ? updated : original;
+    } catch { return original; }
+  }
+  function alignTextBoundaries(a,b) {
+    if(a===b) return Array.from({length:a.length+1},(_,i)=>i);
+    let prefix=0,suffix=0;
+    while(prefix<Math.min(a.length,b.length)&&a[prefix]===b[prefix]) prefix++;
+    while(suffix<Math.min(a.length,b.length)-prefix&&a[a.length-1-suffix]===b[b.length-1-suffix]) suffix++;
+    if(prefix||suffix) {
+      const x=a.slice(prefix,a.length-suffix),y=b.slice(prefix,b.length-suffix);
+      const middle=!x.length ? [y.length] : !y.length ? Array(x.length+1).fill(0) : alignTextBoundaries(x,y);
+      if(!middle) return null;
+      return Array.from({length:a.length+1},(_,i)=>i<prefix ? i : i> a.length-suffix ? b.length-(a.length-i) : prefix+middle[i-prefix]);
+    }
+    // Bounded edit alignment; malformed/oversized sources keep the review gate.
+    if(!a.length||!b.length||a.length*b.length>4000000) return null;
+    const width=b.length+1, costs=new Uint16Array((a.length+1)*width);
+    for(let i=0;i<=a.length;i++) costs[i*width]=i;
+    for(let j=0;j<=b.length;j++) costs[j]=j;
+    for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)
+      costs[i*width+j]=Math.min(costs[(i-1)*width+j-1]+(a[i-1]===b[j-1]?0:1),costs[(i-1)*width+j]+1,costs[i*width+j-1]+1);
+    const map=Array(a.length+1);let i=a.length,j=b.length;map[i]=j;
+    while(i||j) {
+      if(i&&j&&costs[i*width+j]===costs[(i-1)*width+j-1]+(a[i-1]===b[j-1]?0:1)){i--;j--;map[i]=j;}
+      else if(i&&costs[i*width+j]===costs[(i-1)*width+j]+1){i--;map[i]=j;}
+      else {j--;map[i]=j;}
+    }
+    map[a.length]=b.length;
+    return map;
+  }
   function audioStatus(version, slides = null) {
     if (!version) return '';
     const profile = version.audio_set;
@@ -786,7 +879,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { audioStatus, statusMarkup, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  root.MindexSongTiming = { rebaseAudioSet, audioStatus, statusMarkup, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') {
     document.addEventListener('pointerdown', e => {
       activeSeekInput = e.target.closest('[data-song-timing-seek]:not(:disabled)');

@@ -66,6 +66,10 @@ async function saveSongMeta(liveSong) {
     const before = pending?.before || structuredClone(liveSong), formsBefore = pending?.formsBefore || JSON.stringify(state.forms);
     const next = pending?.next || globalThis.MindexSingleSong.fromLegacySong(before, before.versions[0], liveSong.id);
     if (!pending) {
+      // Commit corrected display text and its existing cues in the same CAS write.
+      if (globalThis.MindexSongTiming && next.content.audio_set) {
+        next.content.audio_set = MindexSongTiming.rebaseAudioSet(next.content);
+      }
       next.legacy = record.legacy; next.provenance = record.provenance;
       if (record.previousIds) next.previousIds = structuredClone(record.previousIds);
       next.relations = record.relations; next.revision = before._singleSongRevision ?? record.revision;
@@ -135,6 +139,9 @@ async function saveSongMeta(liveSong) {
     const aggregatePraiseTypes = aggregateSongPraiseTypes(song);
     const useVersionTables = state.songVersionTablesSupported === true;
     const useRelationTable = state.songRelationsSupported === true;
+    for (const version of song.versions || []) {
+      if (globalThis.MindexSongTiming && version.audio_set) version.audio_set = MindexSongTiming.rebaseAudioSet(version);
+    }
     const plan = useVersionTables && state.dirty.forms ? await saveSongVersions(song, {detached:true, planOnly:true}) : {};
     const payload = {
       title: cleanSongTitleForSave(song),
