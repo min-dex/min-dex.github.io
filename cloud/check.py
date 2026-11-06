@@ -171,6 +171,7 @@ SMOKES = (
     "smoke_reference_validation.py",
     "smoke_praise_atomic_save.py",
     "smoke_praise_discard_retry.py",
+    "smoke_native_praise_discard.py",
     "smoke_praise_lifecycle.py",
     "smoke_presenter_freshness.py",
     "smoke_native_freshness_title.py",

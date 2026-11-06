@@ -20600,18 +20600,41 @@ async function discardUnsavedChanges() {
   const dirtyModules = getDirtyModules();
   if (dirtyModules.praise && state.module === "praise") {
     const song = getSelectedSong(), client = state.client, project = state.config.url;
+    const repository = state.singleSongRepository;
     const versionId = getSelectedVersionId();
     const before = JSON.stringify({song, forms:state.forms});
     try {
       if (!song || !client || state.saving) return false;
-      const result = await client.rpc("get_praise_snapshot_v1", {sid:song.id});
-      if (result.error) throw result.error;
-      const fresh = praiseSnapshotSong(result.data);
+      let fresh, nativeRecord;
+      if (song._singleSongRecord) {
+        if (!repository) throw new Error("SINGLE_SONG_REPOSITORY_REQUIRED");
+        // A read cannot settle a request whose commit response was lost.
+        if (praisePendingSaves.has(song) || repository.pendingRecord(song.id)) {
+          showToast("이전 저장 결과를 먼저 확인해야 합니다. 다시 저장한 뒤 이동해 주세요.", "error");
+          return false;
+        }
+        const rows = await repository.read([song.id]);
+        if (rows.length !== 1 || rows[0].id !== song.id) throw new Error("PRAISE_SNAPSHOT_MISMATCH");
+        nativeRecord = rows[0];
+        fresh = globalThis.MindexSingleSong.createCatalog(rows).appSong(song.id);
+      } else {
+        const result = await client.rpc("get_praise_snapshot_v1", {sid:song.id});
+        if (result.error) throw result.error;
+        fresh = praiseSnapshotSong(result.data);
+      }
       if (fresh.id !== song.id) throw new Error("PRAISE_SNAPSHOT_MISMATCH");
       if (project !== state.config.url || client !== state.client || getSelectedSong() !== song || versionId !== getSelectedVersionId()
+          || state.module !== "praise" || state.saving
+          || (nativeRecord && (repository !== state.singleSongRepository || praisePendingSaves.has(song) || repository.pendingRecord(song.id)))
           || before !== JSON.stringify({song, forms:state.forms})) {
         showToast("확인 중 입력이 바뀌어 이동하지 않았습니다. 입력은 유지됩니다.", "error");
         return false;
+      }
+      if (nativeRecord) {
+        const catalog = state.singleSongCatalog;
+        if (catalog.get(song.id).revision > nativeRecord.revision) throw new Error("SONG_READ_STALE");
+        state.singleSongCatalog = globalThis.MindexSingleSong.createCatalog(
+          catalog.ids().map(id => id === song.id ? nativeRecord : catalog.get(id)));
       }
       state.songs = state.songs.map(item => item === song ? fresh : item);
       praisePendingSaves.delete(song);

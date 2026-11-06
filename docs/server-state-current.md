@@ -408,3 +408,14 @@ profile identity. It is not a shared worship/project setting. Existing shared
 scale values are ignored, not copied to other devices; without a device value
 the controller starts at 100%. Legacy browser-local scale migrates to device.
 The output window and Remote do not receive this controller view setting.
+
+## Native Praise discard · 2026-11-06
+
+- Native 판본의 ‘저장 안 함’은 legacy snapshot RPC 대신 현재 repository에서
+  해당 ID만 다시 읽고 검증한다. 성공 시 같은 catalog 항목과 편집 화면만 교체한다.
+- 조회 실패, 연결·repository·선택·입력 변경, 저장 시작, 더 최신 catalog revision은
+  폐기를 취소한다. 다른 판본의 관계·초안·예배 데이터는 변경하지 않는다.
+- 응답 유실 등 미확정 native 저장은 조회만으로 해결됐다고 판단하지 않는다.
+  기존 요청으로 다시 저장해 결과를 확인하기 전까지 폐기·이동을 막는다.
+- Offline Chromium/WebKit 실제 가사 입력·저장 안 함 대화상자 및 경합 검증 통과.
+  운영 쓰기 없음. 공유 release의 exact-SHA gate·배포 검증은 별도다.
