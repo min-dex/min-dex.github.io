@@ -59,7 +59,14 @@ with tempfile.TemporaryDirectory(prefix='mindex-entry-profile-',dir='/private/tm
     page.wait_for_function('MindexCatalogCache.stats().hits>0||MindexCatalogCache.stats().writes>0',timeout=5000)
    if phase=='reopened-repeat' and args.include_invalidated:
     # Change only this disposable local profile's signature, never server data.
-    page.evaluate("async()=>{await MindexCatalogCache.write(state.client,{status:{...(await state.client.rpc('get_praise_storage_status_v1')).data,manifest:'diagnostic-stale-signature'},records:state.singleSongCatalog.ids().map(id=>state.singleSongCatalog.get(id))})}")
+    page.evaluate("""async()=>{
+      const {data:status,error}=await state.client.rpc('get_praise_storage_status_v1');
+      if(error)throw Error('could not prepare disposable stale signature');
+      const records=state.singleSongCatalog.ids().map(id=>state.singleSongCatalog.get(id));
+      if(status.catalogIndex===1)records[0].revision=records[0].revision===0?1:records[0].revision-1;
+      const written=await MindexCatalogCache.write(state.client,{status:{...status,manifest:'diagnostic-stale-signature'},records});
+      if(!written)throw Error('could not seed disposable stale snapshot');
+    }""")
    if phase=='reopened-snapshot':
     page.evaluate('async()=>{if(window.MindexCatalogCache)await MindexCatalogCache.remove(state.client)}')
    (args.output/(args.label+'-'+args.engine+'.json')).write_text(json.dumps(results,ensure_ascii=False,indent=2)+'\n')

@@ -15,7 +15,7 @@ parser=argparse.ArgumentParser();parser.add_argument('--url',required=True);pars
 OUT=args.output.resolve();OUT.mkdir(parents=True,exist_ok=True)
 GUARD=r'''(() => {
  const bookkeeping=new Set(['mindex_state_read_v1','mindex_state_write_v1','mindex_monitor_register','mindex_monitor_ping','mindex_monitor_presence','mindex_remote_output']);
- const reads=new Set(['get_worship_service_v1','get_single_praise_records_v1','get_praise_snapshot_v1','get_single_praise_catalog_page_v1','get_praise_storage_status_v1']);
+ const reads=new Set(['get_worship_service_v1','get_single_praise_records_v1','get_praise_snapshot_v1','get_single_praise_catalog_page_v1','get_praise_storage_status_v1','get_praise_catalog_index_v1']);
  window.loadingAudit={blocked:0,fixture:0,requests:[],errors:0};
  const native=window.fetch.bind(window);
  const allowed=(u,m)=>['GET','HEAD','OPTIONS'].includes(m)||(u.hostname.endsWith('.supabase.co')&&m==='POST'&&reads.has(u.pathname.split('/').pop()));
@@ -26,8 +26,12 @@ GUARD=r'''(() => {
    return new Response(JSON.stringify(value),{status:200,headers:{'Content-Type':'application/json'}});
   }
   if(!allowed(u,method)){loadingAudit.blocked++;return new Response('{"message":"Read-only probe"}',{status:403,headers:{'Content-Type':'application/json'}})}
+  let requestedRecords=null;
+  if(name==='get_single_praise_records_v1'&&method==='POST'){
+   try{const ids=(await request.clone().json()).ids;if(Array.isArray(ids))requestedRecords=ids.length;}catch{}
+  }
   const started=performance.now();
-  try{const response=await native(input,init);const headersMs=performance.now();const copy=response.clone();void copy.arrayBuffer().then(body=>{let sqlstate=null;if(!response.ok&&u.hostname.endsWith('.supabase.co')){try{const code=JSON.parse(new TextDecoder().decode(body)).code;if(/^[A-Z0-9]{5}$/.test(code))sqlstate=code;}catch{}}loadingAudit.requests.push({name,method,startMs:started,headersMs,endMs:performance.now(),ms:performance.now()-started,bytes:body.byteLength,status:response.status,sqlstate});});return response;}
+  try{const response=await native(input,init);const headersMs=performance.now();const copy=response.clone();void copy.arrayBuffer().then(body=>{let sqlstate=null;if(!response.ok&&u.hostname.endsWith('.supabase.co')){try{const code=JSON.parse(new TextDecoder().decode(body)).code;if(/^[A-Z0-9]{5}$/.test(code))sqlstate=code;}catch{}}loadingAudit.requests.push({name,method,startMs:started,headersMs,endMs:performance.now(),ms:performance.now()-started,bytes:body.byteLength,status:response.status,sqlstate,requestedRecords});});return response;}
   catch(e){loadingAudit.requests.push({name,method,ms:performance.now()-started,error:e.name});throw e;}
  };
  const open=XMLHttpRequest.prototype.open,send=XMLHttpRequest.prototype.send;

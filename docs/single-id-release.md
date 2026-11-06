@@ -1,3 +1,28 @@
+## Indexed catalog transport candidate ·2026-11-06
+
+A server that advertises `catalogIndex: 1` may supply a manifest-bound, ordered
+list of record IDs and revisions from one SQL statement snapshot. The client
+validates the exact count, identity and revision domain. It requests only IDs
+missing from a checksum-verified same-project, same-epoch snapshot or with a
+changed revision. Removed IDs disappear by rebuilding in index order. Cold
+profiles use the same index to request disjoint batches of at most 200 IDs,
+with at most three reads in flight and bounded 57014 subdivisions. The client
+requires the expected ID and revision for every fetched row, validates the
+complete catalog and checks fresh final status before installation. It drains
+failed workers before falling back to the existing range transport.
+
+The index is an additive, unapplied server migration. The existing clients
+continue to accept status responses with the new optional capability, and the
+new client retains the old path on servers without it. Apply only after the
+live function definitions, read roles and revision invariants have been
+reviewed. All writes that change a published payload must advance its revision
+or change epoch. The explicit rollback removes the capability and index only.
+The isolated PostgreSQL and browser fixtures verify payload parity, access,
+maintenance, read errors, cache corruption and migration rollback. Synthetic
+transfer reductions require public measurement before making latency claims.
+The optional public probe counts by-ID requests without retaining IDs, and can
+seed a disposable local snapshot with one stale revision.
+
 ## Private activation snapshot ownership ·2026-11-06
 
 `loadActivation` keeps validated prepared records inside its private pending/

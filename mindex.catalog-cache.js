@@ -52,7 +52,7 @@
       });
     } catch { return false; }
   }
-  async function read(client,status) {
+  async function read(client,status,{allowPrevious=false}={}) {
     let timer;
     const task=(async()=>{
       try {
@@ -61,18 +61,18 @@
         const result=await access(id,'readonly',(store,k)=>store.get(k));
         if (!result) { counters.failures++; return null; }
         const entry=result.value;
-        if (entry?.schema !== 1 || entry.signature !== expected || typeof entry.body !== 'string' || entry.body.length > LIMIT) return null;
+        if (entry?.schema !== 1 || (!allowPrevious && entry.signature !== expected) || typeof entry.body !== 'string' || entry.body.length > LIMIT) return null;
         const bytes=new TextEncoder().encode(entry.body);
         if (bytes.byteLength > LIMIT) return null;
         if (entry.digest !== await hash(bytes)) { void remove(client); return null; }
         const snapshot=JSON.parse(entry.body);
-        if (signature(snapshot.status)!==expected || !Array.isArray(snapshot.records) || snapshot.records.length!==status.recordCount) { void remove(client); return null; }
-        return snapshot;
+        if (!signature(snapshot.status) || signature(snapshot.status)!==entry.signature || !Array.isArray(snapshot.records) || snapshot.records.length!==snapshot.status.recordCount) { void remove(client); return null; }
+        return snapshot.status.epoch===status.epoch && (allowPrevious || entry.signature===expected) ? snapshot : null;
       } catch { counters.failures++; return null; }
     })();
     const snapshot=await Promise.race([task,new Promise(resolve=>{timer=setTimeout(()=>resolve(null),250)})]);
     clearTimeout(timer);
-    if (snapshot) counters.hits++; else counters.misses++;
+    if (snapshot && signature(snapshot.status)===signature(status)) counters.hits++; else counters.misses++;
     return snapshot;
   }
   async function write(client,prepared) {

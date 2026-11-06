@@ -52,6 +52,26 @@ try:
      tx.oncomplete=()=>{db.close();resolve()};tx.onerror=reject;
     }});
     const recovered=fixtureClient();await MindexSingleSong.loadActivation(recovered,{persistent:true});checkCache(recovered.calls.length===3,'corruption was installed');
+    // A changed revision index can use a verified previous disk snapshot across clients.
+    const deltaClient=fixtureClient('https://delta-fixture.invalid');
+    await MindexCatalogCache.write(deltaClient,{status:fixtureStatus,records:fixtureRecords});
+    const updated=structuredClone(fixtureRecords.slice(1));
+    updated[0].revision=2;
+    updated[0].content.forms[0].lyrics='변경된 원문';
+    const latest={...fixtureStatus,manifest:'delta-latest',recordCount:updated.length,catalogIndex:1};
+    const downloaded=[];
+    deltaClient.rpc=async(name,args)=>{
+      if(name==='get_praise_storage_status_v1')return {data:latest};
+      if(name==='get_praise_catalog_index_v1')return {data:{epoch:latest.epoch,manifest:latest.manifest,entries:updated.map(row=>[row.id,row.revision])}};
+      if(name==='get_single_praise_records_v1'){
+        downloaded.push(...args.ids);
+        return {data:structuredClone(updated.filter(row=>args.ids.includes(row.id)))};
+      }
+      throw Error('unexpected full catalog download');
+    };
+    const delta=await MindexSingleSong.loadActivation(deltaClient,{persistent:true});
+    checkCache(JSON.stringify(delta.records)===JSON.stringify(updated)&&downloaded.join()===updated[0].id,'revision index did not preserve source and fetch only changed record');
+    checkCache(!await MindexCatalogCache.read(deltaClient,{...latest,epoch:'2'},{allowPrevious:true}),'old epoch snapshot reused');
     // A blocked/quota-denied browser cache cannot stop authoritative reads.
     const descriptor=Object.getOwnPropertyDescriptor(window,'indexedDB');
     Object.defineProperty(window,'indexedDB',{configurable:true,value:{open(){throw Error('fixture denied')}}});

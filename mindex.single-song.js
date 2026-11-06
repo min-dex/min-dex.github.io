@@ -302,28 +302,91 @@
       && cached.status.recordCount === status.recordCount) {
       return {phase:'native', records:cached.records, status,fromReadCache:true};
     }
-    if (persistent && root.MindexCatalogCache) {
+    let previous = cached?.status.epoch === status.epoch ? cached : null;
+    if (!previous && persistent && root.MindexCatalogCache) {
       let snapshot;
-      try { snapshot=await root.MindexCatalogCache.read(client,status); } catch {}
+      try { snapshot = await root.MindexCatalogCache.read(client, status, {allowPrevious:status.catalogIndex === 1}); }
+      catch { /* Disk failure falls back to a server read. */ }
       if (snapshot) {
         try {
-          if (snapshot.status?.protocol!==status.protocol || snapshot.status.phase!=='native' || snapshot.status.idFormat!==status.idFormat
-            || snapshot.status.epoch!==status.epoch || snapshot.status.manifest!==status.manifest
-            || snapshot.status.recordCount!==status.recordCount || !Array.isArray(snapshot.records)
-            || snapshot.records.length!==status.recordCount) fail('INVALID_CATALOG_MANIFEST');
-          if (snapshot.records.some((r,i)=>!code(r.id)||(i && r.id<=snapshot.records[i-1].id))) fail('INVALID_CATALOG_PAGE');
+          const saved = snapshot.status;
+          if (saved?.protocol !== 1 || saved.phase !== 'native' || saved.idFormat !== status.idFormat
+            || saved.epoch !== status.epoch || !Array.isArray(snapshot.records)
+            || snapshot.records.length !== saved.recordCount
+            || snapshot.records.some((r,i) => !code(r.id) || (i && r.id <= snapshot.records[i-1].id))) fail('INVALID_CATALOG_MANIFEST');
           createCatalog(snapshot.records);
-          return {phase:'native',records:snapshot.records,status,fromReadCache:true};
+          if (saved.manifest === status.manifest && saved.recordCount === status.recordCount) {
+            return {phase:'native',records:snapshot.records,status,fromReadCache:true};
+          }
+          previous = snapshot;
         } catch { void root.MindexCatalogCache.remove(client); }
       }
     }
-    const records = status.recordCount <= 400 ? await readCatalogRange(client, status, null, null)
-      : await readParallelCatalog(client, status);
+    let records;
+    if (status.catalogIndex === 1) {
+      try {
+        const indexed = await readIndexedCatalog(client, status, previous);
+        createCatalog(indexed);
+        records = indexed;
+      } catch { /* Incomplete indexed reads never enter the visible catalog. */ }
+    }
+    if (!records) {
+      records = status.recordCount <= 400 ? await readCatalogRange(client, status, null, null)
+        : await readParallelCatalog(client, status);
+      createCatalog(records);
+    }
     if (records.length !== status.recordCount || records.some((r,i) => i && r.id <= records[i-1].id)) fail('INVALID_CATALOG_PAGE');
     const final = await client.rpc('get_praise_storage_status_v1');
     if (final.error || final.data?.phase !== 'native' || final.data.epoch !== status.epoch || final.data.manifest !== status.manifest || final.data.recordCount !== records.length) fail('PRAISE_STORAGE_CHANGED');
-    createCatalog(records); // Validate before any caller replaces its visible state.
     return {phase:'native',records,status,repository:createRpcRepository(client)};
+  }
+  async function readIndexedCatalog(client, status, previous) {
+    const result = await client.rpc('get_praise_catalog_index_v1', {
+      expected_epoch:status.epoch, expected_manifest:status.manifest,
+    });
+    const index = result.data;
+    if (result.error || index?.epoch !== status.epoch || index.manifest !== status.manifest
+      || !Array.isArray(index.entries) || index.entries.length !== status.recordCount) fail('INVALID_CATALOG_INDEX');
+    const revisions = new Map();
+    let last = null;
+    for (const entry of index.entries) {
+      if (!Array.isArray(entry) || entry.length !== 2) fail('INVALID_CATALOG_INDEX');
+      const [id, revision] = entry;
+      if (typeof id !== 'string' || !code(id) || (last !== null && id <= last)
+        || !Number.isSafeInteger(revision) || revision < 0) fail('INVALID_CATALOG_INDEX');
+      revisions.set(id, revision);
+      last = id;
+    }
+    const rows = new Map();
+    for (const row of previous?.records || []) {
+      if (revisions.get(row.id) === row.revision && revisions.has(row.id)) rows.set(row.id,row);
+    }
+    const missing = [...revisions.keys()].filter(id => !rows.has(id));
+    async function readBatch(ids) {
+      const response = await client.rpc('get_single_praise_records_v1', {ids});
+      if (response.error?.code === '57014' && ids.length > 25) {
+        const size = ids.length > 100 ? 100 : 25;
+        for (let offset = 0; offset < ids.length; offset += size) await readBatch(ids.slice(offset,offset+size));
+        return;
+      }
+      const fetched = response.data;
+      if (response.error || !Array.isArray(fetched) || fetched.length !== ids.length
+        || fetched.some((row,i) => row?.id !== ids[i] || row.revision !== revisions.get(ids[i]))) fail('PRAISE_STORAGE_CHANGED');
+      for (const row of fetched) rows.set(row.id,row);
+    }
+    let next = 0, stopped = false;
+    async function worker() {
+      try {
+        while (!stopped && next < missing.length) {
+          const start = next;
+          next += 200;
+          await readBatch(missing.slice(start,start+200));
+        }
+      } catch (error) { stopped = true; throw error; }
+    }
+    const results = await Promise.allSettled(Array.from({length:Math.min(3,Math.ceil(missing.length/200))},worker));
+    for (const result of results) if (result.status === 'rejected') throw result.reason;
+    return [...revisions.keys()].map(id => rows.get(id));
   }
   async function readParallelCatalog(client, status) {
     const bounds = [null, 'SONG-HYMN-N', 'SONG-HYMN-T', null];

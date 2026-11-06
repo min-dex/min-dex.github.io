@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-home-overview-overlap",
+  "version": "20261106-catalog-index",
   "options": {
     "compress": false,
     "mangle": {
