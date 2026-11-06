@@ -3,7 +3,7 @@ function versionAudioSummaryStatus(version, forms) {
   const audio = version?.audio_set;
   if (!audio) return "";
   const count = Array.isArray(audio.starts) ? audio.starts.filter(value => Number.isFinite(value) && value >= 0).length : 0;
-  const changed = globalThis.MindexSongTiming && audio.sourceSignature !== MindexSongTiming.sourceSignature({ ...version, forms });
+  const changed = globalThis.MindexSongTiming && MindexSongTiming.rebaseAudioSet(version, forms).sourceSignature !== MindexSongTiming.sourceSignature({ ...version, forms });
   const status = changed ? "가사 변경 · 타이밍 확인 필요" : `저장된 자동 넘김 ${audio.enabled ? "켜짐" : "꺼짐"}`;
   return `${count ? `저장 타이밍 ${count}개` : "저장 타이밍 없음"} · ${status}`;
 }
