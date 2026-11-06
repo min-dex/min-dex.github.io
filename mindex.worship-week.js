@@ -133,6 +133,17 @@ function manualWorshipServiceType(typeId, date, alias) {
     ? target.typeId : typeId;
 }
 
+function manualWorshipServiceCreation(form) {
+  const date = String(form.date || "").trim();
+  const typeId = manualWorshipServiceType(form.type_id || state.selectedServiceTypeId, date, form.alias);
+  if (!typeId || !date) return {error: "예배 날짜를 입력해 주세요."};
+  if (worshipAppServiceTypeId(typeId) === "monthly" && state.services.some(service =>
+    service.date === date && worshipAppServiceTypeId(service.type_id) === "monthly")) {
+    return {error: "이 날짜에 월삭예배가 이미 있습니다."};
+  }
+  return {typeId, date};
+}
+
 function worshipServiceMatchesAutoTarget(service, target) {
   const actual = worshipAppServiceTypeId(service.type_id), wanted = worshipAppServiceTypeId(target.typeId);
   if (String(service.date || '').trim() !== String(target.date || '').trim()) return false;

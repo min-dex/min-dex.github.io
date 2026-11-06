@@ -2465,17 +2465,9 @@ function initPresenterOutput() {
 async function createService() {
   if (!state.newServiceForm || !requireClient() || state.saving) return;
   const form = state.newServiceForm;
-  const date = String(form.date || "").trim();
-  const alias = String(form.alias || "").trim();
-  const typeId = manualWorshipServiceType(form.type_id || state.selectedServiceTypeId, date, alias);
-  if (!typeId || !date) {
-    showToast("예배 날짜를 입력해 주세요.", "error");
-    return;
-  }
-
-  if (worshipAppServiceTypeId(typeId) === "monthly" && state.services.some(service =>
-    service.date === date && worshipAppServiceTypeId(service.type_id) === "monthly")) {
-    showToast("이 날짜에 월삭예배가 이미 있습니다.", "error");
+  const {typeId, date, error} = manualWorshipServiceCreation(form);
+  if (error) {
+    showToast(error, "error");
     return;
   }
 
@@ -2495,7 +2487,7 @@ async function createService() {
     source_ref: { created_from: "mindex_template", app_service_type_id: typeId },
     notes: "",
   };
-  if (state.serviceAliasSupported) servicePayload.service_alias = alias;
+  if (state.serviceAliasSupported) servicePayload.service_alias = String(form.alias || "").trim();
   state.saving = true;
   updateSaveState();
   try {

@@ -58,6 +58,8 @@ assert.equal(manualWorshipServiceType('friday','2026-11-13',fri.alias),'friday')
 const actualMonthly={...monthly,_worshipSourceRef:{}};
 const duplicateFriday={...fri,_worshipSourceRef:{...fri._worshipSourceRef,navigation_duplicate_of:actualMonthly.id}};
 state.services=[duplicateFriday,actualMonthly];
+assert.ok(manualWorshipServiceCreation({type_id:'friday',date:fri.date,alias:fri.alias}).error);
+assert.equal(manualWorshipServiceCreation({type_id:'friday',date:fri.date,alias:'별도 금요기도회'}).typeId,'friday');
 const reviewedPair=JSON.stringify(state.services);
 const monthlyResults=getGlobalServiceResults(normalizeSearchValue('온세대 월삭예배'));
 assert.deepEqual(monthlyResults.map(service=>service.id),[actualMonthly.id]);
