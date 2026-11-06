@@ -16187,7 +16187,8 @@ function getGlobalScriptureResults(query, tokens) {
 
 function getGlobalServiceResults(query) {
   if (!query) return [];
-  return sortServicesByDate(state.services.filter((service) => serviceMatchesSearch(service, query)), "desc").slice(0, 8);
+  const services = serviceUpcomingDisplayServices(state.services);
+  return sortServicesByDate(services.filter((service) => serviceMatchesSearch(service, query)), "desc").slice(0, 8);
 }
 
 function renderGlobalPraiseResult(result) {

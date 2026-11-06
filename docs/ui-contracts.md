@@ -1209,11 +1209,13 @@ fetch. Category filters still show their own subset. Service/Section/Element/Sli
 UI labels read 예배/섹션/항목/슬라이드. Default empty setlist reasons use concise
 copy and keep words together; authored reasons and stored source text stay intact.
 
-A reviewed duplicate can carry source_ref.navigation_duplicate_of. Upcoming/home
-projection hides it only when its target exists, date/Friday-monthly family,
+A reviewed duplicate can carry source_ref.navigation_duplicate_of. Upcoming/home and global search
+projections hide it only when its target exists, date/Friday-monthly family,
 nonempty alias and effective time range match; missing/changed targets fail open.
 Both IDs and all history/data remain available in the ordinary archive. This is
 independent of no_gathering and replacement navigation. Monthly auto-generation
 also recognizes an already saved Friday with the exact target alias and ordinary
 monthly time range, preventing that duplicate creation path. Other times, names
-and service types remain separate.
+and service types remain separate. For a scheduled monthly Friday, manual creation
+with the monthly alias resolves to the monthly type before saving. The form
+rejects a second monthly service on the same date if one is already loaded.

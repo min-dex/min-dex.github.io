@@ -126,6 +126,13 @@ function serviceUpcomingDisplayServices(services) {
   });
 }
 
+function manualWorshipServiceType(typeId, date, alias) {
+  const target = autoFridayServiceTarget(date);
+  return worshipAppServiceTypeId(typeId) === "friday" && target.typeId === "monthly"
+    && compactSearchValue(alias || "") === compactSearchValue(target.alias)
+    ? target.typeId : typeId;
+}
+
 function worshipServiceMatchesAutoTarget(service, target) {
   const actual = worshipAppServiceTypeId(service.type_id), wanted = worshipAppServiceTypeId(target.typeId);
   if (String(service.date || '').trim() !== String(target.date || '').trim()) return false;

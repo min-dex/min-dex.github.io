@@ -52,6 +52,19 @@ assert.equal(JSON.stringify(state.services),originalPair);
 for(const changed of [{...monthly,alias:'다른 예배'},{...monthly,date:'2026-11-07'},{...monthly,_worshipSourceRef:{...monthly._worshipSourceRef,start_time:'19:00'}},{...monthly,_worshipSourceRef:{navigation_duplicate_of:'missing'}},{...monthly,_worshipSourceRef:{}}]){
  state.services=[fri,changed];assert.equal(serviceUpcomingDisplayServices(state.services).length,2,'A distinct or unreviewed service must remain visible');
 }
+assert.equal(manualWorshipServiceType('friday',fri.date,fri.alias),'monthly');
+assert.equal(manualWorshipServiceType('friday',fri.date,'별도 금요기도회'),'friday');
+assert.equal(manualWorshipServiceType('friday','2026-11-13',fri.alias),'friday');
+const actualMonthly={...monthly,_worshipSourceRef:{}};
+const duplicateFriday={...fri,_worshipSourceRef:{...fri._worshipSourceRef,navigation_duplicate_of:actualMonthly.id}};
+state.services=[duplicateFriday,actualMonthly];
+const reviewedPair=JSON.stringify(state.services);
+const monthlyResults=getGlobalServiceResults(normalizeSearchValue('온세대 월삭예배'));
+assert.deepEqual(monthlyResults.map(service=>service.id),[actualMonthly.id]);
+assert.ok(renderGlobalServiceResult(monthlyResults[0]).includes('data-global-service-id="'+actualMonthly.id+'"'));
+assert.equal(JSON.stringify(state.services),reviewedPair);
+state.services=[fri,actualMonthly];
+assert.equal(getGlobalServiceResults(normalizeSearchValue('온세대 월삭예배')).length,2);
 state.services=[fri];assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:fri.alias}),true);
 assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:'다른 월삭예배'}),false);
 assert.equal(worshipServiceExistsForTarget({typeId:'monthly',date:fri.date,alias:''}),false);

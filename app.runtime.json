@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-catalog-batch-timeout",
+  "version": "20261107-monthly-search-dedup",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "5f1634b8798fdb8f9b577dd041bac16afc9c09883bbf24955be11d4698b022a1",
-  "runtime_sha256": "849caf513556476f22a94ed8b9dfc3d5c2029eb5d742c4f8d31992184173a90d",
-  "source_bytes": 1354771,
-  "runtime_bytes": 967098,
-  "source_gzip": 310474,
-  "runtime_gzip": 243501
+  "source_sha256": "9cb009896c8a3cd9536fe2cd7e6bf99a6374db355fd64abefb7123632475ca68",
+  "runtime_sha256": "c20dab9ceab2cb675bd6d115024d295d0208561c374dc9316bb07136b17f4e7e",
+  "source_bytes": 1354832,
+  "runtime_bytes": 967140,
+  "source_gzip": 310491,
+  "runtime_gzip": 243504
 }
