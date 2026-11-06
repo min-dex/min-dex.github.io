@@ -66,6 +66,8 @@ require('../mindex.song-timing.js');const T=global.MindexSongTiming;
  for(const next of [forms.slice().reverse(),[...forms,forms[1]],forms.slice(1),forms.map((f,i)=>i?f:{...f,lyrics:f.lyrics.replace('\n','\n\n')}),forms.map((f,i)=>i?f:{...f,lyrics:f.lyrics.split('\n\n').reverse().join('\n\n')}),forms.map((f,i)=>i?f:{...f,lyrics:'주님\n\n은혜로\n살아 갑니다\n감사 드리며\n찬양합니다'})]) {
   assert.equal(T.rebaseAudioSet(version,next),version.audio_set,'structure edit must keep stale signature');
  }
+ const initialTypo=structuredClone(forms);initialTypo[0].lyrics=initialTypo[0].lyrics.replace('감사 드리며','늘 감사 드리며');
+ assert.notEqual(T.rebaseAudioSet(version,initialTypo),version.audio_set,'insertion at a page start is not a new page');
  const typo=structuredClone(forms);typo[0].lyrics=typo[0].lyrics.replace('은혜로','은해로');
  assert.notEqual(T.rebaseAudioSet(version,typo),version.audio_set,'one-character correction retains cues');
  const rangeForms=[{id:'p1',lyrics:'주님 은혜로\n살아 갑니다',audioSourceRange:[0,10]},{id:'p2',lyrics:'감사 드리며\n찬양합니다',audioSourceRange:[10,20]},{id:'p3',lyrics:'주님 은혜로\n살아 갑니다',audioSourceRange:[0,10]}];

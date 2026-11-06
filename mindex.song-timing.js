@@ -111,7 +111,8 @@
         let ax=0,by=0;
         for(let j=0;j<a.length;j++) {
           ax+=ac[j].length;by+=bc[j].length;
-          if(mapping[ax]!==by) return original;
+          if(by<(mapping.lower?.[ax]??mapping[ax]) || by>(mapping.upper?.[ax]??mapping[ax])) return original;
+          mapping[ax]=by;
         }
         maps.push({oldOffset,newOffset,length:x.length,mapping});
         oldOffset+=x.length;newOffset+=y.length;
@@ -167,9 +168,10 @@
     while(suffix<Math.min(a.length,b.length)-prefix&&a[a.length-1-suffix]===b[b.length-1-suffix]) suffix++;
     if(prefix||suffix) {
       const x=a.slice(prefix,a.length-suffix),y=b.slice(prefix,b.length-suffix);
-      const middle=!x.length ? [y.length] : !y.length ? Array(x.length+1).fill(0) : alignTextBoundaries(x,y);
+      const middle=!x.length ? Object.assign([y.length],{lower:[0],upper:[y.length]}) : !y.length ? Array(x.length+1).fill(0) : alignTextBoundaries(x,y);
       if(!middle) return null;
-      return Array.from({length:a.length+1},(_,i)=>i<prefix ? i : i> a.length-suffix ? b.length-(a.length-i) : prefix+middle[i-prefix]);
+      const outer=key=>Array.from({length:a.length+1},(_,i)=>i<prefix ? i : i> a.length-suffix ? b.length-(a.length-i) : prefix+(middle[key]?.[i-prefix]??middle[i-prefix]));
+      return Object.assign(outer('values'),{lower:outer('lower'),upper:outer('upper')});
     }
     // Bounded edit alignment; malformed/oversized sources keep the review gate.
     if(!a.length||!b.length||a.length*b.length>4000000) return null;
@@ -178,14 +180,17 @@
     for(let j=0;j<=b.length;j++) costs[j]=j;
     for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)
       costs[i*width+j]=Math.min(costs[(i-1)*width+j-1]+(a[i-1]===b[j-1]?0:1),costs[(i-1)*width+j]+1,costs[i*width+j-1]+1);
-    const map=Array(a.length+1);let i=a.length,j=b.length;map[i]=j;
+    const map=Array(a.length+1),lower=Array(a.length+1).fill(Infinity),upper=Array(a.length+1).fill(-Infinity);
+    let i=a.length,j=b.length;
+    const record=()=>{map[i]=j;lower[i]=Math.min(lower[i],j);upper[i]=Math.max(upper[i],j)};record();
     while(i||j) {
-      if(i&&j&&costs[i*width+j]===costs[(i-1)*width+j-1]+(a[i-1]===b[j-1]?0:1)){i--;j--;map[i]=j;}
-      else if(i&&costs[i*width+j]===costs[(i-1)*width+j]+1){i--;map[i]=j;}
-      else {j--;map[i]=j;}
+      if(i&&j&&costs[i*width+j]===costs[(i-1)*width+j-1]+(a[i-1]===b[j-1]?0:1)){i--;j--;}
+      else if(i&&costs[i*width+j]===costs[(i-1)*width+j]+1){i--;}
+      else {j--;}
+      record();
     }
     map[a.length]=b.length;
-    return map;
+    return Object.assign(map,{lower,upper});
   }
   function audioStatus(version, slides = null) {
     if (!version) return '';
