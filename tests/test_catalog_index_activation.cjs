@@ -28,7 +28,7 @@ function mock(records, {indexed=true, mode='', epoch='1'} = {}) {
       if (mode === 'duplicate') entries[1] = entries[0];
       return data({epoch,manifest:status.manifest,entries});
     }
-    if (name === 'get_single_praise_records_v1') {
+    if (name === 'get_praise_catalog_records_v1') {
       active++;
       client.peak = Math.max(client.peak, active);
       try {
@@ -46,7 +46,7 @@ function mock(records, {indexed=true, mode='', epoch='1'} = {}) {
   };
   return client;
 }
-const byId = client => client.calls.filter(call => call.name === 'get_single_praise_records_v1').flatMap(call => call.args.ids);
+const byId = client => client.calls.filter(call => call.name === 'get_praise_catalog_records_v1').flatMap(call => call.args.ids);
 (async () => {
   const cold = mock(original), old = mock(original, {indexed:false});
   const [indexed, paged] = await Promise.all([api.loadActivation(cold), api.loadActivation(old)]);

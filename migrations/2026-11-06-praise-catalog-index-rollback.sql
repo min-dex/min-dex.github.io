@@ -5,11 +5,11 @@ declare status_function pg_proc;
 begin
   select * into strict status_function from pg_proc
    where oid='public.get_praise_storage_status_v1()'::regprocedure;
-  if md5(status_function.prosrc)<>'6101e5d8f660b0a90c7fc62681c675fa' then
+  if md5(status_function.prosrc)<>'1cb70c6bcdb09455b28423c4f46c58d9' then
     raise exception 'PRAISE_READ_DEFINITION_CHANGED';
   end if;
   execute replace(pg_get_functiondef(status_function.oid),'''catalogIndex'',1,''recordCount'',','''recordCount'',');
 end $$;
-drop function public.get_praise_catalog_index_v1(text,text);
+drop function public.get_praise_catalog_index_v1(text,text), public.get_praise_catalog_records_v1(text[],text);
 notify pgrst,'reload schema';
 commit;

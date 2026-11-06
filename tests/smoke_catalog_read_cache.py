@@ -63,7 +63,7 @@ try:
     deltaClient.rpc=async(name,args)=>{
       if(name==='get_praise_storage_status_v1')return {data:latest};
       if(name==='get_praise_catalog_index_v1')return {data:{epoch:latest.epoch,manifest:latest.manifest,entries:updated.map(row=>[row.id,row.revision])}};
-      if(name==='get_single_praise_records_v1'){
+      if(name==='get_praise_catalog_records_v1'){
         downloaded.push(...args.ids);
         return {data:structuredClone(updated.filter(row=>args.ids.includes(row.id)))};
       }

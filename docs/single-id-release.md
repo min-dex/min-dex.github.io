@@ -1,17 +1,17 @@
 ## Indexed catalog transport candidate ·2026-11-06
 
 A server that advertises `catalogIndex: 1` may supply a manifest-bound, ordered
-list of record IDs and revisions from one SQL statement snapshot. The client
+list of active record IDs and revisions from one SQL statement snapshot. The client
 validates the exact count, identity and revision domain. It requests only IDs
 missing from a checksum-verified same-project, same-epoch snapshot or with a
-changed revision. Removed IDs disappear by rebuilding in index order. Cold
-profiles use the same index to request disjoint batches of at most 200 IDs,
+changed revision. Removed IDs disappear by rebuilding in index order. The batch RPC uses exact active IDs so historical aliases and tombstones cannot
+enter the catalog. Cold profiles use the same index to request disjoint batches of at most 200 IDs,
 with at most three reads in flight and bounded 57014 subdivisions. The client
 requires the expected ID and revision for every fetched row, validates the
 complete catalog and checks fresh final status before installation. It drains
 failed workers before falling back to the existing range transport.
 
-The index is an additive, unapplied server migration. The existing clients
+A separately reviewed additive server migration installs the index and batch RPC. The existing clients
 continue to accept status responses with the new optional capability, and the
 new client retains the old path on servers without it. Apply only after the
 live function definitions, read roles and revision invariants have been

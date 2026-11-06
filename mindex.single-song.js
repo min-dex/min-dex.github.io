@@ -363,7 +363,7 @@
     }
     const missing = [...revisions.keys()].filter(id => !rows.has(id));
     async function readBatch(ids) {
-      const response = await client.rpc('get_single_praise_records_v1', {ids});
+      const response = await client.rpc('get_praise_catalog_records_v1', {ids,expected_epoch:status.epoch});
       if (response.error?.code === '57014' && ids.length > 25) {
         const size = ids.length > 100 ? 100 : 25;
         for (let offset = 0; offset < ids.length; offset += size) await readBatch(ids.slice(offset,offset+size));

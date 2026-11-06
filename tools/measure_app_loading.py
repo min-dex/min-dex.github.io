@@ -15,7 +15,7 @@ parser=argparse.ArgumentParser();parser.add_argument('--url',required=True);pars
 OUT=args.output.resolve();OUT.mkdir(parents=True,exist_ok=True)
 GUARD=r'''(() => {
  const bookkeeping=new Set(['mindex_state_read_v1','mindex_state_write_v1','mindex_monitor_register','mindex_monitor_ping','mindex_monitor_presence','mindex_remote_output']);
- const reads=new Set(['get_worship_service_v1','get_single_praise_records_v1','get_praise_snapshot_v1','get_single_praise_catalog_page_v1','get_praise_storage_status_v1','get_praise_catalog_index_v1']);
+ const reads=new Set(['get_worship_service_v1','get_single_praise_records_v1','get_praise_snapshot_v1','get_single_praise_catalog_page_v1','get_praise_storage_status_v1','get_praise_catalog_index_v1','get_praise_catalog_records_v1']);
  window.loadingAudit={blocked:0,fixture:0,requests:[],errors:0};
  const native=window.fetch.bind(window);
  const allowed=(u,m)=>['GET','HEAD','OPTIONS'].includes(m)||(u.hostname.endsWith('.supabase.co')&&m==='POST'&&reads.has(u.pathname.split('/').pop()));
@@ -27,7 +27,7 @@ GUARD=r'''(() => {
   }
   if(!allowed(u,method)){loadingAudit.blocked++;return new Response('{"message":"Read-only probe"}',{status:403,headers:{'Content-Type':'application/json'}})}
   let requestedRecords=null;
-  if(name==='get_single_praise_records_v1'&&method==='POST'){
+  if(['get_single_praise_records_v1','get_praise_catalog_records_v1'].includes(name)&&method==='POST'){
    try{const ids=(await request.clone().json()).ids;if(Array.isArray(ids))requestedRecords=ids.length;}catch{}
   }
   const started=performance.now();
