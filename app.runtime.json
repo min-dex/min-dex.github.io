@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-catalog-index",
+  "version": "20261106-prayer-audio-r2",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "03a8e08d3d8c41443f84b14d4bcc1d5d3d8db12b0363d671ae0932c44698be98",
-  "runtime_sha256": "54a35f6979420b41d07b4ee1c8dea598ab84836eafd680015b78f75d4694b2fb",
+  "source_sha256": "e69345c1b9de64a1e93d8b6b94a6c95d2413cce24d4e5cbe620ec582dda66c06",
+  "runtime_sha256": "b75f57b9b25eb248f014cbff296fa042587e8c96b24101a317e8a5a247eea797",
   "source_bytes": 1355391,
   "runtime_bytes": 967568,
-  "source_gzip": 310739,
-  "runtime_gzip": 243746
+  "source_gzip": 310738,
+  "runtime_gzip": 243745
 }
