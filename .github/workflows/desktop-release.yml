@@ -71,6 +71,15 @@ jobs:
       - run: pnpm audit --audit-level=moderate
       - run: python tools/broadcast-engine/prepare.py
       - run: pnpm electron:check
+      - name: Check native build disk budget
+        shell: bash
+        run: |
+          python - <<'PYDISK'
+          import shutil
+          free=shutil.disk_usage('.').free
+          print('Free GiB:',round(free/2**30,1),'estimated peak additional GiB: 12')
+          if free < 32*2**30: raise SystemExit('Insufficient room for native candidates; preserve evidence and stop')
+          PYDISK
       - name: Prepare prior-version TEST installation with synthetic records
         if: ${{ !inputs.publish_release }}
         shell: bash
