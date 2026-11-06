@@ -1,3 +1,21 @@
+## 2026-11-06 1.0.0 signed-release preparation
+
+The owner now requests 1.0.0 delivery with broadcast-room equipment acceptance
+explicitly deferred, and chooses certificate preparation followed by signed
+publication. Actual YouTube broadcasting is not started by this work. Certificates
+are not available/confirmed; do not weaken signing or publish unsigned packages
+as a formal release. Keep the development channel until signing can be qualified.
+
+Candidate includes public main `4bc17d5d` (save-return protection, catalog startup,
+precise MP3 transport and approved r2 dawn default). Update package/audio checks
+to the documented r2 bytes/hash/duration while retaining immutable older assets
+and explicit worship attachments. Installed-app tests additionally check local
+file decoding against independent PCM fingerprints. Intel Mac execution reuses
+the same-run x64 artifact, checks local RTMPS and same-version reinstall/restart
+preservation; it is distinct from ARM/Windows 0.9.0-test to 1.0.0-test upgrades.
+All unsigned checks remain separate from real signing/notarization and signed
+updater qualification. No production data or active worship output is changed.
+
 ## 2026-11-04 Background/audio follow-up candidate
 
 Approved shared web candidate `d702a6cd` (including `6947c5bf`, `d2f58911`, `d6e757d8` preview-cache isolation and source-based praise selection guidance) is integrated after verified native candidate

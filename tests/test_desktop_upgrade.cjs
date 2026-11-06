@@ -22,6 +22,7 @@ async function main(){
   assert(info.testBuild);assert.equal(info.build.sourceCommit,sha);
   let bundledAudio = null;
   let previewCacheContract = null;
+  let preciseAudio = null;
   if(phase==='upgrade'){
    previewCacheContract=await page.evaluate(()=>{
     const source='https://fixture.supabase.co/storage/v1/object/public/media/loop.mp4?keep=value';
@@ -36,7 +37,7 @@ async function main(){
    });
    assert(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().every(w=>w.webContents.isAudioMuted())));
    bundledAudio=await page.evaluate(async()=>{
-    const url=new URL('./assets/presenter/dawn-free-prayer-69c12c677944.mp3',location.href);
+    const url=new URL('./assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3',location.href);
     if(url.protocol!=='file:')throw Error('Installed audio must use the bundled local protocol');
     const audio=new Audio();audio.muted=true;audio.preload='metadata';
     let timer;
@@ -48,7 +49,7 @@ async function main(){
      return await Promise.race([(async()=>{
       const ready=waitFor('loadedmetadata');audio.src=url.href;audio.load();await ready;
       const duration=audio.duration;
-      if(Math.abs(duration-3143.9335)>0.1)throw Error('Bundled MP3 duration mismatch');
+      if(Math.abs(duration-3169.543625)>0.1)throw Error('Bundled MP3 duration mismatch');
       const progressing=waitFor('timeupdate');await audio.play();await progressing;
       if(audio.paused||audio.currentTime<=0||!audio.muted)throw Error('Bundled MP3 did not advance muted');
       const progressed=audio.currentTime;
@@ -61,6 +62,31 @@ async function main(){
      })(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Bundled MP3 acceptance timeout')),30000);})]);
     }finally{clearTimeout(timer);audio.pause();audio.removeAttribute('src');audio.load();}
    });
+   preciseAudio=await page.evaluate(async fingerprints=>{
+    let timer;try{return await Promise.race([(async()=>{
+    const source=SERVICE_SLOT_MUSIC['dawn.free'].source;
+    if(!source.endsWith('dawn-free-prayer-f9ebf1aeed23.mp3'))throw Error('Installed dawn default is stale');
+    const audio=MindexPreciseAudio.attach(new Audio());audio.muted=true;
+    try {
+     const ready=new Promise((resolve,reject)=>{audio.addEventListener('loadedmetadata',resolve,{once:true});audio.addEventListener('error',()=>reject(Error('Precise local source failed')),{once:true});});
+     audio.src=new URL(source,location.href).href;audio.load();await ready;
+     const transport=await audio.mindexPreciseAudio.prepare();
+     if(!transport||transport.decoder.calibration.score<=.995)throw Error('Packaged precise transport unavailable');
+     const correlations=[];
+     for(const anchor of fingerprints.anchors){
+      const part=await transport.decoder.chunk(Math.floor(anchor.time/transport.decoder.chunkSeconds));
+      const start=Math.round((anchor.time-part.start)*fingerprints.sampleRate);
+      const left=part.buffer.getChannelData(0),right=part.buffer.getChannelData(1);
+      let dot=0,actualPower=0,referencePower=0;
+      anchor.samples.forEach((expected,k)=>{const at=start+k*anchor.stride,actual=(left[at]+right[at])/2;dot+=actual*expected;actualPower+=actual*actual;referencePower+=expected*expected;});
+      const correlation=dot/Math.sqrt(actualPower*referencePower);
+      if(!(correlation>.995))throw Error('Packaged PCM position mismatch at '+anchor.time);
+      correlations.push({time:anchor.time,correlation});
+     }
+     return {localSource:true,defaultSource:source,calibration:transport.decoder.calibration.score,correlations};
+    }finally{audio.pause();audio.removeAttribute('src');audio.load();}
+    })(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Installed precise audio timeout')),60000);})]);}finally{clearTimeout(timer);}
+   },JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/prayer-audio-timing-fingerprints.json'),'utf8')));
   }
   await page.exposeFunction('fixtureRpc',(name,args)=>{
    if(args.p_key==='mindex.ui.presenterThumbScale')assert.equal(args.p_scope,'device');
@@ -118,7 +144,7 @@ async function main(){
   const draft=JSON.parse(record.data.values['mindex.editor.draft.v2:service:fixture-worship:rehearsal']);
   assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
   for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
-  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,previewCacheContract,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
+  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,previewCacheContract,preciseAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
  }finally{
   // Test teardown discards only the recovered synthetic editor, not persisted records.
   for(const page of app.windows())await page.close({runBeforeUnload:false});

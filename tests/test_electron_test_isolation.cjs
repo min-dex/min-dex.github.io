@@ -63,3 +63,13 @@ test('Windows shell fixture lookup uses native path joining without POSIX suffix
  const path=require('node:path');
  assert.equal(path.win32.join('D:\\a\\_temp','install-fixture.json'),'D:\\a\\_temp\\install-fixture.json');
 });
+
+
+test('Intel acceptance reuses exact-run artifacts and keeps publication disabled',()=>{
+ const workflow=fs.readFileSync('.github/workflows/desktop-release.yml','utf8');
+ const intel=workflow.split('  verify-intel:')[1].split('  draft-release:')[0];
+ assert.match(intel,/if: \$\{\{ !inputs.publish_release \}\}/);
+ assert.match(intel,/needs: build/);assert.match(intel,/runs-on: macos-15-intel/);
+ assert.match(intel,/name: mindex-mac-test/);assert.doesNotMatch(intel,/run-id:|continue-on-error:|--publish always/);
+ for(const name of ['verify_candidate_package.cjs','test_desktop_youtube_local.cjs','test_desktop_upgrade.cjs'])assert.ok(intel.includes(name));
+});

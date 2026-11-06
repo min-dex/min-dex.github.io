@@ -166,6 +166,48 @@ jobs:
             dist/test/*.dmg
             dist/test/*.exe
 
+
+  verify-intel:
+    name: Verify installed Mac Intel candidate
+    if: ${{ !inputs.publish_release }}
+    needs: build
+    runs-on: macos-15-intel
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.9.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pnpm install --frozen-lockfile
+      - run: python tools/broadcast-engine/prepare.py --target mac-x64
+      - uses: actions/download-artifact@v4
+        with:
+          name: mindex-mac-test
+          path: dist/test
+      - name: Verify Intel launch, reinstall preservation and local RTMPS
+        shell: bash
+        run: |
+          test "$(node -p process.arch)" = x64
+          npm install --prefix "$RUNNER_TEMP/mindex-qa" --ignore-scripts --no-audit --no-fund playwright@1.58.0
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          installer="dist/test/Mindex-Test-1.0.0-test-mac-x64.dmg"
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-fixture.json"
+          exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"intel-fixture.json"))).exe')"
+          resources="$(dirname "$(dirname "$exe")")/Resources"
+          node tests/verify_candidate_package.cjs "$resources" mac-x64
+          node tests/test_desktop_youtube_local.cjs "$exe" "$resources/broadcast-engine/ffmpeg"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" seed "$GITHUB_SHA" 1.0.0-test
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" 1.0.0-test
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-fixture.json"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" upgrade "$GITHUB_SHA" 1.0.0-test
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" 1.0.0-test
+
   draft-release:
     if: ${{ inputs.publish_release }}
     needs: build
