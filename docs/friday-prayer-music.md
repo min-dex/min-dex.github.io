@@ -27,7 +27,20 @@
 
 ## Audio
 
-- Dawn prayer audio (2026-11-05):
+- Current dawn default (2026-11-06, user-approved r2):
+  `assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3`, 87,865,100 bytes,
+  SHA-256 `f9ebf1aeed2385f27d61a3ad48908d2dad2cc0ca0a547a20b54a8a4aded7ddd3`; stereo48kHz, decoded3169.543625s unchanged.
+  Six localized interpolations total7ms relative to the v5 PCM master;
+  all other master samples, performance, levels and duration are unchanged.
+  MP3 delivery is lossy re-encoding, not byte-identical outside edits. Ambiguous
+  source transients remain unchanged; no blanket auditory-perfection claim.
+  Only `dawn.free` selects r2. Keep the immutable v5 URL and explicit attachments;
+  do not rewrite worship records, audio links, order, timing or media metadata.
+  Local source verification stays private. Independent decoded anchor fixtures
+  and default/explicit-source regression expectations follow the approved file.
+
+
+- Dawn prayer audio v5 historical reference (2026-11-05):
   `assets/presenter/dawn-free-prayer-bac443d20c02.mp3`, 87,865,148 bytes, 3169.543625 seconds decoded,
   stereo48kHz. SHA-256 `bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87`.
   Built from the first supplied original (SHA-256

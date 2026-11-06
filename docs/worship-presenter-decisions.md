@@ -1,3 +1,11 @@
+## Dawn prayer r2 default asset ·2026-11-06
+
+User approved the six-point (7ms total) pop-corrected r2 MP3 for the shared dawn
+free-prayer default. Change the immutable default source only; retain v5 asset
+bytes/URL and explicit authored attachments. No worship record, section order,
+media link or synchronization data is rewritten. Duration remains3169.543625s.
+See `friday-prayer-music.md` for exact asset identity and verification limits.
+
 ## Shared music volume during output (2026-10-30)
 
 The media management popover and inline music player share one0–100% volume

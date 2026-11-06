@@ -20598,35 +20598,7 @@ function confirmUnsavedChangesAction() {
 
 async function discardUnsavedChanges() {
   const dirtyModules = getDirtyModules();
-  if (dirtyModules.praise && state.module === "praise") {
-    const song = getSelectedSong(), client = state.client, project = state.config.url;
-    const versionId = getSelectedVersionId();
-    const before = JSON.stringify({song, forms:state.forms});
-    try {
-      if (!song || !client || state.saving) return false;
-      const result = await client.rpc("get_praise_snapshot_v1", {sid:song.id});
-      if (result.error) throw result.error;
-      const fresh = praiseSnapshotSong(result.data);
-      if (fresh.id !== song.id) throw new Error("PRAISE_SNAPSHOT_MISMATCH");
-      if (project !== state.config.url || client !== state.client || getSelectedSong() !== song || versionId !== getSelectedVersionId()
-          || before !== JSON.stringify({song, forms:state.forms})) {
-        showToast("확인 중 입력이 바뀌어 이동하지 않았습니다. 입력은 유지됩니다.", "error");
-        return false;
-      }
-      state.songs = state.songs.map(item => item === song ? fresh : item);
-      praisePendingSaves.delete(song);
-      state.selectedVersionId = fresh.versions.some(item => item.id === versionId) ? versionId : getDefaultVersionId(fresh);
-      state.forms = normalizeForms((getSelectedVersion()?.forms || []).map(form => withLocalId({...form, song_id:state.selectedVersionId})));
-      state.dirty.song = state.dirty.forms = false;
-      clearSearchCaches();
-      captureCleanFingerprint("praise");
-      updateSaveState();
-      return true;
-    } catch {
-      showToast("최신 내용을 확인하지 못해 이동하지 않았습니다. 입력은 유지됩니다. 다시 시도해 주세요.", "error");
-      return false;
-    }
-  }
+  if (dirtyModules.praise && state.module === "praise") return discardPraiseEditorChanges();
   clearDirtyState();
   updateSaveState();
   await reloadDiscardedChanges(dirtyModules);
@@ -29895,7 +29867,7 @@ function renderLiveScriptureControl(serviceId) {
 }
 
 const SERVICE_SLOT_MUSIC = Object.freeze({
-  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-bac443d20c02.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
+  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
   "prayer.meeting.free": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "자율기도 음악", repeatAllowed: false },
 });
 
