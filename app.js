@@ -7519,10 +7519,11 @@ async function saveDirtyServiceTypes() {
 }
 
 async function worshipElementTypedStateColumns() {
-  return {
-    inputMode: await detectTableColumnSupport("mindex_worship_elements", "input_mode"),
-    contentState: await detectTableColumnSupport("mindex_worship_elements", "content_state"),
-  };
+  const [inputMode, contentState] = await Promise.all([
+    detectTableColumnSupport("mindex_worship_elements", "input_mode"),
+    detectTableColumnSupport("mindex_worship_elements", "content_state"),
+  ]);
+  return { inputMode, contentState };
 }
 
 async function saveWorshipServiceInstance(service, options = {}) {
@@ -19162,8 +19163,10 @@ function scriptureReferenceProblem(result) {
 }
 
 async function validateScriptureReferences(value, translation = null) {
-  await ensureBibleBookLookups();
-  if (!state.bibleTranslations.length && !state.bibleReaderError) await loadBibleTranslations({ silent: true });
+  await Promise.all([
+    ensureBibleBookLookups(),
+    !state.bibleTranslations.length && !state.bibleReaderError ? loadBibleTranslations({ silent: true }) : null,
+  ]);
   // A choice resolved before the catalogue loaded may now be available.
   translation = translation?.retiredId
     ? serviceBibleTranslationById(translation.retiredId)
