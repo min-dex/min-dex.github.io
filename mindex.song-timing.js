@@ -134,16 +134,18 @@
           const start=mapOffset(f.audioSourceRange[0]),end=mapOffset(f.audioSourceRange[1]);
           if(start==null||end==null||end<=start||!positions[start]||!positions[end-1]) throw Error('range');
           let cursor=f.audioSourceRange[0];
-          const chunks=paragraphs(f.lyrics).map(chunk=>{
-            const from=mapOffset(cursor);cursor+=audioText(chunk).length;const to=mapOffset(cursor);
+          const chunks=paragraphs(f.lyrics).map(chunk=>chunk.split('\n').map(line=>{
+            const length=audioText(line).length;
+            if(!length) return line;
+            const from=mapOffset(cursor);cursor+=length;const to=mapOffset(cursor);
             if(from==null||to==null||to<=from||!positions[from]||!positions[to-1]) throw Error('page range');
             let left=positions[from][0],right=positions[to-1][1];
             while(left>0 && !/[\p{L}\p{N}\s]/u.test(source[left-1])) left--;
             while(right<source.length && !/[\p{L}\p{N}\s]/u.test(source[right])) right++;
-            // Audio pages may intentionally span several DB paragraphs/forms.
-            // Keep their authored page boundaries, not the source's separators.
-            return source.slice(left,right).trim().replace(/\n\s*\n/g,'\n');
-          });
+            // Ranged audio has its own authored lines and page boundaries.
+            // Never import the DB's different paragraph layout into that set.
+            return source.slice(left,right).trim().replace(/\s*\n\s*/g,' ');
+          }).join('\n'));
           return {...f,audioSourceRange:[start,end],lyrics:chunks.join('\n\n')};
         }
         const index=previous.findIndex(p=>p.id===f.id);
