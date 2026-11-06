@@ -82,8 +82,11 @@ reuse the per-service coalescing loader with at most three workers; loading and
 retry states must precede real saved-row rendering. Protected local surfaces,
 service collections, forms and presenter transport remain intact.
 
-The home summary's15-second read budget starts after activation, when its own
-queries begin. A slow catalog must not pre-abort a not-yet-started Bible count.
+The home summary starts the lightweight Bible edition query alongside catalog
+activation. Its 15-second budget belongs to that request. Praise counts still
+wait for activation and use the verified logical catalog, or a separate
+15-second budget for the legacy HEAD count. Either result can succeed when the
+other fails. Adoption remains bound to the active connection.
 Logical group counts, selected readers, drafts, forms, transport and save paths
 are preserved. Regression coverage: `test_initial_worship_reads.cjs`,
 `smoke_single_song_activation.py`, `smoke_home_startup_budget.py`.

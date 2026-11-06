@@ -16386,23 +16386,14 @@ async function loadHomeOverviewStats({ force = false } = {}) {
   const stats = homeOverviewStats;
   if (stats.promise) return stats.promise;
   if (!force && stats.readAt && Date.now() - stats.readAt < 60000) return;
-  const abort = new AbortController();
-  let timer;
   const refresh = () => {
     if (state.client === client && state.module === "home" && refs.detailPane.querySelector(".home-overview") && !isGlobalSearchActive()) renderHomeStart();
   };
   stats.promise = (async () => {
-    await ensureSingleSongActivation();
-    timer = setTimeout(() => abort.abort(), 15000);
-    const results = await Promise.allSettled([
-      state.singleSongCatalog ? Promise.resolve({count:state.singleSongCatalog.displayCount()}) : client.from("mindex_songs").select("id", { count:"exact", head:true }).abortSignal(abort.signal),
-      client.from("mindex_bible_translations").select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true).abortSignal(abort.signal),
-    ]);
+    const [songs, editions] = await window.MINDEX_SERVICE_ENTRY.readHomeOverviewTotals(client);
     if (state.client !== client || homeOverviewStats !== stats) return;
-    const songs = results[0];
     stats.errors.songs = songs.status !== "fulfilled" || Boolean(songs.value.error) || !Number.isInteger(songs.value.count) || songs.value.count < 0;
     if (!stats.errors.songs) stats.songs = songs.value.count;
-    const editions = results[1];
     stats.errors.editions = editions.status !== "fulfilled" || Boolean(editions.value.error) || !Array.isArray(editions.value.data);
     if (!stats.errors.editions) {
       const rows = editions.value.data.filter(row => row.canonical_source);
@@ -16410,7 +16401,6 @@ async function loadHomeOverviewStats({ force = false } = {}) {
       stats.names = homeBibleEditionNames(rows);
     }
   })().catch(() => { stats.errors = { songs:true, editions:true }; }).finally(() => {
-    clearTimeout(timer);
     stats.readAt = Date.now();
     stats.promise = null;
     refresh();

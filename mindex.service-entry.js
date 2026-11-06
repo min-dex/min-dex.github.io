@@ -28,6 +28,25 @@
     if (result.error) throw result.error;
     return result.value;
   }
+  function readHomeOverviewTotals(client) {
+    const read = async (query) => {
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort(), 15000);
+      try { return await query().abortSignal(abort.signal); }
+      finally { clearTimeout(timer); }
+    };
+    const songs = async () => {
+      await ensureSingleSongActivation();
+      if (state.client !== client) throw Error("HOME_OVERVIEW_CLIENT_CHANGED");
+      if (state.singleSongCatalog) return {count:state.singleSongCatalog.displayCount()};
+      return read(() => client.from("mindex_songs").select("id", { count:"exact", head:true }));
+    };
+    return Promise.allSettled([
+      songs(),
+      read(() => client.from("mindex_bible_translations")
+        .select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true)),
+    ]);
+  }
   function initialElementIds(services = []) {
     const pinned = new Set([state.selectedServiceId, state.presenter.serviceId].filter(Boolean));
     const loadHomeWeek = ["home", "service"].includes(state.module) && state.selectedServiceTypeId === SERVICE_WEEK_PANEL_ID;
@@ -206,5 +225,5 @@
     }
     return false;
   }
-  window.MINDEX_SERVICE_ENTRY = { check, enter, invalidate, prepareInitialReads, readInitialLists, initialElementIds, dashboardLoadState };
+  window.MINDEX_SERVICE_ENTRY = { check, enter, invalidate, prepareInitialReads, readInitialLists, initialElementIds, dashboardLoadState, readHomeOverviewTotals };
 })();

@@ -197,8 +197,10 @@ try:
      check(state.module==='praise'&&!document.querySelector('.home-start'),'late totals replaced navigation');
      check(homeOverviewStats.songs===1133&&homeOverviewStats.editions===2,'source-qualified totals');
      check(JSON.stringify([state.songs,state.bibleTranslations,state.selectedBibleTranslationId,state.selectedBookCode,songCatalogLoaded])===before,'summary changed reader/catalogue state');
-     check(calls[0].fields==='id'&&calls[0].options.head&&calls[0].options.count==='exact','song count downloaded catalogue');
-     check(!calls[1].fields.includes('*')&&!calls[1].fields.includes('text'),'edition query fetched bodies');
+     const songQuery=calls.find(call=>call.table==='mindex_songs');
+     const editionQuery=calls.find(call=>call.table==='mindex_bible_translations');
+     check(songQuery.fields==='id'&&songQuery.options.head&&songQuery.options.count==='exact','song count downloaded catalogue');
+     check(!editionQuery.fields.includes('*')&&!editionQuery.fields.includes('text'),'edition query fetched bodies');
      state.module='home';renderHomeStart();
      check(calls.length===2,'summary ignored freshness window');
      responses.mindex_songs=Promise.resolve({error:{message:'offline'}});

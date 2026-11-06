@@ -47,7 +47,8 @@ The order is checked by `tests/solid_audit.py`.
   It loads before `app.js`; its helpers run after app bootstrap. It does not
   perform database I/O or access controller state/DOM directly.
 - `mindex.service-entry.js` owns entered-service refresh and the detached initial
-  home service-list/type read receipt. It loads before `app.js`; functions use app
+  home service-list/type read receipt, and schedules independent home summary
+  reads. It loads before `app.js`; functions use app
   dependencies only after bootstrap calls them. Prefetch does not adopt worship
   records or bypass ID activation. The existing app loader owns projection and
   the existing atomic client owns persistence.
