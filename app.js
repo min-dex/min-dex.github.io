@@ -20636,6 +20636,11 @@ async function discardUnsavedChanges() {
 }
 
 async function confirmSaveBeforeLeaving() {
+  // An inline or explicit worship save may already own the current draft.
+  // Let its receipt settle before deciding whether there is anything left to save.
+  while (activeServiceSavePromise) {
+    await activeServiceSavePromise.catch(() => {});
+  }
   if (!hasDirtyChanges({ reconcile: true })) return true;
   const action = await confirmUnsavedChangesAction();
   if (action === "cancel") return false;

@@ -52,6 +52,34 @@ try:
             trigger.focus();trigger.press('Enter');page.evaluate("document.querySelector('#dialog-trigger').remove()")
             page.keyboard.press('Escape');page.wait_for_function("dialogResult==='cancel'")
             assert page.locator('.unsaved-dialog').count()==0
+            for outcome in ('saved', 'edited', 'failed'):
+                page.evaluate('''() => {
+                  state.dirty.references=false;
+                  state.dirty.service=true;
+                  state.cleanFingerprints.service='';
+                  saveDirtyServiceTypes=async()=>{};
+                  window.completeSave=null;
+                  window.leaveResult=null;
+                  window.fixtureSave=runServiceSave({},async()=>{
+                    const outcome=await new Promise(resolve=>window.completeSave=resolve);
+                    if(outcome==='failed')throw Error('fixture save failed');
+                    if(outcome==='saved')state.dirty.service=false;
+                    return true;
+                  });
+                }''')
+                page.wait_for_function("typeof completeSave==='function'")
+                page.evaluate('''() => { void confirmSaveBeforeLeaving().then(result=>window.leaveResult=result); }''')
+                assert page.locator('.unsaved-dialog').count()==0
+                assert page.evaluate('leaveResult===null')
+                page.evaluate('outcome=>completeSave(outcome)', outcome)
+                if outcome == 'saved':
+                    page.wait_for_function('leaveResult===true')
+                    assert page.locator('.unsaved-dialog').count()==0
+                else:
+                    page.get_by_role('dialog', name='저장하지 않은 변경이 있어요').wait_for()
+                    page.keyboard.press('Escape')
+                    page.wait_for_function('leaveResult===false')
+                    assert page.evaluate('state.dirty.service')
             print('PASS', engine, 'real unsaved dialog: initial focus, Tab/ShiftTab, dynamic disabled/all-disabled, external focus, Escape/choices/opener restoration, detached opener; drafts unchanged, operational writes/print 0', flush=True)
             browser.close()
 finally:
