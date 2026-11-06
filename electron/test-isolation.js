@@ -4,7 +4,7 @@ const os = require('node:os');
 const path = require('node:path');
 function configureTestIsolation({ app, session }, pkg, env = process.env) {
   if (env.MINDEX_ISOLATED_TEST !== '1') return null;
-  if (pkg.mindexTestBuild !== true) throw new Error('Isolation requires a test package');
+  if (pkg.mindexTestBuild !== true && pkg.mindexInternalBuild !== true) throw new Error('Isolation requires a test package or internal package');
   // A test runner may keep its own random fixture across restarts. No arbitrary
   // paths or pre-existing unmarked directories are accepted.
   const token = env.MINDEX_TEST_PROFILE_TOKEN;

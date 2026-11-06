@@ -9,7 +9,7 @@ const asar = createRequire(builder.resolve('app-builder-lib'))('@electron/asar')
 const {identity} = require('../scripts/product-identity.cjs');
 const [resources, target] = process.argv.slice(2);
 const archive = path.join(resources, 'app.asar');
-const {files, ...record} = identity(process.cwd(), {test:true});
+const {files, ...record} = identity(process.cwd(), {test:process.argv[4]!=='internal',internal:process.argv[4]==='internal'});
 assert.deepEqual(JSON.parse(asar.extractFile(archive, 'mindex-build.json')), record);
 const gitBlob = bytes => crypto.createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
 let dawnAudio = null;

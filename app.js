@@ -836,18 +836,22 @@ function bindElectronDesktopEvents() {
     promptPending = true;
     try {
       const installing = update.status === "downloaded";
-      const message = installing
+      const message = update.manualInstall
+        ? `Mindex 새 버전 ${update.version || ""} 설치 파일을 받을까요? 저장·송출 종료 후 설치해 주세요.`
+        : installing
         ? "업데이트 준비가 끝났습니다. 지금 재시작해서 설치할까요?"
         : `Mindex 새 버전 ${update.version || ""}을 내려받을까요?`;
       if (!window.confirm(message)) return;
-      if (installing) {
+      if (installing || update.manualInstall) {
         if (isPresenterOutputWindowOpen()) { showFailure({ reason: "presenter-active" }); return; }
         if (hasDirtyChanges({ reconcile: true }) || currentSaveButtonState().dirty) {
           showToast("편집 내용을 먼저 저장한 뒤 업데이트 메뉴에서 다시 설치해 주세요.", "error");
           return;
         }
       }
-      showFailure(await (installing ? desktop.installUpdate() : desktop.downloadUpdate()));
+      const result = await (installing ? desktop.installUpdate() : desktop.downloadUpdate());
+      showFailure(result);
+      if(result?.ok && result.manualInstall) showToast('설치 파일 다운로드를 열었습니다. 앱을 종료한 뒤 새 버전을 설치해 주세요.');
     } catch { showFailure(); }
     finally {
       promptPending = false;

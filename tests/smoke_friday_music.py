@@ -31,7 +31,9 @@ try:
               });
               if (Math.abs(audio.duration - 3169.543625) > 0.1) throw Error('Wrong final dawn duration');
               await audio.play();
-              await new Promise(resolve => setTimeout(resolve, 250));
+              const deadline = performance.now() + 5000;
+              while (!audio.paused && !audio.error && audio.currentTime <= 0 && performance.now() < deadline)
+                await new Promise(resolve => setTimeout(resolve, 25));
               if (audio.paused || audio.currentTime <= 0) throw Error('Final dawn did not play');
               audio.pause();
               audio.removeAttribute('src');

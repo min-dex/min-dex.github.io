@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypt
 const {execFileSync}=require('node:child_process');
 const git=(root,args)=>execFileSync('git',args,{cwd:root,encoding:'utf8',maxBuffer:8*1024*1024});
 const runtime=name=>!name.includes('/')?/^(?:app(?:\.runtime)?\.js|scripture-editions\.js|mindex\.(?!build\.json$).+\.(?:js|mjs|json)|remote\..+|styles.*\.css|index\.html|favicon\.ico|manifest\.webmanifest)$/.test(name):/^(assets|vendor)\//.test(name);
-function identity(root,{test=false}={}){
+function identity(root,{test=false,internal=false}={}){
  const read=name=>JSON.parse(git(root,['show',`HEAD:${name}`]));
  const pkg=read('package.json'),policy=read('product-release.json'),release=read('mindex-release.json');
  if(!/^\d+\.\d+\.\d+$/.test(pkg.version))throw Error('Product version must be semantic version');
@@ -14,7 +14,7 @@ function identity(root,{test=false}={}){
  }).filter(f=>runtime(f.name));
  if(files.some(f=>f.mode!=='100644'&&f.mode!=='100755'))throw Error('Runtime symlinks are not supported');
  const rendererTree=crypto.createHash('sha256').update(files.map(f=>`${f.name}\0${f.blob}\n`).sort().join('')).digest('hex');
- return {schema:1,productVersion:pkg.version,channel:test?'test':policy.channel,buildVersion:release.version,
+ return {schema:1,productVersion:pkg.version,channel:test?'test':internal?'internal':policy.channel,buildVersion:release.version,
   sourceCommit:git(root,['rev-parse','HEAD']).trim(),rendererTree,changes:policy.changes,upgradeNotes:policy.upgradeNotes||'',files};
 }
 function verifyWebReleaseTag(root,record){
@@ -50,7 +50,8 @@ async function beforePack(context){
  const exe=os==='win'?'ffmpeg.exe':'ffmpeg';
  fs.accessSync(path.join(root,'.cache','broadcast-engine',os+'-'+arch,exe));
  const test=context.packager.config.extraMetadata?.mindexTestBuild===true;
- const record=identity(root,{test});validateWorkingRuntime(root,record);writeIdentity(root,root,{test});
+ const internal=context.packager.config.extraMetadata?.mindexInternalBuild===true;
+ const record=identity(root,{test,internal});validateWorkingRuntime(root,record);writeIdentity(root,root,{test,internal});
 }
 module.exports=beforePack;Object.assign(module.exports,{identity,writeIdentity,validateWorkingRuntime,sameRelease,runtime,verifyWebReleaseTag});
 if(require.main===module){

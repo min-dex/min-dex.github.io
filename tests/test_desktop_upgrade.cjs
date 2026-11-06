@@ -19,7 +19,7 @@ async function main(){
   const page=await app.firstWindow();
   await page.waitForFunction(()=>typeof fetchWorshipServiceListRows==='function'&&!!window.MINDEX_SERVER_STORAGE);
   const info=await page.evaluate(()=>window.mindexElectron.getBuildInfo());
-  assert(info.testBuild);assert.equal(info.build.sourceCommit,sha);
+  assert(info.testBuild || info.build.channel === "internal");assert.equal(info.build.sourceCommit,sha);
   let bundledAudio = null;
   let previewCacheContract = null;
   let preciseAudio = null;

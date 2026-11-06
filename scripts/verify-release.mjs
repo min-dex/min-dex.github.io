@@ -38,13 +38,15 @@ export function verifyRelease({ offline = false, publish = true, platform = proc
   }
   if (problems.length) throw new Error(`Release stopped. Required: ${problems.join(', ')}`);
   for (const args of [
-    ['--test','tests/test_electron_updater.cjs','tests/test_release_preflight.mjs','tests/test_desktop_update_ui.cjs'],
+    ['--test','tests/test_electron_updater.cjs','tests/test_internal_updater.cjs','tests/test_release_preflight.mjs','tests/test_desktop_update_ui.cjs'],
     ['tests/test_worship_input_module_contract.cjs'],
     ['--test','tests/test_product_identity.cjs','tests/test_electron_test_isolation.cjs','tests/test_minimatch_compat.cjs'],
   ]) {
     const result = spawnSync(process.execPath,args,{stdio:'inherit'});
     if (result.status !== 0) throw new Error('Release stopped. Desktop checks failed.');
   }
+  const publication = spawnSync('python3',['tests/test_internal_publication.py'],{stdio:'inherit'});
+  if (publication.status !== 0) throw new Error('Internal publication checks failed.');
   const runtime = spawnSync('python3',['tests/test_electron_runtime_files.py'],{stdio:'inherit'});
   if (runtime.status !== 0) throw new Error('Release stopped. Runtime file check failed.');
   console.log(offline ? 'Offline packaging checks passed; credentials, signatures and real installation are not verified.' : 'Release preflight passed.');

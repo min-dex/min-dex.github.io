@@ -16,7 +16,7 @@ ipcMain.handle('mindex:youtube',async (event,action,value) => {
     const token = owner = new AbortController();
     try {
       let destination;
-      if (require('../package.json').mindexTestBuild === true) {
+      if (require('../package.json').mindexTestBuild === true || globalThis.__mindexTestIsolation) {
         const port = Number(process.env.MINDEX_QA_RTMPS_PORT);
         if (!Number.isInteger(port) || port < 1024 || port > 65535) throw Error('로컬 수신기를 준비해 주세요.');
         destination = {host:'127.0.0.1',servername:'localhost',port,ca:fs.readFileSync(process.env.MINDEX_QA_RTMPS_CA)};

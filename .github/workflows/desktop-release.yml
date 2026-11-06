@@ -12,6 +12,10 @@ on:
     paths:
       - .github/workflows/desktop-release.yml
       - electron-builder.test.cjs
+      - electron-builder.internal.cjs
+      - internal-release.json
+      - scripts/publish-internal.py
+      - tests/test_internal_updater.cjs
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
@@ -40,7 +44,7 @@ jobs:
   build:
     name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -125,6 +129,43 @@ jobs:
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"install-fixture.json"))).exe')"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" upgrade "$GITHUB_SHA" 1.0.0-test
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" 1.0.0-test
+      - name: Build and verify church internal installers without publication
+        if: ${{ !inputs.publish_release }}
+        shell: bash
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            pnpm exec electron-builder --config electron-builder.internal.cjs --win nsis --x64 --publish never
+            installer="dist/internal/Mindex-1.0.0-win-x64.exe"
+            target=win-x64
+          else
+            pnpm exec electron-builder --config electron-builder.internal.cjs --mac dmg --arm64 --x64 --publish never
+            target="mac-$(node -p process.arch)"
+            installer="dist/internal/Mindex-1.0.0-$target.dmg"
+          fi
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
+          exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"internal-install.json"))).exe')"
+          if [[ "$RUNNER_OS" == Windows ]]; then resources="$(dirname "$exe")/resources"; else resources="$(dirname "$(dirname "$exe")")/Resources"; fi
+          node tests/verify_candidate_package.cjs "$resources" "$target" internal
+          if [[ "$RUNNER_OS" == Windows ]]; then encoder="$resources/broadcast-engine/ffmpeg.exe"; else encoder="$resources/broadcast-engine/ffmpeg"; fi
+          node tests/test_desktop_youtube_local.cjs "$exe" "$encoder"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" seed "$GITHUB_SHA" 1.0.0
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" 1.0.0
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" 1.0.0
+      - name: Retain verified church installers
+        if: ${{ !inputs.publish_release }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindex-${{ matrix.platform }}-internal
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+          path: |
+            dist/internal/*.dmg
+            dist/internal/*.exe
       - name: Build signed packages (no public release)
         if: ${{ inputs.publish_release }}
         shell: bash
@@ -208,6 +249,25 @@ jobs:
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" upgrade "$GITHUB_SHA" 1.0.0-test
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" 1.0.0-test
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: mindex-mac-internal
+          path: dist/internal
+      - name: Verify actual Intel church installer and preservation
+        shell: bash
+        run: |
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          installer="dist/internal/Mindex-1.0.0-mac-x64.dmg"
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
+          exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"intel-internal.json"))).exe')"
+          resources="$(dirname "$(dirname "$exe")")/Resources"
+          node tests/verify_candidate_package.cjs "$resources" mac-x64 internal
+          node tests/test_desktop_youtube_local.cjs "$exe" "$resources/broadcast-engine/ffmpeg"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" seed "$GITHUB_SHA" 1.0.0
+          python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" 1.0.0
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" 1.0.0
+
   draft-release:
     if: ${{ inputs.publish_release }}
     needs: build
@@ -240,3 +300,24 @@ jobs:
           test -f release-artifacts/latest.yml
           node -e 'const fs=require("fs"),p=require("./product-release.json");fs.writeFileSync("release-notes.md",p.changes.map(x=>"- "+x).join("\n")+"\n\n"+p.upgradeNotes+"\n\n소스: "+process.env.GITHUB_SHA+"\n")'
           gh release create "$tag" release-artifacts/* --target "$GITHUB_SHA" --draft --title "Mindex $tag" --notes-file release-notes.md
+
+  internal-release:
+    name: Publish verified church internal installers
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && !inputs.publish_release }}
+    needs: [build, verify-intel]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mindex-*-internal
+          path: release-artifacts
+          merge-multiple: true
+      - name: Publish immutable internal version after same-SHA web and native gates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/publish-internal.py

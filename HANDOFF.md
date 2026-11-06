@@ -1,3 +1,19 @@
+## 2026-11-06 Church internal delivery — supersedes signing choice below
+
+The owner chooses unsigned church-only 1.0.0 delivery; equipment acceptance is
+ deferred and actual broadcasts remain prohibited during verification. Keep the
+ signed release command/certificate checks unchanged. The explicit internal
+ configuration keeps Mindex app/profile identity and emits an internal build
+ receipt, separate from isolated TEST packages and formal signed releases.
+
+Internal updates use the app's Update menu and startup notice to find a newer
+ complete `church-vX.Y.Z` GitHub release and open the exact OS/architecture
+ installer. Installation/app replacement is manual on both platforms; no claim
+ of unsigned automatic installation. Prompts defer during output, download
+ action rechecks output and unsaved edits, and no arbitrary URL/command executes.
+ Signed updater, rollback and data-store paths remain unchanged. Package parity,
+ synthetic installation/preservation and local RTMPS gates are still required.
+
 ## 2026-11-06 1.0.0 signed-release preparation
 
 The owner now requests 1.0.0 delivery with broadcast-room equipment acceptance
