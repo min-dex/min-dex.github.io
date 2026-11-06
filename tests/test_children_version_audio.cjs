@@ -82,3 +82,12 @@ require('../mindex.song-timing.js');const T=global.MindexSongTiming;
  assert.equal(T.rebaseAudioSet(stale,corrected),stale.audio_set);
  console.log('PASS text-only CAS preparation; inline line breaks; typo/spacing; repeated/ranged audio pages; split/order/repeat guards; immutable timing');
 }
+{
+ const forms=[{id:'v',lyrics:'첫 구절\n\n둘째 구절'},{id:'c',lyrics:'다음 구절'}];
+ const audioForms=[{id:'p',lyrics:'첫 구절\n둘째 구절\n다음 구절',audioSourceRange:[0,11]}];
+ const profile={enabled:true,audioUrl:'https://example.invalid/cross.wav',audioFingerprint:'hash',duration:20,starts:[2],forms:audioForms,sourceSignature:T.sourceSignature({forms}),lyricsFingerprint:T.fingerprint([{type:'lyrics',text:audioForms[0].lyrics}])};
+ const next=structuredClone(forms);next[0].lyrics=next[0].lyrics.replace('첫 구절','첫구절');
+ const rebased=T.rebaseAudioSet({forms,audio_set:profile},next);
+ assert.notEqual(rebased,profile);assert.equal(rebased.forms.length,1);assert.ok(!rebased.forms[0].lyrics.includes('\n\n'));assert.deepEqual(rebased.starts,[2]);
+ console.log('PASS range spanning DB paragraphs/forms preserves its single audio page');
+}

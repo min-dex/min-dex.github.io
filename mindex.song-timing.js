@@ -133,10 +133,18 @@
         if(Array.isArray(f.audioSourceRange)) {
           const start=mapOffset(f.audioSourceRange[0]),end=mapOffset(f.audioSourceRange[1]);
           if(start==null||end==null||end<=start||!positions[start]||!positions[end-1]) throw Error('range');
-          let left=positions[start][0],right=positions[end-1][1];
-          while(left>0 && !/[\p{L}\p{N}\s]/u.test(source[left-1])) left--;
-          while(right<source.length && !/[\p{L}\p{N}\s]/u.test(source[right])) right++;
-          return {...f,audioSourceRange:[start,end],lyrics:source.slice(left,right).trim()};
+          let cursor=f.audioSourceRange[0];
+          const chunks=paragraphs(f.lyrics).map(chunk=>{
+            const from=mapOffset(cursor);cursor+=audioText(chunk).length;const to=mapOffset(cursor);
+            if(from==null||to==null||to<=from||!positions[from]||!positions[to-1]) throw Error('page range');
+            let left=positions[from][0],right=positions[to-1][1];
+            while(left>0 && !/[\p{L}\p{N}\s]/u.test(source[left-1])) left--;
+            while(right<source.length && !/[\p{L}\p{N}\s]/u.test(source[right])) right++;
+            // Audio pages may intentionally span several DB paragraphs/forms.
+            // Keep their authored page boundaries, not the source's separators.
+            return source.slice(left,right).trim().replace(/\n\s*\n/g,'\n');
+          });
+          return {...f,audioSourceRange:[start,end],lyrics:chunks.join('\n\n')};
         }
         const index=previous.findIndex(p=>p.id===f.id);
         if(index<0) throw Error('form');
