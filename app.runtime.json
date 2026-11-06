@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-save-return-flow",
+  "version": "20261106-save-read-overlap",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "01dff38aaac7248587e76eb70b3818ca9a24ad5a19abd853f30283ef3b84328f",
-  "runtime_sha256": "cc03b51cf567102e17e534441efee9779fd189eca86b2ee3b6576e502f87c46d",
-  "source_bytes": 1354067,
-  "runtime_bytes": 966498,
-  "source_gzip": 310312,
-  "runtime_gzip": 243325
+  "source_sha256": "ae82f6f5a44126c17690a8a582e4499e2b7861382f3e10fcbe00b4ad9775f985",
+  "runtime_sha256": "d4a101aff00bca2f5c7a8070eeaf0ac5612d6f61969dc310430b62a5e6e59d5e",
+  "source_bytes": 1354138,
+  "runtime_bytes": 966533,
+  "source_gzip": 310356,
+  "runtime_gzip": 243350
 }
