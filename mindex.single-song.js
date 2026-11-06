@@ -362,11 +362,17 @@
       if (revisions.get(row.id) === row.revision && revisions.has(row.id)) rows.set(row.id,row);
     }
     const missing = [...revisions.keys()].filter(id => !rows.has(id));
+    let batchSize = 100;
     async function readBatch(ids) {
       const response = await client.rpc('get_praise_catalog_records_v1', {ids,expected_epoch:status.epoch});
       if (response.error?.code === '57014' && ids.length > 25) {
-        const size = ids.length > 100 ? 100 : 25;
-        for (let offset = 0; offset < ids.length; offset += size) await readBatch(ids.slice(offset,offset+size));
+        // A cancellation is a signal for the other workers as well.
+        batchSize = Math.min(batchSize, ids.length > 50 ? 50 : 25);
+        for (let offset = 0; offset < ids.length;) {
+          const size = batchSize;
+          await readBatch(ids.slice(offset,offset+size));
+          offset += size;
+        }
         return;
       }
       const fetched = response.data;
@@ -379,12 +385,12 @@
       try {
         while (!stopped && next < missing.length) {
           const start = next;
-          next += 200;
-          await readBatch(missing.slice(start,start+200));
+          next += batchSize;
+          await readBatch(missing.slice(start,next));
         }
       } catch (error) { stopped = true; throw error; }
     }
-    const results = await Promise.allSettled(Array.from({length:Math.min(3,Math.ceil(missing.length/200))},worker));
+    const results = await Promise.allSettled(Array.from({length:Math.min(3,Math.ceil(missing.length/batchSize))},worker));
     for (const result of results) if (result.status === 'rejected') throw result.reason;
     return [...revisions.keys()].map(id => rows.get(id));
   }

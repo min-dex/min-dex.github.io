@@ -53,6 +53,7 @@ const byId = client => client.calls.filter(call => call.name === 'get_praise_cat
   assert.deepEqual(indexed.records, paged.records);
   assert.deepEqual(byId(cold), original.map(row => row.id));
   assert.equal(cold.peak, 3);
+  assert.equal(Math.max(...cold.calls.map(call => call.args?.ids?.length || 0)), 100);
   assert.ok(cold.bytes < old.bytes, 'index must recover more bytes than the range overlap');
 
   const changed = clone(original.slice(1));
@@ -75,7 +76,12 @@ const byId = client => client.calls.filter(call => call.name === 'get_praise_cat
     const client = mock(original,{mode});
     assert.deepEqual((await api.loadActivation(client)).records,original);
     assert.ok(client.peak <= 3);
-    if (mode === 'timeout') assert.ok(client.calls.some(call => call.args?.ids?.length === 25));
+    if (mode === 'timeout') {
+      const sizes = client.calls.flatMap(call => call.args?.ids ? [call.args.ids.length] : []);
+      assert.ok(sizes.includes(25));
+      assert.equal(sizes.filter(size => size === 100).length, 3, 'no fresh 100-record requests after the first wave times out');
+      assert.ok(sizes.slice(sizes.indexOf(25)).every(size => size <= 25));
+    }
     else assert.ok(client.calls.some(call => call.name === 'get_single_praise_catalog_page_v1'));
   }
   await assert.rejects(api.loadActivation(mock(original,{mode:'drift'})), /PRAISE_STORAGE_CHANGED/);

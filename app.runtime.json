@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261106-praise-save-navigation",
+  "version": "20261106-catalog-batch-timeout",
   "options": {
     "compress": false,
     "mangle": {

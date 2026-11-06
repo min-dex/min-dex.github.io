@@ -5,8 +5,10 @@ list of active record IDs and revisions from one SQL statement snapshot. The cli
 validates the exact count, identity and revision domain. It requests only IDs
 missing from a checksum-verified same-project, same-epoch snapshot or with a
 changed revision. Removed IDs disappear by rebuilding in index order. The batch RPC uses exact active IDs so historical aliases and tombstones cannot
-enter the catalog. Cold profiles use the same index to request disjoint batches of at most 200 IDs,
-with at most three reads in flight and bounded 57014 subdivisions. The client
+enter the catalog. Cold profiles use the same index to request disjoint batches of at most 100 IDs,
+with at most three reads in flight. SQLSTATE 57014 reduces the shared size for
+queued batches and subdivisions to 50, then 25. Workers already in flight
+finish without restarting successful work. The client
 requires the expected ID and revision for every fetched row, validates the
 complete catalog and checks fresh final status before installation. It drains
 failed workers before falling back to the existing range transport.
