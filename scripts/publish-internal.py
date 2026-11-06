@@ -5,8 +5,8 @@ def gh(*args):
     return subprocess.check_output(['gh', *args], text=True)
 def main():
     root=pathlib.Path('.')
-    policy=json.loads((root/'internal-release.json').read_text())
-    version=json.loads((root/'package.json').read_text())['version']
+    policy=json.loads((root/'internal-release.json').read_text(encoding='utf-8'))
+    version=json.loads((root/'package.json').read_text(encoding='utf-8'))['version']
     assert policy == {'version':version,'delivery':'church-internal','publish':True}
     sha=os.environ['GITHUB_SHA']; repo=os.environ['GITHUB_REPOSITORY']
     assert repo=='min-dex/min-dex.github.io' and os.environ['GITHUB_REF']=='refs/heads/main'
@@ -28,11 +28,11 @@ def main():
             for chunk in iter(lambda:stream.read(1024*1024),b''): digest.update(chunk)
         records.append({'file':file.name,'bytes':file.stat().st_size,'sha256':digest.hexdigest()})
     receipt=root/'release-artifacts'/'internal-build.json'
-    receipt.write_text(json.dumps({'version':version,'channel':'internal','sourceCommit':sha,'assets':records},indent=2)+'\n')
+    receipt.write_text(json.dumps({'version':version,'channel':'internal','sourceCommit':sha,'assets':records},indent=2)+'\n',encoding='utf-8')
     sums=root/'release-artifacts'/'SHA256SUMS.txt'
-    sums.write_text(''.join(f"{x['sha256']}  {x['file']}\n" for x in records))
+    sums.write_text(''.join(f"{x['sha256']}  {x['file']}\n" for x in records),encoding='utf-8')
     notes=root/'release-artifacts'/'release-notes.md'
-    notes.write_text(f'Mindex {version} 교회 내부용\n\n미서명 설치본입니다. 첫 실행 시 운영체제의 보안 확인이 필요할 수 있습니다.\n\n앱의 업데이트 메뉴에서 새 설치 파일을 받을 수 있습니다. 설치 전 편집 내용을 저장하고 송출·앱을 종료해 주세요. Mac은 앱 교체, Windows는 설치 파일 실행 방식입니다. 자동 설치하지 않습니다.\n\n방송실 장비 검증은 보류되어 있으며 실제 유튜브 방송으로 검증한 배포가 아닙니다.\n\n소스: '+sha+'\n')
+    notes.write_text(f'Mindex {version} 교회 내부용\n\n미서명 설치본입니다. 첫 실행 시 운영체제의 보안 확인이 필요할 수 있습니다.\n\n앱의 업데이트 메뉴에서 새 설치 파일을 받을 수 있습니다. 설치 전 편집 내용을 저장하고 송출·앱을 종료해 주세요. Mac은 앱 교체, Windows는 설치 파일 실행 방식입니다. 자동 설치하지 않습니다.\n\n방송실 장비 검증은 보류되어 있으며 실제 유튜브 방송으로 검증한 배포가 아닙니다.\n\n소스: '+sha+'\n',encoding='utf-8')
     tag='church-v'+version
     # Immutable version: an existing tag/release requires human reconciliation.
     existing=subprocess.run(['gh','release','view',tag],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)

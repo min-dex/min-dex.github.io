@@ -11,7 +11,12 @@ Internal updates use the app's Update menu and startup notice to find a newer
  installer. Installation/app replacement is manual on both platforms; no claim
  of unsigned automatic installation. Prompts defer during output, download
  action rechecks output and unsaved edits, and no arbitrary URL/command executes.
- Signed updater, rollback and data-store paths remain unchanged. Package parity,
+ Integrated web source `89fd081c` includes the completed lyric-timing preservation batch.
+Local ARM installer source `f4b9538d` passed package parity, local RTMPS and
+synthetic reinstall/restart data preservation; the combined source still needs
+its own full web and native gate.
+
+Signed updater, rollback and data-store paths remain unchanged. Package parity,
  synthetic installation/preservation and local RTMPS gates are still required.
 
 ## 2026-11-06 1.0.0 signed-release preparation
