@@ -42,7 +42,13 @@ SCRIPT = """async manual => {
   let sends=0; publishPresenterState=()=>{sends++};
   const snap=capturePresenterViewportSnapshot(id);
   slides=makeSlides(32);state.presenter.slides=slides;
-  render();restorePresenterViewportSnapshot(snap);await wait(150);
+  render();restorePresenterViewportSnapshot(snap);
+  // The restore is queued in requestAnimationFrame. Wait for its frame, rather
+  // than sampling before WebKit has had a chance to run the restore callback.
+  await new Promise((resolve,reject)=>{
+    const timeout=setTimeout(()=>reject(Error('viewport restore frame did not run')),2000);
+    requestAnimationFrame(()=>{clearTimeout(timeout);resolve();});
+  });
   const after=offset();
   if(after===null||Math.abs(after-before)>4)throw Error(JSON.stringify({before,after,snap}));
   if(document.activeElement!==focus||state.presenter.index!==live||sends)throw Error('focus/live index changed');
