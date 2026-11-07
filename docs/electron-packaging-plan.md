@@ -344,3 +344,14 @@ package accepts it; before any renderer starts, a fresh temporary profile is
 selected, outbound web requests and permissions are denied, audio is muted, and
 presenter-output IPC is refused. This mode never copies an installed profile.
 It does not certify real output or online upgrades.
+
+## Installed-app audit · 2026-11-07
+
+The published church-v1.0.0 source is c61f6a84. Later web commits do not silently
+replace its bundled renderer. Follow-up source incorporates current main.
+Internal update downloads recheck output and candidate identity immediately
+before opening the installer URL; a simultaneous fresh lookup cancels the old
+request. Recovery clears stale error text. No automatic installer execution.
+Draft publication resolves the release database ID before checking uploaded
+asset digests, because an unpublished tag endpoint returns 404. Required web,
+platform, preservation and asset checks remain mandatory.

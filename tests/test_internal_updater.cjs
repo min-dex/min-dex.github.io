@@ -32,3 +32,13 @@ test('internal acceptance cannot send a real broadcast and retains final platfor
  for(const value of ['electron-builder.internal.cjs','internal-proof.json','intel-internal-proof.json','tests/test_desktop_youtube_local.cjs'])assert(workflow.includes(value));
  assert(!workflow.includes('continue-on-error:'));
 });
+
+test('download rechecks output and lookup changes at dispatch time',async()=>{
+ let live=false,opens=0;
+ const c=createInternalUpdateController({version:'1.0.0',platform:'darwin',arch:'arm64',enabled:()=>true,presenterOpen:()=>live,notify:()=>{},fetchImpl:async()=>({ok:true,text:async()=>JSON.stringify([release()])}),openExternal:async()=>{opens++;}});
+ await c.check();const first=c.download();live=true;
+ assert.equal((await first).reason,'presenter-active');assert.equal(opens,0);
+ live=false;const second=c.download();const lookup=c.check();
+ assert.equal((await second).reason,'update-not-ready');await lookup;assert.equal(opens,0);
+ await Promise.all([c.download(),c.download()]);assert.equal(opens,1);
+});

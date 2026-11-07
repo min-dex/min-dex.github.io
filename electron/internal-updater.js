@@ -21,7 +21,7 @@ function createInternalUpdateController({version,platform,arch,enabled,presenter
  let state={status:'idle',version:'',manualInstall:true},candidate=null,checking=null,opening=null;
  const snapshot=()=>({...state,enabled:enabled(),presenterOpen:presenterOpen()});
  const publish=()=>notify(snapshot());
- const set=(status,extra={})=>{state={...state,status,...extra};publish();};
+ const set=(status,extra={})=>{state={...state,message:'',status,...extra};publish();};
  const failure=()=>{set('error',{message:'업데이트를 확인하지 못했습니다. 잠시 후 다시 확인해 주세요.'});return {ok:false,reason:'update-failed'};};
  return {snapshot,publish,
   check(){
@@ -44,7 +44,13 @@ function createInternalUpdateController({version,platform,arch,enabled,presenter
    if(!candidate||state.status!=='available')return Promise.resolve({ok:false,reason:'update-not-ready'});
    if(opening)return opening;
    // Only the fixed repository asset URL is opened, never a renderer-supplied URL.
-   opening=Promise.resolve().then(()=>openExternal(candidate.url)).then(()=>({ok:true,manualInstall:true})).catch(failure).finally(()=>{opening=null;});return opening;
+   const selected=candidate;
+   opening=Promise.resolve().then(async()=>{
+    if(!enabled())return {ok:false,reason:'updates-unavailable'};
+    if(presenterOpen())return {ok:false,reason:'presenter-active'};
+    if(candidate!==selected||state.status!=='available')return {ok:false,reason:'update-not-ready'};
+    await openExternal(selected.url);return {ok:true,manualInstall:true};
+   }).catch(failure).finally(()=>{opening=null;});return opening;
   },
   install(){return {ok:false,reason:'manual-install-required'};},
  };

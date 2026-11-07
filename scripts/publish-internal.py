@@ -39,7 +39,11 @@ def main():
     if existing.returncode==0: raise RuntimeError('Version already exists; do not replace installers')
     gh('release','create',tag,'--target',sha,'--title',f'Mindex {version} · 교회 내부용','--notes-file',str(notes),'--draft')
     gh('release','upload',tag,*map(str,files),str(receipt),str(sums))
-    uploaded=json.loads(gh('api',f'repos/{repo}/releases/tags/{tag}'))
+    # Drafts have no public tag endpoint yet. Resolve their release ID first.
+    draft=json.loads(gh('release','view',tag,'--json','databaseId'))
+    release_id=draft['databaseId']
+    assert isinstance(release_id,int) and release_id>0
+    uploaded=json.loads(gh('api',f'repos/{repo}/releases/{release_id}'))
     assert uploaded['draft']
     assets={a['name']:a for a in uploaded['assets']}
     for item in records:

@@ -16,9 +16,10 @@ class Publication(unittest.TestCase):
     calls.append(args)
     if args[0]=='api':
      if 'actions/runs' in args[1]:return json.dumps({'workflow_runs':[{'id':1,'name':'Cloud web checks','head_branch':'main','head_sha':sha,'conclusion':gate}]})
-     if 'releases/tags' in args[1]:return json.dumps({'draft':True,'assets':[{'name':p.name,'size':p.stat().st_size,'digest':'sha256:'+hashlib.sha256(p.read_bytes()).hexdigest()} for p in (root/'release-artifacts').glob('*')]})
+     if 'releases/tags' in args[1]:raise RuntimeError('Draft tag lookup returns 404')
+     if args[1].endswith('/releases/42'):return json.dumps({'draft':True,'assets':[{'name':p.name,'size':p.stat().st_size,'digest':'sha256:'+hashlib.sha256(p.read_bytes()).hexdigest()} for p in (root/'release-artifacts').glob('*')]})
      return json.dumps({'object':{'sha':current}})
-    if args[:2]==('release','view'):return json.dumps({'isDraft':True,'assets':[{'name':p.name,'size':p.stat().st_size} for p in (root/'release-artifacts').glob('*')]})
+    if args[:2]==('release','view'):return json.dumps({'databaseId':42,'isDraft':True,'assets':[{'name':p.name,'size':p.stat().st_size} for p in (root/'release-artifacts').glob('*')]})
     return ''
    old=pathlib.Path.cwd()
    try:
@@ -30,7 +31,7 @@ class Publication(unittest.TestCase):
   return calls,error
  def test_verified_release_keeps_draft_until_all_assets_verified(self):
   calls,error=self.run_case();self.assertIsNone(error)
-  steps=[x[1] for x in calls if x[0]=='release'];self.assertEqual(steps,['create','upload','edit'])
+  steps=[x[1] for x in calls if x[0]=='release'];self.assertEqual(steps,['create','upload','view','edit'])
   self.assertIn('--draft',next(x for x in calls if x[:2]==('release','create')))
  def test_failed_or_changed_source_and_missing_assets_never_publish(self):
   for values in [{'gate':'failure'},{'current':'b'*40},{'missing':True}]:
