@@ -1,0 +1,27 @@
+name: Complete verified Mindex 1.0.1 publication
+on:
+  push:
+    branches: [release-recovery/church-v1.0.1]
+permissions:
+  actions: read
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts/recover-church-v1-0-1.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 42392589130
+          pattern: mindex-*-internal
+          path: release-artifacts
+          merge-multiple: true
+      - run: python3 scripts/recover-church-v1-0-1.py
+        env:
+          GH_TOKEN: ${{ github.token }}
