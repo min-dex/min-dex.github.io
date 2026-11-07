@@ -5,6 +5,8 @@ from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 INIT = """async () => {
  const client={rpc:async(name,args)=>{
+  if(name==='mindex_state_write_v1' && args.p_key==='mindex.worship.edit-sync.v1' && window.syncFixtureDelay)
+   await new Promise(resolve=>setTimeout(resolve,window.syncFixtureDelay));
   const response=await fetch('/state-fixture/'+name,{method:'POST',body:JSON.stringify(args)});
   const result=await response.json();if(result.error)return {error:Error(result.error)};return result;
  }};
@@ -57,6 +59,48 @@ def main():
                     page.locator(".mindex-boot").wait_for(state="hidden")
                     page.evaluate("document.fonts.ready")
                     assert page.evaluate(INIT)
+                    key='mindex.worship.edit-sync.v1'
+                    timings=page.evaluate("""async()=>{
+                      window.syncFixtureDelay=250;
+                      const dirtyCheck=hasDirtyChanges;
+                      hasDirtyChanges=()=>false;
+                      async function navWait(postCommit) {
+                        const start=performance.now();
+                        activeServiceSavePromise=(async()=>{try{await postCommit();}finally{activeServiceSavePromise=null}})();
+                        if(!await confirmSaveBeforeLeaving())throw Error('navigation did not resume');
+                        return Math.round(performance.now()-start);
+                      }
+                      try {
+                        const source={id:'fixture-no-link'};
+                        const after=await navWait(()=>syncSharedSundayContentAfterSave(source,[]));
+                        const before=await navWait(()=>persistPendingSundayEditSync());
+                        return {before,after};
+                      } finally {hasDirtyChanges=dirtyCheck;window.syncFixtureDelay=0;}
+                    }""")
+                    sync_writes=[r for r in requests if r['p_key']==key]
+                    assert len(sync_writes)==1 and sync_writes[0]['p_value'] is None, sync_writes
+                    assert timings['before']-timings['after']>=180, timings
+                    print(engine, 'linked worship empty queue, tab guard ms', timings)
+                    page.evaluate("""async()=>{
+                      const key='mindex.worship.edit-sync.v1',store=MINDEX_SERVER_STORAGE;
+                      const write=store.setItem('local',key,'[]');
+                      if(store.canSkipEmptyWrite('local',key))throw Error('pending write skipped');
+                      await write;
+                      if(store.canSkipEmptyWrite('local',key))throw Error('existing record skipped');
+                      await syncSharedSundayContentAfterSave({id:'fixture-no-link'},[]);
+                    }""")
+                    assert [r['p_value'] for r in requests if r['p_key']==key]==[None,'[]',None]
+                    control['offline']=True
+                    assert page.evaluate("""async()=>{
+                      try { await MINDEX_SERVER_STORAGE.setItem('local','mindex.worship.edit-sync.v1','[]'); }
+                      catch(error){return error.message;}
+                    }""")=='offline'
+                    assert page.evaluate("!MINDEX_SERVER_STORAGE.canSkipEmptyWrite('local','mindex.worship.edit-sync.v1')")
+                    control['offline']=False
+                    page.evaluate("syncSharedSundayContentAfterSave({id:'fixture-no-link'},[])")
+                    sync_writes=[r for r in requests if r['p_key']==key]
+                    assert [r['p_value'] for r in sync_writes[-3:]]==['[]','[]',None]
+                    assert sync_writes[-3]['p_request_id']==sync_writes[-2]['p_request_id']
                     control['hold']=True
                     page.evaluate("()=>{window.quietSave=MINDEX_SERVER_STORAGE.setItem('session','mindex.quiet.fixture','pending')}")
                     page.wait_for_function('MINDEX_SERVER_STORAGE.pending')

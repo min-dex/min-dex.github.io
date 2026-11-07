@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261107-setlist-leader-focus",
+  "version": "20261107-skip-empty-worship-sync",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "b43e64a16f494a62b5be341fa67b7af4cc69c5d995841f7e6698aa1ca361f620",
-  "runtime_sha256": "5111665b593cc45add9039f0458c53b92efaa69ee0e4b8a746f7e382579e3396",
-  "source_bytes": 1355448,
-  "runtime_bytes": 967636,
-  "source_gzip": 310635,
-  "runtime_gzip": 243643
+  "source_sha256": "a86924d5c2cc40f8bb0ec09c67ab2b9fcb095512517f88b201d6daf72d7882f7",
+  "runtime_sha256": "21158497ee61775a826426089e369543603dca1dfed73f71475951d97d3bfc19",
+  "source_bytes": 1355587,
+  "runtime_bytes": 967767,
+  "source_gzip": 310704,
+  "runtime_gzip": 243690
 }

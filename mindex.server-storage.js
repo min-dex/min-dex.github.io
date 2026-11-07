@@ -91,6 +91,12 @@
   if(!ready)return fallback;
   return stores[namespace(scope,key)].getItem(key)??fallback;
  }
+ function canSkipEmptyWrite(scope,key){
+  if(!ready)return false;
+  const name=namespace(scope,key),id=entryId(scope,key),store=stores[name];
+  return !writers.has(id)&&!queued.has(id)&&!failures.has(id)&&!store.pendingKeys().includes(key)
+   &&!refreshing.has(name)&&store.getItem(key)===null;
+ }
  function setItem(scope,key,value){
   if(transient(key)){value===null?ephemeral.delete(key):ephemeral.set(key,String(value));return Promise.resolve(true);}
   if(!ready)return Promise.reject(Error('SERVER_STORAGE_NOT_READY'));
@@ -245,5 +251,5 @@
   setItem:(key,value)=>setItem('local',key,value),removeItem:key=>setItem('local',key,null)};
  window.addEventListener('beforeunload',event=>{if(pending()){event.preventDefault();event.returnValue=''}});
  window.addEventListener('online',()=>{if(ready)void retry()});
- window.MINDEX_SERVER_STORAGE={initialize,keys:scope=>ready?stores[namespace(scope,'')].keys():[],getItem,setItem,updateItem:(scope,key,update)=>setItem(scope,key,update),queue,flush,retry,journal,get ready(){return ready},get pending(){return pending()}};
+ window.MINDEX_SERVER_STORAGE={initialize,keys:scope=>ready?stores[namespace(scope,'')].keys():[],getItem,canSkipEmptyWrite,setItem,updateItem:(scope,key,update)=>setItem(scope,key,update),queue,flush,retry,journal,get ready(){return ready},get pending(){return pending()}};
 })();

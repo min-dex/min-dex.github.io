@@ -30,6 +30,10 @@ contract and its deployment receipts are authoritative.
 - Navigation requested during a worship save waits for the existing save to
   settle before checking for unsaved changes. A completed save can proceed
   directly. New edits and failed saves still use the usual unsaved-changes guard.
+- With no linked Sunday worship jobs and a loaded, empty retry record, save
+  completion skips the empty state write. Existing retry records, queued or
+  uncertain writes, and confirmed cleanup of completed jobs retain their
+  original path. The worship commit and draft/recovery checks are unchanged.
 - Independent cold reads for typed element columns and Bible reference metadata
   overlap during save preparation. Both checks still finish before the values
   are used. Recovery, journal confirmation, and revision checks retain their
