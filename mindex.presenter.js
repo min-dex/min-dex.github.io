@@ -2910,10 +2910,23 @@ let nativePresenterFrameReady = false;
 function notifyNativePresenterFrameReady() {
   if (nativePresenterFrameReady || !window.mindexElectron?.presenterFrameReady) return;
   nativePresenterFrameReady = true;
-  // Two animation frames let the committed slide reach the compositor first.
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    void window.mindexElectron.presenterFrameReady().catch(() => { nativePresenterFrameReady = false; });
-  }));
+  // A committed video slide is not paintable until its decoder has a frame.
+  // Keep the native window hidden through that initial load; its startup timer
+  // reports failure instead of exposing a green/empty surface indefinitely.
+  const ready = () => {
+    const root = document.getElementById("presenterOutputRoot");
+    const videos = root?.querySelectorAll(":scope > video.presenter-output-background-video, .presenter-output-layer.is-active video.presenter-video") || [];
+    if ([...videos].some(video => video.readyState < 2 || video.seeking || video.style.opacity === "0")) {
+      requestAnimationFrame(ready);
+      return;
+    }
+    requestAnimationFrame(() => {
+      void window.mindexElectron.presenterFrameReady().then(result => {
+        if (!result?.ok) nativePresenterFrameReady = false;
+      }).catch(() => { nativePresenterFrameReady = false; });
+    });
+  };
+  requestAnimationFrame(ready);
 }
 
 function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState = {}, token = presenterOutputRenderState.token, onActivated = null) {

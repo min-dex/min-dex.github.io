@@ -73,6 +73,16 @@ def run(browser, url):
       } finally {nextAnimationFrame=originalFrame;}
       await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
       assert(nativeFrames===1,'native first-frame acknowledgement missing or duplicated');
+      nativePresenterFrameReady=false;
+      const pending=document.createElement('video');pending.className='presenter-output-background-video';
+      let decoded=0;Object.defineProperty(pending,'readyState',{get:()=>decoded});
+      document.getElementById('presenterOutputRoot').append(pending);
+      notifyNativePresenterFrameReady();
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      assert(nativeFrames===1,'native output exposed undecoded initial video');
+      decoded=2;
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      assert(nativeFrames===2,'native decoded video did not release initial window');pending.remove();
       return {result:'PASS projection reuse, edit/service invalidation, ready image without RAF waits, stale commit protection',frameWaits};
     }'''))
     page.close()

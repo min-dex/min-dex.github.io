@@ -55,10 +55,19 @@ try:
    assert output.evaluate("beforeControllerReload===document.querySelector('#presenterOutputRoot > video.presenter-output-background-video')&&!beforeControllerReload.paused")
    output.evaluate("async()=>{const v=beforeControllerReload;v.pause();const seek=new Promise(r=>v.addEventListener('seeked',r,{once:true}));v.currentTime=v.duration*.5;await seek}")
    output.add_init_script("window.savedReloadTime=JSON.parse(sessionStorage.getItem('mindex.presenter.background-checkpoint')||'null')?.time; document.addEventListener('seeked',e=>{if(e.target.matches('video.presenter-output-background-video'))window.restoredSeekTime??=e.target.currentTime},true)")
+   output.evaluate("""()=>window.addEventListener('pagehide',()=>{
+    const v=document.querySelector('#presenterOutputRoot > video.presenter-output-background-video');
+    const c=JSON.parse(sessionStorage.getItem('mindex.presenter.background-checkpoint')||'null');
+    sessionStorage.setItem('fixture-reload-diagnostic',JSON.stringify({ready:v?.readyState,width:v?.videoWidth,seeking:v?.seeking,opacity:v?.style.opacity,time:v?.currentTime,savedTime:c?.time,posterBytes:c?.poster?.length||0}));
+   })""")
    held=[]
    output.route('**/tests/fixtures/praise-background.webm',lambda route:held.append(route))
    output.reload(wait_until='domcontentloaded')
-   output.wait_for_selector('.presenter-background-reload-poster',state='visible',timeout=8000)
+   try:
+    output.wait_for_selector('.presenter-background-reload-poster',state='visible',timeout=8000)
+   except Exception:
+    print(engine,'POSTER DIAGNOSTIC',output.evaluate("""()=>({ready:document.readyState,bootFailed:document.body.dataset.bootFailed,runtime:typeof renderPresenterOutput,root:!!document.getElementById('presenterOutputRoot'),poster:!!document.querySelector('.presenter-background-reload-poster'),savedTime:window.savedReloadTime,checkpoint:JSON.parse(sessionStorage.getItem('fixture-reload-diagnostic')||'null'),video:[...document.querySelectorAll('video.presenter-output-background-video')].map(v=>({ready:v.readyState,seeking:v.seeking,paused:v.paused,error:v.error?.code,time:v.currentTime}))})"""),'held',len(held),flush=True)
+    raise
    output.wait_for_function("document.querySelector('.presenter-background-reload-poster')?.naturalWidth>0")
    assert output.evaluate("()=>{const layer=document.querySelector('.presenter-output-layer.is-active');const text=layer.querySelector('.presenter-slide-text');return text?.textContent.includes('TWO')&&text.getBoundingClientRect().width>0&&getComputedStyle(layer).opacity==='1'}"), 'lyrics hidden while restoring background'
    output.wait_for_function("Number.isFinite(savedReloadTime) && savedReloadTime>0.02")
