@@ -989,7 +989,9 @@ outlines, dimensions, input values and selection; adjacent wrappers stay neutral
 Reserve 30px for the month selector arrow independently of the common input
 inset. Keep leader metadata right-aligned, with a transparent resting input
 and field surface on hover/keyboard focus. Editing, auto-save, draft retention
-and focus outlines remain unchanged.
+and focus outlines remain unchanged. Background archive and song-link loads
+keep the focused leader input mounted. The deferred view updates when focus
+leaves the archive or the operator changes the archive view.
 
 ### Select arrow clearance ·2026-10-24
 

@@ -4157,7 +4157,7 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
     catalog.status = "failed";
     console.warn("Could not load setlist song links.", error);
   }
-  if (state.worshipSetlistSongCatalog === catalog && isSetlistArchiveView()) renderServiceSetlistArchiveDetail();
+  if (state.worshipSetlistSongCatalog === catalog && isSetlistArchiveView()) renderServiceSetlistArchiveDetail({ background: true });
 }
 
 async function fetchWorshipSetlistServices() {
@@ -4230,7 +4230,7 @@ async function loadWorshipSetlistArchive({ force = false } = {}) {
   }
   if (isSetlistArchiveView()) {
     renderSongList();
-    renderServiceSetlistArchiveDetail();
+    renderServiceSetlistArchiveDetail({ background: true });
   }
 }
 
@@ -25065,7 +25065,8 @@ function renderWorshipSetlistArchiveNavigation(entries, allEntries = entries) {
     `<button type="button" data-setlist-jump="setlist-group-${escapeAttr(group.key)}">${escapeHtml(group.title)}</button>`).join("")}</nav>`;
 }
 
-function renderServiceSetlistArchiveDetail() {
+function renderServiceSetlistArchiveDetail({ background = false } = {}) {
+  if (window.MINDEX_ARCHIVE_LIVE?.deferRender(background)) return;
   if (!document.body.classList.contains("ui-booting") && !state.worshipSetlistArchive.loaded && !state.worshipSetlistArchive.loading) {
     void loadWorshipSetlistArchive();
   }

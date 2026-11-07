@@ -51,6 +51,31 @@ def main():
                 page.locator('[data-setlist-period="year"]').select_option('2026')
                 assert page.locator('.svc-setlist-entry').count()==28
                 print('PASS native year selection in both views, future empty state and no fabricated records')
+                leader = page.locator('[data-setlist-leader-input]').first
+                leader.click()
+                leader.fill('입력 중')
+                leader.press('ArrowLeft')
+                page.evaluate("""() => {
+                  const input=document.activeElement, cursor=input.selectionStart;
+                  state.worshipSetlistArchive.error='fixture refresh';
+                  renderServiceSetlistArchiveDetail({background:true});
+                  if(document.activeElement!==input || input.selectionStart!==cursor || input.value!=='입력 중')
+                    throw Error('background archive refresh interrupted the leader edit');
+                }""")
+                page.evaluate("""() => {
+                  saveWorshipSetlistLeader=async id=>{ window.savedLeaderFixture=worshipSetlistLeaderDrafts.get(id)?.value; };
+                }""")
+                page.locator('#searchInput').focus()
+                page.get_by_text('fixture refresh', exact=True).wait_for()
+                assert page.evaluate('window.savedLeaderFixture') == '입력 중'
+                assert leader.input_value() == '입력 중'
+                page.evaluate("""() => {
+                  state.worshipSetlistArchive.error='';
+                  worshipSetlistLeaderDrafts.clear();
+                  renderServiceSetlistArchiveDetail();
+                }""")
+                print('PASS background archive refresh preserves leader focus, cursor, draft and blur save')
+
                 for view in ('date', 'service'):
                     expected = page.evaluate('''view => {
                       state.worshipSetlistArchiveView=view; renderServiceSetlistArchiveDetail();

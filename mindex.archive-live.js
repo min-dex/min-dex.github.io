@@ -84,5 +84,25 @@
     }finally{busy=false;}
   }
   function reconcile(){if(!blocked())window.MINDEX_CONTENT_LIVE?.receive({id:createUuid(),project:state.config.url,kind:'setlist-archive',recordId:'all'});}
-  window.MINDEX_ARCHIVE_LIVE={refresh,reconcile};
+  let renderDeferred = false;
+
+  function deferRender(background) {
+    const active = document.activeElement;
+    renderDeferred = background && refs.detailPane.contains(active)
+      && active.matches("[data-setlist-leader-input]");
+    return renderDeferred;
+  }
+
+  document.addEventListener("focusout", event => {
+    if (!renderDeferred || !refs.detailPane.contains(event.target)) return;
+    // Controls inside the archive finish their own interaction before a redraw.
+    if (refs.detailPane.contains(event.relatedTarget)) return;
+    setTimeout(() => {
+      if (renderDeferred && isSetlistArchiveView() && !refs.detailPane.contains(document.activeElement)) {
+        renderServiceSetlistArchiveDetail();
+      }
+    }, 0);
+  });
+
+  window.MINDEX_ARCHIVE_LIVE={refresh,reconcile,deferRender};
 })();
