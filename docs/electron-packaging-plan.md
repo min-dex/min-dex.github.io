@@ -344,3 +344,11 @@ package accepts it; before any renderer starts, a fresh temporary profile is
 selected, outbound web requests and permissions are denied, audio is muted, and
 presenter-output IPC is refused. This mode never copies an installed profile.
 It does not certify real output or online upgrades.
+
+### Waiting video compatibility
+
+The desktop installer bundles the current ping-pong waiting loop. The two
+retired generated waiting loops remain at their existing public URLs for old
+links and are excluded from the installer and the shared renderer fingerprint.
+The installer audit checks the retired files are absent and verifies the
+remaining runtime files against committed bytes.

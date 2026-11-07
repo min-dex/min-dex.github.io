@@ -106,6 +106,8 @@
       "favicon.ico",
       "manifest.webmanifest",
       "assets/**/*",
+      "!assets/presenter/chromakey-ready-loop.mp4",
+      "!assets/presenter/chromakey-ready-loop-fast.mp4",
       "vendor/**/*",
       "electron/**/*",
       "package.json",

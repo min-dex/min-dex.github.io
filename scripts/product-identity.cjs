@@ -11,7 +11,7 @@ function identity(root,{test=false,internal=false}={}){
  if(!Array.isArray(policy.changes)||!policy.changes.length||policy.changes.some(s=>typeof s!=='string'||!/[가-힣]/.test(s)))throw Error('Korean release notes required');
  const files=git(root,['ls-tree','-rz','HEAD']).split('\0').filter(Boolean).map(row=>{
   const [meta,name]=row.split('\t');return {name,mode:meta.split(' ')[0],blob:meta.split(' ')[2]};
- }).filter(f=>runtime(f.name));
+ }).filter(f=>runtime(f.name)&&!pkg.build?.files?.includes(`!${f.name}`));
  if(files.some(f=>f.mode!=='100644'&&f.mode!=='100755'))throw Error('Runtime symlinks are not supported');
  const rendererTree=crypto.createHash('sha256').update(files.map(f=>`${f.name}\0${f.blob}\n`).sort().join('')).digest('hex');
  return {schema:1,productVersion:pkg.version,channel:test?'test':internal?'internal':policy.channel,buildVersion:release.version,
@@ -28,10 +28,11 @@ function writeIdentity(root,destination,options){
  const result=identity(root,options);if(options?.web)verifyWebReleaseTag(root,result);const {files,...publicInfo}=result;
  fs.writeFileSync(path.join(destination,'mindex-build.json'),JSON.stringify(publicInfo,null,2)+'\n');return result;
 }
-function validateWorkingRuntime(root,record){
+function validateWorkingRuntime(root){
  const dirty=git(root,['diff','--name-only','HEAD','--']).trim().split('\n').filter(Boolean);
  if(dirty.length)throw Error('Commit runtime and product metadata before packaging');
- const names=new Set(record.files.map(f=>f.name));
+ // Public compatibility files can be committed without being part of the shared renderer.
+ const names=new Set(git(root,['ls-tree','-rz','--name-only','HEAD','--','assets','vendor']).split('\0'));
  for(const dir of ['assets','vendor']){
   const walk=folder=>{if(!fs.existsSync(folder))return;for(const item of fs.readdirSync(folder,{withFileTypes:true})){
    const full=path.join(folder,item.name),name=path.relative(root,full).split(path.sep).join('/');
@@ -51,7 +52,7 @@ async function beforePack(context){
  fs.accessSync(path.join(root,'.cache','broadcast-engine',os+'-'+arch,exe));
  const test=context.packager.config.extraMetadata?.mindexTestBuild===true;
  const internal=context.packager.config.extraMetadata?.mindexInternalBuild===true;
- const record=identity(root,{test,internal});validateWorkingRuntime(root,record);writeIdentity(root,root,{test,internal});
+ validateWorkingRuntime(root);writeIdentity(root,root,{test,internal});
 }
 module.exports=beforePack;Object.assign(module.exports,{identity,writeIdentity,validateWorkingRuntime,sameRelease,runtime,verifyWebReleaseTag});
 if(require.main===module){
