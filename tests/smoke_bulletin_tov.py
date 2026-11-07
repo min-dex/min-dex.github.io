@@ -49,6 +49,8 @@ try:
             page.get_by_role("button", name="토브 양식 적용", exact=True).click()
             page.wait_for_function("document.querySelector('[data-bulletin-design=youth-tov]')")
             assert page.locator("[data-bulletin-design=youth-tov]").count() == 2
+            assert page.locator("[data-frame-id=tovArtwork] image").get_attribute("href").endswith("/tov-light-path.svg")
+            assert page.locator("[data-frame-id=newsTitle]").text_content() == "토브 토킹"
             assert page.locator("[data-bulletin-field=news]").input_value().startswith("① 함께")
             assert page.locator("[data-frame-id=staff]").text_content() == "회장 가나다 · 부회장 라마바 · 서기 사아자"
             assert "출력에서 생략할 전문" not in page.locator("[data-frame-id=order]").text_content()
@@ -65,7 +67,11 @@ try:
                 title.family='MindexBulletin';
                 const custom={};MindexBulletin.applyStored(custom,{revision:3,...value});
                 const family=doc=>doc.frames.find(frame=>frame.id==='tovTitle').family;
-                return family(legacy)==='Paperlogy'&&family(custom)==='MindexBulletin';
+                custom.settings.appearance={assets:{artwork:'assets/bulletin/tov-autumn.svg'},palette:{cover:'#abcdef'}};
+                const {pages}=MindexBulletin.renderPages(custom,'print');
+                return family(legacy)==='Paperlogy'&&family(custom)==='MindexBulletin'
+                    &&pages[0].querySelector('[data-frame-id=tovArtwork] image').getAttribute('href').endsWith('/tov-autumn.svg')
+                    &&!!pages[0].querySelector('rect[fill="#abcdef"]');
             }""")
             assert page.locator('[data-frame-id=tovTitle] tspan').first.get_attribute('font-family') == 'Paperlogy'
             assert page.locator('[data-frame-id=order] text').first.get_attribute('font-family') == 'MindexBulletin'

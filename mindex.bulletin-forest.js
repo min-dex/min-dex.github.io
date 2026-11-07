@@ -67,14 +67,14 @@
     add('insideBrand',1,159.5,202,126.5,5,7.5,'label:꿈꾸는 어린이부','text','right');
     return result;
   }
-  const tovArtwork='assets/bulletin/tov-autumn.svg';
-  const tovPalette={paper:'#ffffff',cover:'#d9dcf2',ink:'#292f72',accent:'#85358e',soft:'#f1e4f3',peach:'#f1e4f3',line:'#afb2d5',muted:'#4b5190'};
+  const tovArtwork='assets/bulletin/tov-light-path.svg';
+  const tovPalette={paper:'#fffcf7',cover:'#e2e3f0',ink:'#26294f',accent:'#574579',soft:'#eeebf4',peach:'#eeebf4',line:'#b6b8cd',muted:'#50567c'};
   function tovFrames(){
     const result=[];
     const add=(id,page,x,y,w,h,size,binding,type='text',align='left',weight=500)=>result.push({id,page,x,y,w,h,size,binding,type,align,weight});
-    add('eventsTitle',0,19,13,118,11,22.5,'label:★  교회 일정','text','left',800);
+    add('eventsTitle',0,19,13,118,11,22.5,'label:교회 일정','text','left',800);
     add('events',0,19,31,118,34,11.5,'field:eventsText','list');
-    add('newsTitle',0,19,67,118,11,22.5,'label:★  토브 토킹','text','left',800);
+    add('newsTitle',0,19,67,118,11,22.5,'label:토브 토킹','text','left',800);
     add('welcome',0,19,85,118,11,12.5,'field:welcome','text','left',700);
     add('news',0,19,97,118,43,11.5,'field:news','list');
     add('notices',0,19,141,118,17,10,'field:notices','list');
@@ -85,22 +85,22 @@
     add('issue',0,241.5,10.5,43.5,10,11.5,'issue','text','center',700);
     add('tovTitle',0,174.5,50,96.5,36,35,'label:검단우리교회\n토브 청소년부','text','center',800);
     add('tovTag',0,182.5,93.5,80,9,12.5,'label:예수님 안에서 함께 성장하는 우리','text','center',700);
-    add('tovArtwork',0,181.5,111,82.5,74,10,'label:가을 나무','art','center');
+    add('tovArtwork',0,181.5,111,82.5,74,10,'label:표지 그림','art','center');
     add('tovChurch',0,158.5,189,128.5,9,15,'label:검단우리교회 청소년부','text','center',800);
     add('address',0,158.5,200,128.5,8,10,'field:address','text','center');
-    add('orderTitle',1,18,12,120,11,22.5,'label:○  예배 순서','text','left',800);
+    add('orderTitle',1,18,12,120,11,22.5,'label:예배 순서','text','left',800);
     add('meeting',1,18,29,58,8,11.5,'field:meeting','text','left',700);
     add('leader',1,78,29,60,8,11.5,'leader','text','right',700);
     add('order',1,18,42,120,105,11.5,'source:order','order');
     add('nextPrayer',1,18,150,120,9,10,'field:nextPrayer');
-    add('tovPointTitle',1,23,168,111,9,15,'label:+  예배 포인트','text','left',800);
+    add('tovPointTitle',1,23,168,111,9,15,'label:예배 포인트','text','left',800);
     add('worshipPoint',1,23,181,111,14,11.5,'field:worshipPoint');
-    add('notesTitle',1,160,12,119,11,22.5,'label:○  말씀 노트','text','left',800);
+    add('notesTitle',1,160,12,119,11,22.5,'label:말씀 노트','text','left',800);
     add('tovScriptureTitle',1,165,33,51,8,12.5,'label:성경 본문','text','left',800);
     add('tovOutlineTitle',1,224,33,50,8,12.5,'label:말씀 이해','text','left',800);
     add('scriptureNote',1,165,44,51,112,11.5,'field:scriptureNote');
     add('outline',1,224,44,50,112,11.5,'field:outline');
-    add('tovReflectionTitle',1,165,168,111,9,15,'label:+  내게 주신 말씀 / 내가 받은 은혜','text','left',800);
+    add('tovReflectionTitle',1,165,168,111,9,15,'label:내게 주신 말씀 / 내가 받은 은혜','text','left',800);
     add('reflection',1,165,181,111,14,11.5,'field:reflection');
     const displayTitles=new Set(['tovTitle','eventsTitle','newsTitle','orderTitle','notesTitle','tovPointTitle','tovReflectionTitle']);
     for(const frame of result)if(displayTitles.has(frame.id))frame.family='Paperlogy';
@@ -110,24 +110,23 @@
     const add=(tag,props)=>root.append(a.svg(tag,props));
     const rect=(x,y,width,height,fill,rx=0)=>add('rect',{x,y,width,height,fill,rx});
     const line=(x1,y1,x2,y2,stroke=p.line)=>add('line',{x1,y1,x2,y2,stroke,'stroke-width':.3});
-    const wave=(x,y,width)=>{
-      const steps=24,step=width/steps;
-      const d=Array.from({length:steps},()=>`q${step/4} -.7 ${step/2} 0t${step/2} 0`).join(' ');
-      add('path',{d:`M${x} ${y} ${d}`,fill:'none',stroke:p.muted,'stroke-width':.3});
+    const headingRule=(x,y,width)=>{
+      line(x,y,x+width,y);
+      rect(x,y-.4,10,.8,p.accent,.4);
     };
     rect(0,0,9,210,p.cover);
     if(page===0){
       rect(148.5,0,148.5,210,p.cover);
-      add('path',{d:'M173 185V75a49.5 46 0 0 1 99 0v110Z',fill:p.paper});
+      rect(168,31,109,154,p.paper,5);
       rect(241,10,45,11,p.ink,5.5);
       rect(182.5,92,80,10,p.accent,5);
       rect(148.5,185,148.5,25,p.accent);
-      rect(20.5,162.5,118,37,p.line,3);
-      rect(19,161,118,37,p.cover,3);
-      wave(19,26,118);wave(19,80,118);
+      rect(19,161,118,37,p.soft,3);
+      rect(19,164,.8,31,p.accent,.4);
+      headingRule(19,26,118);headingRule(19,80,118);
     }else{
       rect(288,0,9,210,p.cover);
-      wave(18,25,120);wave(160,25,119);
+      headingRule(18,25,120);headingRule(160,25,119);
       add('rect',{x:160,y:30,width:119,height:130,fill:'none',stroke:p.line,'stroke-width':.3});
       line(219.5,30,219.5,160);
       for(const x of [18,160]){
