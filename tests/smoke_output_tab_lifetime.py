@@ -54,7 +54,7 @@ try:
    assert main.evaluate("readPresenterStoredPayload().slides.some(s=>s.text==='UPDATED NEXT') && readPresenterStoredPayload().slides[2].text==='TWO'")
    assert output.evaluate("beforeControllerReload===document.querySelector('#presenterOutputRoot > video.presenter-output-background-video')&&!beforeControllerReload.paused")
    output.evaluate("async()=>{const v=beforeControllerReload;v.pause();const seek=new Promise(r=>v.addEventListener('seeked',r,{once:true}));v.currentTime=v.duration*.5;await seek}")
-   output.add_init_script("window.savedReloadTime=JSON.parse(sessionStorage.getItem('mindex.presenter.background-checkpoint')||'null')?.time; document.addEventListener('seeked',e=>{if(e.target.matches('video.presenter-output-background-video'))window.restoredSeekTime=e.target.currentTime},true)")
+   output.add_init_script("window.savedReloadTime=JSON.parse(sessionStorage.getItem('mindex.presenter.background-checkpoint')||'null')?.time; document.addEventListener('seeked',e=>{if(e.target.matches('video.presenter-output-background-video'))window.restoredSeekTime??=e.target.currentTime},true)")
    held=[]
    output.route('**/tests/fixtures/praise-background.webm',lambda route:held.append(route))
    output.reload(wait_until='domcontentloaded')
@@ -65,7 +65,11 @@ try:
    assert held
    for route in held:route.continue_()
    output.unroute('**/tests/fixtures/praise-background.webm')
-   output.wait_for_function("Number.isFinite(window.restoredSeekTime) && Math.abs(restoredSeekTime-savedReloadTime)<.08",timeout=10000)
+   try:
+    output.wait_for_function("Number.isFinite(window.restoredSeekTime) && Math.abs(restoredSeekTime-savedReloadTime)<.08",timeout=10000)
+   except Exception:
+    print(engine,'RELOAD DIAGNOSTIC',output.evaluate("()=>{const v=document.querySelector('#presenterOutputRoot > video.presenter-output-background-video');return {saved:window.savedReloadTime,restored:window.restoredSeekTime,time:v?.currentTime,duration:v?.duration,ready:v?.readyState,seeking:v?.seeking,error:v?.error?.code,paused:v?.paused}}"),flush=True)
+    raise
    output.wait_for_selector('.presenter-background-reload-poster',state='detached',timeout=5000)
    assert output.evaluate("()=>{const v=document.querySelector('#presenterOutputRoot > video.presenter-output-background-video');return v?.readyState>=2&&!v.paused}")
    print(engine,'PASS reload preserves live element, refreshes upcoming content, restores still, lyrics and playhead',flush=True)

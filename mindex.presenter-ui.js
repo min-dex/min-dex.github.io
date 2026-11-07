@@ -922,7 +922,7 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   // Keep the decoded outgoing footage until the incoming element can paint.
   const video = document.createElement("video");
   video.className = "presenter-output-background-video";
-  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = true; video.playsInline = true; video.preload = "auto";
+  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = !resume; video.playsInline = true; video.preload = "auto";
   video.style.opacity = "0";
   if (presenterBackgroundAllowsFrameCapture(source)) video.crossOrigin = "anonymous";
   video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
@@ -935,13 +935,18 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
     root.prepend(poster);
   }
   let restoring = Boolean(resume);
+  let play;
   video.addEventListener("loadedmetadata", () => {
     if (!restoring) return;
     const target = Number.isFinite(video.duration) && video.duration > 0 ? resume.time % video.duration : resume.time;
     if (Math.abs(video.currentTime - target) > 0.02) video.currentTime = target;
-    else restoring = false;
+    else { restoring = false; play?.(); }
   });
-  video.addEventListener("seeked", () => { restoring = false; reveal(); });
+  video.addEventListener("seeked", () => {
+    if (!restoring) return;
+    restoring = false;
+    play?.();
+  });
   root._presenterBackgroundVideo = video;
   let revealed = false;
   let retried = false;
@@ -991,10 +996,11 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
     // Cold media requests can exceed eight seconds; keep decoded outgoing footage
     // during the bounded wait and one retry instead of abandoning a healthy load.
     timer = window.setTimeout(() => failed(true), 30000);
-    video.play()?.then(reveal).catch(error => {
+    play = () => video.play()?.then(reveal).catch(error => {
       if (loadingAttempt !== attempt || revealed) return;
       failed(["AbortError", "NetworkError", "NotSupportedError"].includes(error?.name));
     });
+    if (!restoring) play();
   };
   start();
 }
