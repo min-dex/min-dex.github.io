@@ -56,7 +56,9 @@ try:
     check(rows.elements[0].asset.original.sha256===before&&rows.elements[0].config.asset.original.sha256===before,'persistence dropped original');
     check(await presenterPptxDigest(await readPresenterPptxSource(new URL(asset.original.url)))===before,'original bytes changed');
     refs.detailPane.insertAdjacentHTML('beforeend',renderPresenterAssetUpload(item,0,memo,sid));
-    check(document.querySelector('[aria-label="원본 자료 교체"]').accept==='.key,.pptx','replacement accept');
+    const replacement=refs.detailPane.querySelector('[data-presenter-pptx-file]');
+    check(replacement?.accept==='.key,.pptx'&&replacement.hasAttribute('data-keynote-public-upload'),'replacement accept/consent marker');
+    check(replacement.getAttribute('aria-label').includes('메모·숨긴 장 포함')&&replacement.closest('label').innerText.includes('원본 공개 저장'),'replacement discloses original storage before selection');
     return {saved,hash:before};
    }''')
    page.get_by_text('자료 관리',exact=True).click()
