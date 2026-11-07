@@ -36,8 +36,11 @@ def main():
                 assert page.locator('[data-operations-nav]').get_attribute('aria-current')=='page'
                 assert page.locator('#songList [data-home-module="setlists"]').get_attribute('aria-current')=='page'
                 assert page.evaluate('currentPageTabTitle()')=='역대 콘티'
-                page.locator('#searchInput').fill('fixture-song')
-                page.wait_for_function("state.search==='fixture-song' && !isGlobalSearchActive()")
+                page.locator('#searchInput').fill('fixture')
+                # The search input updates state immediately and redraws on a debounce.
+                # Finish that user-triggered redraw before starting the background-refresh case.
+                page.wait_for_function("state.search==='fixture' && !state.searchCache.renderTimer && !isGlobalSearchActive()")
+                assert page.locator('.svc-setlist-entry').count()==28
                 page.screenshot(path='/tmp/mindex-setlists-operations-'+os.environ.get('MINDEX_ENGINE','chromium')+'.png')
                 print('PASS Operations entry, active navigation, route title and scoped archive search')
                 page.locator('[data-setlist-period="year"]').select_option('2027')
@@ -102,7 +105,7 @@ def main():
 
                     assert page.evaluate("state.module")=="setlists"
                     result = page.evaluate("() => ({view:state.worshipSetlistArchiveView,month:state.worshipSetlistArchiveMonth,year:state.worshipSetlistArchiveYear,search:state.search,title:currentPageTabTitle()})")
-                    assert result == dict(view=view, month='07', year='2026', search='fixture-song', title='역대 콘티'), result
+                    assert result == dict(view=view, month='07', year='2026', search='fixture', title='역대 콘티'), result
                     print('PASS browser Back restores', result, 'scroll', expected)
                 page.evaluate("""async () => {
                   const songs=[{id:'old',title:'문들아 머리 들어라',versions:[],metadata:{}},
@@ -116,7 +119,7 @@ def main():
                 }""")
                 page.go_back()
                 page.wait_for_function("!state.applyingBrowserHistory && isSetlistArchiveView() && !!document.querySelector('.svc-setlist-entry')")
-                assert page.evaluate("state.search") == 'fixture-song'
+                assert page.evaluate("state.search") == 'fixture'
                 print('PASS song link returns in one Back; artist hint renders without changing title')
                 page.reload(wait_until='domcontentloaded')
                 page.wait_for_function("typeof isSetlistArchiveView==='function' && state.module==='setlists'")

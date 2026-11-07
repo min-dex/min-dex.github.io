@@ -128,31 +128,33 @@ jobs:
         if: ${{ !inputs.publish_release }}
         shell: bash
         run: |
+          version="$(node -p 'require("./package.json").version')"
           export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
           if [[ "$RUNNER_OS" == Windows ]]; then
-            installer="dist/test/Mindex-Test-1.0.0-test-win-x64.exe"
+            installer="dist/test/Mindex-Test-${version}-test-win-x64.exe"
           else
-            installer="dist/test/Mindex-Test-1.0.0-test-mac-$(node -p process.arch).dmg"
+            installer="dist/test/Mindex-Test-${version}-test-mac-$(node -p process.arch).dmg"
           fi
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/install-fixture.json"
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"install-fixture.json"))).exe')"
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" upgrade "$GITHUB_SHA" 1.0.0-test
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" 1.0.0-test
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" upgrade "$GITHUB_SHA" "${version}-test"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" "${version}-test"
       - name: Build and verify church internal installers without publication
         if: ${{ !inputs.publish_release }}
         shell: bash
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
         run: |
+          version="$(node -p 'require("./package.json").version')"
           export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
           if [[ "$RUNNER_OS" == Windows ]]; then
             pnpm exec electron-builder --config electron-builder.internal.cjs --win nsis --x64 --publish never
-            installer="dist/internal/Mindex-1.0.0-win-x64.exe"
+            installer="dist/internal/Mindex-${version}-win-x64.exe"
             target=win-x64
           else
             pnpm exec electron-builder --config electron-builder.internal.cjs --mac dmg --arm64 --x64 --publish never
             target="mac-$(node -p process.arch)"
-            installer="dist/internal/Mindex-1.0.0-$target.dmg"
+            installer="dist/internal/Mindex-${version}-$target.dmg"
           fi
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"internal-install.json"))).exe')"
@@ -160,10 +162,10 @@ jobs:
           node tests/verify_candidate_package.cjs "$resources" "$target" internal
           if [[ "$RUNNER_OS" == Windows ]]; then encoder="$resources/broadcast-engine/ffmpeg.exe"; else encoder="$resources/broadcast-engine/ffmpeg"; fi
           node tests/test_desktop_youtube_local.cjs "$exe" "$encoder"
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" seed "$GITHUB_SHA" 1.0.0
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" seed "$GITHUB_SHA" "$version"
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" 1.0.0
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" 1.0.0
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" "$version"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" "$version"
       - name: Retain verified church installers
         if: ${{ !inputs.publish_release }}
         uses: actions/upload-artifact@v4
@@ -243,21 +245,22 @@ jobs:
       - name: Verify Intel launch, reinstall preservation and local RTMPS
         shell: bash
         run: |
+          version="$(node -p 'require("./package.json").version')"
           test "$(node -p process.arch)" = x64
           npm install --prefix "$RUNNER_TEMP/mindex-qa" --ignore-scripts --no-audit --no-fund playwright@1.58.0
           export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
-          installer="dist/test/Mindex-Test-1.0.0-test-mac-x64.dmg"
+          installer="dist/test/Mindex-Test-${version}-test-mac-x64.dmg"
           test -f "$installer"
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-fixture.json"
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"intel-fixture.json"))).exe')"
           resources="$(dirname "$(dirname "$exe")")/Resources"
           node tests/verify_candidate_package.cjs "$resources" mac-x64
           node tests/test_desktop_youtube_local.cjs "$exe" "$resources/broadcast-engine/ffmpeg"
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" seed "$GITHUB_SHA" 1.0.0-test
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" 1.0.0-test
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" seed "$GITHUB_SHA" "${version}-test"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" "${version}-test"
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-fixture.json"
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" upgrade "$GITHUB_SHA" 1.0.0-test
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" 1.0.0-test
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" upgrade "$GITHUB_SHA" "${version}-test"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" "${version}-test"
 
       - uses: actions/download-artifact@v4
         with:
@@ -266,17 +269,18 @@ jobs:
       - name: Verify actual Intel church installer and preservation
         shell: bash
         run: |
+          version="$(node -p 'require("./package.json").version')"
           export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
-          installer="dist/internal/Mindex-1.0.0-mac-x64.dmg"
+          installer="dist/internal/Mindex-${version}-mac-x64.dmg"
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"intel-internal.json"))).exe')"
           resources="$(dirname "$(dirname "$exe")")/Resources"
           node tests/verify_candidate_package.cjs "$resources" mac-x64 internal
           node tests/test_desktop_youtube_local.cjs "$exe" "$resources/broadcast-engine/ffmpeg"
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" seed "$GITHUB_SHA" 1.0.0
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" seed "$GITHUB_SHA" "$version"
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" 1.0.0
-          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" 1.0.0
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" "$version"
+          node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" "$version"
 
   draft-release:
     if: ${{ inputs.publish_release }}

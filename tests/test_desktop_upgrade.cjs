@@ -21,6 +21,7 @@ async function main(){
   const info=await page.evaluate(()=>window.mindexElectron.getBuildInfo());
   assert(info.testBuild || info.build.channel === "internal");assert.equal(info.build.sourceCommit,sha);
   let bundledAudio = null;
+  let waitingAndFriday = null;
   let previewCacheContract = null;
   let preciseAudio = null;
   if(phase==='upgrade'){
@@ -61,6 +62,35 @@ async function main(){
       return {protocol:url.protocol,duration,progressed,seekedNearEnd:true,muted:true,released:true};
      })(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Bundled MP3 acceptance timeout')),30000);})]);
     }finally{clearTimeout(timer);audio.pause();audio.removeAttribute('src');audio.load();}
+   });
+   waitingAndFriday=await page.evaluate(async()=>{
+    const sources=[
+     ['video',PRESENTER_DEFAULT_CHROMAKEY_READY_LOOP_VIDEO,'chromakey-ready-loop-pingpong.mp4',39,41],
+     ['audio',SERVICE_SLOT_MUSIC['prayer.meeting.free'].source,'friday-free-prayer.m4a',2790,2820],
+    ];
+    const results={};
+    for(const [kind,source,filename,minDuration,maxDuration] of sources){
+     const url=new URL(source,location.href);
+     if(url.protocol!=='file:'||!url.pathname.endsWith('/'+filename))throw Error('Unexpected installed source: '+kind);
+     const media=document.createElement(kind);
+     media.muted=true;
+     media.preload='auto';
+     let timer;
+     try{
+      results[kind]=await Promise.race([(async()=>{
+       const advanced=new Promise((resolve,reject)=>{
+        media.addEventListener('timeupdate',()=>{if(media.currentTime>0)resolve();});
+        media.addEventListener('error',()=>reject(Error('Installed '+kind+' failed: '+media.error?.code)),{once:true});
+       });
+       media.src=url.href;
+       await Promise.all([media.play(),advanced]);
+       const {duration,currentTime,paused}=media;
+       if(paused||!(duration>=minDuration&&duration<=maxDuration)||(kind==='video'&&!media.videoWidth))throw Error('Installed '+kind+' did not decode correctly');
+       return {filename,duration,currentTime};
+      })(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Installed '+kind+' playback timed out')),30000);})]);
+     }finally{clearTimeout(timer);media.pause();media.removeAttribute('src');media.load();}
+    }
+    return results;
    });
    preciseAudio=await page.evaluate(async fingerprints=>{
     let timer;try{return await Promise.race([(async()=>{
@@ -144,7 +174,7 @@ async function main(){
   const draft=JSON.parse(record.data.values['mindex.editor.draft.v2:service:fixture-worship:rehearsal']);
   assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
   for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
-  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,previewCacheContract,preciseAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
+  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,waitingAndFriday,previewCacheContract,preciseAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
  }finally{
   // Test teardown discards only the recovered synthetic editor, not persisted records.
   for(const page of app.windows())await page.close({runBeforeUnload:false});

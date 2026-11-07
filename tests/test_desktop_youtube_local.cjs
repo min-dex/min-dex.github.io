@@ -49,7 +49,8 @@ async function main() {
     assert.equal(await panel.locator('#ytKey').inputValue(),'');
     await sleep(2200);
     await panel.locator('#excludeBroadcast').click();
-    assert(await panel.evaluate(()=>!broadcastPrototype.routing().broadcast && document.querySelector('#program').getContext('2d').getImageData(10,10,1,1).data[2]>210));
+    // The routing toggle applies before the next animation frame paints the local preview.
+    await panel.waitForFunction(()=>!broadcastPrototype.routing().broadcast && document.querySelector('#program').getContext('2d').getImageData(10,10,1,1).data[2]>210,null,{timeout:5000});
     await sleep(2500);
     await panel.locator('#excludeBroadcast').click(); await sleep(2500);
     await panel.locator('#ytStop').click();

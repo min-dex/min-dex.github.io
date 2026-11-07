@@ -364,3 +364,11 @@ Manual source-link keyboard acceptance explicitly reactivates the opener after
 closing each popup. This avoids racing WebKit focus restoration; exact source
 URLs, click/Enter activation, noopener and unchanged app route/history assertions
 remain in place. This is test synchronization, not a runtime behavior change.
+
+### Waiting video compatibility
+
+The desktop installer bundles the current ping-pong waiting loop. The two
+retired generated waiting loops remain at their existing public URLs for old
+links and are excluded from the installer and the shared renderer fingerprint.
+The installer audit checks the retired files are absent and verifies the
+remaining runtime files against committed bytes.

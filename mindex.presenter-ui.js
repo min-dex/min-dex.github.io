@@ -840,12 +840,61 @@ function presenterBackgroundVideoPreviewSource(source) {
   return source;
 }
 
+// This checkpoint belongs to a single output tab and never crosses the controller channel.
+const PRESENTER_BACKGROUND_CHECKPOINT = "mindex.presenter.background-checkpoint";
+
+function presenterBackgroundResumeKey(payload, slide) {
+  const element = presenterSlideElementGroupKey(slide);
+  return payload?.outputSessionId && payload?.serviceId && element
+    ? JSON.stringify([payload.outputSessionId, payload.serviceId, element]) : "";
+}
+
+function readPresenterBackgroundCheckpoint(sessionId) {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(PRESENTER_BACKGROUND_CHECKPOINT) || "null");
+    return saved?.key && saved.source && Number.isFinite(saved.time) && saved.time >= 0
+      && Date.now() - saved.savedAt < 5 * 60 * 1000 && (sessionId === undefined || saved.sessionId === sessionId)
+      ? saved : null;
+  } catch { return null; }
+}
+
+function savePresenterBackgroundCheckpoint(root, sessionId) {
+  try {
+    const video = root?._presenterBackgroundVideo;
+    const key = root?._presenterBackgroundResumeKey;
+    sessionStorage.removeItem(PRESENTER_BACKGROUND_CHECKPOINT);
+    if (!sessionId || !key || video?.readyState < 2 || !video?.videoWidth || video.style.opacity !== "1" || video.seeking) return;
+    const checkpoint = { sessionId, key, source: video.getAttribute("src"), time: video.currentTime, savedAt: Date.now() };
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.min(video.videoWidth, 960);
+      canvas.height = Math.max(1, Math.round(canvas.width * video.videoHeight / video.videoWidth));
+      canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+      checkpoint.poster = canvas.toDataURL("image/jpeg", 0.82);
+    } catch { /* The playhead can still be recovered for a non-CORS source. */ }
+    sessionStorage.setItem(PRESENTER_BACKGROUND_CHECKPOINT, JSON.stringify(checkpoint));
+  } catch { /* Playback also works when tab storage is unavailable. */ }
+}
+
+function presenterBackgroundAllowsFrameCapture(source) {
+  try {
+    const url = new URL(source, document.baseURI);
+    return url.protocol === "https:" && url.hostname.endsWith(".supabase.co")
+      && url.pathname.startsWith("/storage/v1/object/public/");
+  } catch { return false; }
+}
+
 function applyPresenterBackgroundVideo(root, source = "", options = {}) {
-  const selector = ":scope > .presenter-output-background-video";
+  const selector = ":scope > video.presenter-output-background-video";
+  root._presenterBackgroundResumeKey = source ? options.resumeKey : "";
   const videos = () => [...root.querySelectorAll(selector)];
   const dispose = video => { video.pause(); video.removeAttribute("src"); video.load(); video.remove(); };
   const current = root._presenterBackgroundVideo;
   if (current?.getAttribute("src") === source && source) return;
+  root.querySelector(":scope > .presenter-background-reload-poster")?.remove();
+  const checkpoint = options.resumeKey ? readPresenterBackgroundCheckpoint() : null;
+  if (checkpoint) { try { sessionStorage.removeItem(PRESENTER_BACKGROUND_CHECKPOINT); } catch {} }
+  const resume = checkpoint?.key === options.resumeKey && checkpoint?.source === source ? checkpoint : null;
   // Cancel readiness listeners and delayed cleanup from superseded element changes.
   const generation = (root._presenterBackgroundGeneration || 0) + 1;
   root._presenterBackgroundGeneration = generation;
@@ -873,15 +922,37 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   // Keep the decoded outgoing footage until the incoming element can paint.
   const video = document.createElement("video");
   video.className = "presenter-output-background-video";
-  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = true; video.playsInline = true; video.preload = "auto";
+  video.muted = true; video.defaultMuted = true; video.loop = true; video.autoplay = !resume; video.playsInline = true; video.preload = "auto";
   video.style.opacity = "0";
+  if (presenterBackgroundAllowsFrameCapture(source)) video.crossOrigin = "anonymous";
   video.setAttribute("aria-hidden", "true"); video.setAttribute("src", source);
+  let poster;
+  if (resume?.poster?.startsWith("data:image/jpeg;base64,")) {
+    poster = document.createElement("img");
+    poster.className = "presenter-output-background-video presenter-background-reload-poster";
+    poster.alt = "";
+    poster.src = resume.poster;
+    root.prepend(poster);
+  }
+  let restoring = Boolean(resume);
+  let play;
+  video.addEventListener("loadedmetadata", () => {
+    if (!restoring) return;
+    const target = Number.isFinite(video.duration) && video.duration > 0 ? resume.time % video.duration : resume.time;
+    if (Math.abs(video.currentTime - target) > 0.02) video.currentTime = target;
+    else { restoring = false; play?.(); }
+  });
+  video.addEventListener("seeked", () => {
+    if (!restoring) return;
+    restoring = false;
+    play?.();
+  });
   root._presenterBackgroundVideo = video;
   let revealed = false;
   let retried = false;
   let attempt = 0;
   const reveal = () => {
-    if (revealed || video.readyState < 2 || root._presenterBackgroundGeneration !== generation) return;
+    if (revealed || restoring || video.seeking || video.readyState < 2 || root._presenterBackgroundGeneration !== generation) return;
     revealed = true;
     window.clearTimeout(timer);
     delete root.dataset.backgroundVideoError;
@@ -889,7 +960,7 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
     void video.offsetWidth;
     video.style.transition = `opacity ${duration}ms ease-in-out`;
     video.style.opacity = "1";
-    timer = window.setTimeout(() => finish(video), duration);
+    timer = window.setTimeout(() => { poster?.remove(); finish(video); }, duration);
   };
   video.addEventListener("loadeddata", reveal);
   video.addEventListener("playing", reveal);
@@ -899,6 +970,7 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
     window.clearTimeout(timer);
     if (retryable && !revealed && !retried) {
       retried = true;
+      if (video.error && video.crossOrigin) video.removeAttribute("crossorigin");
       video.load();
       start();
       return;
@@ -917,17 +989,18 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
     if (!revealed) dispose(video);
   };
   // New footage is above existing background videos but below the content layers.
-  const previous = videos().filter(node => node !== video).at(-1);
+  const previous = videos().filter(node => node !== video).at(-1) || poster;
   if (previous) previous.after(video); else root.prepend(video);
   const start = () => {
     const loadingAttempt = ++attempt;
     // Cold media requests can exceed eight seconds; keep decoded outgoing footage
     // during the bounded wait and one retry instead of abandoning a healthy load.
     timer = window.setTimeout(() => failed(true), 30000);
-    video.play()?.then(reveal).catch(error => {
+    play = () => video.play()?.then(reveal).catch(error => {
       if (loadingAttempt !== attempt || revealed) return;
       failed(["AbortError", "NetworkError", "NotSupportedError"].includes(error?.name));
     });
+    if (!restoring) play();
   };
   start();
 }
