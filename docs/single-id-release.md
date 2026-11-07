@@ -233,3 +233,7 @@ The lifecycle PostgreSQL test covers the imported empty shape, meaningful-value
 counterexamples, incoming references, CAS, permission attributes and rollback.
 Production application and actual cleanup require their separate verification;
 a successful local test does not establish either.
+
+Home renders completed song and edition totals independently. Slow catalog
+activation does not hide an already available edition total. Results from a
+replaced connection are ignored.

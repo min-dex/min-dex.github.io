@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261107-youth-bulletin",
+  "version": "20261107-home-independent-summary",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "3368124aeaa4355aff6c68576e1f1e62196ddfcc59102f3e20dc6eca4b73a734",
-  "runtime_sha256": "8967452a8137459189e6a973a2516e8e899a04924d34922ef97b995d569a05fb",
-  "source_bytes": 1354909,
-  "runtime_bytes": 967186,
-  "source_gzip": 310511,
-  "runtime_gzip": 243504
+  "source_sha256": "6882cf8461c0d6a079602889d90c88d5973ebb7290617009167fe09a4346b14e",
+  "runtime_sha256": "2bc76ff8b594a6c36e4b0b542aba80ac42df5dfc784f578372eea406bb5e7fe6",
+  "source_bytes": 1355064,
+  "runtime_bytes": 967383,
+  "source_gzip": 310504,
+  "runtime_gzip": 243542
 }

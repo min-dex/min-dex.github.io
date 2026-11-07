@@ -7484,14 +7484,14 @@ async function saveService(serviceId = state.selectedServiceId, options = {}) {
     }
     finishServiceSaveDirtyState(unchanged);
     if (!options.silent) showToast("예배를 저장했습니다.");
-    // Field-level commits already refreshed the affected presenter content. Avoid
-    // rebuilding the whole application after a small inline edit.
-    // Native board/attachment players belong to this DOM. Replacing the detail
-    // pane after a save would stop them even though their source did not change.
+    // The atomic save already refreshes the presenter board incrementally.
+    // Keep the mounted editor and its media while saving the displayed service.
+    const mountedPresenter = state.module === "presenter"
+      && document.getElementById("servicePresenterControls")?.dataset.serviceId === serviceId;
     const playingInlineAudio = [...(refs.detailPane?.querySelectorAll("audio") || [])]
       .some((audio) => !audio.paused && !audio.ended);
     if (unchanged && !serviceHasPendingTextEdits(serviceId) && options.renderAfterSave !== false
-      && !playingInlineAudio) render();
+      && !mountedPresenter && !playingInlineAudio) render();
     else renderServiceList();
     return { itemIds: saved?.itemIds };
   }));
@@ -16406,18 +16406,24 @@ async function loadHomeOverviewStats({ force = false } = {}) {
   const refresh = () => {
     if (state.client === client && state.module === "home" && refs.detailPane.querySelector(".home-overview") && !isGlobalSearchActive()) renderHomeStart();
   };
-  stats.promise = (async () => {
-    const [songs, editions] = await window.MINDEX_SERVICE_ENTRY.readHomeOverviewTotals(client);
-    if (state.client !== client || homeOverviewStats !== stats) return;
-    stats.errors.songs = songs.status !== "fulfilled" || Boolean(songs.value.error) || !Number.isInteger(songs.value.count) || songs.value.count < 0;
-    if (!stats.errors.songs) stats.songs = songs.value.count;
-    stats.errors.editions = editions.status !== "fulfilled" || Boolean(editions.value.error) || !Array.isArray(editions.value.data);
-    if (!stats.errors.editions) {
-      const rows = editions.value.data.filter(row => row.canonical_source);
-      stats.editions = rows.length;
-      stats.names = homeBibleEditionNames(rows);
-    }
-  })().catch(() => { stats.errors = { songs:true, editions:true }; }).finally(() => {
+  const current = () => state.client === client && homeOverviewStats === stats;
+  const { songs, editions } = window.MINDEX_SERVICE_ENTRY.readHomeOverviewTotals(client);
+  stats.promise = Promise.allSettled([
+    songs.then(result => {
+      if (!current()) return;
+      stats.errors.songs = Boolean(result.error) || !Number.isInteger(result.count) || result.count < 0;
+      if (!stats.errors.songs) stats.songs = result.count;
+    }).catch(() => { if (current()) stats.errors.songs = true; }).finally(refresh),
+    editions.then(result => {
+      if (!current()) return;
+      stats.errors.editions = Boolean(result.error) || !Array.isArray(result.data);
+      if (!stats.errors.editions) {
+        const rows = result.data.filter(row => row.canonical_source);
+        stats.editions = rows.length;
+        stats.names = homeBibleEditionNames(rows);
+      }
+    }).catch(() => { if (current()) stats.errors.editions = true; }).finally(refresh),
+  ]).finally(() => {
     stats.readAt = Date.now();
     stats.promise = null;
     refresh();

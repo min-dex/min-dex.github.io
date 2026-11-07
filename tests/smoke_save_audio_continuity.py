@@ -23,6 +23,15 @@ try:
     await new Promise(r=>setTimeout(r,250));
     if(renders||!audio.isConnected||audio.paused||audio.currentTime<=before||pauses)throw Error('save interrupted audio');
     audio.pause();await saveService('audio-save');if(renders!==1)throw Error('paused save did not refresh');
-    return 'PASS actual native playback continues through save; paused save refreshes';
+    state.module='presenter';
+    refs.detailPane.innerHTML='<section id="servicePresenterControls" data-service-id="audio-save"><input value="준비 중 입력"></section>';
+    const editor=refs.detailPane.querySelector('input');
+    editor.focus();editor.setSelectionRange(1,3);
+    if(!await saveService('audio-save')||renders!==1||document.activeElement!==editor
+      ||editor.selectionStart!==1||editor.selectionEnd!==3)throw Error('same-service save replaced focused preparation editor');
+    document.getElementById('servicePresenterControls').dataset.serviceId='other';
+    await saveService('audio-save');
+    if(renders!==2)throw Error('save skipped render for a different mounted service');
+    return 'PASS actual native playback continues through save; paused save refreshes outside mounted presenter; focused presenter save preserves editor';
    }'''),flush=True);browser.close()
 finally:server.shutdown()

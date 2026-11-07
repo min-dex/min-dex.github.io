@@ -585,3 +585,7 @@ post-rollback lookup returned no fixture, and record/issued-ID/receipt counts pl
 allocation-counter hash matched the pre-test values. The initial SET ROLE test
 was rejected and rolled back; validation uses the real SECURITY DEFINER RPC path
 instead, without changing role memberships.
+
+A completed full save refreshes the current Presenter board through the existing
+incremental update. If that service is still mounted, save completion refreshes
+the sidebar without replacing the preparation editor.

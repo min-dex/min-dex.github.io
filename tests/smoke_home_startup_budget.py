@@ -22,6 +22,7 @@ try:
    }''')
    page.clock.fast_forward(16000)
    assert page.evaluate("budgetRequests.length===1&&budgetRequests[0].table==='mindex_bible_translations'&&!budgetRequests[0].aborted"),'edition metadata did not overlap activation'
+   assert page.evaluate("homeOverviewStats.editions===1&&homeOverviewStats.songs===null"),'available edition count waited for catalog activation'
    result=page.evaluate('''async()=>{releaseBudgetActivation();await budgetPending;
     if(budgetRequests.length!==2||budgetRequests[1].table!=='mindex_songs'||budgetRequests[1].aborted)throw Error('catalog consumed legacy count timeout');
     if(homeOverviewStats.songs!==1141||homeOverviewStats.editions!==1||homeOverviewStats.errors.songs||homeOverviewStats.errors.editions)throw Error('valid totals lost');

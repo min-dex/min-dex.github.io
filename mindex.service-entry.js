@@ -41,11 +41,11 @@
       if (state.singleSongCatalog) return {count:state.singleSongCatalog.displayCount()};
       return read(() => client.from("mindex_songs").select("id", { count:"exact", head:true }));
     };
-    return Promise.allSettled([
-      songs(),
-      read(() => client.from("mindex_bible_translations")
+    return {
+      songs: songs(),
+      editions: read(() => client.from("mindex_bible_translations")
         .select("id,name,language,canonical_source:metadata->canonical_source").eq("is_active", true)),
-    ]);
+    };
   }
   function initialElementIds(services = []) {
     const pinned = new Set([state.selectedServiceId, state.presenter.serviceId].filter(Boolean));
