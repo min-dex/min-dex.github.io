@@ -355,3 +355,7 @@ request. Recovery clears stale error text. No automatic installer execution.
 Draft publication resolves the release database ID before checking uploaded
 asset digests, because an unpublished tag endpoint returns 404. Required web,
 platform, preservation and asset checks remain mandatory.
+
+Presenter mutations and native Keynote import accept only the main controller's
+main frame, matching updater IPC ownership. Foreign windows and child frames
+receive `untrusted-window` without opening/closing output or importing a file.

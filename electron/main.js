@@ -236,26 +236,35 @@ function bindUpdateMenu() {
   Menu.setApplicationMenu(menu);
 }
 
+function isControllerRequest(event) {
+  return Boolean(mainWindow && !mainWindow.isDestroyed()
+    && event.sender === mainWindow.webContents
+    && event.senderFrame === mainWindow.webContents.mainFrame);
+}
+
 function updateRequest(event, action) {
-  if (!mainWindow || event.sender !== mainWindow.webContents) return { ok: false, reason: "untrusted-window" };
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
   const controller = configureAutoUpdater();
   if (!controller) return { ok: false, reason: "updates-unavailable" };
   return action === "state" ? { ok: true, state: controller.snapshot() } : controller[action]();
 }
 
-ipcMain.handle("mindex:open-presenter", (_event, payload = {}) => {
+ipcMain.handle("mindex:open-presenter", (event, payload = {}) => {
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
   if (testIsolation) return { ok: false, reason: "isolated-test" };
   createPresenterWindow(payload);
   return { ok: true };
 });
 
-ipcMain.handle("mindex:close-presenter", () => {
+ipcMain.handle("mindex:close-presenter", event => {
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
   if (presenterWindow && !presenterWindow.isDestroyed()) presenterWindow.close();
   // Keep the live-window guard until Electron confirms the window is closed.
   return { ok: true };
 });
 
-ipcMain.handle("mindex:fullscreen-presenter", () => {
+ipcMain.handle("mindex:fullscreen-presenter", event => {
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
   if (!presenterWindow || presenterWindow.isDestroyed()) return { ok: false, reason: "presenter-window-unavailable" };
   presenterWindow.setFullScreen(true);
   presenterWindow.focus();
@@ -267,12 +276,13 @@ ipcMain.handle("mindex:get-presenter-displays", () => ({
   displays: presenterDisplayPayload(),
 }));
 
-ipcMain.handle("mindex:set-presenter-always-on-top", (_event, payload = {}) => ({
-  ok: applyPresenterAlwaysOnTop(Boolean(payload.enabled)),
-}));
+ipcMain.handle("mindex:set-presenter-always-on-top", (event, payload = {}) => {
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
+  return { ok: applyPresenterAlwaysOnTop(Boolean(payload.enabled)) };
+});
 
 ipcMain.handle("mindex:get-build-info", event => {
-  if (!mainWindow || event.sender !== mainWindow.webContents) return { ok: false, reason: "untrusted-window" };
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
   let build = null;
   try { build = JSON.parse(require("node:fs").readFileSync(path.join(appRoot(), "mindex-build.json"), "utf8")); } catch {}
   return { ok: true, installedVersion: app.getVersion(), testBuild: require("../package.json").mindexTestBuild === true, build };
@@ -283,7 +293,8 @@ ipcMain.handle("mindex:check-for-updates", event => updateRequest(event, "check"
 ipcMain.handle("mindex:download-update", event => updateRequest(event, "download"));
 ipcMain.handle("mindex:install-update", event => updateRequest(event, "install"));
 
-ipcMain.handle("mindex:import-keynote-deck", async (_event, payload = {}) => {
+ipcMain.handle("mindex:import-keynote-deck", async (event, payload = {}) => {
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
   const outputDir = payload.outputDir || path.join(app.getPath("userData"), "imported-decks");
   return importKeynoteDeck({
     ...payload,

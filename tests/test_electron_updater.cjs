@@ -44,7 +44,7 @@ test('main-process IPC accepts controller only and blocks install while presente
  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
  const handlers={},windows=[];let installed=0,testBuild=false,broadcastActive=false;
  class Window extends EventEmitter {
-  constructor(){super();this.webContents=new EventEmitter();this.webContents.send=()=>{};windows.push(this);}
+  constructor(){super();this.webContents=new EventEmitter();this.webContents.send=()=>{};this.webContents.mainFrame={};windows.push(this);}
   isDestroyed(){return false;} isVisible(){return true;} isMinimized(){return false;}
   show(){} focus(){} close(){} loadFile(){} loadURL(){} setAlwaysOnTop(){} setBounds(){}
  }
@@ -58,7 +58,10 @@ test('main-process IPC accepts controller only and blocks install while presente
  const context={require:name=>name==='./youtube-window'?broadcast:name==='./test-isolation'?require('../electron/test-isolation'):name==='../mindex-build.json'?{channel:'release'}:name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
   process:{platform:'darwin',env:{}},__dirname:path.resolve(__dirname,'../electron'),console,setTimeout:()=>0,setInterval:()=>0,clearInterval(){}};
  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../electron/main.js'),'utf8'),context);
- await new Promise(r=>setImmediate(r));const event={sender:windows[0].webContents};
+ await new Promise(r=>setImmediate(r));const event={sender:windows[0].webContents,senderFrame:windows[0].webContents.mainFrame};
+ for(const name of ["open-presenter","close-presenter","fullscreen-presenter","set-presenter-always-on-top","import-keynote-deck","check-for-updates"]){
+  for(const foreign of [{sender:{}},{sender:event.sender,senderFrame:{}}])assert.equal((await handlers["mindex:"+name](foreign,{})).reason,"untrusted-window");
+ }
  assert.equal(handlers['mindex:install-update']({sender:{}}).reason,'untrusted-window');
  await handlers['mindex:check-for-updates'](event);await handlers['mindex:download-update'](event);
  handlers['mindex:open-presenter'](event,{});
