@@ -1,4 +1,4 @@
-"""Bulletin visibility regardless of saved membership; no production requests, writes or printing."""
+"""November bulletin visibility regardless of saved membership; no production requests, writes or printing."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from urllib.parse import urlsplit
@@ -19,7 +19,7 @@ try:
                 state.config.url='saved-bulletin-fixture';state.module='bulletin';state.search='';state.selectedServiceId='new';
                 state.connectionError=null;state.serviceError='';
                 state.serviceTypes=[{id:'young-adult',name:'청년부'},{id:'children',name:'어린이부'},{id:'youth',name:'청소년부'}];
-                state.services=[{id:'old',date:'2026-09-27',type_id:'young-adult'},
+                state.services=[{id:'old',date:'2026-10-31',type_id:'young-adult'},
                     {id:'new',date:'2026-11-01',type_id:'children'},
                     {id:'unsaved',date:'2026-11-08',type_id:'children'},
                     {id:'youth',date:'2026-11-08',type_id:'youth'}];
@@ -40,7 +40,7 @@ try:
                 window.draftNode=document.getElementById('preserved-draft');
                 renderBulletinList();
             }''')
-            assert page.locator('[data-bulletin-open]').count() == 4
+            assert page.locator('[data-bulletin-open]').count() == 3
             assert '청소년부 주보' in page.locator('[data-bulletin-open=youth]').inner_text()
             page.evaluate("""() => {
                 const B=MindexBulletin;
@@ -54,9 +54,9 @@ try:
             }""")
             assert page.evaluate('indexReads') == 0, 'visibility must not depend on saved index'
             page.evaluate("async()=>{savedIds=['old'];await savedBulletinList.load({force:true})}")
-            assert page.locator('[data-bulletin-open=old]').count() == 1
+            assert page.locator('[data-bulletin-open=old]').count() == 0
             assert page.locator('[data-bulletin-open=new]').count() == 1
-            assert page.evaluate("serviceSupportsBulletin(state.services[1])"), 'new documents can still be created from worship'
+            assert page.evaluate("state.services.slice(0,2).every(serviceSupportsBulletin)"), 'October and November remain accessible from worship'
             # Actual save adapter adds only a successfully saved record to membership.
             page.evaluate('''async()=>{
                 const publish=MINDEX_CONTENT_LIVE.publish;MINDEX_CONTENT_LIVE.publish=()=>{};
@@ -71,18 +71,22 @@ try:
             assert page.locator('[data-bulletin-open=unsaved]').count() == 1
             # A different record's notification updates the list without an open controller.
             page.evaluate("()=>{savedIds=['new'];MINDEX_CONTENT_LIVE.receive({id:'remote-delete',project:state.config.url,kind:'bulletin',recordId:'old'})}")
-            page.locator('[data-bulletin-open=old]').wait_for()
+            assert page.locator('[data-bulletin-open=old]').count() == 0
+            assert page.locator('[data-bulletin-open=new]').count() == 1
             # SQL changes without notifications are recovered by the existing reconciliation path.
             page.evaluate("async()=>{savedIds=['old','new'];await MINDEX_CONTENT_LIVE.reconcile()}")
-            page.locator('[data-bulletin-open=old]').wait_for()
+            assert page.locator('[data-bulletin-open=old]').count() == 0
+            assert page.locator('[data-bulletin-open=new]').count() == 1
             # Saved-index failure cannot hide worship-derived bulletins.
             page.evaluate("async()=>{readFailure=true;await savedBulletinList.load({force:true});renderBulletinList()}")
-            assert page.locator('[data-bulletin-open]').count() == 4
+            assert page.locator('[data-bulletin-open]').count() == 3
             assert not page.get_by_text('주보 목록을 불러오지 못했습니다', exact=True).is_visible()
-            # The search still filters all supported worship dates, including historical dates.
-            page.evaluate("()=>{state.search='2026-09';renderBulletinList()}")
+            # Search cannot bring back October and still finds the November boundary.
+            page.evaluate("()=>{state.search='2026-10';renderBulletinList()}")
+            assert page.locator('[data-bulletin-open]').count() == 0
+            page.evaluate("()=>{state.search='2026-11-01';renderBulletinList()}")
             assert page.locator('[data-bulletin-open]').count() == 1
-            assert page.locator('[data-bulletin-open=old]').count() == 1
+            assert page.locator('[data-bulletin-open=new]').count() == 1
             assert page.evaluate("JSON.stringify(state.services)===worshipBefore&&document.getElementById('preserved-draft')===draftNode&&draftNode.value==='미저장 주보 내용'"), 'worship records or open draft replaced'
             # Late supplemental worship hydration must keep the saved-bulletin sidebar.
             page.evaluate("""async()=>{
@@ -91,9 +95,10 @@ try:
                 try{await hydrateSupplementalWorshipDataAfterInitialRender()}
                 finally{[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices]=previous}
             }""")
-            assert page.locator('[data-bulletin-open=old]').count() == 1, 'late hydration replaced saved bulletin list with worship list'
+            assert page.locator('[data-bulletin-open=old]').count() == 0, 'late hydration bypassed the date cutoff'
+            assert page.locator('[data-bulletin-open=new]').count() == 1
             assert page.evaluate('JSON.stringify(state.services)===worshipBefore')
-            print('PASS bulletin visibility: unsaved November, saved/failed saves, remote changes, index failure, search and worship/draft preservation', engine)
+            print('PASS bulletin visibility: November cutoff, unsaved November, saved/failed saves, remote changes, index failure, search and worship/draft preservation', engine)
             browser.close()
 finally:
     server.shutdown()

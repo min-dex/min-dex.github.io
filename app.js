@@ -15020,7 +15020,10 @@ const savedBulletinList = window.MindexBulletin.createSavedList(
   () => { if (state.module === "bulletin") renderBulletinList(); });
 function getBulletinSidebarServices() {
   const query = normalizeSearchValue(state.search);
-  return state.services.filter(service => serviceSupportsBulletin(service) && (!query || normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`).includes(query))).sort((a,b) => b.date.localeCompare(a.date));
+  return state.services
+    .filter(service => serviceSupportsBulletin(service) && service.date >= "2026-11-01")
+    .filter(service => !query || normalizeSearchValue(`${service.date} ${bulletinPageTabTitle(service.id)} ${service.title||""}`).includes(query))
+    .sort((a,b) => b.date.localeCompare(a.date));
 }
 
 function renderBulletinList() {
