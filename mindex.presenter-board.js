@@ -945,16 +945,8 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const preparation = firstSlide && isPresenterPreparationSlide(firstSlide);
   const summary = preparation && context ? serviceItemSummaryDisplayParts(context.item, context.service) : null;
   const display = summary ? { label: summary.meta, title: summary.title } : presenterBoardSubgroupDisplay(serviceId, subgroup);
-  const rawLabel = Object.prototype.hasOwnProperty.call(display, "label")
-    ? display.label
-    : subgroup.label || "항목";
-  const rawTitle = Object.prototype.hasOwnProperty.call(display, "title")
-    ? display.title
-    : subgroup.title || subgroup.name;
-  const visibleTitle = preparation && !context
-    ? ""
-    : presenterVisibleTitle(rawLabel, rawTitle);
-  const visibleLabel = rawLabel;
+  const { label: visibleLabel, title } = display;
+  const visibleTitle = preparation && !context ? "" : presenterVisibleTitle(visibleLabel, title);
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
   const warnings = presenterWarningsForEntries(subgroup.slides);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
