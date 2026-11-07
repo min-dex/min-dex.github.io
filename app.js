@@ -7909,6 +7909,7 @@ async function syncSharedSundayContentAfterSave(sourceService, sourceItems = [],
       });
     }
   }
+  if (!pendingSundayEditSync.size && globalThis.MINDEX_SERVER_STORAGE?.canSkipEmptyWrite?.("local", SUNDAY_EDIT_SYNC_STORAGE_KEY)) return;
   const failures = [];
   let retryRecordPersisted = await persistPendingSundayEditSync();
   for (const [jobKey, job] of pendingSundayEditSync) {
