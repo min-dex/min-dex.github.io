@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261107-tov-layout-refinement",
+  "version": "20261107-keynote-simple-flow",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "a86924d5c2cc40f8bb0ec09c67ab2b9fcb095512517f88b201d6daf72d7882f7",
-  "runtime_sha256": "21158497ee61775a826426089e369543603dca1dfed73f71475951d97d3bfc19",
-  "source_bytes": 1355587,
-  "runtime_bytes": 967767,
-  "source_gzip": 310704,
-  "runtime_gzip": 243690
+  "source_sha256": "54e250977aef544dffef969a2c614d6999f6e9286325275f756bf425c2aa0cde",
+  "runtime_sha256": "ac14dc7a1aeaa78396441554ff291160008931930b5403d9dd0b1a0c296fa6bf",
+  "source_bytes": 1355366,
+  "runtime_bytes": 967543,
+  "source_gzip": 310680,
+  "runtime_gzip": 243662
 }

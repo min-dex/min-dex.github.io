@@ -45,11 +45,14 @@ try:
    page.wait_for_function('[...presenterKeynoteHtmlManifests.values()].some(entry=>entry.error)')
    assert page.evaluate('cardIndexes().length')==0
    page.locator('.svc-slide-thumb[data-presenter-slide-id="other-deck:imported-deck:1"]').click()
-   page.get_by_text('자료 관리',exact=True).click()
-   page.get_by_role('button',name='재연결',exact=True).click()
+   assert page.locator('[data-keynote-html-files]').is_visible() is False  # folder input is visually hidden inside its label
+   assert page.get_by_text('폴더로 연결',exact=True).is_visible()
+   page.get_by_role('button',name='재생 연결 다시 시도',exact=True).click()
    page.wait_for_function('cardIndexes().length===24')
    cards=page.locator('.svc-slide-thumb[data-presenter-slide-id^="card-item:imported-deck:"]:not([data-presenter-slide-id$=":after-blank"])')
    assert cards.count()==24
+   assert page.get_by_text('준비 완료 · 24장',exact=True).is_visible()
+   assert page.locator('[data-keynote-html-files], [data-keynote-auto-connect], [data-keynote-html-action="status"]').count()==0
    page.evaluate('''()=>{
     check(manifestReads===2,'manifest was read repeatedly after explicit retry');check(getServiceItems('cards-service')[0].memo===originalMemo,'read projection mutated memo');
     check(state.presenter.slides[state.presenterBoardSelection.indexes[0]]?.id==='other-deck:imported-deck:1','late metadata moved the other deck selection');

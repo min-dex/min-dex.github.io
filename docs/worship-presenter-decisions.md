@@ -4912,19 +4912,22 @@ individual resources currently must fit the 50 MiB Storage upload limit.
 
 ### Chrome Keynote automatic preparation ·2026-10-31
 
-Connected KEY/PPTX controls show one replacement chooser and omit the redundant
-generic file card; the normal deck cards provide the preview. KEY keeps its
-slide count and play/pause controls visible. Original download, reconnect,
-re-preparation and manual folder connection live under the native **자료 관리**
-disclosure. An original-only KEY keeps automatic connection visible. These are
-presentation changes only; source metadata, handlers and atomic saves remain.
+Keynote's normal controller flow is file selection, preparation, then the usual
+slide/output controls. The chooser discloses public original storage before
+selection. It has no second confirmation for Keynote. A valid tab-local helper
+connection is reused. Only a missing connection opens the local approval flow.
+A failed automatic preparation offers a same-file retry and a verified manual
+folder. An original without playback, failed manifest, or active playback
+error exposes recovery for that item. Ready items hide those actions. Live
+play/pause remains available for the selected Keynote output. The original
+download is available under 자료 관리. PPTX keeps its own existing confirmation.
 
 PPTX keeps its existing direct browser import. KEY upload first prepares the
 Apple HTML export through the paired Mac helper, verifies the original hash,
 known native runtime and every resource, then saves the byte-identical original
 and attaches playback through the existing atomic element-save path. These are
 two acknowledged saves: if the second stage fails, the original remains attached
-and **슬라이드 자동 연결** can resume it. An uncertain save retains immutable
+and **준비 다시 시도** can resume it. An uncertain save retains immutable
 uploads and the pending edit for normal atomic reconciliation. A new edit,
 service/project switch or source mismatch stops attachment; it never saves
 another pending edit just to complete conversion. Existing original-only KEY

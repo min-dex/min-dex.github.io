@@ -57,7 +57,11 @@ function presenterKeynoteHtmlDeckAsset(asset, serviceId) {
     void promise.then(() => {
       if (state.client !== client || state.config.url !== project) return;
       refreshPresenterKeynoteHtmlCards(serviceId);
-    }).catch(error => { if (state.client === client && state.config.url === project && state.selectedServiceId === serviceId) showToast(error.message, 'error'); });
+    }).catch(error => {
+      if (state.client !== client || state.config.url !== project || state.selectedServiceId !== serviceId) return;
+      showToast(error.message, 'error');
+      if (state.module === 'presenter') renderPresenterControlState(serviceId);
+    });
   }
   if (!entry.value) return asset;
   return { ...asset, kind: 'imported_deck', slides: entry.value.slides.map((slide, page) => ({ url: new URL(slide.thumbnail, descriptor.url).href, name: `${page + 1}번 슬라이드`, order: page + 1 })) };
@@ -121,7 +125,7 @@ function adoptPresenterKeynoteHtmlMetadata(metadata) {
       }
     } catch {}
   }
-  publishPresenterState();if (previewChanged || cardChanged) renderPresenterControlState(owner.serviceId);
+  publishPresenterState();if (previewChanged || cardChanged || Boolean(current.error) !== Boolean(metadata.error)) renderPresenterControlState(owner.serviceId);
   for (const label of document.querySelectorAll('[data-keynote-page]')) if (label.dataset.keynoteItemId === slide.elementId) label.textContent = presenterKeynoteHtmlPageLabel(slide.asset, owner.serviceId, slide.elementId);
   if (ack && !metadata.recoveredUnknown && (metadata.accepted === false || metadata.checkpoint?.terminalTransition)) {
     if (metadata.checkpoint?.atEnd && current.command?.action === 'next') runPresenterAction('next', owner.serviceId);
@@ -219,7 +223,11 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       }
     };
     addEventListener('message', session.onMessage);
-    session.timeout = setTimeout(() => { if (active() && !session.ready) root.dataset.pptxError = 'Keynote 재생 연결이 지연됩니다. 자료 연결을 확인해 주세요.'; }, 30000);
+    session.timeout = setTimeout(() => {
+      if (!active() || session.ready) return;
+      root.dataset.pptxError = 'Keynote 재생 연결이 지연됩니다. 자료 연결을 확인해 주세요.';
+      metadata({ error: root.dataset.pptxError });
+    }, 30000);
     session.watchdog = setInterval(() => {
       if (active() && session.inFlight && Date.now() - session.sentAt > 35000) {
         metadata({ error: '효과 응답을 확인하지 못했습니다. 재연결로 현재 위치를 확인해 주세요.', checkpoint: session.checkpoint });
@@ -266,19 +274,58 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
 
 function presenterKeynoteHtmlPageLabel(asset, serviceId, itemId) {
   const descriptor = asset.keynoteHtml, entry = presenterKeynoteHtmlManifests.get(descriptor.url + '|' + descriptor.sha256);
-  if (entry && !entry.value) return entry.error ? `슬라이드 ${descriptor.pages}장 · 목록 재연결 필요` : `슬라이드 ${descriptor.pages}장 불러오는 중…`;
+  if (!entry?.value) return entry?.error ? `슬라이드 ${descriptor.pages}장 · 목록 재연결 필요` : `슬라이드 ${descriptor.pages}장 불러오는 중…`;
   const owner = state.presenter, active = presenterKeynoteHtmlSlide(owner.slides?.[owner.index]);
   const live = typeof presenterControllerIsLive === 'function' && presenterControllerIsLive(serviceId);
   const checkpoint = active?.elementId === itemId && owner.serviceId === serviceId && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active) ? owner.pptxProgress.checkpoint : null;
-  return live && checkpoint ? `송출 ${checkpoint.slide + 1}/${descriptor.pages} · 효과 재생` : `슬라이드 ${descriptor.pages}장`;
+  if (live && active?.elementId === itemId && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active)
+      && owner.pptxProgress.error) return 'Keynote 재생 확인 필요';
+  return live && checkpoint ? `송출 ${checkpoint.slide + 1}/${descriptor.pages} · 효과 재생` : `준비 완료 · ${descriptor.pages}장`;
 }
 function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId, download = '') {
   if (asset.original?.format !== 'key') return '';
   const identity = `data-service-id="${escapeAttr(serviceId)}" data-keynote-item-id="${escapeAttr(itemId)}" data-keynote-source-hash="${escapeAttr(asset.original.sha256)}"`;
-  const automatic = `<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>${asset.keynoteHtml ? '슬라이드 다시 준비' : '불러오기 다시 시도'}</button>`;
-  const controls = asset.keynoteHtml ? `<span class="svc-deck-status" data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${presenterKeynoteHtmlPageLabel(asset, serviceId, itemId)}</span><button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button>` : automatic;
-  return `<div class="svc-deck-controls"><div class="svc-deck-playback">${controls}</div><details class="svc-deck-more"><summary>자료 관리</summary><div class="svc-deck-menu">${download}${asset.keynoteHtml ? `<button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재연결</button>${automatic}` : ''}<label class="svc-reference-media-upload">폴더로 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity} aria-label="Keynote 재생 폴더 연결"></label></div></details></div>`;
+  const descriptor = asset.keynoteHtml;
+  const manifestFailed = descriptor && presenterKeynoteHtmlManifests.get(descriptor.url + '|' + descriptor.sha256)?.error;
+  const owner = state.presenter, active = presenterKeynoteHtmlSlide(owner.slides?.[owner.index]);
+  const onAir = descriptor && owner.serviceId === serviceId && active?.elementId === itemId
+    && active.asset.original.sha256 === asset.original.sha256
+    && active.asset.keynoteHtml.sha256 === descriptor.sha256 && presenterControllerIsLive(serviceId);
+  const playbackFailed = onAir && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active) && owner.pptxProgress.error;
+  const status = descriptor ? presenterKeynoteHtmlPageLabel(asset, serviceId, itemId) : '슬라이드 준비 필요';
+  const reconnect = manifestFailed || playbackFailed
+    ? `<button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재생 연결 다시 시도</button>` : '';
+  const recovery = !descriptor || manifestFailed || playbackFailed
+    ? `${reconnect}<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>준비 다시 시도</button>
+      <label class="svc-reference-media-upload">폴더로 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity} aria-label="Keynote 재생 폴더 연결"></label>` : '';
+  const playback = onAir ? `<button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button>` : '';
+  return `<div class="svc-deck-controls"><div class="svc-deck-playback"><span class="svc-deck-status" data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${status}</span>${playback}${recovery}</div><details class="svc-deck-more"><summary>자료 관리</summary><div class="svc-deck-menu">${download}</div></details></div>`;
 }
+async function validatePresenterKeynoteFolder(files, sourceSha256) {
+  const module = await keynoteHtmlRuntime(), byName = new Map();let total = 0;
+  for (const file of files) {
+    const parts = file.webkitRelativePath.split('/');parts.shift();const name = parts.join('/');
+    if (!name || byName.has(name) || file.size > 50 * 1024 * 1024) throw Error('폴더를 확인해 주세요. 개별 재생 파일은 50MB 이하로 준비해 주세요.');
+    byName.set(name, file);total += file.size;
+  }
+  if (files.length > 5001 || total > 500 * 1024 * 1024 || !byName.has('manifest.json')) throw Error('민덱스에서 준비한 Keynote 재생 폴더를 선택해 주세요.');
+  const manifestFile = byName.get('manifest.json');
+  if (manifestFile.size > 2 * 1024 * 1024) throw Error('Keynote 재생 정보가 너무 큽니다.');
+  const manifestBytes = new Uint8Array(await manifestFile.arrayBuffer()), manifest = JSON.parse(new TextDecoder().decode(manifestBytes));
+  if (manifest?.format !== 'apple-keynote-html-v1' || !Number.isSafeInteger(manifest.pages)
+      || manifest.pages < 1 || manifest.pages > 300 || !/\.(jpeg|jpg|png)$/.test(manifest.slides?.[0]?.thumbnail || '')) {
+    throw Error('Keynote 재생 폴더의 형식이나 슬라이드 수를 확인해 주세요.');
+  }
+  if (manifest.sourceSha256 !== sourceSha256) throw Error('이 재생 자료가 연결된 Keynote 원본과 일치하지 않습니다.');
+  module.validateKeynoteHtmlManifest(manifest, manifest);module.assertKnownKeynoteHtmlRuntime(manifest);
+  if (byName.size !== Object.keys(manifest.files).length + 1) throw Error('재생 폴더의 파일 구성이 변경됐습니다. 다시 준비해 주세요.');
+  for (const [name, expected] of Object.entries(manifest.files)) {
+    const file = byName.get(name);
+    if (!file || file.size !== expected.size || await presenterPptxDigest(await file.arrayBuffer()) !== expected.sha256) throw Error('재생 폴더의 파일이 누락되거나 변경됐습니다.');
+  }
+  return { module, byName, manifestBytes, manifest };
+}
+
 async function importPresenterKeynoteHtml(input, options = {}) {
   const serviceId = input.dataset.serviceId, itemId = input.dataset.keynoteItemId;
   const files = [...(input.files || [])];
@@ -294,26 +341,11 @@ async function importPresenterKeynoteHtml(input, options = {}) {
   const uploaded = [];let saveAttempted = false;
   const bucket = client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
   try {
-    const module = await keynoteHtmlRuntime(), byName = new Map();let total = 0;
-    for (const file of files) {
-      const parts = file.webkitRelativePath.split('/');parts.shift();const name = parts.join('/');
-      if (!name || byName.has(name) || file.size > 50 * 1024 * 1024) throw Error('폴더를 확인해 주세요. 개별 재생 파일은 50MB 이하로 준비해 주세요.');
-      byName.set(name, file);total += file.size;
-    }
-    if (files.length > 5001 || total > 500 * 1024 * 1024 || !byName.has('manifest.json')) throw Error('민덱스에서 준비한 Keynote 재생 폴더를 선택해 주세요.');
-    const manifestFile = byName.get('manifest.json');
-    if (manifestFile.size > 2 * 1024 * 1024) throw Error('Keynote 재생 정보가 너무 큽니다.');
-    const manifestBytes = new Uint8Array(await manifestFile.arrayBuffer()), manifest = JSON.parse(new TextDecoder().decode(manifestBytes));
+    const { module, byName, manifestBytes, manifest } = await validatePresenterKeynoteFolder(files, original.sha256);
     const prefix = `services/${String(serviceId).replace(/[^a-zA-Z0-9_-]/g,'')}/keynote/${crypto.randomUUID()}/`;
     const url = bucket.getPublicUrl(prefix + 'manifest.json')?.data?.publicUrl;
     const descriptor = module.normalizeKeynoteHtml({ format: manifest.format, sourceSha256: manifest.sourceSha256, pages: manifest.pages, url, poster: new URL(manifest.slides?.[0]?.thumbnail || 'invalid', url).href, sha256: await presenterPptxDigest(manifestBytes) }, original);
     if (!descriptor) throw Error('이 재생 자료가 연결된 Keynote 원본과 일치하지 않습니다.');
-    module.validateKeynoteHtmlManifest(manifest, descriptor);module.assertKnownKeynoteHtmlRuntime(manifest);
-    if (byName.size !== Object.keys(manifest.files).length + 1) throw Error('재생 폴더의 파일 구성이 변경됐습니다. 다시 준비해 주세요.');
-    for (const [name, expected] of Object.entries(manifest.files)) {
-      const file = byName.get(name);
-      if (!file || file.size !== expected.size || await presenterPptxDigest(await file.arrayBuffer()) !== expected.sha256) throw Error('재생 폴더의 파일이 누락되거나 변경됐습니다.');
-    }
     if (!unchanged()) throw Error('자료를 준비하는 동안 예배나 입력이 변경됐습니다.');
     if (!options.confirmed && !window.confirm(`${original.name}\n\n원본은 그대로 두고 슬라이드 ${manifest.pages}장과 효과·포함 미디어의 재생 자료를 이 예배에 연결할까요? 기존 공개 자료 저장소를 사용합니다.`)) return false;
     const mime = name => ({ js:'application/javascript', css:'text/css', html:'text/html', json:'application/json', pdf:'application/pdf', jpeg:'image/jpeg', jpg:'image/jpeg', png:'image/png', svg:'image/svg+xml', mp4:'video/mp4', mov:'video/quicktime', mp3:'audio/mpeg', m4a:'audio/mp4', wav:'audio/wav', woff:'font/woff', woff2:'font/woff2' }[name.split('.').pop().toLowerCase()] || 'application/octet-stream');
@@ -341,7 +373,7 @@ async function importPresenterKeynoteHtml(input, options = {}) {
     if (index < 0) throw Error('자료를 연결할 항목을 확인해 주세요.');
     saveAttempted = true;
     if (!await saveServiceItemMutation(serviceId, index, { silent:true, renderAfterSave:false, throwOnError:true })) throw Error('저장 상태를 확인한 후 다시 저장해 주세요.');
-    showToast(`슬라이드 ${manifest.pages}장을 불러왔습니다.`);return true;
+    showToast(`Keynote 준비 완료 · ${manifest.pages}장`);return true;
   } catch (error) {
     if (!saveAttempted && uploaded.length) { try { await bucket.remove(uploaded); } catch {} }
     showToast(error.message || 'Keynote 재생 자료 연결에 실패했습니다.', 'error');return false;

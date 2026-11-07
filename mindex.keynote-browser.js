@@ -49,14 +49,15 @@ async function connectPresenterKeynoteBridge() {
       const start = Date.now();
       while (!cancelled && Date.now() - start < 120000) {
         const result = await presenterKeynoteBridgeRequest('/pair/' + pair.id, { headers: { 'X-Mindex-Keynote-Client': client } });
-        if (cancelled) throw Error('Keynote 연결을 취소했습니다. 원본은 보존됩니다.');
+        if (cancelled) throw new DOMException('Keynote 연결을 취소했습니다. 원본은 보존됩니다.', 'AbortError');
         if (result.token) {
           if (!/^[a-f0-9]{64}$/.test(result.token)) throw Error('Keynote 연결 정보를 확인해 주세요.');
           presenterKeynoteBridgeSession = result.token;return true;
         }
         await new Promise(resolve => setTimeout(resolve, 750));
       }
-      throw Error(cancelled ? 'Keynote 연결을 취소했습니다. 원본은 보존됩니다.' : 'Keynote 연결 시간이 지났습니다. 다시 연결해 주세요.');
+      if (cancelled) throw new DOMException('Keynote 연결을 취소했습니다. 원본은 보존됩니다.', 'AbortError');
+      throw Error('Keynote 연결 시간이 지났습니다. 다시 연결해 주세요.');
     } finally { dialog.close();dialog.remove();if (opener?.isConnected) opener.focus({ preventScroll: true }); }
   })();
   try { return await presenterKeynoteBridgePairing; }
@@ -93,6 +94,48 @@ async function preparePresenterKeynoteBrowserFile(file, unchanged = () => true) 
   if (!unchanged()) throw Error('예배나 입력이 변경됐습니다. 기존 작업을 보존했습니다.');
   Object.defineProperty(manifestFile, 'webkitRelativePath', { value: 'playback/manifest.json' });files.push(manifestFile);
   return files;
+}
+
+function choosePresenterKeynoteRecovery(message) {
+  const dialog = document.createElement('dialog');
+  dialog.className = 'unsaved-dialog';
+  dialog.setAttribute('aria-label', 'Keynote 준비 실패');
+  dialog.innerHTML = `<div class="unsaved-dialog-copy"><h2>Keynote를 준비하지 못했어요</h2><p></p></div>
+    <div class="unsaved-dialog-actions"><form method="dialog"><button class="btn subtle">취소</button></form>
+    <button class="btn primary" type="button" data-keynote-retry>다시 시도</button>
+    <label class="svc-reference-media-upload">폴더로 연결<input type="file" webkitdirectory multiple aria-label="Keynote 재생 폴더 연결"></label></div>`;
+  dialog.querySelector('p').textContent = message;
+  return new Promise(resolve => {
+    let choice = null;
+    dialog.querySelector('[data-keynote-retry]').onclick = () => { choice = 'retry';dialog.close(); };
+    dialog.querySelector('input').onchange = event => {
+      if (!event.target.files.length) return;
+      choice = [...event.target.files];dialog.close();
+    };
+    dialog.addEventListener('close', () => { dialog.remove();resolve(choice); }, { once:true });
+    document.body.append(dialog);dialog.showModal();
+  });
+}
+
+async function preparePresenterKeynoteWithRecovery(file, unchanged) {
+  while (unchanged()) {
+    try { return await preparePresenterKeynoteBrowserFile(file, unchanged); }
+    catch (error) {
+      if (error.name === 'AbortError' || !unchanged()) throw error;
+      let choice = await choosePresenterKeynoteRecovery(error.message || 'Mac의 Keynote 도우미를 확인해 주세요.');
+      while (Array.isArray(choice) && unchanged()) {
+        try {
+          await validatePresenterKeynoteFolder(choice, await presenterPptxDigest(await file.arrayBuffer()));
+          return choice;
+        } catch (failure) {
+          if (!unchanged()) throw failure;
+          choice = await choosePresenterKeynoteRecovery(failure.message);
+        }
+      }
+      if (!choice) return null;
+    }
+  }
+  throw Error('예배나 입력이 변경됐습니다. 기존 작업을 보존했습니다.');
 }
 
 async function connectPresenterKeynoteItemAutomatically(button) {
