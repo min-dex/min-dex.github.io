@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261107-tov-youth-bulletin",
+  "version": "20261107-tov-paperlogy",
   "options": {
     "compress": false,
     "mangle": {

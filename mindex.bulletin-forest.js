@@ -102,6 +102,8 @@
     add('outline',1,224,44,50,112,11.5,'field:outline');
     add('tovReflectionTitle',1,165,168,111,9,15,'label:+  내게 주신 말씀 / 내가 받은 은혜','text','left',800);
     add('reflection',1,165,181,111,14,11.5,'field:reflection');
+    const displayTitles=new Set(['tovTitle','eventsTitle','newsTitle','orderTitle','notesTitle','tovPointTitle','tovReflectionTitle']);
+    for(const frame of result)if(displayTitles.has(frame.id))frame.family='Paperlogy';
     return result;
   }
   function decorateTov(root,page,p,a){

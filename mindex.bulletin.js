@@ -688,6 +688,18 @@
     if (value!==undefined) node.textContent=value;
     return node;
   }
+  const paperlogyPath="vendor/fonts/paperlogy/Paperlogy-8ExtraBold-5047db061c39ec5e.woff2";
+  const bulletinFonts=design=>[["MindexBulletin","Freesentation"],["MindexChildrenTheme","던파 비트비트"],
+    ...(design==="youth-tov"?[["Paperlogy","페이퍼로지"]]:[])];
+  const frameWeights=family=>family==="Paperlogy"?[800]:family==="MindexChildrenTheme"?[400]:[500,700,800];
+  let paperlogyReady;
+  function readyPaperlogy(){
+    if(!paperlogyReady){
+      const face=new FontFace("Paperlogy",`url(${new URL(paperlogyPath,document.baseURI)})`,{weight:"800"});
+      paperlogyReady=face.load().then(font=>document.fonts.add(font)).catch(error=>{paperlogyReady=null;throw error;});
+    }
+    return paperlogyReady;
+  }
   let fontReady;
   function readyAssets() {
     if (!fontReady) fontReady=(async()=>{
@@ -707,6 +719,7 @@
   }
   async function readyBackground(doc) {
     await readyAssets();
+    if(doc.settings?.design==="youth-tov")await readyPaperlogy();
     if(!["children-forest","youth-tov"].includes(doc.settings?.design)&&doc.settings?.appearance)await Promise.all(Object.values(appearanceFor(doc).assets).filter(Boolean).map(src=>new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("주보 이미지를 불러오지 못했습니다."));image.src=new URL(src,document.baseURI).href;})));
     if(doc.settings?.design==="simple")return;
     if(["children-forest","youth-tov"].includes(doc.settings?.design)){
@@ -1161,8 +1174,10 @@
       f.w=Math.max(10,Math.min(297,f.w));f.h=Math.max(5,Math.min(210,f.h));
       f.x=Math.min(f.x,297-f.w);f.y=Math.min(f.y,210-f.h);
       if([400,500,700,800].includes(patch.weight))f.weight=patch.weight;
-      if(["MindexBulletin","MindexChildrenTheme"].includes(patch.family))f.family=patch.family;
-      if(f.family==="MindexChildrenTheme")f.weight=400;else if(f.weight===400)f.weight=500;
+      if(bulletinFonts(settings.design).some(([family])=>family===patch.family))f.family=patch.family;
+      if(f.family==="Paperlogy")f.weight=800;
+      else if(f.family==="MindexChildrenTheme")f.weight=400;
+      else if(f.weight===400)f.weight=500;
       f.hidden=patch.hidden===true;if(["left","center","right"].includes(patch.align))f.align=patch.align;
       if(["top","middle","bottom"].includes(patch.verticalAlign))f.verticalAlign=patch.verticalAlign;
     }
@@ -1500,7 +1515,7 @@
           <label><input type="checkbox" data-bulletin-hidden ${f.hidden||(["children-forest","youth-tov"].includes(doc.settings.design)&&appearanceFor(doc).visible[f.id]===false)?"":"checked"}> 출력에 표시</label><div class="bulletin-number-grid">`+
           [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" ${isFlowFrame(doc,f.id)&&["y","h"].includes(key)?'readonly title="내용에 따라 자동 계산"':""} value="${isFlowFrame(doc,f.id)?Number(simpleFlow(doc).frames.find(item=>item.id===f.id)[key].toFixed(2)):f[key]}"></label>`).join("")+`</div>
           <label>글자 크기 (pt)<select data-bulletin-dimension="size">${[...new Set([...TOKENS.fontSizes,f.size])].sort((a,b)=>a-b).map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
-          ${f.type==="text"?`<label>글꼴<select data-bulletin-family>${[["MindexBulletin","Freesentation"],["MindexChildrenTheme","던파 비트비트"]].map(([key,name])=>`<option value="${key}" ${(f.family||"MindexBulletin")===key?"selected":""}>${name}</option>`).join("")}</select></label><label>굵기<select data-bulletin-dimension="weight">${(f.family==="MindexChildrenTheme"?[400]:[500,700,800]).map(n=>`<option value="${n}" ${(f.weight||500)===n?"selected":""}>${n===400||n===500?"보통":n===700?"굵게":"아주 굵게"}</option>`).join("")}</select></label>`:""}
+          ${f.type==="text"?`<label>글꼴<select data-bulletin-family>${bulletinFonts(doc.settings.design).map(([key,name])=>`<option value="${key}" ${(f.family||"MindexBulletin")===key?"selected":""}>${name}</option>`).join("")}</select></label><label>굵기<select data-bulletin-dimension="weight">${frameWeights(f.family).map(n=>`<option value="${n}" ${(f.weight||500)===n?"selected":""}>${n===400||n===500?"보통":n===700?"굵게":"아주 굵게"}</option>`).join("")}</select></label>`:""}
           <label>가로 정렬<select data-bulletin-align>${[["left","왼쪽"],["center","가운데"],["right","오른쪽"]].map(([v,t])=>`<option value="${v}" ${f.align===v?"selected":""}>${t}</option>`).join("")}</select></label>
           <label>세로 정렬<select data-bulletin-vertical-align>${[["","기존 배치"],["top","위쪽"],["middle","가운데"],["bottom","아래쪽"]].map(([v,t])=>`<option value="${v}" ${(f.verticalAlign||"")===v?"selected":""}>${t}</option>`).join("")}</select></label>
           <details class="bulletin-property-section" data-bulletin-section="layout-help" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"layout-help"])||""}><summary>편집 도움말</summary><p class="bulletin-help">드래그로 이동하고 모서리로 크기를 조절합니다. 방향키는 2.5mm씩 이동합니다.</p><p class="bulletin-help">광고·안내·일정·섬김이는 내용에 맞춰 자동 배치됩니다.</p><p class="bulletin-help">순서 간추리기는 준비·마침·교제·보조 성구와 고백 전문을 생략하고 같은 순서를 묶습니다.</p>${templateSession?'<p class="bulletin-help">광고·설교는 예시입니다. 11월부터 새 주보에 적용되며, 저장된 주보는 유지됩니다.</p>':""}</details>`;
@@ -1630,7 +1645,7 @@
       if(t.matches("[data-bulletin-service]")){if(options.onServiceChange?.(t.value)===false){t.value=doc.id;return;}void load(t.value);return;}
       if(t.matches("[data-bulletin-frame]")){selected=t.value;properties();preview();showPage(doc.frames.find(f=>f.id===selected).page);return;}
       const f=doc.frames.find(f=>f.id===selected);
-      if(t.hasAttribute("data-bulletin-family")){if(!["MindexBulletin","MindexChildrenTheme"].includes(t.value))return;remember();f.family=t.value;f.weight=t.value==="MindexChildrenTheme"?400:500;persist();properties();preview();return;}
+      if(t.hasAttribute("data-bulletin-family")){if(!bulletinFonts(doc.settings.design).some(([family])=>family===t.value))return;remember();f.family=t.value;f.weight=frameWeights(t.value)[0];persist();properties();preview();return;}
       if(t.dataset.bulletinDimension){const n=Number(t.value);if(!t.value.trim()||!Number.isFinite(n)){t.value=String(f[t.dataset.bulletinDimension]);return;}remember();if(t.dataset.bulletinDimension==="weight")f.family=f.family||"MindexBulletin";setDimension(f,t.dataset.bulletinDimension,n);persist();properties();preview();}
       if(t.matches("[data-bulletin-align]")){remember();f.align=t.value;persist();preview();}
       if(t.matches("[data-bulletin-vertical-align]")){if(!["","top","middle","bottom"].includes(t.value))return;remember();if(t.value)f.verticalAlign=t.value;else delete f.verticalAlign;persist();preview();}
@@ -1722,7 +1737,9 @@
         const rendered=renderPages(output,"print",null);if(rendered.issues.size)throw new Error("내용이 편집 영역을 넘습니다. 크기나 간격을 조정해 주세요.");
         printFrame?.remove();printFrame=document.createElement("iframe");
         printFrame.title="주보 인쇄";printFrame.className="bulletin-print-frame";
-        const fontCSS=[[500,"5Medium"],[700,"7Bold"],[800,"8ExtraBold"]].map(([w,n])=>`@font-face{font-family:MindexBulletin;font-weight:${w};src:url('${new URL(`vendor/fonts/freesentation/Freesentation-${n}.woff2`,document.baseURI)}')}`).join("")+`@font-face{font-family:MindexChildrenTheme;font-weight:400;src:url('${new URL("vendor/fonts/dnf-bitbit-v2/DNFBitBitv2.otf",document.baseURI)}')}`;
+        let fontCSS=[[500,"5Medium"],[700,"7Bold"],[800,"8ExtraBold"]].map(([w,n])=>`@font-face{font-family:MindexBulletin;font-weight:${w};src:url('${new URL(`vendor/fonts/freesentation/Freesentation-${n}.woff2`,document.baseURI)}')}`).join("")+`@font-face{font-family:MindexChildrenTheme;font-weight:400;src:url('${new URL("vendor/fonts/dnf-bitbit-v2/DNFBitBitv2.otf",document.baseURI)}')}`;
+        const tov=output.settings.design==="youth-tov";
+        if(tov)fontCSS+=`@font-face{font-family:Paperlogy;font-weight:800;src:url('${new URL(paperlogyPath,document.baseURI)}')}`;
         const frame=printFrame;
         const loaded=new Promise(resolve=>{
           const abort=()=>resolve(false);
@@ -1733,6 +1750,7 @@
         document.body.append(frame);if(!await loaded||signal.aborted)return;
         await Promise.all([500,700,800].map(w=>frame.contentDocument.fonts.load(`${w} 12.5pt MindexBulletin`)));
         await frame.contentDocument.fonts.load("400 15pt MindexChildrenTheme");
+        if(tov)await frame.contentDocument.fonts.load("800 35pt Paperlogy","검단우리교회 토브 청소년부");
         await frame.contentDocument.fonts.ready;
         if(signal.aborted||!frame.isConnected)return;
         printSession=true;

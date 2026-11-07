@@ -57,6 +57,36 @@ try:
             page.locator("[data-bulletin-field=reflection]").fill("받은 은혜 기록")
             page.locator("[data-bulletin-field=nextPrayer]").fill("다음번 기도 · 학생 담당")
             page.wait_for_function("document.querySelector('[data-bulletin-print]').disabled===false")
+            assert page.evaluate("""() => {
+                const value=MindexBulletin.storedValue(documents.get(source.id));
+                const title=value.layout.frames.find(frame=>frame.id==='tovTitle');
+                delete title.family;
+                const legacy={};MindexBulletin.applyStored(legacy,{revision:3,...value});
+                title.family='MindexBulletin';
+                const custom={};MindexBulletin.applyStored(custom,{revision:3,...value});
+                const family=doc=>doc.frames.find(frame=>frame.id==='tovTitle').family;
+                return family(legacy)==='Paperlogy'&&family(custom)==='MindexBulletin';
+            }""")
+            assert page.locator('[data-frame-id=tovTitle] tspan').first.get_attribute('font-family') == 'Paperlogy'
+            assert page.locator('[data-frame-id=order] text').first.get_attribute('font-family') == 'MindexBulletin'
+            assert page.evaluate("""[...document.fonts].some(f=>f.family==='Paperlogy'&&f.status==='loaded')""")
+            page.evaluate("""() => {
+                window.printCalls=0;
+                const {get}=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'contentWindow');
+                Object.defineProperty(HTMLIFrameElement.prototype,'contentWindow',{get(){
+                    const w=get.call(this);
+                    if(w)w.print=()=>{printCalls++;w.dispatchEvent(new w.Event('afterprint'));};
+                    return w;
+                }});
+            }""")
+            page.locator('[data-bulletin-print]').click()
+            page.wait_for_function('printCalls===1')
+            assert page.evaluate("""() => {
+                const print=document.querySelector('iframe.bulletin-print-frame').contentDocument;
+                return [...print.fonts].some(f=>f.family==='Paperlogy'&&f.status==='loaded')
+                    &&print.querySelector('[data-frame-id=tovTitle] tspan').getAttribute('font-family')==='Paperlogy'
+                    &&print.querySelector('[data-frame-id=order] text').getAttribute('font-family')==='MindexBulletin';
+            }""")
             for index, name in enumerate(("outside", "inside")):
                 page.locator("[data-bulletin-design=youth-tov]").nth(index).screenshot(path=str(output / f"{engine}-{name}.png"))
             page.evaluate("""() => {
