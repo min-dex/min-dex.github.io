@@ -5,6 +5,7 @@ module.exports = {
  publish: null,
  directories: {output: 'dist/internal'},
  extraMetadata: {mindexInternalBuild: true},
- mac: {...pkg.build.mac, identity: null, notarize: false},
+ // Seal the repackaged bundle with the local identity without certificate discovery.
+ mac: {...pkg.build.mac, identity: "-", hardenedRuntime: false, notarize: false},
  win: {...pkg.build.win, signExecutable: false},
 };

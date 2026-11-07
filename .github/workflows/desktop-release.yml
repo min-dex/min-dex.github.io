@@ -160,6 +160,7 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"internal-install.json"))).exe')"
           if [[ "$RUNNER_OS" == Windows ]]; then resources="$(dirname "$exe")/resources"; else resources="$(dirname "$(dirname "$exe")")/Resources"; fi
+          if [[ "$RUNNER_OS" == macOS ]]; then codesign --verify --deep --strict "$(dirname "$(dirname "$(dirname "$exe")")")"; fi
           node tests/verify_candidate_package.cjs "$resources" "$target" internal
           if [[ "$RUNNER_OS" == Windows ]]; then encoder="$resources/broadcast-engine/ffmpeg.exe"; else encoder="$resources/broadcast-engine/ffmpeg"; fi
           node tests/test_desktop_youtube_local.cjs "$exe" "$encoder"
@@ -285,6 +286,7 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"intel-internal.json"))).exe')"
           resources="$(dirname "$(dirname "$exe")")/Resources"
+          codesign --verify --deep --strict "$(dirname "$(dirname "$(dirname "$exe")")")"
           node tests/verify_candidate_package.cjs "$resources" mac-x64 internal
           node tests/test_desktop_youtube_local.cjs "$exe" "$resources/broadcast-engine/ffmpeg"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" seed "$GITHUB_SHA" "$version"

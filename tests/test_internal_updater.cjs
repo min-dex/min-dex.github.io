@@ -21,6 +21,7 @@ test('coalesces lookup, fails closed, retries, rechecks live output and never au
 test('internal build keeps real identity while signed defaults stay protected',()=>{
  const pkg=require('../package.json'),config=require('../electron-builder.internal.cjs');
  assert.equal(config.appId,pkg.build.appId);assert.equal(config.productName,'Mindex');assert.equal(config.extraMetadata.mindexInternalBuild,true);
+ assert.equal(config.mac.identity,'-');assert.equal(config.mac.hardenedRuntime,false);assert.equal(pkg.build.mac.hardenedRuntime,true);
  assert.equal(config.publish,null);assert.equal(config.win.signExecutable,false);assert.notEqual(config.win.signAndEditExecutable,false);assert.equal(config.mac.notarize,false);assert.equal(pkg.build.mac.notarize,true);
 });
 
@@ -29,7 +30,7 @@ test('internal acceptance cannot send a real broadcast and retains final platfor
  const source=fs.readFileSync('electron/youtube-window.js','utf8');
  assert.match(source,/mindexTestBuild === true \|\| globalThis.__mindexTestIsolation/);
  const workflow=fs.readFileSync('.github/workflows/desktop-release.yml','utf8');
- for(const value of ['electron-builder.internal.cjs','internal-proof.json','intel-internal-proof.json','tests/test_desktop_youtube_local.cjs'])assert(workflow.includes(value));
+ for(const value of ['electron-builder.internal.cjs','internal-proof.json','intel-internal-proof.json','tests/test_desktop_youtube_local.cjs','codesign --verify --deep --strict'])assert(workflow.includes(value));
  assert(!workflow.includes('continue-on-error:'));
 });
 

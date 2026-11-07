@@ -1,3 +1,13 @@
+## Internal Mac bundle integrity
+
+The internal Mac installer applies a local ad-hoc signature after Electron
+Builder finishes assembling the bundle. Verify the mounted or installed
+application with `codesign --verify --deep --strict` on ARM and Intel before
+publication. Its app and profile identifiers remain unchanged. This seals the
+bundle and does not use a paid certificate or Apple notarization. Gatekeeper
+can still require explicit per-app approval for a browser download. An isolated
+executable launch does not certify the Finder first-launch experience.
+
 ## 2026-11-06 Church internal delivery — supersedes signing choice below
 
 The owner chooses unsigned church-only 1.0.0 delivery; equipment acceptance is
