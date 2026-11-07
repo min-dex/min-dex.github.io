@@ -602,3 +602,14 @@ nested text, without scanning song payloads. The function owner, grants,
 security mode, validation limit, errors, CAS and immutable retries stay in
 place. The migration requires the existing cache trigger and recognized guard
 definition. It changes no worship, song or draft rows.
+
+## Targeted praise read alias lookup · 2026-11-08 candidate
+
+The targeted praise reader resolves current and previous IDs through the existing
+private alias cache before fetching matching payloads. It retains result ID order,
+deduplication, full payload/revision, null/empty input behavior, the existing
+security-definer owner and grants. The guarded SQL refuses unknown function bodies
+or cache/source drift. No operational song/worship rows are rewritten.
+`tests/test_praise_reader_alias_cache.mjs` verifies parity, RLS/privileges,
+transaction rollback, migration replay and drift rejection on isolated PostgreSQL.
+Operational application and deployed verification remain separate receipts.

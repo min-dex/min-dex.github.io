@@ -65,8 +65,7 @@ try:
                       renderPresenterDetail();
                       assert(!document.querySelector('.svc-presenter-toolbar [data-presenter-citation-auto-output]').checked,'toggle lost');
                       assert(document.querySelector('.svc-presenter-toolbar [data-presenter-citation-reference-input]').value==='요 15:9','unfocused draft lost');
-                      document.querySelector('[data-presenter-citation-focus]').click();
-                      assert(document.activeElement===document.querySelector('.svc-presenter-toolbar [data-presenter-citation-reference-input]'),'shortcut focus');
+                      assert(!document.querySelector('[data-presenter-citation-focus]'),'duplicate citation shortcut');
                       if(!document.querySelector('.svc-presenter-toolbar [data-presenter-citation-auto-output]').checked) document.querySelector('.svc-presenter-toolbar [data-presenter-citation-auto-output]').click();
                       renderPresenterDetail();
                       if(innerWidth>=1000){

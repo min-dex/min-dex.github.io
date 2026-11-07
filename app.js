@@ -8780,14 +8780,6 @@ function handleDetailClick(event) {
     renderServiceList();
     return;
   }
-  const citationFocus = event.target.closest("[data-presenter-citation-focus]");
-  if (citationFocus) {
-    applyRightSidebarVisibility();
-    const input = refs.detailPane?.querySelector(`[data-presenter-citation-reference-input][data-service-id="${CSS.escape(citationFocus.dataset.serviceId)}"][data-presenter-citation-element-id="${CSS.escape(citationFocus.dataset.presenterCitationFocus)}"]`);
-    input?.focus({ preventScroll: true });
-    input?.scrollIntoView({ block: "nearest" });
-    return;
-  }
   document.querySelectorAll(".svc-reference-media-quick-add[open]").forEach((menu) => {
     if (!menu.contains(event.target)) menu.removeAttribute("open");
   });
