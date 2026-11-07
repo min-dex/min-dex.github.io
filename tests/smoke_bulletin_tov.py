@@ -63,13 +63,18 @@ try:
                 const value=MindexBulletin.storedValue(documents.get(source.id));
                 const title=value.layout.frames.find(frame=>frame.id==='tovTitle');
                 delete title.family;
+                const art=value.layout.frames.find(frame=>frame.id==='tovArtwork');
+                Object.assign(art,{x:181.5,y:111,w:82.5,h:74});
                 const legacy={};MindexBulletin.applyStored(legacy,{revision:3,...value});
+                art.x=182;
                 title.family='MindexBulletin';
                 const custom={};MindexBulletin.applyStored(custom,{revision:3,...value});
                 const family=doc=>doc.frames.find(frame=>frame.id==='tovTitle').family;
                 custom.settings.appearance={assets:{artwork:'assets/bulletin/tov-autumn.svg'},palette:{cover:'#abcdef'}};
                 const {pages}=MindexBulletin.renderPages(custom,'print');
-                return family(legacy)==='Paperlogy'&&family(custom)==='MindexBulletin'
+                return legacy.frames.find(frame=>frame.id==='tovArtwork').w===98.5
+                    &&custom.frames.find(frame=>frame.id==='tovArtwork').x===182
+                    &&family(legacy)==='Paperlogy'&&family(custom)==='MindexBulletin'
                     &&pages[0].querySelector('[data-frame-id=tovArtwork] image').getAttribute('href').endsWith('/tov-autumn.svg')
                     &&!!pages[0].querySelector('rect[fill="#abcdef"]');
             }""")
@@ -101,6 +106,10 @@ try:
                 const print=MindexBulletin.renderPages(doc,'print');
                 if(print.issues.size||print.pages.length!==2||print.pages.some(svg=>svg.getAttribute('viewBox')!=='0 0 297 210'))throw Error('Invalid print pages');
                 if(JSON.stringify(doc.source)!==before)throw Error('Source mutated');
+                const blank=MindexBulletin.renderPages({...doc,fields:{...doc.fields,outline:'',reflection:''}},'print').pages[1];
+                if(blank.querySelectorAll('[data-frame-id=reflection] [data-tov-writing-rule]').length!==2
+                    ||!blank.querySelector('[data-frame-id=outline] [data-tov-writing-rule]')
+                    ||print.pages[1].querySelector('[data-tov-writing-rule]'))throw Error('Writing guides must only appear in empty note areas');
                 const overflow=MindexBulletin.renderPages({...doc,fields:{...doc.fields,scriptureNote:'긴 본문 '.repeat(500)}},'print');
                 if(!overflow.issues.has('scriptureNote'))throw Error('Long note must block printing');
             }""")

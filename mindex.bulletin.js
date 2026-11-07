@@ -1166,6 +1166,14 @@
         // Upgrade only an untouched old default; preserve every custom frame.
         if(old&&["x","y","w","h","size","align"].every(key=>patch[key]===old[key])&&!patch.hidden&&!["top","middle","bottom"].includes(patch.verticalAlign))patch=null;
       }
+      // Only migrate the original Tov illustration box. Custom artwork or
+      // geometry keeps the placement selected in the saved issue.
+      if(patch&&settings.design==="youth-tov"&&f.id==="tovArtwork"
+        &&patch.x===181.5&&patch.y===111&&patch.w===82.5&&patch.h===74
+        &&!patch.hidden&&!patch.verticalAlign
+        &&(!settings.appearance?.assets.artwork||settings.appearance.assets.artwork===window.MindexBulletinForest.tovArtwork)){
+        patch={...patch,x:f.x,y:f.y,w:f.w,h:f.h};
+      }
       if(!patch)continue;
       for(const key of ["x","y","w","h","size"]){
         const n=patch[key];
