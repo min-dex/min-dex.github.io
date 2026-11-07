@@ -20,7 +20,7 @@ try:
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
    context=browser.new_context(viewport={'width':1000,'height':800})
    context.route('**/*',lambda r:r.continue_() if r.request.method=='GET' and urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
-   approved={'value':False};protocol_calls=[]
+   approved={'value':False};protocol_calls=[];convert_failures={'left':0}
    def helper(route):
     request=route.request;parsed=urlsplit(request.url);name=parsed.path
     headers={'Access-Control-Allow-Origin':urlsplit(url).scheme+'://'+urlsplit(url).netloc,'Access-Control-Allow-Headers':'Authorization, Content-Type, X-Mindex-Keynote-Client','Access-Control-Allow-Methods':'GET, POST, OPTIONS'}
@@ -34,6 +34,9 @@ try:
     elif name=='/pair/'+pair_id:body={'token':'a'*64} if approved['value'] else {'pending':True}
     elif name=='/convert':
      assert request.header_value('authorization')=='Bearer '+'a'*64
+     if convert_failures['left']:
+      convert_failures['left']-=1
+      return route.fulfill(status=503,content_type='application/json',body='{"code":"keynote-export-failed"}',headers=headers)
      body={'id':pair_id,'manifest':manifest}
     elif name.startswith('/jobs/'+pair_id+'/'):
      assert request.header_value('authorization')=='Bearer '+'a'*64
@@ -74,6 +77,60 @@ try:
    page.wait_for_function("keynotePrepareResult!==null")
    assert page.evaluate("keynotePrepareResult!=='unexpected'")
    assert protocol_calls.count('/convert')==1,'edit must stop before conversion/upload'
+   page.evaluate("""sha=>{
+    const serviceId='fixture',itemId='deck',keynoteHtml={url:'https://fixture.invalid/manifest.json',sha256:sha,pages:20};
+    const original={format:'key',sha256:sha},key=keynoteHtml.url+'|'+sha;
+    const host=document.createElement('div');host.id='fixture-deck';document.body.append(host);
+    const check=(status,needsRecovery)=> {
+     presenterKeynoteHtmlManifests.set(key,status);
+     host.innerHTML=renderPresenterKeynoteHtmlControls({original,keynoteHtml},serviceId,itemId);
+     const hasRecovery=Boolean(host.querySelector('[data-keynote-auto-connect]')&&host.querySelector('[data-keynote-html-files]')&&host.querySelector('[data-keynote-html-action="status"]'));
+     if(hasRecovery!==needsRecovery)throw Error('incorrect recovery visibility');
+     if(status.value && !host.textContent.includes('준비 완료'))throw Error('ready status missing');
+    };
+    check({value:null,error:null},false);
+    check({value:{},error:null},false);
+    check({value:null,error:Error('fixture')},true);
+    host.innerHTML=renderPresenterKeynoteHtmlControls({original},serviceId,itemId);
+    if(!host.querySelector('[data-keynote-auto-connect]')||!host.querySelector('[data-keynote-html-files]'))throw Error('original-only recovery missing');
+    host.remove();
+   }""",source_hash)
+   convert_failures['left']=1
+   page.evaluate("""()=>{
+    keynotePrepareResult=null;
+    void preparePresenterKeynoteWithRecovery(new File(['offline KEY'],'source.key'),()=>true)
+     .then(files=>keynotePrepareResult=files?.length ?? 'cancel',e=>keynotePrepareResult=e.message);
+   }""")
+   recovery=page.get_by_role('dialog',name='Keynote 준비 실패')
+   recovery.wait_for(state='visible')
+   assert recovery.get_by_label('Keynote 재생 폴더 연결').count()==1
+   recovery.get_by_role('button',name='다시 시도').click()
+   page.wait_for_function("keynotePrepareResult!==null")
+   assert page.evaluate('keynotePrepareResult')==23
+   assert recovery.count()==0 and dialog.count()==0
+   assert protocol_calls.count('/pair')==1,'a valid connection must not ask again'
+   convert_failures['left']=1
+   page.evaluate("""()=>{
+    keynotePrepareResult=null;
+    void preparePresenterKeynoteWithRecovery(new File(['offline KEY'],'source.key'),()=>true)
+     .then(files=>keynotePrepareResult=files?.length ?? 'cancel',e=>keynotePrepareResult=e.message);
+   }""")
+   recovery.wait_for(state='visible')
+   page.evaluate("""()=>{
+    const input=document.querySelector('dialog[aria-label="Keynote 준비 실패"] input');
+    const wrong=new File(['{}'],'manifest.json');
+    Object.defineProperty(wrong,'webkitRelativePath',{value:'wrong/manifest.json'});
+    Object.defineProperty(input,'files',{value:[wrong]});
+    input.dispatchEvent(new Event('change'));
+   }""")
+   recovery.get_by_text('Keynote 재생 폴더의 형식이나 슬라이드 수를 확인해 주세요.').wait_for()
+   page.evaluate("""()=>{
+    const input=document.querySelector('dialog[aria-label="Keynote 준비 실패"] input');
+    Object.defineProperty(input,'files',{value:keynotePreparedFiles});
+    input.dispatchEvent(new Event('change'));
+   }""")
+   page.wait_for_function("keynotePrepareResult!==null")
+   assert page.evaluate('keynotePrepareResult')==23 and recovery.count()==0
    popup.close()
    approved['value']=False
    # Pairing cancellation is an actual dialog/keyboard interaction, without a save.
@@ -81,6 +138,6 @@ try:
    dialog.wait_for(state='visible');dialog.get_by_role('button',name='취소').click()
    page.wait_for_function('keynotePrepareResult!==null')
    assert page.locator('dialog[aria-labelledby=keynoteBridgeTitle]').count()==0
-   print('PASS',engine,'explicit helper approval, paired fetch, 20 slide hashes/files, dirty abort and keyboard-accessible cancellation; production writes/native automation/playback 0',flush=True)
+   print('PASS',engine,'explicit helper approval, paired fetch, 20 slide hashes/files, failure-only retry/folder, dirty abort and keyboard-accessible cancellation; production writes/native automation/playback 0',flush=True)
    browser.close()
 finally:server.shutdown()

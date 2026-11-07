@@ -575,7 +575,7 @@ async function importPresenterPptx(input, existingItem = null) {
   };
   try {
     const isKeynote = /\.key$/i.test(file.name);
-    if (!window.confirm(`${file.name}\n\n이 예배에 불러올까요? 원본 파일(메모·숨긴 장 포함)은 공개 자료 저장소에 보관됩니다.`)) return false;
+    if ((!isKeynote || !input.hasAttribute?.("data-keynote-public-upload")) && !window.confirm(`${file.name}\n\n이 예배에 불러올까요? 원본 파일(메모·숨긴 장 포함)은 공개 자료 저장소에 보관됩니다.`)) return false;
     showToast("파일을 불러오고 있습니다.", "info");
     const bytes = new Uint8Array(await file.arrayBuffer());
     const sha256 = await presenterPptxDigest(bytes);
@@ -585,7 +585,10 @@ async function importPresenterPptx(input, existingItem = null) {
       parsed = await parsePresenterPptx(bytes);
       ({ deck, runtime } = parsed);
     }
-    if (isKeynote) automaticKeynoteFiles = await preparePresenterKeynoteBrowserFile(file, unchanged);
+    if (isKeynote) {
+      automaticKeynoteFiles = await preparePresenterKeynoteWithRecovery(file, unchanged);
+      if (!automaticKeynoteFiles) return false;
+    }
     if (!unchanged()) throw new Error("자료를 준비하는 동안 예배나 입력이 변경됐습니다. 다시 선택해 주세요.");
     const sourceUrl = await uploadPresenterPptxSource(file, upload);
     const original = { format: isKeynote ? "key" : "pptx", url: sourceUrl, name: file.name, size: file.size, sha256 };
@@ -653,6 +656,18 @@ async function importPresenterPptx(input, existingItem = null) {
   }
 }
 
+
+function renderPresenterDeckFileChooser(serviceId, label, sectionKey = "", index = null) {
+  const target = index === null
+    ? `data-presenter-reference-media-section="${escapeAttr(sectionKey)}"`
+    : `data-service-item-index="${index}"`;
+  const notice = "Keynote 원본(메모·숨긴 장 포함)과 재생 자료는 공개 자료 저장소에 보관돼요.";
+  return `<label class="svc-reference-media-upload" title="${notice}">
+    <input type="file" accept=".key,.pptx" data-presenter-pptx-file data-keynote-public-upload
+      data-service-id="${escapeAttr(serviceId)}" ${target} aria-label="${escapeAttr(label)} · ${notice}" />
+    <span>${escapeHtml(label)} <small>원본 공개 저장</small></span>
+  </label>`;
+}
 
 function renderPresenterDeckOriginalActions(asset, serviceId, itemId) {
   if (!asset.original && !asset.pptx) return "";

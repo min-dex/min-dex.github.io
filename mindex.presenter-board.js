@@ -878,11 +878,7 @@ function renderPresenterReferenceMediaQuickAdd(sectionKey, serviceId) {
         <span>추가</span>
       </summary>
       <div class="svc-reference-media-quick-add-actions">
-        <label class="svc-reference-media-upload">
-          <input type="file" accept=".key,.pptx" data-presenter-pptx-file
-            data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="설교·발표 자료 삽입" />
-          <span>Keynote / PPT</span>
-        </label>
+        ${renderPresenterDeckFileChooser(serviceId, "Keynote / PPT", sectionKey)}
         <label class="svc-reference-media-upload">
           <input type="file" multiple accept="${PRESENTER_REFERENCE_MEDIA_ACCEPT}" data-presenter-reference-media-direct-file
             data-presenter-reference-media-section="${escapeAttr(sectionKey)}" data-service-id="${escapeAttr(serviceId)}" aria-label="파일 선택" />

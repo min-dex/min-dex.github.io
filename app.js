@@ -29439,7 +29439,7 @@ function renderPresenterAssetUpload(item, index, memo, serviceId) {
       ${reference ? "data-presenter-reference-media-file" : "data-service-item-asset-file"}
       data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" />
     <i data-lucide="upload"></i><span>${kind === "image" ? "이미지 추가" : "파일 선택"}</span>
-  </label>`}${renderPresenterDeckOriginalActions(asset, serviceId, item.id)}${asset.pptx || asset.original ? `<label class="svc-reference-media-upload"><input type="file" accept=".key,.pptx" data-presenter-pptx-file data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${index}" aria-label="원본 자료 교체" /><i data-lucide="presentation"></i><span>자료 교체</span></label>` : ""}`;
+  </label>`}${renderPresenterDeckOriginalActions(asset, serviceId, item.id)}${asset.pptx || asset.original ? renderPresenterDeckFileChooser(serviceId, "자료 교체", "", index) : ""}`;
 }
 
 function renderPresenterServiceAssetInput(item, index, memo, options = {}) {
