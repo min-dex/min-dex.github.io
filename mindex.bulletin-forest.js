@@ -67,6 +67,77 @@
     add('insideBrand',1,159.5,202,126.5,5,7.5,'label:꿈꾸는 어린이부','text','right');
     return result;
   }
+  const tovArtwork='assets/bulletin/tov-autumn.svg';
+  const tovPalette={paper:'#ffffff',cover:'#d9dcf2',ink:'#292f72',accent:'#85358e',soft:'#f1e4f3',peach:'#f1e4f3',line:'#afb2d5',muted:'#4b5190'};
+  function tovFrames(){
+    const result=[];
+    const add=(id,page,x,y,w,h,size,binding,type='text',align='left',weight=500)=>result.push({id,page,x,y,w,h,size,binding,type,align,weight});
+    add('eventsTitle',0,19,13,118,11,22.5,'label:★  교회 일정','text','left',800);
+    add('events',0,19,31,118,34,11.5,'field:eventsText','list');
+    add('newsTitle',0,19,67,118,11,22.5,'label:★  토브 토킹','text','left',800);
+    add('welcome',0,19,85,118,11,12.5,'field:welcome','text','left',700);
+    add('news',0,19,97,118,43,11.5,'field:news','list');
+    add('notices',0,19,141,118,17,10,'field:notices','list');
+    add('motto',0,22,164,112,13,12.5,'field:motto','text','center',800);
+    add('tovStaffTitle',0,22,179,112,5,9,'label:임원진','text','center',800);
+    add('staff',0,22,185,112,13,11.5,'field:staff','text','center',700);
+    add('verse',0,161,10,80,16,11.5,'field:verse');
+    add('issue',0,241.5,10.5,43.5,10,11.5,'issue','text','center',700);
+    add('tovTitle',0,174.5,50,96.5,36,35,'label:검단우리교회\n토브 청소년부','text','center',800);
+    add('tovTag',0,182.5,93.5,80,9,12.5,'label:예수님 안에서 함께 성장하는 우리','text','center',700);
+    add('tovArtwork',0,181.5,111,82.5,74,10,'label:가을 나무','art','center');
+    add('tovChurch',0,158.5,189,128.5,9,15,'label:검단우리교회 청소년부','text','center',800);
+    add('address',0,158.5,200,128.5,8,10,'field:address','text','center');
+    add('orderTitle',1,18,12,120,11,22.5,'label:○  예배 순서','text','left',800);
+    add('meeting',1,18,29,58,8,11.5,'field:meeting','text','left',700);
+    add('leader',1,78,29,60,8,11.5,'leader','text','right',700);
+    add('order',1,18,42,120,105,11.5,'source:order','order');
+    add('nextPrayer',1,18,150,120,9,10,'field:nextPrayer');
+    add('tovPointTitle',1,23,168,111,9,15,'label:+  예배 포인트','text','left',800);
+    add('worshipPoint',1,23,181,111,14,11.5,'field:worshipPoint');
+    add('notesTitle',1,160,12,119,11,22.5,'label:○  말씀 노트','text','left',800);
+    add('tovScriptureTitle',1,165,33,51,8,12.5,'label:성경 본문','text','left',800);
+    add('tovOutlineTitle',1,224,33,50,8,12.5,'label:말씀 이해','text','left',800);
+    add('scriptureNote',1,165,44,51,112,11.5,'field:scriptureNote');
+    add('outline',1,224,44,50,112,11.5,'field:outline');
+    add('tovReflectionTitle',1,165,168,111,9,15,'label:+  내게 주신 말씀 / 내가 받은 은혜','text','left',800);
+    add('reflection',1,165,181,111,14,11.5,'field:reflection');
+    return result;
+  }
+  function decorateTov(root,page,p,a){
+    const add=(tag,props)=>root.append(a.svg(tag,props));
+    const rect=(x,y,width,height,fill,rx=0)=>add('rect',{x,y,width,height,fill,rx});
+    const line=(x1,y1,x2,y2,stroke=p.line)=>add('line',{x1,y1,x2,y2,stroke,'stroke-width':.3});
+    const wave=(x,y,width)=>{
+      const steps=24,step=width/steps;
+      const d=Array.from({length:steps},()=>`q${step/4} -.7 ${step/2} 0t${step/2} 0`).join(' ');
+      add('path',{d:`M${x} ${y} ${d}`,fill:'none',stroke:p.muted,'stroke-width':.3});
+    };
+    rect(0,0,9,210,p.cover);
+    if(page===0){
+      rect(148.5,0,148.5,210,p.cover);
+      add('path',{d:'M173 185V75a49.5 46 0 0 1 99 0v110Z',fill:p.paper});
+      rect(241,10,45,11,p.ink,5.5);
+      rect(182.5,92,80,10,p.accent,5);
+      rect(148.5,185,148.5,25,p.accent);
+      rect(20.5,162.5,118,37,p.line,3);
+      rect(19,161,118,37,p.cover,3);
+      wave(19,26,118);wave(19,80,118);
+    }else{
+      rect(288,0,9,210,p.cover);
+      wave(18,25,120);wave(160,25,119);
+      add('rect',{x:160,y:30,width:119,height:130,fill:'none',stroke:p.line,'stroke-width':.3});
+      line(219.5,30,219.5,160);
+      for(const x of [18,160]){
+        rect(x,164,120,36,p.soft,4);
+        line(x+5,179,x+115,179);
+      }
+    }
+    for(const [x,angle] of page?[[4.5,-90],[292.5,90]]:[[4.5,-90]]){
+      const text=a.svg('text',{x,y:105,transform:`rotate(${angle} ${x} 105)`,'text-anchor':'middle','dominant-baseline':'middle','font-family':'MindexBulletin','font-size':2.8,'font-weight':700,fill:p.ink});
+      text.textContent='토브 청소년부';root.append(text);
+    }
+  }
   function paragraphs(value){
     const items=[];
     for(const line of String(value||'').split('\n').filter(line=>line.trim())){
@@ -116,10 +187,10 @@
     group.append(a.svg('line',{x1:f.x,y1:y,x2:f.x+f.w,y2:y,stroke:palette.accent,'stroke-width':.5}));
     for(const row of rows){
       const n=Math.max(a.wrap(row.label,25,f.size).length,a.wrap(row.content,inner,f.size,700).length,a.wrap(row.person,28,Math.max(7.5,f.size-2.5)).length);
-      const h=n*15/a.MM+4,base={...f,y:y+1.5,h:h-2,leading:15,color:palette.ink};
-      const center=base.y+(n-1)*15/a.MM/2;
+      const leading=a.tov?13:15,h=n*leading/a.MM+(a.tov?3.25:4),base={...f,y:y+(a.tov?1.25:1.5),h:h-(a.tov?1.5:2),leading,color:palette.ink};
+      const center=base.y+(n-1)*leading/a.MM/2;
       a.text(group,row.label,{...base,y:center,w:25,size:Math.max(7.5,f.size-1)},issues,f.id);
-      a.text(group,row.content,{...base,x:f.x+27.5,w:inner,align:'center',weight:700},issues,f.id);
+      a.text(group,row.content,{...base,x:f.x+27.5,w:inner,align:'center',weight:700,...(a.tov&&['성경봉독','설교'].includes(row.label)?{color:palette.accent}:{})},issues,f.id);
       a.text(group,row.person,{...base,y:center,x:f.x+f.w-28,w:28,size:Math.max(7.5,f.size-2.5),align:'right'},issues,f.id);
       y+=h;group.append(a.svg('line',{x1:f.x,y1:y,x2:f.x+f.w,y2:y,stroke:palette.line,'stroke-width':.25}));
       if(y>f.y+f.h+.01)issues.add(f.id);
@@ -136,18 +207,25 @@
     if(rows*step-1.5>f.h+.01)issues.add(f.id);
   }
   function render(doc,mode,selected,a){
-    const appearance=normalizeAppearance(doc.settings.appearance),palette=appearance.palette;
-    a={...a,palette};
+    const tov=doc.settings.design==='youth-tov';
+    const appearance=normalizeAppearance(doc.settings.appearance,tov?{frames:tovFrames(),palette:tovPalette,assets:{logo:'',artwork:tovArtwork}}:undefined),palette=appearance.palette;
+    a={...a,palette,tov};
     const issues=new Set(),pages=[];
     for(let page=0;page<2;page++){
-      const root=a.svg('svg',{viewBox:'0 0 297 210',class:'bulletin-sheet',role:'img','aria-label':page?'주보 안쪽':'주보 겉면','data-bulletin-design':'children-forest'});
+      const root=a.svg('svg',{viewBox:'0 0 297 210',class:'bulletin-sheet',role:'img','aria-label':page?'주보 안쪽':'주보 겉면','data-bulletin-design':doc.settings.design});
       root.append(a.svg('rect',{width:297,height:210,fill:palette.paper}));
-      if(!page)root.append(a.svg('rect',{x:148.5,width:148.5,height:210,fill:palette.cover}));
+      if(tov)decorateTov(root,page,palette,a);
+      else if(!page)root.append(a.svg('rect',{x:148.5,width:148.5,height:210,fill:palette.cover}));
       for(const f of doc.frames.filter(f=>f.page===page&&appearance.visible[f.id]!==false&&(!f.hidden||mode==='layout'))){
         const group=a.svg('g',{'data-frame-id':f.id}),check=f.hidden?new Set():issues,box={...f,color:['eventsMonth','themeMonth','liturgical','staff','address','website','memoryReference'].includes(f.id)?palette.muted:palette.ink},value=Object.hasOwn(appearance.labels,f.id)?appearance.labels[f.id]:a.bound(doc,f);
-        if(f.type==='logo'||f.type==='art')group.append(a.svg('image',{href:new URL(f.type==='logo'?appearance.assets.logo:appearance.assets.artwork,document.baseURI).href,x:f.x,y:f.y,width:f.w,height:f.h,preserveAspectRatio:'xMinYMid meet'}));
+        if(tov){
+          if(['issue','tovTag','tovChurch','address'].includes(f.id))box.color='#ffffff';
+          if(['tovOutlineTitle','outline','tovPointTitle','worshipPoint','tovReflectionTitle','reflection'].includes(f.id))box.color=palette.accent;
+        }
+        if(f.type==='logo'||f.type==='art')group.append(a.svg('image',{href:new URL(f.type==='logo'?appearance.assets.logo:appearance.assets.artwork,document.baseURI).href,x:f.x,y:f.y,width:f.w,height:f.h,preserveAspectRatio:tov?'xMidYMax meet':'xMinYMid meet'}));
         else if(f.id==='coverTitle')a.text(group,String(value).replace(/^(\S{2,8})[ \t]+(\S{2,8})$/u,'$1\n$2'),{...box,leading:40},check,f.id);
         else if(f.id==='coverTheme')a.text(group,value,{...box,size:12.5,leading:17.5,color:palette.accent},check,f.id);
+        else if(tov&&f.type==='list')a.list(group,value,{...box,itemGap:1.5},check);
         else if(f.type==='news')news(group,value,box,check,a);
         else if(f.type==='events')events(group,value,box,check,a);
         else if(f.type==='order')order(group,doc,box,check,a);
@@ -157,7 +235,7 @@
           a.styled(group,lines.map((text,i)=>({text:(i?'\n':'')+text,size:i?12.5:f.size,weight:i?500:700})),{...box,leading:17.5},check,f.id);
         }else if(f.id==='motto'||f.id==='notices'){
           a.styled(group,a.runs(value),box,check,f.id);
-        }else if(f.binding==='leader'){const leader=a.value(doc,'leader');if(leader)a.styled(group,[{text:'인도 · ',size:f.size},...a.personRuns(leader,f.size)],box,check,f.id);}
+        }else if(f.binding==='leader'){const leader=a.value(doc,'leader');if(leader)a.styled(group,[{text:tov?'인도 : ':'인도 · ',size:f.size},...a.personRuns(leader,f.size)],box,check,f.id);}
         else if(f.binding.startsWith('month:'))a.text(group,String(value).replace('\n',' '),box,check,f.id);
         else a.styled(group,a.runs(value),box,check,f.id);
         if(mode==='layout'){
@@ -170,5 +248,5 @@
     }
     return {pages,issues};
   }
-  window.MindexBulletinForest=Object.freeze({frames,render,artwork,visibleFrame,normalizeAppearance,controls});
+  window.MindexBulletinForest=Object.freeze({frames,tovFrames,tovPalette,tovArtwork,render,artwork,visibleFrame,normalizeAppearance,controls});
 })();
