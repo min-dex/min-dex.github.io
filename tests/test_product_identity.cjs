@@ -71,3 +71,10 @@ test('retired waiting videos stay public but outside the shared renderer identit
   validateWorkingRuntime(f.root);
  }finally{f.close();}
 });
+
+test('home-screen icon participates in web/native renderer identity',()=>{
+ const f=fixture();try{
+  const before=identity(f.root);fs.writeFileSync(path.join(f.root,'apple-touch-icon.png'),'synthetic icon');f.commit();
+  const after=identity(f.root);assert(after.files.some(file=>file.name==='apple-touch-icon.png'));assert.notEqual(after.rendererTree,before.rendererTree);
+ }finally{f.close();}
+});

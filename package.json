@@ -104,6 +104,7 @@
       "mindex.editor-drafts.js",
       "styles*.css",
       "favicon.ico",
+      "apple-touch-icon.png",
       "manifest.webmanifest",
       "assets/**/*",
       "!assets/presenter/chromakey-ready-loop.mp4",
