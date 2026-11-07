@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261107-skip-empty-worship-sync",
+  "version": "20261107-tov-layout-refinement",
   "options": {
     "compress": false,
     "mangle": {
