@@ -754,7 +754,7 @@
   font-size: calc(75 * var(--presenter-stage-unit));
   font-weight: var(--presenter-weight-body);
 }
-.presenter-output-root.no-chromakey :is(.presenter-fullscreen-song-heading, .presenter-fullscreen-order-heading, .presenter-fullscreen-song-detail) {
+.presenter-output-root.no-chromakey :is(.presenter-fullscreen-song-heading, .presenter-fullscreen-order-heading, .presenter-fullscreen-song-detail, .presenter-slide-meta) {
   font-size: var(--presenter-size-meta);
   font-weight: var(--presenter-weight-support);
 }

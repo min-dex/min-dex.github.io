@@ -78,6 +78,7 @@ try:
     const meta=document.createElement('span');meta.className='presenter-slide-meta';meta.textContent='보조제목';root.append(meta);
     check(getComputedStyle(person).fontSize===getComputedStyle(meta).fontSize,'fullscreen assignee differs from support size');
     check(getComputedStyle(person).fontWeight==='700','fullscreen assignee support weight differs');
+    check(getComputedStyle(meta).fontWeight===getComputedStyle(person).fontWeight,'fullscreen metadata weight differs');
     check(parseFloat(getComputedStyle(person).fontSize)===60,'fullscreen support base differs');
     for(const cls of ['presenter-fullscreen-song-heading','presenter-fullscreen-order-heading','presenter-fullscreen-song-detail','presenter-title-content-body']) {
       const node=document.createElement('div');node.className=cls;node.textContent='보조정보';root.append(node);
