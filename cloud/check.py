@@ -115,6 +115,7 @@ SMOKES = (
     "smoke_native_praise_mode_reference.py",
     "smoke_presenter_return.py",
     "smoke_controller_slide_blocks.py",
+    "smoke_section_label_display.py",
     "smoke_future_outline_consistency.py",
     "smoke_empty_presenter_inputs.py",
     "smoke_legacy_title_restore.py",

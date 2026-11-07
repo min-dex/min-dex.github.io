@@ -31,7 +31,20 @@ try:
               items[0].label='기념 2026';
               mount.innerHTML=renderPresenterSectionEditorItem(items[0],0,context);
               check(mount.querySelector('[data-service-item-field="label"]').value==='기념 2026','custom number removed');
-              return 'PASS single/peer/custom labels and no-op source preservation';
+              const waiting={id:'waiting',service_id:service.id,label:'대기 화면',raw_title:'2026 다니엘기도회 대기 화면',memo:''};
+              items.push(waiting);
+              const draw=(id)=> {
+                const slide={id,elementId:id,type:'ready',title:'준비'};
+                mount.innerHTML=renderPresenterBoardSubgroup({id,label:'대기 화면',title:'준비',slides:[{slide,slideIndex:0}]},-1,service.id,{showHead:true,slides:[]});
+                return mount.querySelector('.svc-board-subgroup-head strong')?.textContent || '';
+              };
+              const waitingBefore=JSON.stringify(waiting);
+              check(draw(waiting.id)===serviceItemSummaryDisplayParts(waiting,service).title && draw(waiting.id)===waiting.raw_title,'saved waiting title differs from outline');
+              check(JSON.stringify(waiting)===waitingBefore,'waiting display mutated source');
+              check(draw('generated-ready')==='', 'generated preparation leaked a title');
+              waiting.raw_title=waiting.label;
+              check(draw(waiting.id)==='', 'waiting title repeated its label');
+              return 'PASS ordinal labels, waiting title parity and no-op source preservation';
             }'''), flush=True)
             browser.close()
 finally:

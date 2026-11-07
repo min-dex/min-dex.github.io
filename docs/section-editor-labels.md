@@ -26,3 +26,11 @@ remain open, and explicit reopening preserves editing.
 The board toolbar starts at its sticky origin. Outline navigation clears queued
 viewport restoration and reserves the actual toolbar height so the destination
 heading and first input remain visible. These operations do not control output.
+
+
+### Presenter waiting element title
+
+A real waiting element uses the same read-only label and content title in the
+outline and thumbnail board. The generated preparation slide has no element
+title. The board keeps a distinct saved title and hides a title equal to its
+label. Section headings, editable fields and slide output keep their own roles.
