@@ -4074,7 +4074,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   width: 100%;
   min-width: 0;
   grid-template-columns: repeat(auto-fill, var(--svc-thumb-wrap-min-width));
-  justify-content: start;
+  justify-content: space-between;
   gap: 12px;
   max-width: 100%;
   overflow-x: auto;

@@ -5786,3 +5786,11 @@ lowered after the extraction; they are not raised to accommodate this change.
 `26-감사특새.png`를 OneDrive `01_방송/02_테마/2026`의 현재 승인 원본으로
 교체한다. SHA-256은 `d49b1544f68e1a17947f7f9cc10f388d07c9c425870e43c8eccd6d3b48e11481`이다. 동일 파일 이름으로
 lossless WebP 미리보기와 밝기 값을 갱신하며 예배의 기존 배경 선택 경로를 사용한다.
+
+
+### Controller thumbnail spacing · 2026-11-07
+
+The thumbnail board keeps fixed thumbnail sizes and the minimum column gap.
+When multiple columns fit, distribute the leftover width between the columns.
+Short rows follow the same column positions. At narrow widths, oversized zoom
+levels retain horizontal scrolling.

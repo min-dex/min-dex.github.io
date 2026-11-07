@@ -940,15 +940,18 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const firstIndex = subgroup.slides.find(({ slideIndex, slide }) =>
     slideIndex >= 0 && presenterSlideIsNavigable(slide))?.slideIndex ?? -1;
   const slides = options.slides || annotatePresenterFormStarts(subgroup.slides).entries;
-  const display = presenterBoardSubgroupDisplay(serviceId, subgroup);
+  const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
+  const firstSlide = subgroup.slides[0]?.slide || slides[0]?.slide;
+  const preparation = firstSlide && isPresenterPreparationSlide(firstSlide);
+  const summary = preparation && context ? serviceItemSummaryDisplayParts(context.item, context.service) : null;
+  const display = summary ? { label: summary.meta, title: summary.title } : presenterBoardSubgroupDisplay(serviceId, subgroup);
   const rawLabel = Object.prototype.hasOwnProperty.call(display, "label")
     ? display.label
     : subgroup.label || "항목";
   const rawTitle = Object.prototype.hasOwnProperty.call(display, "title")
     ? display.title
     : subgroup.title || subgroup.name;
-  const firstSlide = subgroup.slides[0]?.slide || slides[0]?.slide;
-  const visibleTitle = firstSlide && isPresenterPreparationSlide(firstSlide)
+  const visibleTitle = preparation && !context
     ? ""
     : presenterVisibleTitle(rawLabel, rawTitle);
   const visibleLabel = rawLabel;
@@ -964,7 +967,6 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const headerDbContext = options.showHead && inputContexts.length === 1 ? inputContexts[0] : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext), headerDbLink: Boolean(headerDbContext) });
   const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
-  const context = presenterBoardSubgroupItemContext(serviceId, subgroup);
   const itemIndexAttr = context ? ` data-service-item-index="${escapeAttr(String(context.index))}"` : "";
   const elementIdAttr = context?.item?.id ? ` data-service-element-id="${escapeAttr(context.item.id)}"` : "";
   const hidden = context?.item
