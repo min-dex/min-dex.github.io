@@ -30,7 +30,7 @@ def main():
               if(renderPresenterCitationComposer({slides:[{slide:trailingBlank,slideIndex:0}]},'fixture')) throw Error('composer attached to normal trailing blank');
               const section=document.createElement('div');
               section.innerHTML=renderPresenterBoardSubgroup(subgroup,-1,'fixture');
-              if(section.querySelector('.svc-citation-composer') || !section.querySelector('[data-presenter-citation-focus]')) throw Error('board composer not relocated');
+              if(section.querySelector('.svc-citation-composer, [data-presenter-citation-focus]')) throw Error('duplicate live scripture control in citation section');
               if(section.querySelectorAll('.svc-slide-thumb').length!==2) throw Error('empty citation blank slide was not visible');
               if(section.querySelector('.svc-element-hidden-badge')) throw Error('citation control hid the element');
               if(renderPresenterSlideThumb(slide,0,-1,'fixture').includes('data-presenter-citation-reference-input')) throw Error('input still on thumbnail');
