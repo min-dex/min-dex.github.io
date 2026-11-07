@@ -144,6 +144,10 @@ try:
             history_before = page.evaluate('history.length')
             for index in range(sources.count()):
                 for activation in ('click', 'Enter'):
+                    # Closing a WebKit popup restores opener focus asynchronously.
+                    # Activate the opener before testing the next keyboard action.
+                    page.bring_to_front()
+                    page.wait_for_function('document.hasFocus()')
                     link = sources.nth(index)
                     expected = link.get_attribute('href')
                     with context.expect_page(timeout=10000) as opened:

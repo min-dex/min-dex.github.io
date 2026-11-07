@@ -359,3 +359,8 @@ platform, preservation and asset checks remain mandatory.
 Presenter mutations and native Keynote import accept only the main controller's
 main frame, matching updater IPC ownership. Foreign windows and child frames
 receive `untrusted-window` without opening/closing output or importing a file.
+
+Manual source-link keyboard acceptance explicitly reactivates the opener after
+closing each popup. This avoids racing WebKit focus restoration; exact source
+URLs, click/Enter activation, noopener and unchanged app route/history assertions
+remain in place. This is test synchronization, not a runtime behavior change.
