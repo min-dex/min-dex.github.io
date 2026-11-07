@@ -593,3 +593,12 @@ instead, without changing role memberships.
 A completed full save refreshes the current Presenter board through the existing
 incremental update. If that service is still mounted, save completion refreshes
 the sidebar without replacing the preparation editor.
+
+### Worship stale Praise ID guard cache · 2026-11-08
+
+The existing private alias cache also serves the atomic worship request guard.
+The guard serializes the request once and checks the same substrings, including
+nested text, without scanning song payloads. The function owner, grants,
+security mode, validation limit, errors, CAS and immutable retries stay in
+place. The migration requires the existing cache trigger and recognized guard
+definition. It changes no worship, song or draft rows.

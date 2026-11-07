@@ -57,6 +57,35 @@ try {
   await db.exec(await load('../migrations/2026-10-24-single-song-worship-candidate.sql'));
   const record={id:'knh-361',revision:0,metadata:{title:'fixture'},content:{forms:[{id:'u',lyrics:'가사',part_type:'Verse'}],audio_set:{starts:[0,4]}}};
   await scalar('select save_single_praise_record_v1($1)',[{requestId:randomUUID(),expectedRevision:0,record}]);
+  await db.exec(await load('./fixtures/worship-praise-id-guard-before.sql'));
+  const protocol = await scalar("select pg_get_functiondef('mindex_atomic.require_single_song_protocol(jsonb)'::regprocedure)");
+  const entry = 'begin\n';
+  assert(protocol.includes(entry));
+  await db.exec(protocol.replace(entry, entry + ' perform mindex_atomic.require_current_praise_ids(req);\n'));
+  await db.exec(`create table mindex_single_song.state_id_alias_cache (
+    alias text not null, record_id text not null, primary key(alias,record_id));
+    alter table mindex_single_song.state_id_alias_cache enable row level security;
+    revoke all on mindex_single_song.state_id_alias_cache from public,anon,authenticated;`);
+  const stateMigration = await load('../migrations/2026-11-03-state-alias-guard-cache.sql');
+  await db.exec(stateMigration.slice(stateMigration.indexOf('create or replace function mindex_single_song.sync_state_id_alias_cache()'),
+    stateMigration.indexOf('do $patch$')));
+  await db.exec(`update mindex_single_song.records set payload=payload||'{"previousIds":["kid-361"]}' where id='knh-361';`);
+  const guardMetadata = async () => (await db.query(`select oid,proowner,proacl,proconfig,prosecdef,provolatile
+    from pg_proc where oid='mindex_atomic.require_current_praise_ids(jsonb)'::regprocedure`)).rows[0];
+  const priorMetadata = await guardMetadata();
+  const guardMigration = await load('../migrations/2026-11-08-worship-praise-id-guard-cache.sql');
+  await db.exec(guardMigration);
+  await db.exec(guardMigration);
+  assert.deepEqual(await guardMetadata(),priorMetadata);
+  assert.equal(await scalar("select count(*)::int from mindex_single_song.state_id_alias_cache where alias='kid-361'"),1);
+  for (const role of ['anon','authenticated']) {
+    assert.equal(await scalar("select has_function_privilege($1,'mindex_atomic.require_current_praise_ids(jsonb)','EXECUTE')",[role]),false);
+    assert.equal(await scalar("select has_table_privilege($1,'mindex_single_song.state_id_alias_cache','SELECT')",[role]),false);
+  }
+  for (const invalid of [null,JSON.stringify([]),{body:'x'.repeat(4194304)}]) {
+    await assert.rejects(scalar('select mindex_atomic.require_current_praise_ids($1)',[invalid]),/INVALID_REQUEST/);
+  }
+
   const sid=randomUUID(),section=randomUUID(),element=randomUUID();
   const create={protocolVersion:1,singleSongProtocol:1,serviceId:sid,requestId:randomUUID(),serviceTypeId:'fixture',serviceDate:'2026-10-24',metadataPatch:{title:'native fixture'},
    sections:[{id:section,patch:{title:'찬양'}}],elements:[{id:element,sectionId:section,patch:{element_type:'praise',praise_record_id:'knh-361',body:'saved body',config:{audioTiming:{starts:[0,4]},formHint:'V1-Coda'}}}],
@@ -69,7 +98,16 @@ try {
   const req={protocolVersion:1,singleSongProtocol:1,serviceId:sid,requestId:randomUUID(),expectedRevision:before.revision,metadataPatch:{title:'saved'},elementPatches:[{id:element,patch:{sort_order:2}}],document:create.document};
   const old={...req};delete old.singleSongProtocol;
   await assert.rejects(scalar('select save_worship_service_v1($1)',[old]),/SINGLE_SONG_CLIENT_REQUIRED/);
-  await scalar('select save_worship_service_v1($1)',[req]);const after=await read();
+  await assert.rejects(scalar('select save_worship_service_v1($1)',[
+    {...req,document:{...req.document,sourceText:'prefix kid-361 suffix'}},
+  ]),/PRAISE_ID_CHANGED_RELOAD_REQUIRED/);
+  assert.deepEqual(await read(),before);
+  const saved=await scalar('select save_worship_service_v1($1)',[req]);
+  const after=await read();
+  const replay=await scalar('select save_worship_service_v1($1)',[req]);
+  assert.equal(replay.replayed,true);
+  assert.equal(replay.committedRevision,saved.committedRevision);
+  assert.deepEqual(await read(),after);
   assert.deepEqual(after.elements[0].config,before.elements[0].config);assert.equal(after.elements[0].body,'saved body');assert.equal(after.elements[0].sort_order,2);
   await assert.rejects(db.query('delete from mindex_single_song.records where id=$1',['knh-361']),/foreign key/);
   const bad={...req,requestId:randomUUID(),expectedRevision:after.revision,metadataPatch:{title:'must rollback'},elementPatches:[{id:element,patch:{praise_record_id:'knh-999'}}]};
