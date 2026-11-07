@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261107-monthly-search-dedup",
+  "version": "20261107-youth-bulletin",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "9cb009896c8a3cd9536fe2cd7e6bf99a6374db355fd64abefb7123632475ca68",
-  "runtime_sha256": "c20dab9ceab2cb675bd6d115024d295d0208561c374dc9316bb07136b17f4e7e",
-  "source_bytes": 1354832,
-  "runtime_bytes": 967140,
-  "source_gzip": 310491,
-  "runtime_gzip": 243504
+  "source_sha256": "01bbe6f56d5543f012de018240de46c9b6f2000c236593e4215ca31bc4652144",
+  "runtime_sha256": "90694232703725a16167ef2e71d29466615a60e77e1a93d13f37b6a8a7fea77f",
+  "source_bytes": 1354848,
+  "runtime_bytes": 967156,
+  "source_gzip": 310490,
+  "runtime_gzip": 243496
 }

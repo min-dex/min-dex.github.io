@@ -18,10 +18,11 @@ try:
             page.evaluate('''() => {
                 state.config.url='saved-bulletin-fixture';state.module='bulletin';state.search='';state.selectedServiceId='new';
                 state.connectionError=null;state.serviceError='';
-                state.serviceTypes=[{id:'young-adult',name:'청년부'},{id:'children',name:'어린이부'}];
+                state.serviceTypes=[{id:'young-adult',name:'청년부'},{id:'children',name:'어린이부'},{id:'youth',name:'청소년부'}];
                 state.services=[{id:'old',date:'2026-09-27',type_id:'young-adult'},
                     {id:'new',date:'2026-11-01',type_id:'children'},
-                    {id:'unsaved',date:'2026-11-08',type_id:'children'}];
+                    {id:'unsaved',date:'2026-11-08',type_id:'children'},
+                    {id:'youth',date:'2026-11-08',type_id:'youth'}];
                 window.worshipBefore=JSON.stringify(state.services);
                 window.savedIds=[];window.readFailure=false;window.saveFailure=false;window.indexReads=0;
                 state.client={from(table){
@@ -39,7 +40,18 @@ try:
                 window.draftNode=document.getElementById('preserved-draft');
                 renderBulletinList();
             }''')
-            assert page.locator('[data-bulletin-open]').count() == 3
+            assert page.locator('[data-bulletin-open]').count() == 4
+            assert '청소년부 주보' in page.locator('[data-bulletin-open=youth]').inner_text()
+            page.evaluate("""() => {
+                const B=MindexBulletin;
+                const source=B.resolveSource({service:{id:'youth',service_date:'2026-11-08',service_type_id:'youth'},
+                    calendar:[{date:'2026-11-08',youth_prayer:'청소년 담당',young_adult_prayer:'청년 담당'}]});
+                const doc={source,fields:{},settings:{design:'simple',theme:'auto'},frames:B.defaultFrames('simple')};
+                const {pages}=B.renderPages(doc,'print');
+                const text=pages.map(page=>page.textContent).join(' ');
+                if(!text.includes('청소년부 소식')||/RIA|청년부/.test(text))throw Error('Wrong department in bulletin');
+                if(source.prayers.find(row=>row.date===source.date).person!=='청소년 담당')throw Error('Wrong prayer roster');
+            }""")
             assert page.evaluate('indexReads') == 0, 'visibility must not depend on saved index'
             page.evaluate("async()=>{savedIds=['old'];await savedBulletinList.load({force:true})}")
             assert page.locator('[data-bulletin-open=old]').count() == 1
@@ -65,7 +77,7 @@ try:
             page.locator('[data-bulletin-open=old]').wait_for()
             # Saved-index failure cannot hide worship-derived bulletins.
             page.evaluate("async()=>{readFailure=true;await savedBulletinList.load({force:true});renderBulletinList()}")
-            assert page.locator('[data-bulletin-open]').count() == 3
+            assert page.locator('[data-bulletin-open]').count() == 4
             assert not page.get_by_text('주보 목록을 불러오지 못했습니다', exact=True).is_visible()
             # The search still filters all supported worship dates, including historical dates.
             page.evaluate("()=>{state.search='2026-09';renderBulletinList()}")

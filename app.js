@@ -14475,7 +14475,7 @@ function presenterViewServiceId() {
 
 function bulletinPageTabTitle(serviceId) {
   const service = state.services.find(s => s.id === serviceId);
-  return service ? `${worshipAppServiceTypeId(service.type_id)==="children"?"어린이부":"청년부"} 주보` : "주보";
+  return service ? `${window.MindexBulletin.departmentName(worshipAppServiceTypeId(service.type_id))} 주보` : "주보";
 }
 
 function currentPageTabTitle() {
@@ -15010,7 +15010,7 @@ async function handleNavigationRailClick(button) {
 }
 
 function serviceSupportsBulletin(service = null) {
-  return Boolean(service?.id && !service._expected && ["young-adult","children"].includes(worshipAppServiceTypeId(service.type_id || service.service_type_id))
+  return Boolean(service?.id && !service._expected && window.MindexBulletin.supportsDepartment(worshipAppServiceTypeId(service.type_id || service.service_type_id))
     && !serviceIsNoGathering(service));
 }
 
@@ -15067,7 +15067,7 @@ async function loadServiceBulletinSource(serviceId, settings = {}) {
   const aggregate = await atomic.read(serviceId, {adopt: false});
   if (!aggregate?.service || !Array.isArray(aggregate.sections) || !Array.isArray(aggregate.elements)) throw new Error("저장된 예배 자료를 확인하지 못했습니다.");
   const normalized = normalizeWorshipService(aggregate.service);
-  if (!serviceSupportsBulletin(normalized)) throw new Error("청년부 또는 어린이부 예배를 선택해 주세요.");
+  if (!serviceSupportsBulletin(normalized)) throw new Error("주보를 지원하는 부서 예배를 선택해 주세요.");
   const months = [normalized.date.slice(0, 7), settings.eventsMonth, settings.rosterMonth]
     .filter(v => /^\d{4}-(0[1-9]|1[0-2])$/.test(v || "")).sort();
   const monthStart = `${months[0]}-01`;
@@ -15077,7 +15077,7 @@ async function loadServiceBulletinSource(serviceId, settings = {}) {
   const [songs, scriptures, calendar, bulletinServices, history] = await Promise.all([
     window.MindexBulletin.readLinkedSongs(state.client, aggregate.elements),
     scriptureIds.length ? read(state.client.from("mindex_scriptures").select("id,reference").in("id", scriptureIds)) : [],
-    read(state.client.from("mindex_sunday_calendar").select("date,liturgical,note,church_schedule,young_adult_prayer,children_prayer").gte("date", monthStart).lte("date", rangeEnd).order("date")),
+    read(state.client.from("mindex_sunday_calendar").select("date,liturgical,note,church_schedule,young_adult_prayer,children_prayer,youth_prayer").gte("date", monthStart).lte("date", rangeEnd).order("date")),
     read(state.client.from("mindex_worship_services").select("id,service_type_id,service_date,title,service_alias,source_ref").gte("service_date", monthStart).lte("service_date", rangeEnd).order("service_date")),
     loadBulletinReusableContent(aggregate.service),
   ]);
