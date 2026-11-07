@@ -4889,7 +4889,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   display: block;
   width: 16px;
   height: 16px;
-  background: currentColor;
+  background: linear-gradient(45deg, #0068aa, #a27fc9 50%, #ff8bc2);
   -webkit-mask: url("./assets/mindex-cross.svg?v=20261004a") center / contain no-repeat;
   mask: url("./assets/mindex-cross.svg?v=20261004a") center / contain no-repeat;
 }

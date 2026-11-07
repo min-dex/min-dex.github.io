@@ -1,3 +1,17 @@
+## 2026-11-08 church 1.0.2 candidate — not published yet
+
+Owned source: `output/desktop-audit-workspace`, `codex/native-dawn-startup`.
+User authorizes approved Dawn branding, native first-frame output reveal,
+retained worship outline during startup hydration, and fullscreen support text
+unification (60px / 700). Internal updater distinguishes public renderer parity
+from latest installer availability; never reloads or installs during worship.
+Windows icon metadata editing remains enabled while signing remains disabled.
+Actual published 1.0.0/1.0.1 -> candidate preservation is added to native CI using
+hash-verified installers and marker-owned synthetic profiles only. No real
+broadcast, production DB operation, or physical equipment certification.
+Local scoped node, Chromium/WebKit rendering/fitting/Keynote/bootstrap checks pass;
+final combined Cloud/native gates and public readback remain required.
+
 ## 2026-11-06 Church internal delivery — supersedes signing choice below
 
 The owner chooses unsigned church-only 1.0.0 delivery; equipment acceptance is

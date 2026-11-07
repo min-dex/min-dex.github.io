@@ -41,7 +41,7 @@
 .remote-panel { width: min(440px, calc(100% - 30px)); }
 .remote-panel header { flex-wrap: nowrap; margin-bottom: 20px; }
 .remote-panel h2 { font-size: var(--ui-card-title-size); font-weight: var(--ui-title-weight); }
-.remote-brand-mark { width: 16px; height: 20px; flex: 0 0 16px; background: var(--accent); -webkit-mask: url("./assets/mindex-cross.svg") center / contain no-repeat; mask: url("./assets/mindex-cross.svg") center / contain no-repeat; }
+.remote-brand-mark { width: 16px; height: 20px; flex: 0 0 16px; background: linear-gradient(45deg, #0068aa, #a27fc9 50%, #ff8bc2); -webkit-mask: url("./assets/mindex-cross.svg") center / contain no-repeat; mask: url("./assets/mindex-cross.svg") center / contain no-repeat; }
 .remote-connection { padding-bottom: 20px; }
 .remote-panel [data-remote-code] { display: block; margin: 15px 0 10px; padding: 15px; border-radius: var(--r); background: var(--panel); color: var(--ink); text-align: center; font-size: 30px; font-variant-numeric: tabular-nums; letter-spacing: .15em; }
 .remote-panel [data-remote-help] { color: var(--ink-3); font-size: var(--ui-meta-size); }

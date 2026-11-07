@@ -1,6 +1,6 @@
 {
   "name": "mindex",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Mindex desktop shell",
   "author": "Mindex",
@@ -145,12 +145,14 @@
         "zip"
       ],
       "hardenedRuntime": true,
-      "notarize": true
+      "notarize": true,
+      "icon": "build/dawn.icns"
     },
     "win": {
       "target": [
         "nsis"
-      ]
+      ],
+      "icon": "build/dawn.ico"
     },
     "nsis": {
       "oneClick": false,

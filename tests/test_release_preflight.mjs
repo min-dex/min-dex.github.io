@@ -24,7 +24,7 @@ test('test installers are isolated, unsigned and cannot join the update channel'
  assert.notEqual(config.extraMetadata.name,pkg.name);
  assert.equal(config.publish,null);
  assert.equal(config.mac.identity,null);assert.equal(config.mac.notarize,false);
- assert.equal(config.win.signAndEditExecutable,false);
+ assert.equal(config.win.signExecutable,false);assert.notEqual(config.win.signAndEditExecutable,false);
  assert.match(config.directories.output,/test/);
 });
 

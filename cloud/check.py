@@ -132,6 +132,7 @@ SMOKES = (
     "smoke_form_default_placeholder.py",
     "smoke_lyrics_form.py",
     "smoke_presenter_common_fit.py",
+    "smoke_presenter_outline_refresh.py",
     "smoke_media_viewport_fit.py",
     "smoke_ready_stage_ratio.py",
     "smoke_media_source_identity.py",

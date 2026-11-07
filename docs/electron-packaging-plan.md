@@ -334,10 +334,9 @@ tag/Release, then publish the matching formal web artifact. Later source changes
 cannot continue claiming that formal version; return to development or review a
 new version. None of these promotion steps have been performed by this work.
 
-First formal product target is **1.0.0**, as agreed on 2026-10-30. Dawn remains
-a preparation/preview direction; this does not activate it, bump development
-package 0.1.1, or authorize signing, installation or a public release. Existing
-real-device and upgrade release conditions still apply.
+Historical 2026-10-30 target was **1.0.0** with Dawn preview-only. The user
+authorized the approved Dawn theme on 2026-11-08 for the next church-internal
+update. This changes branding, not the unsigned delivery or real-device checks.
 
 Unsigned native smoke may opt into `MINDEX_ISOLATED_TEST=1`. Only a test-marked
 package accepts it; before any renderer starts, a fresh temporary profile is
@@ -372,3 +371,31 @@ retired generated waiting loops remain at their existing public URLs for old
 links and are excluded from the installer and the shared renderer fingerprint.
 The installer audit checks the retired files are absent and verifies the
 remaining runtime files against committed bytes.
+
+
+## Dawn and output-start continuity · 2026-11-08 candidate
+
+The approved Dawn blue–lavender–pink cross replaces the flat brand mark on the
+boot screen, main/Remote headers, web icons and native Mac/Windows icons. Existing
+light/dark colors and button geometry remain the established app rules; preview
+release dialogs and obsolete preview claims are not copied into production.
+
+Native output stays hidden with a black fallback until the renderer commits its
+first prepared slide and acknowledges after two animation frames. Only the output
+main frame may acknowledge; other windows/subframes are rejected. Ordinary document
+ready-to-show does not reveal output. A 30-second startup failure closes only that
+unready output and reports failure. A ready worship editor and outline remain
+mounted while output freshness validation runs; initial loading remains guarded.
+
+Internal update checks compare the public rendererTree to the installed receipt.
+Unknown/offline web status cannot be called synchronized, and a different renderer
+is reported separately from the latest available installer. No remote renderer
+replacement, forced reload, background installation or editing/output interruption.
+Publication still requires exact-source Cloud, native platform and public receipts.
+
+Windows internal/TEST builds disable signing only (`signExecutable:false`),
+retaining executable icon/version resource editing. Platform CI additionally
+installs the hash-verified published 1.0.0 and 1.0.1 installers into disposable
+marker-owned directories, seeds synthetic records in isolated profiles, replaces
+them with the candidate, and verifies upgrade/restart preservation. No real
+profile or operational data is read. Compact receipts survive successful cleanup.

@@ -4,11 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MINDEX</title>
-    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=20261013iconset" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=20261013iconset" />
-    <link rel="shortcut icon" href="./favicon.ico?v=20261013iconset" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=20261013iconset" />
-    <link rel="manifest" href="./manifest.webmanifest?v=20261013iconset" />
+    <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg?v=dawn1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png?v=dawn1" />
+    <link rel="shortcut icon" href="./favicon.ico?v=dawn1" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=dawn1" />
+    <link rel="manifest" href="./manifest.webmanifest?v=dawn1" />
     <meta name="theme-color" content="#191b17" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="MINDEX" />
@@ -133,7 +133,8 @@
   </head>
   <body class="ui-booting">
     <div id="bootStatus" class="mindex-boot" role="status" aria-label="MINDEX 시작 중">
-      <svg class="mindex-boot-cross" viewBox="128 104 256 304" fill="currentColor" aria-hidden="true">
+      <svg class="mindex-boot-cross" viewBox="128 104 256 304" fill="url(#mindex-dawn)" aria-hidden="true">
+        <defs><linearGradient id="mindex-dawn" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#0068aa"/><stop offset=".5" stop-color="#a27fc9"/><stop offset="1" stop-color="#ff8bc2"/></linearGradient></defs>
         <path d="M224 104h64v80h96v64h-96v160h-64V248h-96v-64h96z" />
       </svg>
       <span class="mindex-boot-wordmark" aria-hidden="true">MINDEX</span>
@@ -256,9 +257,9 @@
     </script>
     <script>
       (() => {
-        const fallbackVersion = "20261107-presenter-background-reload";
+        const fallbackVersion = "20261108-dawn-output-continuity";
         globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY = true;
-        const compiledAppVersion = "20261107-presenter-background-reload";
+        const compiledAppVersion = "20261108-dawn-output-continuity";
         const modules = [
           "mindex.presenter-lifetime.js", "mindex.icons.js", "mindex.hymn-structure.js", "vendor/supabase-js.min.js",
           "mindex.catalog-cache.js", "mindex.single-song.js", "mindex.praise-selection.js", "mindex.praise-storage.js", "mindex.constants.js", "mindex.inline-text.js", "mindex.design-tokens.js", "mindex.worship-model.js",

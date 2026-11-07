@@ -21,7 +21,7 @@ test('coalesces lookup, fails closed, retries, rechecks live output and never au
 test('internal build keeps real identity while signed defaults stay protected',()=>{
  const pkg=require('../package.json'),config=require('../electron-builder.internal.cjs');
  assert.equal(config.appId,pkg.build.appId);assert.equal(config.productName,'Mindex');assert.equal(config.extraMetadata.mindexInternalBuild,true);
- assert.equal(config.publish,null);assert.equal(config.mac.notarize,false);assert.equal(pkg.build.mac.notarize,true);
+ assert.equal(config.publish,null);assert.equal(config.win.signExecutable,false);assert.notEqual(config.win.signAndEditExecutable,false);assert.equal(config.mac.notarize,false);assert.equal(pkg.build.mac.notarize,true);
 });
 
 test('internal acceptance cannot send a real broadcast and retains final platform gates',()=>{
@@ -41,4 +41,18 @@ test('download rechecks output and lookup changes at dispatch time',async()=>{
  live=false;const second=c.download();const lookup=c.check();
  assert.equal((await second).reason,'update-not-ready');await lookup;assert.equal(opens,0);
  await Promise.all([c.download(),c.download()]);assert.equal(opens,1);
+});
+
+test('web parity compares renderer identity and never hides installer updates when offline',async()=>{
+ for(const mode of ['matched','different','offline']){
+  const hash='a'.repeat(64);
+  const c=createInternalUpdateController({version:'1.0.1',platform:'darwin',arch:'arm64',rendererTree:hash,enabled:()=>true,presenterOpen:()=>false,notify:()=>{},openExternal:async()=>{},fetchImpl:async url=>{
+   if(url.includes('api.github.com'))return {ok:true,text:async()=>JSON.stringify([release('1.0.2')])};
+   assert.equal(url,'https://min-dex.github.io/mindex-build.json');
+   if(mode==='offline')throw Error('offline');
+   return {ok:true,text:async()=>JSON.stringify({rendererTree:mode==='matched'?hash:'b'.repeat(64)})};
+  }});
+  assert((await c.check()).ok);assert.equal(c.snapshot().status,'available');
+  assert.equal(c.snapshot().webSync,mode==='offline'?'unknown':mode);
+ }
 });

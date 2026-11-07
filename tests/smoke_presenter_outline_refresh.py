@@ -1,5 +1,7 @@
 import argparse
-from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+import os
+os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
+from smoke_app import launch_chromium, start_local_app_server, sync_playwright, prepare_server_state_fixture
 
 
 def main():
@@ -12,15 +14,17 @@ def main():
         with sync_playwright() as p:
             browser = launch_chromium(p) if args.engine == 'chromium' else p.webkit.launch()
             page = browser.new_page(viewport={'width': 1440, 'height': 900})
+            page.add_init_script("window.MINDEX_SUPABASE={url:'',anonKey:''}")
             page.route('**/*supabase*/**', lambda route: route.abort())
             page.goto(url, wait_until='domcontentloaded')
             page.wait_for_function("typeof renderPresenterControlState === 'function' && !document.body.classList.contains('ui-booting')")
+            prepare_server_state_fixture(page)
             result = page.evaluate('''() => {
               const service={id:'outline-fixture',type_id:'young-adult',date:'2026-09-06',title:'테스트 예배'};
               const item={id:'praise-fixture',service_id:service.id,label:'찬양 2',raw_title:'250 구주의 십자가 보혈로',
                 song_id:'song-fixture',version_id:'old',sort_order:1};
               state.client=state.client||{};state.auth.session={user:{id:'offline-fixture'}};state.connectionError='';
-      state.module='presenter'; state.selectedServiceId=service.id;
+      state.module='presenter'; document.body.dataset.module='presenter'; state.selectedServiceId=service.id;
               state.services=[service]; state.serviceItems={[service.id]:[item]};
               state.loadedWorshipServiceIds.add(service.id);
               state.songs=[]; clearSearchCaches();
@@ -33,7 +37,7 @@ def main():
               ]}]; clearSearchCaches();
               refreshPresenterForService(service.id);
               const after=refs.songList.textContent;
-              const row=refs.songList.querySelector('[data-service-outline-item-id="praise-fixture"]');
+              const row=refs.songList.querySelector('.service-outline-row--child[data-service-outline-item-id="praise-fixture"]');
               const slideIndex=Number(row?.dataset.serviceOutlineSlide);
               const slides=presenterSlidesForService(service.id);
               refs.songList.innerHTML=staleMarkup;
@@ -42,7 +46,7 @@ def main():
               const fullRender=refs.songList.textContent;
               const scrolls=[];
               refs.detailPane.scrollTo=options=>scrolls.push(options);
-              handleServiceOutlineSlideClick(refs.songList.querySelector('[data-service-outline-item-id="praise-fixture"]'));
+              handleServiceOutlineSlideClick(refs.songList.querySelector('.service-outline-row--child[data-service-outline-item-id="praise-fixture"]'));
               return {before,after,fullRender,slideIndex,slide:slides[slideIndex]?.title,label:row?.getAttribute('aria-label'),
                 immediate:scrolls.length>0 && scrolls.every(options=>options.behavior==='auto')};
             }''')
@@ -80,12 +84,16 @@ def main():
                 assert row['text'] == text, details
                 assert text in row['hint'] and text in row['aria'], details
             print('PASS outline titles include assignees without duplicate names or source mutations')
+            page.bring_to_front()
+            page.wait_for_function("document.hasFocus()")
             page.evaluate("""() => {
               state.serviceTypes=[{id:'young-adult',name:'테스트'}];state.serviceError='';
               renderServiceList();
               const current=refs.songList.querySelector('.service-sidebar-section--current');
               if(!current?._presenterOutlineMarkup)throw Error('initial outline signature missing');
-              const button=current.querySelector('button:not([disabled])');button?.focus();
+              const button=[...current.querySelectorAll('button:not([disabled])')].find(node=>node.getClientRects().length);
+              if(!button)throw Error('visible outline button missing');button.focus();
+              if(document.activeElement!==button)throw Error('outline fixture cannot receive focus');
               Object.defineProperty(refs.songList,'scrollTop',{configurable:true,get(){throw Error('unchanged outline forced layout')}});
               try { patchPresenterSidebarOutline(state.services[0],presenterSlidesForService(state.services[0].id)); }
               finally {delete refs.songList.scrollTop;}
@@ -93,6 +101,21 @@ def main():
               if(button&&document.activeElement!==button)throw Error('focus lost');
             }""")
             print('PASS initial outline reuse avoids scroll/layout reads and retains focus')
+            page.evaluate("""() => {
+              const sid=state.services[0].id;
+              const controls=document.getElementById('servicePresenterControls');
+              if(!controls || controls.dataset.serviceId!==sid)throw Error('mounted controls missing');
+              const before=refs.songList.textContent;
+              presenterServiceHydrationPromises.set(sid,new Promise(()=>{}));
+              try {
+                if(serviceViewIsLoading(sid))throw Error('ready worship became loading during output preparation');
+                if(renderServiceViewLoadingIfNeeded(state.services[0]))throw Error('mounted controls replaced');
+                if(document.getElementById('servicePresenterControls')!==controls)throw Error('controls lost');
+                if(refs.songList.textContent!==before)throw Error('worship order lost');
+                if(!serviceViewIsLoading('never-loaded'))throw Error('initial loading protection removed');
+              } finally {presenterServiceHydrationPromises.delete(sid);}
+            }""")
+            print('PASS output preparation retains mounted worship order and controls; initial loading remains guarded')
             browser.close()
     finally:
         if server:

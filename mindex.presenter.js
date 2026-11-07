@@ -1669,6 +1669,10 @@ function restorePresenterControllerSession() {
 }
 
 function bindPresenterChannel() {
+  window.mindexElectron?.onPresenterStartFailed?.(() => {
+    stopPresenterOutput(state.presenter.serviceId);
+    showToast('첫 송출 화면을 준비하지 못했습니다. 미디어와 연결을 확인한 뒤 다시 시작해 주세요.', 'error');
+  });
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin || !event.source
       || !event.data?.type?.startsWith("presenter-")) return;
@@ -2902,6 +2906,16 @@ function populatePresenterOutputLayer(layer, html) {
   }
 }
 
+let nativePresenterFrameReady = false;
+function notifyNativePresenterFrameReady() {
+  if (nativePresenterFrameReady || !window.mindexElectron?.presenterFrameReady) return;
+  nativePresenterFrameReady = true;
+  // Two animation frames let the committed slide reach the compositor first.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    void window.mindexElectron.presenterFrameReady().catch(() => { nativePresenterFrameReady = false; });
+  }));
+}
+
 function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState = {}, token = presenterOutputRenderState.token, onActivated = null) {
   if (!activeLayer || !nextLayer) return;
   // Blending video pixels into the key color creates unkeyed intermediate colors.
@@ -2968,6 +2982,7 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
     activeLayer._pptxSession?.pause();
     startCrossMorph?.();
     onActivated?.();
+    notifyNativePresenterFrameReady();
     const clearPreviousLayer = () => {
       if (token !== presenterOutputRenderState.token) return;
       if (activeLayer.classList.contains("is-active")) return;

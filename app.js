@@ -869,7 +869,9 @@ function bindElectronDesktopEvents() {
       if (!result?.ok) { showFailure(result); return; }
       const update = result.state;
       if (update.presenterOpen) showToast("송출 종료 후 업데이트를 진행할 수 있습니다.");
-      else if (update.status === "current") showToast("최신 버전입니다.");
+      else if (update.status === "current") showToast(update.webSync === "different"
+        ? "설치 앱은 최신입니다. 웹과 다른 변경 사항이 있어 다음 업데이트에 반영됩니다."
+        : update.webSync === "matched" ? "웹과 설치 앱 모두 최신입니다." : "설치 앱은 최신입니다. 웹 버전은 확인하지 못했습니다.");
       else if (update.status === "downloading") showToast(`업데이트 다운로드 중 · ${Math.round(update.percent)}%`);
       else void handleState(update);
     } catch { showFailure(); }
@@ -5980,6 +5982,7 @@ function calendarCellClassForField(field) {
 function serviceViewHasProtectedSurface(serviceId) {
   const liveRoot = document.getElementById("servicePresenterControls");
   return sundayEditSyncHasLocalDraft(serviceId)
+    || (state.loadedWorshipServiceIds.has(serviceId) && liveRoot?.dataset.serviceId === serviceId)
     || (presenterControllerIsLive(serviceId) && liveRoot?.dataset.serviceId === serviceId);
 }
 

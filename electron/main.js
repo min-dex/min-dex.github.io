@@ -163,21 +163,26 @@ function createPresenterWindow({ url, targetRect, alwaysOnTop = false } = {}) {
     frame: false,
     show: false,
     alwaysOnTop: Boolean(alwaysOnTop),
-    backgroundColor: "#00ff00",
+    backgroundColor: "#000000",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
+      backgroundThrottling: false,
     },
   });
 
-  presenterWindow.once("ready-to-show", () => {
-    applyPresenterAlwaysOnTop(alwaysOnTop);
-    presenterWindow.setFullScreen(true);
-    presenterWindow.show();
-    presenterWindow.focus();
-  });
+  const output = presenterWindow;
+  // Electron's ready-to-show precedes the first worship payload/media decode.
+  // Keep the window hidden until that frame has actually been committed.
+  output._mindexFirstFrame = false;
+  const startupTimeout = setTimeout(() => {
+    if (presenterWindow !== output || output.isDestroyed() || output._mindexFirstFrame) return;
+    output.close();
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('mindex:presenter-start-failed');
+  }, 30000);
+  output.once('closed', () => clearTimeout(startupTimeout));
   presenterWindow.on("closed", () => {
     presenterWindow = null;
     updateController?.publish();
@@ -196,7 +201,7 @@ function configureAutoUpdater() {
     const build = require('../mindex-build.json');
     if (build.channel === 'internal') {
       updateController = require('./internal-updater').createInternalUpdateController({
-        version: app.getVersion(), platform: process.platform, arch: process.arch,
+        version: app.getVersion(), platform: process.platform, arch: process.arch, rendererTree: build.rendererTree,
         enabled: updatesEnabled,
         presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()) || require('./youtube-window').isActive(),
         notify: state => { if(mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('mindex:update-state',state); },
@@ -254,6 +259,19 @@ ipcMain.handle("mindex:open-presenter", (event, payload = {}) => {
   if (testIsolation) return { ok: false, reason: "isolated-test" };
   createPresenterWindow(payload);
   return { ok: true };
+});
+
+ipcMain.handle('mindex:presenter-frame-ready', event => {
+  const output = presenterWindow;
+  if (!output || output.isDestroyed() || event.sender !== output.webContents
+    || event.senderFrame !== output.webContents.mainFrame) return {ok:false,reason:'untrusted-window'};
+  if (!output._mindexFirstFrame) {
+    output._mindexFirstFrame = true;
+    output.setFullScreen(true);
+    output.show();
+    output.focus();
+  }
+  return {ok:true};
 });
 
 ipcMain.handle("mindex:close-presenter", event => {

@@ -37,4 +37,14 @@ class Publication(unittest.TestCase):
   for values in [{'gate':'failure'},{'current':'b'*40},{'missing':True}]:
    calls,error=self.run_case(**values);self.assertIsNotNone(error)
    self.assertFalse(any(x[:2]==('release','create') for x in calls))
+class PublishedUpgradeIdentity(unittest.TestCase):
+ def test_source_target_size_and_hash_are_required_before_install(self):
+  from verify_published_upgrade import SOURCES, asset_record
+  row={'file':'Mindex-1.0.0-win-x64.exe','bytes':100,'sha256':'a'*64}
+  receipt={'version':'1.0.0','channel':'internal','sourceCommit':SOURCES['1.0.0'],'assets':[row]}
+  self.assertEqual(asset_record(receipt,'1.0.0','win-x64'),row)
+  for change in [{'sourceCommit':'b'*40},{'channel':'release'},{'assets':[row,row]},{'assets':[{**row,'sha256':'bad'}]},{'assets':[{**row,'bytes':-1}]}]:
+   with self.assertRaises(ValueError):asset_record({**receipt,**change},'1.0.0','win-x64')
+  with self.assertRaises(ValueError):asset_record(receipt,'1.0.0','mac-arm64')
+
 if __name__=='__main__':unittest.main()

@@ -8,6 +8,7 @@ def run(browser, url):
     page.wait_for_function("typeof state !== \"undefined\" && typeof compactSearchValue === \"function\" && !document.body.classList.contains('ui-booting') && (typeof preparePresenterNavigation === 'function')")
     print(page.evaluate('''async () => {
       const assert=(v,m)=>{if(!v)throw Error(m)};
+      let nativeFrames=0;window.mindexElectron={presenterFrameReady:async()=>{nativeFrames++;return {ok:true}}};
       const service={id:'latency-test',type_id:'sunday-afternoon',date:'2026-09-06'};
       state.services=[service];
       state.serviceItems[service.id]=[{id:'song',label:'찬양 1',raw_title:'곡',memo:''}];
@@ -70,6 +71,8 @@ def run(browser, url):
         assert(root.querySelector('.is-active').textContent.includes('Latest'),'stale image overwrote text');
         assert(!root.querySelector('.is-entering,.is-exiting'),'transition was reintroduced');
       } finally {nextAnimationFrame=originalFrame;}
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      assert(nativeFrames===1,'native first-frame acknowledgement missing or duplicated');
       return {result:'PASS projection reuse, edit/service invalidation, ready image without RAF waits, stale commit protection',frameWaits};
     }'''))
     page.close()

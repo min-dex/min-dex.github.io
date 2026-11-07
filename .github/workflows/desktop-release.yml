@@ -26,6 +26,7 @@ on:
       - tests/verify_candidate_package.cjs
       - tests/test_desktop_youtube_local.cjs
       - tests/test_desktop_upgrade.cjs
+      - tests/verify_published_upgrade.py
       - tests/install_test_fixture.py
       - tests/test_electron_updater.cjs
       - tests/test_minimatch_compat.cjs
@@ -166,6 +167,15 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" "$version"
+          python tests/verify_published_upgrade.py "$installer" "$target" "$GITHUB_SHA" "$version"
+      - name: Retain published-version upgrade receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-upgrade-${{ matrix.platform }}
+          path: ${{ runner.temp }}/published-upgrade-*/*proof.json
+          if-no-files-found: warn
+          retention-days: 14
       - name: Retain verified church installers
         if: ${{ !inputs.publish_release }}
         uses: actions/upload-artifact@v4
@@ -224,7 +234,7 @@ jobs:
     if: ${{ !inputs.publish_release }}
     needs: build
     runs-on: macos-15-intel
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -281,6 +291,16 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" "$version"
+          python tests/verify_published_upgrade.py "$installer" mac-x64 "$GITHUB_SHA" "$version"
+
+      - name: Retain Intel published-version upgrade receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-upgrade-intel
+          path: ${{ runner.temp }}/published-upgrade-*/*proof.json
+          if-no-files-found: warn
+          retention-days: 14
 
   draft-release:
     if: ${{ inputs.publish_release }}

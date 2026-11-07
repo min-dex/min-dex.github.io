@@ -163,6 +163,7 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       const first = !root._keynoteHtmlMetadata;
       root._keynoteHtmlMetadata = { ...root._keynoteHtmlMetadata, key, run: session.token, version: ++session.version, ...value };
       if (first || value.id || value.error !== undefined) root._onKeynoteAcknowledgement?.();
+      if (session.initialized || value.error) notifyNativePresenterFrameReady();
     };
     const send = request => {
       if (!active()) return;

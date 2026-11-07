@@ -11,5 +11,5 @@ module.exports = {
     version: `${pkg.version}-test`, mindexTestBuild: true,
   },
   mac: { ...pkg.build.mac, identity: null, notarize: false },
-  win: { ...pkg.build.win, signAndEditExecutable: false },
+  win: { ...pkg.build.win, signExecutable: false },
 };

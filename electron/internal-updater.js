@@ -17,7 +17,7 @@ function chooseRelease(rows, current, platform, arch) {
  }
  return null;
 }
-function createInternalUpdateController({version,platform,arch,enabled,presenterOpen,notify,fetchImpl=fetch,openExternal}) {
+function createInternalUpdateController({version,platform,arch,rendererTree,enabled,presenterOpen,notify,fetchImpl=fetch,openExternal}) {
  let state={status:'idle',version:'',manualInstall:true},candidate=null,checking=null,opening=null;
  const snapshot=()=>({...state,enabled:enabled(),presenterOpen:presenterOpen()});
  const publish=()=>notify(snapshot());
@@ -34,7 +34,17 @@ function createInternalUpdateController({version,platform,arch,enabled,presenter
     const body=await response.text();if(body.length>2000000)throw Error('Release response too large');
     const rows=JSON.parse(body);if(!Array.isArray(rows))throw Error('Invalid release list');
     candidate=chooseRelease(rows,version,platform,arch);
-    set(candidate?'available':'current',{version:candidate?.version||''});
+    let webSync='unknown';
+    if (/^[a-f0-9]{64}$/.test(rendererTree || '')) {
+     try {
+      const web=await fetchImpl('https://min-dex.github.io/mindex-build.json',{signal:AbortSignal.timeout(5000),redirect:'error',cache:'no-store'});
+      if(!web.ok)throw Error('Web receipt unavailable');
+      const text=await web.text();if(text.length>2000000)throw Error('Web receipt too large');
+      const receipt=JSON.parse(text);
+      if(/^[a-f0-9]{64}$/.test(receipt.rendererTree||''))webSync=receipt.rendererTree===rendererTree?'matched':'different';
+     }catch{/* Offline web status must not hide an available installer. */}
+    }
+    set(candidate?'available':'current',{version:candidate?.version||'',webSync});
     return {ok:true,state:snapshot()};
    }catch{return failure();}finally{checking=null;}})();return checking;
   },

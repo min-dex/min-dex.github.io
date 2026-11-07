@@ -44,9 +44,9 @@ test('main-process IPC accepts controller only and blocks install while presente
  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
  const handlers={},windows=[];let installed=0,testBuild=false,broadcastActive=false;
  class Window extends EventEmitter {
-  constructor(){super();this.webContents=new EventEmitter();this.webContents.send=()=>{};this.webContents.mainFrame={};windows.push(this);}
+  constructor(options){super();this.options=options;this.shown=0;this.fullscreen=false;this.webContents=new EventEmitter();this.webContents.send=()=>{};this.webContents.mainFrame={};windows.push(this);}
   isDestroyed(){return false;} isVisible(){return true;} isMinimized(){return false;}
-  show(){} focus(){} close(){} loadFile(){} loadURL(){} setAlwaysOnTop(){} setBounds(){}
+  show(){this.shown++;} setFullScreen(value){this.fullscreen=value;} focus(){} close(){} loadFile(){} loadURL(){} setAlwaysOnTop(){} setBounds(){}
  }
  const app=new EventEmitter();app.isPackaged=true;app.getAppPath=()=>'/fixture';app.whenReady=()=>Promise.resolve();
  const updater=new EventEmitter();updater.checkForUpdates=async()=>updater.emit('update-available',{version:'1.0.0'});
@@ -56,7 +56,7 @@ test('main-process IPC accepts controller only and blocks install while presente
   screen:{getAllDisplays:()=>[display],getPrimaryDisplay:()=>display},Menu:{getApplicationMenu:()=>null,buildFromTemplate:()=>({append(){}}),setApplicationMenu(){}},MenuItem:class {}};
  const broadcast = Object.assign(()=>{}, {isActive:()=>broadcastActive});
  const context={require:name=>name==='./youtube-window'?broadcast:name==='./test-isolation'?require('../electron/test-isolation'):name==='../mindex-build.json'?{channel:'release'}:name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
-  process:{platform:'darwin',env:{}},__dirname:path.resolve(__dirname,'../electron'),console,setTimeout:()=>0,setInterval:()=>0,clearInterval(){}};
+  process:{platform:'darwin',env:{}},__dirname:path.resolve(__dirname,'../electron'),console,setTimeout:()=>0,setInterval:()=>0,clearInterval(){},clearTimeout(){}};
  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../electron/main.js'),'utf8'),context);
  await new Promise(r=>setImmediate(r));const event={sender:windows[0].webContents,senderFrame:windows[0].webContents.mainFrame};
  for(const name of ["open-presenter","close-presenter","fullscreen-presenter","set-presenter-always-on-top","import-keynote-deck","check-for-updates"]){
@@ -65,6 +65,14 @@ test('main-process IPC accepts controller only and blocks install while presente
  assert.equal(handlers['mindex:install-update']({sender:{}}).reason,'untrusted-window');
  await handlers['mindex:check-for-updates'](event);await handlers['mindex:download-update'](event);
  handlers['mindex:open-presenter'](event,{});
+ const output=windows[1];assert.equal(output.options.backgroundColor,'#000000');assert.equal(output.shown,0);
+ output.emit('ready-to-show');assert.equal(output.shown,0,'native document readiness must not expose an unpainted frame');
+ assert.equal(handlers['mindex:presenter-frame-ready'](event).ok,false);
+ assert.equal(handlers['mindex:presenter-frame-ready']({sender:output.webContents,senderFrame:{}}).ok,false);
+ const outputEvent={sender:output.webContents,senderFrame:output.webContents.mainFrame};
+ assert.equal(handlers['mindex:presenter-frame-ready'](outputEvent).ok,true);assert.equal(output.shown,1);assert.equal(output.fullscreen,true);
+ handlers['mindex:presenter-frame-ready'](outputEvent);assert.equal(output.shown,1);
+
  assert.equal(handlers['mindex:install-update'](event).reason,'presenter-active');assert.equal(installed,0);
  handlers['mindex:close-presenter'](event);
  assert.equal(handlers['mindex:install-update'](event).reason,'presenter-active');

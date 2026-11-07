@@ -4,6 +4,12 @@ contextBridge.exposeInMainWorld("mindexElectron", {
   isDesktop: true,
   getBuildInfo: () => ipcRenderer.invoke("mindex:get-build-info"),
   openPresenterOutput: (payload) => ipcRenderer.invoke("mindex:open-presenter", payload),
+  presenterFrameReady: () => ipcRenderer.invoke('mindex:presenter-frame-ready'),
+  onPresenterStartFailed: (callback) => {
+    const handler = () => callback();
+    ipcRenderer.on('mindex:presenter-start-failed', handler);
+    return () => ipcRenderer.removeListener('mindex:presenter-start-failed', handler);
+  },
   closePresenterOutput: () => ipcRenderer.invoke("mindex:close-presenter"),
   fullscreenPresenterOutput: () => ipcRenderer.invoke("mindex:fullscreen-presenter"),
   getPresenterDisplays: () => ipcRenderer.invoke("mindex:get-presenter-displays"),

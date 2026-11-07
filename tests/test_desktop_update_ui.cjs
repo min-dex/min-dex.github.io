@@ -39,3 +39,11 @@ test('renderer reload recovers already-downloaded update without a new download'
 test('manual internal download preserves edits and never schedules an automatic install',async()=>{
  const f=fixture({status:'available',version:'1.0.1',manualInstall:true});f.dirty(true);await tick();assert.equal(f.counts().downloads,0);assert.equal(f.counts().installs,0);
 });
+
+test('manual check distinguishes matching web, pending web changes and unverified web without restarting',async()=>{
+ for(const webSync of ['matched','different','unknown']){
+  const f=fixture({status:'current',manualInstall:true,webSync});await tick();await f.bridge.manual();
+  assert.equal(f.counts().installs,0);assert.equal(f.counts().downloads,0);
+  assert(f.messages.some(m=>m.includes(webSync==='matched'?'모두 최신':webSync==='different'?'다른 변경':'확인하지 못')));
+ }
+});
