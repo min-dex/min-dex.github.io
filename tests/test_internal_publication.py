@@ -46,5 +46,21 @@ class PublishedUpgradeIdentity(unittest.TestCase):
   for change in [{'sourceCommit':'b'*40},{'channel':'release'},{'assets':[row,row]},{'assets':[{**row,'sha256':'bad'}]},{'assets':[{**row,'bytes':-1}]}]:
    with self.assertRaises(ValueError):asset_record({**receipt,**change},'1.0.0','win-x64')
   with self.assertRaises(ValueError):asset_record(receipt,'1.0.0','mac-arm64')
+ def test_failed_old_install_acceptance_stops_before_candidate_install(self):
+  import io, types, verify_published_upgrade as upgrade
+  with tempfile.TemporaryDirectory() as folder:
+   root=pathlib.Path(folder);candidate=root/'Mindex-1.0.2-win-x64.exe';candidate.write_bytes(b'candidate')
+   payload=b'published fixture';row={'file':'Mindex-1.0.0-win-x64.exe','bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}
+   receipt={'version':'1.0.0','channel':'internal','sourceCommit':upgrade.SOURCES['1.0.0'],'assets':[row]}
+   calls=[]
+   def run(args,**kwargs):
+    calls.append(args)
+    if args[1]=='tests/install_test_fixture.py':pathlib.Path(args[3]).write_text(json.dumps({'exe':'synthetic.exe'}))
+    else:raise RuntimeError('synthetic seed failure')
+   def read(url,**kwargs):return io.BytesIO(json.dumps(receipt).encode() if url.endswith('internal-build.json') else payload)
+   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder}),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.2']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
+    with self.assertRaisesRegex(RuntimeError,'synthetic seed failure'):upgrade.main()
+   self.assertEqual(len(calls),2)
+   self.assertFalse(any(str(candidate) in args for args in calls))
 
 if __name__=='__main__':unittest.main()
