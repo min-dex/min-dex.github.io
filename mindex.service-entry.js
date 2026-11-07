@@ -213,14 +213,14 @@
       return false;
     } finally { busy = false; }
   }
-  async function enter(serviceId) {
+  async function enter(serviceId, { background = false } = {}) {
     const token = ++entryToken, revision = editRevision;
     for (let attempt = 0; attempt < 100; attempt += 1) {
       if (token !== entryToken || revision !== editRevision || state.selectedServiceId !== serviceId
         || !["service", "presenter"].includes(state.module)) return false;
       const reason = blockedReason();
       if (reason && !reason.startsWith("저장 또는 불러오기")) return false;
-      if (!busy && !reason) return check(serviceId, token);
+      if (!busy && !reason) return check(serviceId, token, { background });
       await new Promise(resolve => setTimeout(resolve, 100));
     }
     return false;

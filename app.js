@@ -2574,7 +2574,7 @@ async function handleBrowserHistoryPop(event) {
   await applyBrowserHistorySnapshot(snapshot);
 }
 
-async function applyBrowserHistorySnapshot(snapshot) {
+async function applyBrowserHistorySnapshot(snapshot, { pageTab = false } = {}) {
   window.MINDEX_SERVICE_ENTRY?.invalidate();
   if (snapshot.module === "presenter" && snapshot.presenterBulletinServiceId) snapshot={...snapshot,module:"bulletin"};
   state.applyingBrowserHistory = true;
@@ -2640,9 +2640,13 @@ async function applyBrowserHistorySnapshot(snapshot) {
       focusSelectedBibleVerseAfterRender();
     }
     if (isServiceDataModule() && state.module !== "bulletin" && state.selectedServiceId && !state.presenterBulletinServiceId) {
-      markWorshipServiceExplicitlyRequested(state.selectedServiceId);
-      await loadServiceItems(state.selectedServiceId);
-      await window.MINDEX_SERVICE_ENTRY?.enter(state.selectedServiceId);
+      const serviceId = state.selectedServiceId;
+      markWorshipServiceExplicitlyRequested(serviceId);
+      await loadServiceItems(serviceId);
+      if (state.selectedServiceId === serviceId) {
+        if (pageTab) void window.MINDEX_SERVICE_ENTRY?.enter(serviceId, { background: true });
+        else await window.MINDEX_SERVICE_ENTRY?.enter(serviceId);
+      }
     }
     if (snapshot.setlistArchive && isSetlistArchiveView()) {
       // Rail width transitions reflow the archive and trigger scroll anchoring.
@@ -14964,7 +14968,7 @@ async function activatePageTab(index, { force = false } = {}) {
 async function applyPageTabSnapshot(index) {
   state.applyingPageTab = true;
   try {
-    await applyBrowserHistorySnapshot(state.pageTabs[index].snapshot || defaultPageTabSnapshot());
+    await applyBrowserHistorySnapshot(state.pageTabs[index].snapshot || defaultPageTabSnapshot(), { pageTab: true });
   } finally {
     state.applyingPageTab = false;
   }

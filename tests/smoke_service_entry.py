@@ -68,6 +68,21 @@ try:
     check(atomic.baseline(sid).revision==='2'&&state.services[0].title==='atomic fresh','late playback changed baseline');
     state.serviceMusic.playing=false;duringAtomic=null;
 
+    aggregate.revision='2';
+    const noChangeRenders=renders;
+    check(await MINDEX_SERVICE_ENTRY.enter(sid,{background:true}),'same-revision tab entry failed');
+    check(renders===noChangeRenders,'same revision repainted the board');
+    const originalEntry=MINDEX_SERVICE_ENTRY.enter,originalLoad=loadServiceItems,originalTypes=state.serviceTypes;
+    let finishTabCheck,backgroundCheck;
+    MINDEX_SERVICE_ENTRY.enter=(id,options)=>{
+      backgroundCheck=id===sid&&options.background===true;
+      return new Promise(resolve=>finishTabCheck=resolve);
+    };
+    loadServiceItems=async()=>{};state.serviceTypes=[{id:'test'}];
+    await applyBrowserHistorySnapshot({module:'service',selectedServiceId:sid},{pageTab:true});
+    check(backgroundCheck&&typeof finishTabCheck==='function'&&!state.applyingBrowserHistory,'tab waited for optional refresh');
+    finishTabCheck(false);MINDEX_SERVICE_ENTRY.enter=originalEntry;loadServiceItems=originalLoad;state.serviceTypes=originalTypes;
+
     // Exercise actual tab activation with an isolated route renderer, no save or network writes.
     confirmSaveBeforeLeaving=async()=>true;syncActivePageTabState=()=>{};
     state.pageTabs=[{id:'tab-a',snapshot:{selectedServiceId:sid}},{id:'tab-b',snapshot:{selectedServiceId:'other'}}];state.pageTabIndex=0;
