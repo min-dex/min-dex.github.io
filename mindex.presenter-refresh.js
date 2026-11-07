@@ -120,5 +120,18 @@
       state.cleanFingerprints.service = before.clean;restoreSession?.();presenterSlideBuildCache.delete(id);throw error;
     }
   }
-  globalThis.MindexPresenterRefresh = { action, payload, output, controls, refresh, frozen: id => Boolean(current(id)) };
+  function preserveLiveElement(previous, fresh) {
+    const active = previous.slides[previous.index];
+    const key = presenterSlideElementGroupKey(active);
+    if (!key) return fresh;
+    const sameElement = slide => presenterSlideElementGroupKey(slide) === key;
+    const retained = previous.slides.filter(sameElement);
+    const index = fresh.findIndex(sameElement);
+    const updated = fresh.filter(slide => !sameElement(slide));
+    const insertion = index >= 0 ? index : Math.min(previous.index, updated.length);
+    updated.splice(insertion, 0, ...retained);
+    return updated;
+  }
+
+  globalThis.MindexPresenterRefresh = { action, payload, output, controls, refresh, preserveLiveElement, frozen: id => Boolean(current(id)) };
 })();

@@ -1631,9 +1631,11 @@ function restorePresenterControllerSession() {
   if (!slides.length) return "pending";
 
   state.presenter.serviceId = service.id;
-  state.presenter.slides = slides;
+  state.presenter.slides = MindexPresenterRefresh.preserveLiveElement(payload, slides);
+  state.presenter.sourceItems = state.serviceItems[service.id];
+  state.presenter.sourceSignature = presenterSlideBuildSourceSignature(service.id);
   state.presenter.index = presenterSlideIndexForAnchor(
-    slides,
+    state.presenter.slides,
     payload.slideAnchor || presenterSlideAnchor(payload.slides?.[payload.index]),
     payload.index,
   );
@@ -2424,7 +2426,7 @@ function initPresenterOutputCore() {
     }
   }
   if (channel) {
-    renderStoredState(true);
+    renderStoredState(!readPresenterBackgroundCheckpoint(outputSessionId));
     channel.onmessage = (event) => handleOutputSignalMessage(event.data || {});
     window.setTimeout(() => {
       sendControllerMessage({ type: "presenter-ready", clientId: outputClientId });
@@ -2440,6 +2442,7 @@ function initPresenterOutputCore() {
     heartbeatTimer = window.setInterval(postHeartbeat, PRESENTER_OUTPUT_HEARTBEAT_INTERVAL_MS);
   }
   window.addEventListener("pagehide", () => {
+    savePresenterBackgroundCheckpoint(document.getElementById("presenterOutputRoot"), outputSessionId);
     postDisconnect();
     closeOutputChannel();
   });
@@ -2760,6 +2763,7 @@ function presenterOutputFrameStateForSlide(slide, payload = {}) {
     videoOutput,
     scriptureReadingOutput,
     backgroundVideo: blackoutOutput || emergencyMode ? "" : presenterSlideBackgroundVideoSource(slide, cleanOutput),
+    backgroundResumeKey: presenterBackgroundResumeKey(payload, slide),
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
     serviceType: payload?.serviceType || "",
@@ -2903,7 +2907,9 @@ function activatePresenterOutputLayer(root, activeLayer, nextLayer, frameState =
   // Blending video pixels into the key color creates unkeyed intermediate colors.
   const videoEndFade = Boolean(frameState.videoEndFade && frameState.noChromakey && !frameState.blackoutOutput && !frameState.blankOutput);
   const { calm, transitionClearDelay, transitionEntryDelay } = presenterOutputTransitionTiming(root, frameState, videoEndFade, nextLayer);
-  const animated = videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState);
+  const checkpoint = !activeLayer.firstElementChild && frameState.backgroundResumeKey ? readPresenterBackgroundCheckpoint() : null;
+  const recovering = checkpoint?.key === frameState.backgroundResumeKey && checkpoint?.source === frameState.backgroundVideo && Boolean(checkpoint);
+  const animated = !recovering && (videoEndFade || presenterOutputShouldAnimateFrameTransition(root, frameState));
   const swap = () => {
     if (token !== presenterOutputRenderState.token) return;
     const startCrossMorph = preparePresenterServiceBlankCrossMorph(root, activeLayer, nextLayer);
@@ -3472,7 +3478,7 @@ function applyPresenterOutputFrameState(root, frameState = {}) {
   root.classList.toggle("is-blank", Boolean(frameState.blankOutput));
   document.body.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
   root.classList.toggle("is-blackout", Boolean(frameState.blackoutOutput));
-  applyPresenterBackgroundVideo(root, frameState.backgroundVideo, { immediate: frameState.blackoutOutput || frameState.emergencyMode || !frameState.noChromakey });
+  applyPresenterBackgroundVideo(root, frameState.backgroundVideo, { resumeKey: frameState.backgroundResumeKey, immediate: frameState.blackoutOutput || frameState.emergencyMode || !frameState.noChromakey });
   root.dataset.serviceType = frameState.serviceType || "";
   root.dataset.outputTheme = frameState.outputTheme || presenterOutputTheme(frameState.serviceType);
   const inkSource = presenterBackgroundInkSource(frameState);

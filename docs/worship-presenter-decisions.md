@@ -5794,3 +5794,13 @@ The thumbnail board keeps fixed thumbnail sizes and the minimum column gap.
 When multiple columns fit, distribute the leftover width between the columns.
 Short rows follow the same column positions. At narrow widths, oversized zoom
 levels retain horizontal scrolling.
+
+### 송출 창 새로고침 시 배경 영상 복구 · 2026-11-07
+
+컨트롤러 재접속은 출력 창을 다시 열지 않는다. 송출 중인 엘리멘트의 기존
+슬라이드를 그대로 두고 나머지 슬라이드는 새로 읽은 예배 자료로 반영한다.
+같은 배경 영상 노드와 재생 위치를 유지한다. 출력 탭은 닫히기 직전에 마지막
+재생 위치와 캡처할 수 있는 프레임을 탭 내부에 최대 5분간 보관한다. 동일한
+송출 세션·예배·엘리멘트·영상으로 복구할 때 가사와 정지 화면을 먼저 표시하고,
+복원 위치에서 프레임이 준비되면 영상으로 넘어간다. 외부 영상이 캡처를 허용하지
+않으면 기존 배경으로 대기하며 재생 위치는 복구한다.
