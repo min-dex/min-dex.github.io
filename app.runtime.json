@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261107-tov-year-end",
+  "version": "20261107-setlist-leader-focus",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "44e3ae53ec970289ebdd2a862f442c9c6bf715244715f720a5a58d7593090692",
-  "runtime_sha256": "07ae7445c6476ab382d4647cb42100440cdc1e0e440f46e2973d946ec864f5ab",
-  "source_bytes": 1355314,
-  "runtime_bytes": 967526,
-  "source_gzip": 310587,
-  "runtime_gzip": 243607
+  "source_sha256": "24cb28652c7765d2ba613238a35da3cbc98b72790bbdf99efa816c3819dc6a8c",
+  "runtime_sha256": "9591abc42d217c2324fb8de5d70de1cd570a8605fcc0ad26702f31c3ef4030bf",
+  "source_bytes": 1356117,
+  "runtime_bytes": 968128,
+  "source_gzip": 310808,
+  "runtime_gzip": 243746
 }

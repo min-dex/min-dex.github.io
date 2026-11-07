@@ -4157,7 +4157,7 @@ async function loadWorshipSetlistSongCatalog({ force = false } = {}) {
     catalog.status = "failed";
     console.warn("Could not load setlist song links.", error);
   }
-  if (state.worshipSetlistSongCatalog === catalog && isSetlistArchiveView()) renderServiceSetlistArchiveDetail();
+  if (state.worshipSetlistSongCatalog === catalog && isSetlistArchiveView()) renderServiceSetlistArchiveDetail({ background: true });
 }
 
 async function fetchWorshipSetlistServices() {
@@ -4230,7 +4230,7 @@ async function loadWorshipSetlistArchive({ force = false } = {}) {
   }
   if (isSetlistArchiveView()) {
     renderSongList();
-    renderServiceSetlistArchiveDetail();
+    renderServiceSetlistArchiveDetail({ background: true });
   }
 }
 
@@ -25065,7 +25065,15 @@ function renderWorshipSetlistArchiveNavigation(entries, allEntries = entries) {
     `<button type="button" data-setlist-jump="setlist-group-${escapeAttr(group.key)}">${escapeHtml(group.title)}</button>`).join("")}</nav>`;
 }
 
-function renderServiceSetlistArchiveDetail() {
+let setlistArchiveRenderDeferred = false;
+
+function renderServiceSetlistArchiveDetail({ background = false } = {}) {
+  if (background && refs.detailPane.contains(document.activeElement)
+    && document.activeElement.matches("[data-setlist-leader-input]")) {
+    setlistArchiveRenderDeferred = true;
+    return;
+  }
+  setlistArchiveRenderDeferred = false;
   if (!document.body.classList.contains("ui-booting") && !state.worshipSetlistArchive.loaded && !state.worshipSetlistArchive.loading) {
     void loadWorshipSetlistArchive();
   }
@@ -25261,6 +25269,14 @@ async function persistWorshipSetlistLeader(id, value, expectedLeader, attempt = 
 function handleSetlistLeaderFocusOut(event) {
   const input = event.target.closest("[data-setlist-leader-input]");
   if (input) void saveWorshipSetlistLeader(input.dataset.setlistLeaderInput);
+  if (!setlistArchiveRenderDeferred || !refs.detailPane.contains(event.target)) return;
+  // Let controls in the archive finish their own interaction before replacing them.
+  if (event.relatedTarget && refs.detailPane.contains(event.relatedTarget)) return;
+  setTimeout(() => {
+    if (setlistArchiveRenderDeferred && isSetlistArchiveView() && !refs.detailPane.contains(document.activeElement)) {
+      renderServiceSetlistArchiveDetail();
+    }
+  }, 0);
 }
 
 function updateWorshipSetlistLeaderInputs(id, value, saving, original) {
