@@ -5,18 +5,39 @@ const vm=require('node:vm'),fs=require('node:fs');
 const source=readRuntimeSource('app.js');
 const bind=source.slice(source.indexOf('function bindElectronDesktopEvents()'),source.indexOf('\nasync function loadInitialData()'));
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-function fixture(initial){
+function fixture(initial, platform){
  let status=initial || {status:'available',version:'1.2.3',presenterOpen:false};let live=false,dirty=false,accept=true;
- let confirms=0,installs=0,downloads=0;const messages=[];
- const bridge={isDesktop:true,onUpdateState:cb=>bridge.event=cb,onCheckUpdateRequested:cb=>bridge.manual=cb,
+ let confirms=0,installs=0,downloads=0,broadcasts=0;const messages=[];
+ const buttons=Object.fromEntries(['desktopUpdateBtn','desktopBroadcastBtn'].map(id=>[id,{
+  hidden:true,addEventListener(_name,callback){this.click=callback;},
+ }]));
+ const bridge={isDesktop:true,platform,onUpdateState:cb=>bridge.event=cb,onCheckUpdateRequested:cb=>bridge.manual=cb,
  getUpdateState:async()=>({ok:true,state:status}),checkForUpdates:async()=>({ok:true,state:status}),
+ openBroadcast:async()=>{broadcasts++;return {ok:true};},
  installUpdate:async()=>{installs++;status={...status,status:'installing'};return {ok:true};},
  downloadUpdate:async()=>{downloads++;status={...status,status:'downloaded'};bridge.event(status);return {ok:true};}};
- const ctx={window:{mindexElectron:bridge,confirm:()=>{confirms++;return accept;}},showToast:m=>messages.push(m),
+ const ctx={window:{mindexElectron:bridge,confirm:()=>{confirms++;return accept;}},document:{getElementById:id=>buttons[id]},showToast:m=>messages.push(m),
  isPresenterOutputWindowOpen:()=>live,hasDirtyChanges:()=>dirty,currentSaveButtonState:()=>({dirty})};
  vm.runInNewContext(bind+'\nbindElectronDesktopEvents();',ctx);
- return {bridge,messages,live:v=>live=v,dirty:v=>dirty=v,accept:v=>accept=v,set:v=>status=v,counts:()=>({confirms,installs,downloads})};
+ return {bridge,buttons,messages,live:v=>live=v,dirty:v=>dirty=v,accept:v=>accept=v,set:v=>status=v,counts:()=>({confirms,installs,downloads,broadcasts})};
 }
+test('Windows toolbar reuses update guards and opens only the broadcast window',async()=>{
+ const f=fixture({status:'downloaded',version:'1.2.3',presenterOpen:true},'win32');
+ f.live(true);await tick();
+ assert.equal(f.buttons.desktopUpdateBtn.hidden,false);
+ assert.equal(f.buttons.desktopBroadcastBtn.hidden,false);
+ await f.buttons.desktopUpdateBtn.click();
+ assert.equal(f.counts().installs,0);
+ f.live(false);f.dirty(true);f.set({status:'downloaded',version:'1.2.3'});
+ await f.buttons.desktopUpdateBtn.click();
+ assert.equal(f.counts().installs,0);
+ await f.buttons.desktopBroadcastBtn.click();
+ assert.equal(f.counts().broadcasts,1);
+ f.dirty(false);await f.buttons.desktopUpdateBtn.click();
+ assert.equal(f.counts().installs,1);
+ const mac=fixture({status:'current'},'darwin');
+ assert(Object.values(mac.buttons).every(button=>button.hidden));
+});
 test('declined update remains reachable from menu',async()=>{
  const f=fixture();f.accept(false);await tick();assert.equal(f.counts().confirms,1);
  await tick();assert.equal(f.counts().confirms,1);

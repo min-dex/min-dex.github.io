@@ -1231,3 +1231,11 @@ scroll viewport. Only the current order rail scrolls; search results have a
 bounded separate viewport. No worship data or output state changes follow from
 scrolling. Local Chromium/WebKit layout probes at 600px and 900px heights verify
 that the summary stays fixed while the order rail scrolls. Publication pending.
+
+### Windows 앱의 상단 도구
+
+Windows 앱은 왼쪽 탐색 6개와 오른쪽 기본 도구 6개를 상단에 배치한다.
+오른쪽의 테마·저장·원격 조작·접속 현황 뒤에 업데이트와 방송을 둔다.
+두 도구는 Windows 네이티브 메뉴에서 제거한다. 업데이트는 기존 확인과
+편집·송출 중 설치 차단을 사용한다. 방송 버튼은 방송 창을 열며 송출은
+그 창의 기존 별도 조작으로 시작한다. 웹과 다른 OS에는 새 버튼을 표시하지 않는다.

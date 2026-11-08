@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer, webUtils } = require("electron");
 
 contextBridge.exposeInMainWorld("mindexElectron", {
   isDesktop: true,
+  platform: process.platform,
   getBuildInfo: () => ipcRenderer.invoke("mindex:get-build-info"),
   openPresenterOutput: (payload) => ipcRenderer.invoke("mindex:open-presenter", payload),
   presenterFrameReady: () => ipcRenderer.invoke('mindex:presenter-frame-ready'),
@@ -15,6 +16,7 @@ contextBridge.exposeInMainWorld("mindexElectron", {
   getPresenterDisplays: () => ipcRenderer.invoke("mindex:get-presenter-displays"),
   setPresenterAlwaysOnTop: (payload) => ipcRenderer.invoke("mindex:set-presenter-always-on-top", payload),
   checkForUpdates: () => ipcRenderer.invoke("mindex:check-for-updates"),
+  openBroadcast: () => ipcRenderer.invoke("mindex:open-broadcast"),
   downloadUpdate: () => ipcRenderer.invoke("mindex:download-update"),
   installUpdate: () => ipcRenderer.invoke("mindex:install-update"),
   importKeynoteDeck: (payload) => ipcRenderer.invoke("mindex:import-keynote-deck", payload),

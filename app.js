@@ -846,7 +846,7 @@ function bindElectronDesktopEvents() {
       if (installing || update.manualInstall) {
         if (isPresenterOutputWindowOpen()) { showFailure({ reason: "presenter-active" }); return; }
         if (hasDirtyChanges({ reconcile: true }) || currentSaveButtonState().dirty) {
-          showToast("편집 내용을 먼저 저장한 뒤 업데이트 메뉴에서 다시 설치해 주세요.", "error");
+          showToast("편집 내용을 먼저 저장한 뒤 업데이트를 다시 확인해 주세요.", "error");
           return;
         }
       }
@@ -862,7 +862,7 @@ function bindElectronDesktopEvents() {
     }
   };
   desktop.onUpdateState?.(update => { void handleState(update); });
-  desktop.onCheckUpdateRequested?.(async () => {
+  const checkUpdate = async () => {
     prompted = "";
     try {
       const result = await desktop.checkForUpdates();
@@ -875,7 +875,25 @@ function bindElectronDesktopEvents() {
       else if (update.status === "downloading") showToast(`업데이트 다운로드 중 · ${Math.round(update.percent)}%`);
       else void handleState(update);
     } catch { showFailure(); }
-  });
+  };
+  desktop.onCheckUpdateRequested?.(checkUpdate);
+  if (desktop.platform === "win32") {
+    const update = document.getElementById("desktopUpdateBtn");
+    const broadcast = document.getElementById("desktopBroadcastBtn");
+    if (update && typeof desktop.checkForUpdates === "function") {
+      update.hidden = false;
+      update.addEventListener("click", checkUpdate);
+    }
+    if (broadcast && typeof desktop.openBroadcast === "function") {
+      broadcast.hidden = false;
+      broadcast.addEventListener("click", async () => {
+        try {
+          if ((await desktop.openBroadcast())?.ok) return;
+        } catch {}
+        showToast("방송 창을 열지 못했습니다.", "error");
+      });
+    }
+  }
   desktop.getUpdateState?.().then(result => { if (result?.ok) void handleState(result.state); }).catch(() => {});
 }
 

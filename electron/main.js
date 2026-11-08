@@ -225,6 +225,7 @@ function configureAutoUpdater() {
 }
 
 function bindUpdateMenu() {
+  if (process.platform === "win32") return;
   const menu = Menu.getApplicationMenu() || Menu.buildFromTemplate([
     ...(process.platform === "darwin" ? [{ role: "appMenu" }] : []),
     { role: "fileMenu" }, { role: "editMenu" }, { role: "viewMenu" }, { role: "windowMenu" },
@@ -308,6 +309,11 @@ ipcMain.handle("mindex:get-build-info", event => {
 
 ipcMain.handle("mindex:get-update-state", event => updateRequest(event, "state"));
 ipcMain.handle("mindex:check-for-updates", event => updateRequest(event, "check"));
+ipcMain.handle("mindex:open-broadcast", event => {
+  if (!isControllerRequest(event)) return { ok: false, reason: "untrusted-window" };
+  require("./youtube-window")(mainWindow);
+  return { ok: true };
+});
 ipcMain.handle("mindex:download-update", event => updateRequest(event, "download"));
 ipcMain.handle("mindex:install-update", event => updateRequest(event, "install"));
 
