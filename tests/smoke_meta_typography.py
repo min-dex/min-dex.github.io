@@ -1,3 +1,5 @@
+from pathlib import Path
+import tempfile
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -42,7 +44,7 @@ def main():
                   root.innerHTML='<div class="presenter-scripture-reading" style="position:absolute;inset:100px;width:auto;height:auto"><div class="presenter-scripture-reading-version">개역개정</div><div class="presenter-scripture-reading-text" style="margin-top:80px">하나님이 세상을 이처럼 사랑하사</div><div class="presenter-scripture-reading-fin">Fin.</div></div>';
                   return 'PASS citation tab = 700, liturgical body = 500, other tested 50px roles = 600; Fin family/italic; body and support preserved';
                 }'''))
-                page.screenshot(path=f'/private/tmp/mindex-meta-{engine}.png')
+                page.screenshot(path=str(Path(tempfile.gettempdir()) / f'mindex-meta-{engine}.png'))
                 browser.close()
     finally:
         server.shutdown()
