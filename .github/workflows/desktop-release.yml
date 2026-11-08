@@ -72,6 +72,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Use the runner volume for disposable Windows test files
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          printf 'TEMP=%s\nTMP=%s\n' "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=moderate
       - run: python tools/broadcast-engine/prepare.py

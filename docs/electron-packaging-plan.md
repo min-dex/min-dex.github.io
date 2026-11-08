@@ -437,3 +437,8 @@ Windows may retain app.asar briefly after the isolated Electron process closes.
 Validated disposable-tree cleanup retries only Windows sharing/lock violations
 (32/33), at most 20 seconds; other errors fail immediately. Upgrade preservation
 receipts are written and compared before cleanup, with no production profile use.
+
+Windows CI sets both TEMP and TMP to RUNNER_TEMP before package preparation.
+Python fixtures and Node/Electron isolated profiles therefore share the runner
+volume; published upgrades assert that root before measuring the 26 GiB budget.
+This avoids checking D: while accidentally allocating the upgrade fixture on C:.

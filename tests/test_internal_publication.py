@@ -64,6 +64,14 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    self.assertFalse(any(str(candidate) in args for args in calls))
 
 class CiCleanup(unittest.TestCase):
+ def test_windows_upgrade_requires_the_runner_temporary_root(self):
+  import verify_published_upgrade as upgrade
+  with tempfile.TemporaryDirectory() as runner, tempfile.TemporaryDirectory() as other:
+   with patch.object(upgrade.sys,'platform','win32'),patch.dict(os.environ,{'RUNNER_TEMP':runner}),patch.object(upgrade.tempfile,'gettempdir',return_value=runner):
+    self.assertEqual(upgrade.upgrade_temp_root(),pathlib.Path(runner).resolve())
+   with patch.object(upgrade.sys,'platform','win32'),patch.dict(os.environ,{'RUNNER_TEMP':runner}),patch.object(upgrade.tempfile,'gettempdir',return_value=other):
+    with self.assertRaisesRegex(RuntimeError,'TEMP/TMP'):upgrade.upgrade_temp_root()
+
  def test_cleanup_retries_only_windows_sharing_locks(self):
   import cleanup_desktop_ci as clean
   locked=PermissionError('still closing');locked.winerror=32

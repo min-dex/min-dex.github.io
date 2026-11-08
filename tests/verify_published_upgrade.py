@@ -32,6 +32,13 @@ def asset_record(receipt, version, target):
     return row
 
 
+def upgrade_temp_root():
+    root = Path(tempfile.gettempdir()).resolve()
+    if sys.platform == 'win32' and root != Path(os.environ['RUNNER_TEMP']).resolve():
+        raise RuntimeError('Windows TEMP/TMP must use the disposable RUNNER_TEMP volume')
+    return root
+
+
 def main():
     if os.environ.get('GITHUB_ACTIONS') != 'true':
         raise RuntimeError('Disposable CI runner required; never install over a real profile')
@@ -40,8 +47,10 @@ def main():
     assert candidate.is_file() and version not in SOURCES
     receipt_dir = Path(os.environ['RUNNER_TEMP']) / ('published-upgrade-' + target)
     receipt_dir.mkdir(exist_ok=True)
+    temp_root = upgrade_temp_root()
+    print(f'Published upgrade temporary root: {temp_root}', flush=True)
     for previous in SOURCES:
-        free = shutil.disk_usage(tempfile.gettempdir()).free
+        free = shutil.disk_usage(temp_root).free
         print(f'Published upgrade {previous}: free {free / 1024**3:.2f} GiB; required 26 GiB', flush=True)
         if free < 26 * 1024**3:
             raise RuntimeError('Need 20 GiB reserve plus 6 GiB for published upgrade fixture')
