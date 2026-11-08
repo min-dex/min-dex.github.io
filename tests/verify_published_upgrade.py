@@ -7,6 +7,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
+import urllib.error
 import urllib.request
 from cleanup_desktop_ci import remove_completed_tree
 
@@ -39,6 +41,37 @@ def upgrade_temp_root():
     return root
 
 
+def retry_download(read):
+    for attempt in range(3):
+        try:
+            return read()
+        except urllib.error.HTTPError as error:
+            if error.code not in (408, 429, 500, 502, 503, 504) or attempt == 2:
+                raise
+            error.close()
+        except (TimeoutError, ConnectionError, urllib.error.URLError):
+            if attempt == 2:
+                raise
+        time.sleep(2 ** attempt)
+
+
+def read_receipt(url):
+    with urllib.request.urlopen(url, timeout=60) as response:
+        return json.loads(response.read(100000))
+
+
+def download_installer(url, installer, record):
+    digest = hashlib.sha256()
+    with urllib.request.urlopen(url, timeout=120) as response, installer.open('wb') as out:
+        for block in iter(lambda: response.read(1024 * 1024), b''):
+            out.write(block)
+            digest.update(block)
+            if out.tell() > record['bytes']:
+                raise RuntimeError('Installer exceeds recorded size')
+    if installer.stat().st_size != record['bytes'] or digest.hexdigest() != record['sha256']:
+        raise RuntimeError('Published installer integrity mismatch')
+
+
 def main():
     if os.environ.get('GITHUB_ACTIONS') != 'true':
         raise RuntimeError('Disposable CI runner required; never install over a real profile')
@@ -55,20 +88,11 @@ def main():
         if free < 26 * 1024**3:
             raise RuntimeError('Need 20 GiB reserve plus 6 GiB for published upgrade fixture')
         base = BASE + 'church-v' + previous + '/'
-        with urllib.request.urlopen(base + 'internal-build.json', timeout=60) as response:
-            receipt = json.loads(response.read(100000))
+        receipt = retry_download(lambda: read_receipt(base + 'internal-build.json'))
         record = asset_record(receipt, previous, target)
         with tempfile.TemporaryDirectory(prefix='mindex-published-download-') as folder:
             installer = Path(folder) / record['file']
-            digest = hashlib.sha256()
-            with urllib.request.urlopen(base + record['file'], timeout=120) as response, installer.open('wb') as out:
-                for block in iter(lambda: response.read(1024 * 1024), b''):
-                    out.write(block)
-                    digest.update(block)
-                    if out.tell() > record['bytes']:
-                        raise RuntimeError('Installer exceeds recorded size')
-            if installer.stat().st_size != record['bytes'] or digest.hexdigest() != record['sha256']:
-                raise RuntimeError('Published installer integrity mismatch')
+            retry_download(lambda: download_installer(base + record['file'], installer, record))
             state = receipt_dir / (previous + '-install.json')
             proof = receipt_dir / (previous + '-proof.json')
             subprocess.run([sys.executable, 'tests/install_test_fixture.py', str(installer), str(state), 'internal'], check=True)

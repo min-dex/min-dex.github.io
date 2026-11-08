@@ -38,6 +38,24 @@ class Publication(unittest.TestCase):
    calls,error=self.run_case(**values);self.assertIsNotNone(error)
    self.assertFalse(any(x[:2]==('release','create') for x in calls))
 class PublishedUpgradeIdentity(unittest.TestCase):
+ def test_download_timeout_retries_but_invalid_installers_still_fail(self):
+  import io, verify_published_upgrade as upgrade
+  payload=b'verified fixture'
+  record={'bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}
+  class Interrupted(io.BytesIO):
+   def read(self, amount):
+    if self.tell(): raise TimeoutError('network interruption')
+    return super().read(4)
+  with tempfile.TemporaryDirectory() as folder:
+   installer=pathlib.Path(folder)/'fixture.exe'
+   fetch=lambda: upgrade.download_installer('https://example.invalid/fixture.exe',installer,record)
+   with patch.object(upgrade.urllib.request,'urlopen',side_effect=[Interrupted(payload),io.BytesIO(payload)]) as open_url,patch.object(upgrade.time,'sleep'):
+    upgrade.retry_download(fetch)
+    self.assertEqual(open_url.call_count,2)
+    self.assertEqual(installer.read_bytes(),payload)
+   with patch.object(upgrade.urllib.request,'urlopen',return_value=io.BytesIO(b'x'*len(payload))) as open_url:
+    with self.assertRaisesRegex(RuntimeError,'integrity mismatch'):upgrade.retry_download(fetch)
+    self.assertEqual(open_url.call_count,1)
  def test_source_target_size_and_hash_are_required_before_install(self):
   from verify_published_upgrade import SOURCES, asset_record
   row={'file':'Mindex-1.0.0-win-x64.exe','bytes':100,'sha256':'a'*64}
