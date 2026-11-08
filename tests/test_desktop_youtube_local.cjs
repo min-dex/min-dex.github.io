@@ -35,10 +35,27 @@ async function main() {
     }).listen(0,'127.0.0.1');
     await once(server,'listening');
     app = await _electron.launch({executablePath:desktop,args:['--no-first-run'],env:{...process.env,MINDEX_ISOLATED_TEST:'1',MINDEX_QA_RTMPS_PORT:String(server.address().port),MINDEX_QA_RTMPS_CA:file('qa.pem')}});
-    await app.firstWindow();
+    const main = await app.firstWindow();
     assert(await app.evaluate(({app}) => app.getPath('userData').includes('mindex-isolated-') && !!globalThis.__mindexTestIsolation?.networkBlocked), 'Requires isolated QA package');
+    const isWindows = process.platform === 'win32';
+    if (isWindows) {
+      await main.locator('#desktopBroadcastBtn').waitFor({state:'visible'});
+      const left = main.locator('.topbar-module-strip button:visible');
+      assert.equal(await left.count(), 6, 'Windows left toolbar must have six actions');
+      const ids = ['themeBtn','saveAllBtn','remotePanelBtn','monitorPanelBtn','desktopUpdateBtn','desktopBroadcastBtn'];
+      const boxes = await Promise.all(ids.map(id => main.locator('#'+id).boundingBox()));
+      assert(boxes.every((box,index) => box && (index === 0 ||
+        Math.abs(box.y-boxes[0].y)<1 && box.x>boxes[index-1].x)),
+      'Windows right toolbar must have six ordered actions on one row');
+      assert(await app.evaluate(({Menu}) => !Menu.getApplicationMenu().items.some(
+        item => ['업데이트','방송'].includes(item.label))), 'Moved actions must be absent from the native menu');
+      await main.locator('#desktopUpdateBtn').click();
+      await main.getByText('자동 업데이트는 배포용 설치 앱에서 사용할 수 있습니다.',{exact:true}).waitFor();
+      console.log('PASS installed Windows 6+6 toolbar and update button IPC (isolated updates disabled)');
+    }
     const opened = app.waitForEvent('window');
-    await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.find(x=>x.label==='방송').submenu.items[0].click());
+    if (isWindows) await main.locator('#desktopBroadcastBtn').click();
+    else await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.find(x=>x.label==='방송').submenu.items[0].click());
     const panel = await opened;
     await panel.locator('#ytStart').waitFor({state:'visible'});
     assert(await panel.locator('#ytStart').isDisabled());

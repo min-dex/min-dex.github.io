@@ -32,7 +32,7 @@ def main():
     sums=root/'release-artifacts'/'SHA256SUMS.txt'
     sums.write_text(''.join(f"{x['sha256']}  {x['file']}\n" for x in records),encoding='utf-8')
     notes=root/'release-artifacts'/'release-notes.md'
-    notes.write_text(f'Mindex {version} 교회 내부용\n\n교회 내부용 설치본입니다. Mac 앱은 로컬 서명으로 무결성을 확인하며 Apple 공증은 받지 않았습니다. 첫 실행 시 macOS에서 이 앱을 허용해야 할 수 있습니다. Windows 설치본은 미서명입니다.\n\n앱의 업데이트 메뉴에서 새 설치 파일을 받을 수 있습니다. 설치 전 편집 내용을 저장하고 송출·앱을 종료해 주세요. Mac은 앱 교체, Windows는 설치 파일 실행 방식입니다. 자동 설치하지 않습니다.\n\n방송실 장비 검증은 보류되어 있으며 실제 유튜브 방송으로 검증한 배포가 아닙니다.\n\n소스: '+sha+'\n',encoding='utf-8')
+    notes.write_text(f'Mindex {version} 교회 내부용\n\n교회 내부용 설치본입니다. Mac 앱은 로컬 서명으로 무결성을 확인하며 Apple 공증은 받지 않았습니다. 첫 실행 시 macOS에서 이 앱을 허용해야 할 수 있습니다. Windows 설치본은 미서명입니다.\n\nWindows는 오른쪽 상단 업데이트 버튼에서, Mac은 업데이트 메뉴에서 새 설치 파일을 받을 수 있습니다. 설치 전 편집 내용을 저장하고 송출·앱을 종료해 주세요. Mac은 앱 교체, Windows는 설치 파일 실행 방식입니다. 자동 설치하지 않습니다.\n\n방송실 장비 검증은 보류되어 있으며 실제 유튜브 방송으로 검증한 배포가 아닙니다.\n\n소스: '+sha+'\n',encoding='utf-8')
     tag='church-v'+version
     # Immutable version: an existing tag/release requires human reconciliation.
     existing=subprocess.run(['gh','release','view',tag],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)

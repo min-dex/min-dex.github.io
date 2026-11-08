@@ -225,11 +225,14 @@ function configureAutoUpdater() {
 }
 
 function bindUpdateMenu() {
-  if (process.platform === "win32") return;
   const menu = Menu.getApplicationMenu() || Menu.buildFromTemplate([
     ...(process.platform === "darwin" ? [{ role: "appMenu" }] : []),
     { role: "fileMenu" }, { role: "editMenu" }, { role: "viewMenu" }, { role: "windowMenu" },
   ]);
+  if (process.platform === "win32") {
+    Menu.setApplicationMenu(menu);
+    return;
+  }
   menu.append(new MenuItem({ label: "업데이트", submenu: [{
     label: "업데이트 확인…",
     click: () => {
