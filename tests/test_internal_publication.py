@@ -64,6 +64,30 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    self.assertFalse(any(str(candidate) in args for args in calls))
 
 class CiCleanup(unittest.TestCase):
+ def test_internal_cleanup_retains_installers_and_signed_receipts(self):
+  import cleanup_desktop_ci as clean
+  import uuid
+  token=uuid.uuid4().hex
+  with tempfile.TemporaryDirectory() as project, tempfile.TemporaryDirectory() as runner, tempfile.TemporaryDirectory(prefix='mindex-install-qa-') as install:
+   root=pathlib.Path(project);temp=pathlib.Path(runner)
+   profile=pathlib.Path(tempfile.gettempdir())/('mindex-isolated-upgrade-'+token)
+   profile.mkdir()
+   try:
+    (profile/'fixture-only.json').write_text(json.dumps({'token':token,'appId':'kr.mindex.app.test'}))
+    (pathlib.Path(install)/'fixture-only').write_text('kr.mindex.app.test')
+    (temp/'internal-install.json').write_text(json.dumps({'root':install}))
+    (temp/'internal-proof.json').write_text(json.dumps({'token':token,'profile':str(profile/'data')}))
+    output=root/'dist/internal';output.mkdir(parents=True)
+    for name in ('win-unpacked','mac-arm64','mac'):(output/name).mkdir()
+    for name in ('Mindex-1.0.2.exe','Mindex-1.0.2.dmg','encoder-mac-arm64.json'):(output/name).write_text('keep')
+    with patch.dict(os.environ,{'GITHUB_ACTIONS':'true'}):clean.cleanup(root,temp,'internal')
+    self.assertFalse((output/'win-unpacked').exists());self.assertFalse((output/'mac').exists());self.assertFalse((output/'mac-arm64').exists())
+    for name in ('Mindex-1.0.2.exe','Mindex-1.0.2.dmg','encoder-mac-arm64.json'):self.assertEqual((output/name).read_text(),'keep')
+    self.assertTrue((temp/'internal-proof.json').exists())
+   finally:
+    if profile.exists():
+     import shutil;shutil.rmtree(profile)
+
  def test_only_owned_completed_fixtures_removed_and_receipts_kept(self):
   import cleanup_desktop_ci as clean
   with tempfile.TemporaryDirectory() as project, tempfile.TemporaryDirectory() as runner, tempfile.TemporaryDirectory(prefix='mindex-install-qa-') as install:

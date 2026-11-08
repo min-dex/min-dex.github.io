@@ -40,7 +40,9 @@ def main():
     receipt_dir = Path(os.environ['RUNNER_TEMP']) / ('published-upgrade-' + target)
     receipt_dir.mkdir(exist_ok=True)
     for previous in SOURCES:
-        if shutil.disk_usage(tempfile.gettempdir()).free < 26 * 1024**3:
+        free = shutil.disk_usage(tempfile.gettempdir()).free
+        print(f'Published upgrade {previous}: free {free / 1024**3:.2f} GiB; required 26 GiB', flush=True)
+        if free < 26 * 1024**3:
             raise RuntimeError('Need 20 GiB reserve plus 6 GiB for published upgrade fixture')
         base = BASE + 'church-v' + previous + '/'
         with urllib.request.urlopen(base + 'internal-build.json', timeout=60) as response:

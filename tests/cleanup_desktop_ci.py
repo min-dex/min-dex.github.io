@@ -36,8 +36,18 @@ def cleanup(root, temp, phase):
             folder = root / 'dist' / name
             assert not (root / 'dist').is_symlink() and not folder.is_symlink()
             if folder.exists(): paths.append(folder)
+    if phase == 'internal':
+        # Installed candidate checks and signed encoder receipts are complete.
+        # Subsequent upgrade tests use the retained installer, never these trees.
+        output = root / 'dist' / 'internal'
+        assert not (root / 'dist').is_symlink() and not output.is_symlink()
+        for name in ('win-unpacked', 'mac-arm64', 'mac'):
+            folder = output / name
+            assert not folder.is_symlink()
+            if folder.exists(): paths.append(folder)
     for folder in paths:
         shutil.rmtree(folder)
+    print(f'CI free space after cleanup: {shutil.disk_usage(temp).free / 1024**3:.2f} GiB', flush=True)
     print('Removed completed CI fixtures; proof JSON and internal installers retained', flush=True)
 
 

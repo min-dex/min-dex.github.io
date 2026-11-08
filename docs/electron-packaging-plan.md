@@ -426,3 +426,8 @@ fixtures and reproducible TEST/prior-test trees. Current internal installers and
 proof JSON remain. Completed internal fixtures are similarly removed before
 sequential published-version upgrades. The 20 GiB reserve plus 6 GiB upgrade
 budget remains unchanged; cleanup is forbidden outside disposable CI.
+
+After successful installed internal checks and signed-engine receipt capture,
+CI also removes only the reproducible `dist/internal/win-unpacked`, `mac-arm64`
+and `mac` build trees. Installers and engine/proof receipts remain for upgrades
+and publication; free space is logged before each published-version upgrade.
