@@ -411,7 +411,8 @@ them with the candidate, and verifies upgrade/restart preservation. No real
 profile or operational data is read. Compact receipts survive successful cleanup.
 
 Native first-frame reveal readiness lives in `mindex.presenter-lifetime.js`;
-changes to this installed-window lifecycle module trigger Desktop Packages.
+changes to this installed-window lifecycle module and generated `mindex.icons.js`
+trigger Desktop Packages.
 The native IPC sender guard remains in `electron/main.js`.
 
 ### CI resource bounds and signed encoder identity · 2026-11-08

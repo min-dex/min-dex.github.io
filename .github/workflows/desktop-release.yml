@@ -23,6 +23,7 @@ on:
       - tools/broadcast-prototype/**
       - electron/**
       - mindex.presenter-lifetime.js
+      - mindex.icons.js
       - tools/minimatch-compat/**
       - tests/verify_candidate_package.cjs
       - tests/test_desktop_youtube_local.cjs
