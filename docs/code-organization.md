@@ -52,6 +52,7 @@ The order is checked by `tests/solid_audit.py`.
   dependencies only after bootstrap calls them. Prefetch does not adopt worship
   records or bypass ID activation. The existing app loader owns projection and
   the existing atomic client owns persistence.
+- `mindex.desktop-ui.js` binds renderer update and broadcast controls to the desktop bridge. It loads before app bootstrap and uses the app’s existing edit and output guards.
 - `app.js` owns bootstrap, state, persistence orchestration, DOM events and canonical shared helpers.
 - `mindex.presenter-praise.js` owns song/score slide composition and form planning.
 - `mindex.presenter-live.js` owns music transport, synchronized lyrics and live scripture actions.
