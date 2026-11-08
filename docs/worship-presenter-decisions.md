@@ -4570,7 +4570,7 @@ Inline musical notes use a .80 title-font ratio. The shared span renderer in
 main Title and order/content captions overrides generic slide-span inheritance.
 
 2026-11-08: The separate ♬ heading above a fullscreen praise title uses the
-shared 80-unit fullscreen heading size. The song title retains its 150-unit
+shared 80-unit fullscreen heading size. The song title uses its 140-unit
 base. Thumbnails and fullscreen output scale both from the same stage units.
 Placement, colors and saved worship data are preserved.
 
@@ -5823,7 +5823,7 @@ levels retain horizontal scrolling.
 80px 공통 support token을 사용한다. 담당자·순서명·보조 본문·찬양 부제·곡 설명은
 모두 600으로 통일한다. 이전 담당 100·순서 80·설명 60 및
 담당자 800 굵기 예외를 대체한다. 제목 화면의 주 정보(순서·설교·곡 제목)는
-140px·800 공통 title token을 사용하고 찬양 음표는 그 제목의 0.8배(112px)를 유지한다.
+140px·800 공통 title token을 사용하고 별도로 놓인 찬양 음표는 80px로 맞춘다. 인라인 음표의 .8em 비율은 유지한다.
 가사·성경본문·하단 크로마키 자막 규칙은 유지한다. 같은 renderer를 사용하는 출력·발표자 미리보기·리모트에 적용하고,
 긴 보조 문구의 기존 축소·넘침 방지와 원문 데이터는 유지한다.
 

@@ -30,13 +30,7 @@ export function createScreenAwake({request,onChange}){
 }
 
 export function setupPhoneExperience(){
- const $=id=>document.getElementById(id);
- const labels={unsupported:'화면 꺼짐 방지 미지원',blocked:'화면 꺼짐 방지를 허용하지 않았어요.',released:'화면 꺼짐 방지 해제됨'};
- const awake=createScreenAwake({request:navigator.wakeLock?.request?()=>navigator.wakeLock.request('screen'):null,onChange:state=>{
-  $('screenStatus').textContent=labels[state]||'';
-  $('screenStatus').closest('.phone-options').hidden=!labels[state];$('screenRetry').hidden=!['blocked','released'].includes(state);
- }});
- $('screenRetry').onclick=()=>awake.retry();
+ const awake=createScreenAwake({request:navigator.wakeLock?.request?()=>navigator.wakeLock.request('screen'):null,onChange:()=>{}});
  document.addEventListener('visibilitychange',()=>awake.update({visible:!document.hidden}));
  window.addEventListener('pagehide',()=>awake.close());
  awake.update({visible:!document.hidden});

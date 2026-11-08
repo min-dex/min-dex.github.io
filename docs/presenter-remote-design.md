@@ -649,15 +649,15 @@ catalog identity and jump guards; no output command is queued offline.
 
 Connected Remote controllers have a 말씀 form. Typing/IME confirmation never
 publishes; explicit 말씀 송출 sends a bounded 200-character query through the
-existing encrypted command gate. PC's buildLiveScriptureSlide owns parsing,
-translation selection and verse validation. Lookup failure preserves current
+existing encrypted command gate. PC's shared citation append path owns parsing,
+translation selection, verse validation, slide generation and atomic item save. Lookup failure preserves current
 output and the Remote draft. PC navigation/service/source/live scripture changes
 during lookup reject the late result; no automatic retry is introduced.
 설교 제목으로 finds a visible title-assignee/title-content slide belonging to a canonical
 sermon-title item in this service and uses the normal presenter jump path, which
 clears temporary scripture. It is disabled if no such slide exists.
 Live reference is displayed separately; state updates never replace typed input.
-No worship document, DB schema or stored lyrics are changed.
+Only the selected citation item is saved through the existing atomic path; DB schema and stored lyrics are unchanged.
 
 
 ### Remote flow feedback and focus ·2026-10-31
@@ -688,3 +688,17 @@ A PC navigation change during lookup rejects the command; during shared append
 it preserves the newly added reference but suppresses a stale output jump and
 reports that distinction. Save failure is reported rather than acknowledged as
 a successful remote command. Sermon-title return retains the generated slides.
+
+### 설치 앱의 정적 배경 공유 ·2026-11-08
+
+설치 앱에서 번들 이미지가 file URL로 생성되면 Remote가 그 로컬 파일을
+열 수 없다. 공개 번들과 일치하는 assets/worship-backgrounds·presenter 이미지 경로만
+공개 HTTPS 경로로 바꾼다. CSS URL도 같은 규칙으로 정규화한다. 그 밖의
+file/blob/data URL은 계속 제거하며, 유효하지 않은 URL 선언만 제거해 다른
+레이아웃 토큰을 보존한다. 원본 영상·음원 재생이나 송출 상태에는 관여하지 않는다.
+
+### 화면 유지 자동 관리 ·2026-11-08
+
+연결된 Remote는 화면 Wake Lock을 기본 요청하고 화면 복귀 때 재요청한다.
+거절·미지원·OS 해제는 제어 기능을 막지 않으며 화면 유지 안내/재시도 UI는
+표시하지 않는다. 자동 무한 재시도는 하지 않고 기존 visibility 수명주기를 쓴다.

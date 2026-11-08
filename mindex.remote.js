@@ -27,6 +27,19 @@
  function activate(){if(ending)return;void ensureRegistry();panel.showModal();}
  trigger.onclick=activate;document.addEventListener('click',event=>{if(event.target.closest('[data-presenter-remote]'))activate();});
  $('[data-remote-end]').onclick=async()=>{if(ending)return;ending=true;paintPanel();try{await registry?.disconnectGuest();}finally{ending=false;paintPanel();}};
+ // Share shipped/public image URLs; never expose local paths or private blob/data payloads.
+ function previewImageUrl(value){
+  try{
+   const url=new URL(value,document.baseURI);
+   if(['https:','http:'].includes(url.protocol))return url.href;
+   const base=new URL('.',document.baseURI);
+   if(url.protocol==='file:'&&base.protocol==='file:'&&url.href.startsWith(base.href)){
+    const relative=decodeURIComponent(url.pathname.slice(base.pathname.length));
+    if(/^assets\/(?:worship-backgrounds|presenter)\/(?:previews\/)?[^/]+\.(?:png|webp|jpe?g|svg)$/i.test(relative))return new URL(relative,'https://min-dex.github.io/').href;
+   }
+  }catch{}
+  return '';
+ }
  const text=s=>[s?.title,s?.body||s?.text||s?.bodyText||s?.content].filter(v=>typeof v==='string').join('\n').slice(0,1800);
  function adapter(serviceId,outputSession,outputWindow,admin=false,followOutput=admin){
   let slideSet,slideSignature,slideService,slideKey;
@@ -44,10 +57,17 @@
      for(const attr of [...el.attributes])if(/^on/i.test(attr.name)||['href','srcdoc','srcset'].includes(attr.name))el.removeAttribute(attr.name);
      if(el.tagName==='IMG')el.setAttribute('loading','eager');
      if(el.hasAttribute('src')){
-      const url=new URL(el.getAttribute('src'),location.href);
-      if(['https:','http:'].includes(url.protocol))el.setAttribute('src',url.href);else el.removeAttribute('src');
+      const url=previewImageUrl(el.getAttribute('src'));
+      if(url)el.setAttribute('src',url);else el.removeAttribute('src');
      }
-     if(/(?:blob:|data:|file:|javascript:)/i.test(el.getAttribute('style')||''))el.removeAttribute('style');
+     for(const property of [...el.style]){
+      let invalid=false;
+      const value=el.style.getPropertyValue(property).replace(/url\(\s*(["']?)(.*?)\1\s*\)/gi,(_,quote,source)=>{
+       const url=previewImageUrl(source);if(!url)invalid=true;return url?`url("${url.replace(/"/g,'%22')}")`:'';
+      });
+      if(invalid||/(?:blob:|data:|file:|javascript:)/i.test(value))el.style.removeProperty(property);
+      else el.style.setProperty(property,value,el.style.getPropertyPriority(property));
+     }
     }
     const stage=document.createElement('div');stage.style.cssText='position:fixed;left:-10000px;top:0;width:1920px;height:1080px;visibility:hidden;pointer-events:none';
     stage.append(template.content);document.body.append(stage);

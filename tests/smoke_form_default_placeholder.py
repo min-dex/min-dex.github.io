@@ -175,7 +175,7 @@ try:
     const glyphRange=document.createRange();glyphRange.selectNodeContents(fullTitle);const glyphBounds=glyphRange.getBoundingClientRect();
     check(Math.abs((glyphBounds.left+glyphBounds.right-stageBounds.left-stageBounds.right)/2)<2,'fullscreen content glyphs must center');
     check(headingBounds.bottom<=titleBounds.top+1 && Math.abs((titleBounds.top+titleBounds.bottom-stageBounds.top-stageBounds.bottom)/2)<108,'fullscreen order heading above centered title');
-    check(parseFloat(getComputedStyle(fullTitle).fontSize)===150,'short fullscreen content title must retain original scale');
+    check(parseFloat(getComputedStyle(fullTitle).fontSize)===140,'short fullscreen content title must retain original scale');
     fullTitleHost.remove();
     for(const slide of [mainTitle,oldContent])for(const noChromakey of [true,false]){
      const stage=document.createElement('main');stage.className='presenter-output-root'+(noChromakey?' no-chromakey':'');
@@ -191,7 +191,7 @@ try:
        const noteSize=parseFloat(getComputedStyle(heading).fontSize);
        const titleSize=parseFloat(getComputedStyle(stage.querySelector('.presenter-title-content-title')).fontSize);
        check(Math.abs(noteSize-80*width/1920)<.01,'fullscreen note stage size '+width+' '+noteSize);
-       check(Math.abs(titleSize-150*width/1920)<.01,'fullscreen title stage size '+width+' '+titleSize);
+       check(Math.abs(titleSize-140*width/1920)<.01,'fullscreen title stage size '+width+' '+titleSize);
       }
      }
     stage.remove();

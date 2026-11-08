@@ -165,3 +165,15 @@ const presenterTools = (() => {
   }
   return {toolbar,key,mount,close,outputFrame,receive};
 })();
+
+// Manual media selection belongs with the media controls.
+function loadServiceMusicFile(file) {
+  if (!file) return;
+  const audio = getServiceMusicAudio();
+  if (state.serviceMusic.objectUrl) URL.revokeObjectURL(state.serviceMusic.objectUrl);
+  state.serviceMusic.objectUrl = URL.createObjectURL(file);
+  state.serviceMusic.fileName = file.name || "음악";
+  setServiceMusicSource(audio, state.serviceMusic.objectUrl, "manual", { loop: false }, state.serviceMusic.fileName);
+  audio.volume = state.serviceMusic.volumeLevel / 5;
+  renderPresenterControlState();
+}

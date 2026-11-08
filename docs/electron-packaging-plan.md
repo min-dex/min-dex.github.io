@@ -431,3 +431,8 @@ After successful installed internal checks and signed-engine receipt capture,
 CI also removes only the reproducible `dist/internal/win-unpacked`, `mac-arm64`
 and `mac` build trees. Installers and engine/proof receipts remain for upgrades
 and publication; free space is logged before each published-version upgrade.
+
+Windows may retain app.asar briefly after the isolated Electron process closes.
+Validated disposable-tree cleanup retries only Windows sharing/lock violations
+(32/33), at most 20 seconds; other errors fail immediately. Upgrade preservation
+receipts are written and compared before cleanup, with no production profile use.

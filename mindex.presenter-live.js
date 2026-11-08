@@ -318,16 +318,6 @@ function runServiceMusicAction(action, binding = null) {
     });
 }
 
-function loadServiceMusicFile(file) {
-  if (!file) return;
-  const audio = getServiceMusicAudio();
-  if (state.serviceMusic.objectUrl) URL.revokeObjectURL(state.serviceMusic.objectUrl);
-  state.serviceMusic.objectUrl = URL.createObjectURL(file);
-  state.serviceMusic.fileName = file.name || "음악";
-  setServiceMusicSource(audio, state.serviceMusic.objectUrl, "manual", { loop: false }, state.serviceMusic.fileName);
-  audio.volume = state.serviceMusic.volumeLevel / 5;
-  renderPresenterControlState();
-}
 
 function presenterSyncTimelineForSlide(slide = null) {
   const sync = slide?.syncTimeline && typeof slide.syncTimeline === "object" ? slide.syncTimeline : null;

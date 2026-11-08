@@ -16,13 +16,13 @@ try:
    assert page.locator('#installHelp, #installApp').count()==0;assert page.locator('.phone-options').is_hidden()
    assert page.locator('#code').evaluate("e=>getComputedStyle(e).fontWeight")=='400'
    if engine=='chromium':assert float(page.locator('#code').evaluate("e=>getComputedStyle(e,'::placeholder').opacity"))<.6
-   page.evaluate('awake.update({active:true})');page.wait_for_function('locks.length===1');assert page.locator('#screenStatus').is_hidden()
+   page.evaluate('awake.update({active:true})');page.wait_for_function('locks.length===1');assert page.locator('#screenStatus,#screenRetry').count()==0
    assert page.locator('#keepAwake').count()==0
    page.evaluate('awake.close()');page.wait_for_function('locks[0].released')
    page.evaluate('awake.update({active:true})');page.wait_for_function('locks.length===2')
-   page.evaluate('locks[1].release()');assert page.locator('#screenRetry').is_visible();page.click('#screenRetry');page.wait_for_function('locks.length===3')
-   page.evaluate('awake.close();denied=true;awake.update({active:true})');page.wait_for_function("document.querySelector('#screenStatus').textContent.includes('허용하지')")
-   assert page.locator('.phone-options').is_visible()
+   page.evaluate('locks[1].release();awake.update({visible:false});awake.update({visible:true})');page.wait_for_function('locks.length===3')
+   page.evaluate('awake.close();denied=true;awake.update({active:true})');page.wait_for_timeout(100);assert page.locator('#screenStatus,#screenRetry,.phone-options').count()==0
+   page.evaluate('awake.update({visible:false});denied=false;awake.update({visible:true})');page.wait_for_function('locks.length===4')
    for width in (320,390,768):
     page.set_viewport_size({'width':width,'height':844});assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
    page.screenshot(path='/tmp/mindex-remote-phone-options-'+engine+'.png',full_page=True)

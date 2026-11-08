@@ -16,6 +16,15 @@ try:
     if(!value.previewCurrent.includes('기쁨으로')||JSON.stringify(value).length>18000)throw Error('preview payload');
     if(value.previewCurrent!==adapter.read().previewCurrent)throw Error('unstable preview');
     state.presenter.safetyBlank=true;if(!adapter.read().previewCurrent.includes('background:#000'))throw Error('blackout');
+    const render=renderPresenterSlideMiniPreview;
+    const base=Object.getOwnPropertyDescriptor(document,'baseURI');
+    try{
+     Object.defineProperty(document,'baseURI',{configurable:true,value:'file:///fixture/renderer/index.html'});
+     renderPresenterSlideMiniPreview=()=>`<span class="svc-slide-mini-output"><span class="svc-slide-mini-canvas presenter-output-root no-chromakey has-background" style="--presenter-bg-image:url('file:///fixture/renderer/assets/presenter/cadaros-thumbnail.png');--keep-token:80px;background-image:url('data:image/png,bad')">배경 보존</span><img src="file:///private/secret.png"></span>`;
+     state.presenter.safetyBlank=false;state.presenter.sourceSignature='file-fixture';
+     value.filePreview=adapter.read().previewCurrent;
+     if(!value.filePreview.includes('https://min-dex.github.io/assets/presenter/cadaros-thumbnail.png')||value.filePreview.includes('file:')||value.filePreview.includes('data:')||!value.filePreview.includes('--keep-token: 80px'))throw Error('packaged image sanitization');
+    }finally{renderPresenterSlideMiniPreview=render;if(base)Object.defineProperty(document,'baseURI',base);else delete document.baseURI;}
     return value;
    }''')
    phone=browser.new_page(viewport={'width':390,'height':844});phone.route('**/remote.mjs*',lambda r:r.fulfill(body='',content_type='text/javascript'))
@@ -41,6 +50,13 @@ try:
      box=phone.locator('#current').bounding_box();assert abs(box['width']/box['height']-16/9)<.02
     phone.set_viewport_size({'width':390,'height':844})
     phone.screenshot(path='/tmp/mindex-remote-preview-'+engine+'-'+theme+'.png',full_page=True)
+   from pathlib import Path
+   phone.route('https://min-dex.github.io/assets/presenter/cadaros-thumbnail.png',lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/'assets/presenter/cadaros-thumbnail.png')))
+   phone.evaluate("draw(packet.filePreview,'')")
+   stage=phone.frame_locator('#current iframe').locator('.presenter-output-root')
+   stage.get_by_text('배경 보존').wait_for()
+   assert 'https://min-dex.github.io/assets/presenter/cadaros-thumbnail.png' in stage.evaluate("el=>getComputedStyle(el).getPropertyValue('--presenter-bg-image')")
+   assert not phone.frame_locator('#current iframe').locator('img').get_attribute('src')
    phone.evaluate('''()=>{window.executed=false;draw('<script>parent.executed=true</script><img src="bad" onerror="parent.executed=true"><form action="/bad"></form>','');}''')
    phone.wait_for_timeout(200);assert not phone.evaluate('executed')
    assert phone.locator('#current iframe').get_attribute('sandbox')==''

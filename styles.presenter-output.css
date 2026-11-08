@@ -1548,6 +1548,7 @@
 }
 
 /* Announcement asides share the authored text and emphasis at 80% size. */
+:is(.svc-slide-mini-output, .presenter-output-root):is(.no-chromakey, :not(.no-chromakey)) .presenter-slide--scripture .presenter-slide-text span.presenter-scripture-paren,
 span.presenter-scripture-paren,
 span.presenter-announcement-paren,
 :is(.svc-slide-mini-output, .presenter-output-root) .presenter-slide--lyrics .presenter-slide-text span.presenter-lyric-paren {

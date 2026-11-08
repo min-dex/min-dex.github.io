@@ -44,7 +44,7 @@ try:
     }
     for(const mode of ['presenter-output-root','presenter-output-root no-chromakey']) {
      host.className=mode;host.style.cssText='width:1920px;height:1080px;position:relative;container-type:size';
-     for(const context of ['reading','citation']) {
+     for(const context of ['reading','citation','']) {
       const slide={type:'scripture',elementType:PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT,scriptureContext:context,title:'시편 1:1',text:'1 복 있는 사람 (작은 설명(안쪽))은 <말씀>을 따릅니다',textHighlights:[{text:'설명(안쪽)',bold:true}]};
       const before=JSON.stringify(slide);host.innerHTML=renderPresenterSlideFrame(slide);
       const spans=[...host.querySelectorAll('.presenter-scripture-paren')];check(spans.length>0,'scripture parentheses missing '+context);

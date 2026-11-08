@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261108-dawn-output-continuity",
+  "version": "20261108-internal-102-final",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "9bb7b9156602cbbdce9babcb956aa4e05212a35d2263518d5c37867aa00f6f26",
-  "runtime_sha256": "69410daf9a553e020d41fbc2a587f39148a1882054810560252510c8bd63dd99",
-  "source_bytes": 1355249,
-  "runtime_bytes": 967464,
-  "source_gzip": 310653,
-  "runtime_gzip": 243671
+  "source_sha256": "3efdc4355834efb6445a6cffeb917130dbc8016fc7920ba9563228926eaa3906",
+  "runtime_sha256": "5d4f1aea48460b9f08bfbfd7754ba004afc7017671428e7632acf8248fc1e043",
+  "source_bytes": 1355582,
+  "runtime_bytes": 967763,
+  "source_gzip": 310717,
+  "runtime_gzip": 243725
 }
