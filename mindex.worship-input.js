@@ -1863,6 +1863,19 @@ function syncServiceVersionFormErrors(field) {
 const CHILDREN_OFFERING_VIDEO_URL = "https://tdulobbnppmpiqqxbvqy.supabase.co/storage/v1/object/public/mindex-worship-media/services/222e03ec-096e-4530-af33-d952eb23f9b7/35e6f2a3-ec9a-456d-9a28-d648e3f91a03/1792893957703-.mp4";
 const CHILDREN_OFFERING_VIDEO_NAME = "문들아 머리 들어라.mp4";
 
+function childrenOfferingVideoDisplay(sectionKey, elementType, slotKey, label, asset) {
+  if (sectionKey !== "offering" || elementType !== "video") return { label, asset };
+  const labelKey = compactSearchValue(label);
+  const defaultVideo = asset.url === CHILDREN_OFFERING_VIDEO_URL;
+  if (labelKey === "어린이부봉헌영상" || (labelKey === "영상" && (slotKey === "offering.video" || defaultVideo))) {
+    label = "봉헌영상";
+  }
+  if (defaultVideo && asset.name === "봉헌찬양 · 문들아 머리 들어라-송출용.mp4") {
+    asset = { ...asset, name: CHILDREN_OFFERING_VIDEO_NAME };
+  }
+  return { label, asset };
+}
+
 // Creation-only default: never applied by existing-service template projection.
 function applyChildrenOfferingCreationDefault(service, scaffold) {
   if (worshipAppServiceTypeId(service?.type_id) !== "children") return;

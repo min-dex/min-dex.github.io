@@ -4895,13 +4895,8 @@ function groupWorshipElements(sections = [], elements = []) {
       && (["청소년부광고", "청년부광고"].includes(compactSearchValue(elementLabel))
         || (compactSearchValue(elementLabel) === "광고" && ["body", "plain_text"].includes(configuredElementType)));
     const inputMode = canonicalWorshipElementInputMode(element);
-    const asset = normalizeServiceAsset(config.asset || config.media || element.asset || sourceRef.asset);
-    const isOfferingVideo = sectionKey === "offering" && configuredElementType === "video";
-    const legacyChildrenOffering = isOfferingVideo && (sourceRef.slotKey === "offering.video"
-      || asset.url === CHILDREN_OFFERING_VIDEO_URL || compactSearchValue(elementLabel) === "어린이부봉헌영상");
-    if (isOfferingVideo && asset.url === CHILDREN_OFFERING_VIDEO_URL && asset.name === "봉헌찬양 · 문들아 머리 들어라-송출용.mp4") {
-      asset.name = CHILDREN_OFFERING_VIDEO_NAME;
-    }
+    const { asset, label } = childrenOfferingVideoDisplay(sectionKey, configuredElementType, sourceRef.slotKey,
+      sourceRef.label || section.title || "", normalizeServiceAsset(config.asset || config.media || element.asset || sourceRef.asset));
     const mediaAnnouncement = sectionKey === "announcements"
       && !departmentAnnouncementBody
       && (hasServiceAsset(asset) || ["image", "video", "ppt", "pdf"].includes(configuredElementType) || inputMode === "asset");
@@ -4953,8 +4948,7 @@ function groupWorshipElements(sections = [], elements = []) {
       id: element.id,
       service_id: serviceId,
       sort_order: (Number(section.sort_order) || 0) * 1000 + (Number(element.sort_order) || 0),
-      label: legacyChildrenOffering && ["영상", "어린이부봉헌영상"].includes(compactSearchValue(elementLabel))
-        ? "봉헌영상" : sourceRef.label || section.title || "",
+      label,
       assignee: element.person || "",
       raw_title: worshipElementDisplayTitle(element, section, sourceRef, config),
       ...(state.singleSongCatalog
