@@ -186,8 +186,13 @@ try:
       check(Math.abs(ratio-.80)<.005,'inline note ratio '+noChromakey+' '+ratio);
      }else check(heading,'song note markup missing '+slide.type+' '+noChromakey);
      if(heading){
-      const ratio=parseFloat(getComputedStyle(heading).fontSize)/parseFloat(getComputedStyle(stage.querySelector('.presenter-title-content-title')).fontSize);
-      check(Math.abs(ratio-.80)<.005,'separate note ratio '+ratio);
+      for(const width of [1920,368]){
+       stage.style.width=width+'px';
+       const noteSize=parseFloat(getComputedStyle(heading).fontSize);
+       const titleSize=parseFloat(getComputedStyle(stage.querySelector('.presenter-title-content-title')).fontSize);
+       check(Math.abs(noteSize-80*width/1920)<.01,'fullscreen note stage size '+width+' '+noteSize);
+       check(Math.abs(titleSize-150*width/1920)<.01,'fullscreen title stage size '+width+' '+titleSize);
+      }
      }
     stage.remove();
     }

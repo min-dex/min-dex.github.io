@@ -4566,12 +4566,13 @@ forms, versions, service links or operational records are rewritten.
 
 ## Consistent song-note proportions ·2026-10-24
 
-All musical title notes share a .80 title-font ratio (increased from .65 after
-visual review of .75 and explicit approval of .80). Inline notes use the same
-span renderer in main Title and order/content captions; its sizing overrides the
-generic slide-span inheritance. The separate fullscreen heading uses the same
-ratio against the song-title token. Keep placement, colors, title sizing, content
-and saved worship data unchanged.
+Inline musical notes use a .80 title-font ratio. The shared span renderer in
+main Title and order/content captions overrides generic slide-span inheritance.
+
+2026-11-08: The separate ♬ heading above a fullscreen praise title uses the
+shared 80-unit fullscreen heading size. The song title retains its 150-unit
+base. Thumbnails and fullscreen output scale both from the same stage units.
+Placement, colors and saved worship data are preserved.
 
 
 ## Timing popup control alignment ·2026-10-24
