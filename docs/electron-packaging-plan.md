@@ -413,3 +413,16 @@ profile or operational data is read. Compact receipts survive successful cleanup
 Native first-frame reveal readiness lives in `mindex.presenter-lifetime.js`;
 changes to this installed-window lifecycle module trigger Desktop Packages.
 The native IPC sender guard remains in `electron/main.js`.
+
+### CI resource bounds and signed encoder identity · 2026-11-08
+
+Mac ad-hoc signing rewrites the FFmpeg signature, so installed engine bytes are
+compared with a source-SHA/architecture-bound receipt from the strictly verified
+signed build. The receipt also pins the verified pre-signing encoder digest;
+Intel repeats that input comparison and installed-app codesign check. Binary
+comparisons use compact SHA-256 digests rather than formatting full Buffer diffs.
+After TEST acceptance and artifact upload, CI removes only its marker-owned
+fixtures and reproducible TEST/prior-test trees. Current internal installers and
+proof JSON remain. Completed internal fixtures are similarly removed before
+sequential published-version upgrades. The 20 GiB reserve plus 6 GiB upgrade
+budget remains unchanged; cleanup is forbidden outside disposable CI.

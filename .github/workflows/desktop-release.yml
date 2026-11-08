@@ -28,6 +28,7 @@ on:
       - tests/test_desktop_youtube_local.cjs
       - tests/test_desktop_upgrade.cjs
       - tests/verify_published_upgrade.py
+      - tests/cleanup_desktop_ci.py
       - tests/install_test_fixture.py
       - tests/test_electron_updater.cjs
       - tests/test_minimatch_compat.cjs
@@ -37,6 +38,7 @@ on:
       - tests/test_release_preflight.mjs
       - scripts/verify-release.mjs
       - scripts/product-identity.cjs
+      - scripts/packaged-encoder-identity.cjs
       - product-release.json
 
 permissions:
@@ -141,6 +143,26 @@ jobs:
           exe="$(node -p 'JSON.parse(require("fs").readFileSync(require("path").join(process.env.RUNNER_TEMP,"install-fixture.json"))).exe')"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" upgrade "$GITHUB_SHA" "${version}-test"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/upgrade-proof.json" restart "$GITHUB_SHA" "${version}-test"
+      - name: Retain verified TEST installers before cleanup
+        if: ${{ !inputs.publish_release }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mindex-${{ matrix.platform }}-${{ inputs.publish_release && 'signed' || 'test' }}
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest*.yml
+            dist/test/*.dmg
+            dist/test/*.exe
+
+      - name: Remove completed TEST fixtures and reproducible builds
+        if: ${{ !inputs.publish_release }}
+        run: python tests/cleanup_desktop_ci.py test
       - name: Build and verify church internal installers without publication
         if: ${{ !inputs.publish_release }}
         shell: bash
@@ -155,6 +177,8 @@ jobs:
             target=win-x64
           else
             pnpm exec electron-builder --config electron-builder.internal.cjs --mac dmg --arm64 --x64 --publish never
+            node scripts/packaged-encoder-identity.cjs mac-arm64 "dist/internal/mac-arm64/Mindex.app" dist/internal/encoder-mac-arm64.json
+            node scripts/packaged-encoder-identity.cjs mac-x64 "dist/internal/mac/Mindex.app" dist/internal/encoder-mac-x64.json
             target="mac-$(node -p process.arch)"
             installer="dist/internal/Mindex-${version}-$target.dmg"
           fi
@@ -169,6 +193,7 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" "$version"
+          python tests/cleanup_desktop_ci.py internal
           python tests/verify_published_upgrade.py "$installer" "$target" "$GITHUB_SHA" "$version"
       - name: Retain published-version upgrade receipts
         if: always()
@@ -189,6 +214,7 @@ jobs:
           path: |
             dist/internal/*.dmg
             dist/internal/*.exe
+            dist/internal/encoder-*.json
       - name: Build signed packages (no public release)
         if: ${{ inputs.publish_release }}
         shell: bash
@@ -215,6 +241,7 @@ jobs:
             pnpm exec electron-builder --win nsis --x64 --publish never -c.forceCodeSigning=true
           fi
       - name: Upload packages without renaming update assets
+        if: ${{ inputs.publish_release }}
         uses: actions/upload-artifact@v4
         with:
           name: mindex-${{ matrix.platform }}-${{ inputs.publish_release && 'signed' || 'test' }}
@@ -274,6 +301,8 @@ jobs:
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" upgrade "$GITHUB_SHA" "${version}-test"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-proof.json" restart "$GITHUB_SHA" "${version}-test"
 
+      - name: Remove completed Intel TEST fixtures
+        run: python tests/cleanup_desktop_ci.py intel-test
       - uses: actions/download-artifact@v4
         with:
           name: mindex-mac-internal
@@ -294,6 +323,7 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" "$version"
+          python tests/cleanup_desktop_ci.py intel-internal
           python tests/verify_published_upgrade.py "$installer" mac-x64 "$GITHUB_SHA" "$version"
 
       - name: Retain Intel published-version upgrade receipts

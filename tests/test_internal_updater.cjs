@@ -57,3 +57,15 @@ test('web parity compares renderer identity and never hides installer updates wh
   assert.equal(c.snapshot().webSync,mode==='offline'?'unknown':mode);
  }
 });
+
+
+test('encoder digest handles multi-chunk files and reports changed bytes compactly',()=>{
+ const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),crypto=require('node:crypto');
+ const {fileIdentity}=require('../scripts/packaged-encoder-identity.cjs');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'mindex-digest-'));
+ try {
+  const file=path.join(dir,'fixture'),data=Buffer.alloc(3*1024*1024+17,7);fs.writeFileSync(file,data);
+  const before=fileIdentity(file);assert.deepEqual(before,{bytes:data.length,sha256:crypto.createHash('sha256').update(data).digest('hex')});
+  data[data.length-1]=8;fs.writeFileSync(file,data);assert.notEqual(fileIdentity(file).sha256,before.sha256);
+ } finally {fs.rmSync(dir,{recursive:true});}
+});

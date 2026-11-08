@@ -7,6 +7,7 @@ const {execFileSync} = require('node:child_process');
 const builder = createRequire(require.resolve('electron-builder'));
 const asar = createRequire(builder.resolve('app-builder-lib'))('@electron/asar');
 const {identity} = require('../scripts/product-identity.cjs');
+const {fileIdentity} = require('../scripts/packaged-encoder-identity.cjs');
 const [resources, target] = process.argv.slice(2);
 const archive = path.join(resources, 'app.asar');
 const packagedPaths = new Set(asar.listPackage(archive).map(name => name.replace(/\\/g, '/').replace(/^\//, '')));
@@ -28,7 +29,17 @@ for (const {name, blob} of files) {
 }
 assert.ok(dawnAudio, 'approved dawn MP3 is included');
 const desktop = execFileSync('git',['ls-files','-z','electron','tools/broadcast-prototype']).toString().split('\0').filter(Boolean);
-for (const name of desktop) assert.deepEqual(asar.extractFile(archive,path.normalize(name)), fs.readFileSync(name), name);
+const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
+for (const name of desktop) assert.equal(sha256(asar.extractFile(archive,path.normalize(name))), sha256(fs.readFileSync(name)), name);
 const binary = target.startsWith('win-') ? 'ffmpeg.exe' : 'ffmpeg';
-assert.deepEqual(fs.readFileSync(path.join(resources,'broadcast-engine',binary)), fs.readFileSync(path.join('.cache','broadcast-engine',target,binary)));
+const originalEncoder = fileIdentity(path.join('.cache','broadcast-engine',target,binary));
+let expectedEncoder = originalEncoder;
+if (process.argv[4] === 'internal' && target.startsWith('mac-')) {
+ const receipt=JSON.parse(fs.readFileSync(path.join('dist','internal',`encoder-${target}.json`)));
+ assert.equal(receipt.sourceCommit,record.sourceCommit,'signed encoder source');
+ assert.equal(receipt.target,target,'signed encoder architecture');
+ assert.deepEqual(receipt.original,originalEncoder,'pinned encoder input');
+ expectedEncoder=receipt.signed;
+}
+assert.deepEqual(fileIdentity(path.join(resources,'broadcast-engine',binary)),expectedEncoder,'packaged encoder identity');
 console.log(JSON.stringify({source:record.sourceCommit,renderer:record.rendererTree,target,rendererFiles:files.length,desktopFiles:desktop.length,dawnAudio}));

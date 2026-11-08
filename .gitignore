@@ -42,6 +42,7 @@ assets/youtube/
 !scripts/check_hymn_structure_summary.py
 
 !scripts/product-identity.cjs
+!scripts/packaged-encoder-identity.cjs
 mindex-build.json
 
 !scripts/publish-internal.py

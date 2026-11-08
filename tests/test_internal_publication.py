@@ -63,4 +63,31 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    self.assertEqual(len(calls),2)
    self.assertFalse(any(str(candidate) in args for args in calls))
 
+class CiCleanup(unittest.TestCase):
+ def test_only_owned_completed_fixtures_removed_and_receipts_kept(self):
+  import cleanup_desktop_ci as clean
+  with tempfile.TemporaryDirectory() as project, tempfile.TemporaryDirectory() as runner, tempfile.TemporaryDirectory(prefix='mindex-install-qa-') as install:
+   root=pathlib.Path(project);temp=pathlib.Path(runner);token='a'*32
+   profile=pathlib.Path(tempfile.gettempdir())/('mindex-isolated-upgrade-'+token)
+   self.assertFalse(profile.exists());profile.mkdir()
+   try:
+    (profile/'fixture-only.json').write_text(json.dumps({'token':token,'appId':'kr.mindex.app.test'}))
+    (pathlib.Path(install)/'fixture-only').write_text('kr.mindex.app.test')
+    (temp/'install-fixture.json').write_text(json.dumps({'root':install}))
+    (temp/'upgrade-proof.json').write_text(json.dumps({'token':token,'profile':str(profile/'user-data')}))
+    (root/'dist/test').mkdir(parents=True);(root/'dist/internal').mkdir();(root/'dist/internal/keep.dmg').write_text('keep')
+    with patch.dict(os.environ,{'GITHUB_ACTIONS':'false'}):
+     with self.assertRaises(RuntimeError):clean.cleanup(root,temp,'test')
+    with patch.dict(os.environ,{'GITHUB_ACTIONS':'true'}):
+     (pathlib.Path(install)/'fixture-only').write_text('wrong')
+     with self.assertRaises(AssertionError):clean.cleanup(root,temp,'test')
+     self.assertTrue(profile.exists());self.assertTrue((root/'dist/test').exists())
+     (pathlib.Path(install)/'fixture-only').write_text('kr.mindex.app.test')
+     clean.cleanup(root,temp,'test')
+    self.assertFalse(profile.exists());self.assertFalse((root/'dist/test').exists())
+    self.assertTrue((temp/'upgrade-proof.json').exists());self.assertTrue((root/'dist/internal/keep.dmg').exists())
+   finally:
+    if profile.exists():
+     import shutil;shutil.rmtree(profile)
+
 if __name__=='__main__':unittest.main()
