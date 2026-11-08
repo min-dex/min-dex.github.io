@@ -74,7 +74,7 @@ class CiCleanup(unittest.TestCase):
     (profile/'fixture-only.json').write_text(json.dumps({'token':token,'appId':'kr.mindex.app.test'}))
     (pathlib.Path(install)/'fixture-only').write_text('kr.mindex.app.test')
     (temp/'install-fixture.json').write_text(json.dumps({'root':install}))
-    (temp/'upgrade-proof.json').write_text(json.dumps({'token':token,'profile':str(profile/'user-data')}))
+    (temp/'upgrade-proof.json').write_text(json.dumps({'token':token,'profile':str(profile/'설정'),'label':'한글 예배 검증'},ensure_ascii=False),encoding='utf-8')
     (root/'dist/test').mkdir(parents=True);(root/'dist/internal').mkdir();(root/'dist/internal/keep.dmg').write_text('keep')
     with patch.dict(os.environ,{'GITHUB_ACTIONS':'false'}):
      with self.assertRaises(RuntimeError):clean.cleanup(root,temp,'test')
@@ -83,7 +83,10 @@ class CiCleanup(unittest.TestCase):
      with self.assertRaises(AssertionError):clean.cleanup(root,temp,'test')
      self.assertTrue(profile.exists());self.assertTrue((root/'dist/test').exists())
      (pathlib.Path(install)/'fixture-only').write_text('kr.mindex.app.test')
-     clean.cleanup(root,temp,'test')
+     read=pathlib.Path.read_text
+     # Emulate the Windows legacy default; the helper must explicitly use UTF-8.
+     with patch.object(pathlib.Path,'read_text',lambda file,encoding=None,errors=None:read(file,encoding=encoding or 'cp1252',errors=errors)):
+      clean.cleanup(root,temp,'test')
     self.assertFalse(profile.exists());self.assertFalse((root/'dist/test').exists())
     self.assertTrue((temp/'upgrade-proof.json').exists());self.assertTrue((root/'dist/internal/keep.dmg').exists())
    finally:

@@ -15,20 +15,20 @@ def cleanup(root, temp, phase):
              'intel-test': ('intel-fixture.json', 'intel-proof.json'),
              'internal': ('internal-install.json', 'internal-proof.json'),
              'intel-internal': ('intel-internal.json', 'intel-internal-proof.json')}[phase]
-    state = json.loads((temp / names[0]).read_text())
-    proof = json.loads((temp / names[1]).read_text())
+    state = json.loads((temp / names[0]).read_text(encoding='utf-8'))
+    proof = json.loads((temp / names[1]).read_text(encoding='utf-8'))
     install = Path(state['root'])
     token = proof['token']
     profile = Path(proof['profile']).parent
     assert install.parent.resolve() == Path(tempfile.gettempdir()).resolve()
     assert not install.is_symlink() and install.name.startswith('mindex-install-qa-')
-    assert (install / 'fixture-only').read_text() == 'kr.mindex.app.test'
+    assert (install / 'fixture-only').read_text(encoding='utf-8') == 'kr.mindex.app.test'
     assert len(token) == 32 and all(c in '0123456789abcdef' for c in token)
     assert profile.parent.resolve() == Path(tempfile.gettempdir()).resolve()
     assert not profile.is_symlink() and profile.name == 'mindex-isolated-upgrade-' + token
     marker = profile / 'fixture-only.json'
     assert not marker.is_symlink()
-    assert json.loads(marker.read_text()) == {'token': token, 'appId': 'kr.mindex.app.test'}
+    assert json.loads(marker.read_text(encoding='utf-8')) == {'token': token, 'appId': 'kr.mindex.app.test'}
     paths = [install, profile]
     if phase.endswith('test'):
         # The workflow uploads requested TEST installers before this call.

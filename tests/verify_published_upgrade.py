@@ -60,19 +60,19 @@ def main():
             state = receipt_dir / (previous + '-install.json')
             proof = receipt_dir / (previous + '-proof.json')
             subprocess.run([sys.executable, 'tests/install_test_fixture.py', str(installer), str(state), 'internal'], check=True)
-            exe = json.loads(state.read_text())['exe']
+            exe = json.loads(state.read_text(encoding='utf-8'))['exe']
             for phase in ('seed', 'restart'):
                 subprocess.run(['node', 'tests/test_desktop_upgrade.cjs', exe, str(proof), phase, SOURCES[previous], previous], check=True)
             subprocess.run([sys.executable, 'tests/install_test_fixture.py', str(candidate), str(state), 'internal'], check=True)
             for phase in ('upgrade', 'restart'):
                 subprocess.run(['node', 'tests/test_desktop_upgrade.cjs', exe, str(proof), phase, sha, version], check=True)
             # Only marker-owned, successful CI installation output is reproducible.
-            root = Path(json.loads(state.read_text())['root'])
+            root = Path(json.loads(state.read_text(encoding='utf-8'))['root'])
             assert root.parent.resolve() == Path(tempfile.gettempdir()).resolve()
             assert not root.is_symlink() and root.name.startswith('mindex-install-qa-')
-            assert (root / 'fixture-only').read_text() == 'kr.mindex.app.test'
+            assert (root / 'fixture-only').read_text(encoding='utf-8') == 'kr.mindex.app.test'
             shutil.rmtree(root)
-            saved = json.loads(proof.read_text())
+            saved = json.loads(proof.read_text(encoding='utf-8'))
             profile = Path(saved['profile']).parent
             token = saved['token']
             assert len(token) == 32 and all(c in '0123456789abcdef' for c in token)
@@ -80,7 +80,7 @@ def main():
             assert not profile.is_symlink() and profile.name == 'mindex-isolated-upgrade-' + token
             marker = profile / 'fixture-only.json'
             assert not marker.is_symlink()
-            assert json.loads(marker.read_text()) == {'token': token, 'appId': 'kr.mindex.app.test'}
+            assert json.loads(marker.read_text(encoding='utf-8')) == {'token': token, 'appId': 'kr.mindex.app.test'}
             shutil.rmtree(profile)
             print(f'PASS published {previous} -> {version} {target}; synthetic data preserved', flush=True)
 
