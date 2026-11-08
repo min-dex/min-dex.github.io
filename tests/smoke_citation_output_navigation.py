@@ -104,7 +104,7 @@ def main():
               while(!finishSave) await Promise.resolve();
               assert(pendingPresenterCitationRequests.size===1,'lock released before persistence');
               assert(saveOptions._itemId===elementId,'save target is not stable identity');
-              finishSave(false);await saving;
+              finishSave(false);const failedSave=await saving;assert(failedSave?.ok===false&&failedSave.message,'failed save acknowledged success');
               assert(input.value==='마 5:45' && !pendingPresenterCitationRequests.size,'failed save did not retain retry input');
               saveServiceItemPatch=async()=>true;
               presenterCitationAutoOutput=true;live=false;
@@ -122,6 +122,15 @@ def main():
               input.value='마 5:46';await appendPresenterCitationReference(input);
               assert(JSON.stringify(state.serviceItems[serviceId][0])===beforeMissingTarget,'missing target left citation draft behind');
               assert(state.dirty.service===beforeMissingDirty,'missing target changed dirty state');
+              setup();live=true;actions=[];presenterCitationAutoOutput=false;
+              presenterSlidesForService=()=>[{...slide,elementId}];input.value='마 5:45';
+              const stale=await appendPresenterCitationReference(input,{autoOutput:true,canOutput:()=>false});
+              assert(stale.ok===false&&!actions.length,'late remote request overwrote PC navigation');
+              assert(state.serviceItems[serviceId][0].raw_title.includes('5:45'),'late remote request lost added reference');
+              input.value='마 5:45';
+              const remote=await appendPresenterCitationReference(input,{autoOutput:true,canOutput:()=>true});
+              assert(remote.ok&&actions.length===1&&!presenterCitationAutoOutput,'remote send did not use shared jump or changed PC preference');
+              actions=[];
               const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.dataset.presenterCitationAutoOutput='';
               document.body.append(checkbox);checkbox.addEventListener('change',handleDetailChange);
               checkbox.checked=false;checkbox.dispatchEvent(new Event('change'));

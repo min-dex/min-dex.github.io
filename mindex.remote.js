@@ -72,15 +72,15 @@
   async function showScripture(target){
    const query=typeof target?.query==='string'?target.query.trim():'';
    if(!query||query.length>200)throw Error('성구를 200자 이내로 입력해 주세요.');
-   const p=state.presenter,owner=serviceId,index=p.index,slides=p.slides,signature=p.sourceSignature,live=p.liveScripture,transport=presenterTransportSequence;
-   const serial=++liveScriptureRequestSerial;
-   const slide=await buildLiveScriptureSlide(query);
-   if(serial!==liveScriptureRequestSerial||!read().live||owner!==serviceId||p.index!==index||p.slides!==slides||p.sourceSignature!==signature||p.liveScripture!==live||presenterTransportSequence!==transport)throw Error('PC 화면이나 말씀이 바뀌었어요. 확인 후 다시 송출해 주세요.');
-   if(!slide)throw Error('성구를 불러오지 못했습니다. 입력을 확인해 주세요.');
-   updateLiveScriptureDraft(query,serviceId);
-   p.liveScripture={reference:slide.title,draft:query,active:true,slide};
-   p.livePraise=emptyLivePraiseState(p.livePraise?.draft||p.livePraise?.query||'');p.safetyBlank=false;
-   publishPresenterState({force:true});renderPresenterControlState(serviceId);
+   const p=state.presenter,index=p.index,transport=presenterTransportSequence,session=p.outputSessionId;
+   const citation=p.slides.find(slide=>slide.liveScriptureControl&&slide.elementId);
+   if(!citation)throw Error('이 예배에 인용 구절 항목이 없습니다. PC에서 먼저 추가해 주세요.');
+   const canOutput=()=>read().live&&p.outputSessionId===session&&p.index===index&&presenterTransportSequence===transport;
+   await validateScriptureReferences(query);
+   if(!canOutput())throw Error('PC 화면이나 말씀이 바뀌었어요. 확인 후 다시 송출해 주세요.');
+   const input={value:query,dataset:{serviceId,presenterCitationElementId:citation.elementId,presenterCitationSlotKey:citation.slotKey||''}};
+   const result=await appendPresenterCitationReference(input,{autoOutput:true,canOutput});
+   if(!result?.ok)throw Error(result?.message||'말씀을 추가하지 못했습니다.');
   }
   function read(){
    if(followOutput&&state.presenter.outputSessionId===outputSession&&state.presenter.outputWindow===outputWindow)serviceId=state.presenter.serviceId;
@@ -101,7 +101,7 @@
    const video=presenterRemoteVideoState(serviceId);
    if(video?.ready)allowed.push(...(video.status==='playing'?['video-pause']:['video-play']), 'video-restart');
    const next=p.slides.slice(p.index+1).find(s=>!presenterSlideIsHidden(s));
-   return {live,video,media:slideMedia(slide),audioActive:!!(own&&(m.playing||m.pending||m.fadeStop)),liveReference:p.liveScripture?.active?p.liveScripture.reference:'',serviceTitle:serviceDisplayTypeName(state.services.find(s=>s.id===serviceId))||'예배',catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank&&!transparent,transparent:!!transparent,alwaysOnTop:!!p.alwaysOnTop,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),nextTitle:[...new Set([next?.elementLabel||next?.sectionLabel,next?.elementTitle||next?.title].filter(Boolean))].join(' · ').slice(0,200),allowed,
+   return {live,video,media:slideMedia(slide),audioActive:!!(own&&(m.playing||m.pending||m.fadeStop)),liveReference:slide?.scriptureContext==='citation'?slide.title||slide.marker||'':p.liveScripture?.active?p.liveScripture.reference:'',serviceTitle:serviceDisplayTypeName(state.services.find(s=>s.id===serviceId))||'예배',catalogKey:catalogKey(),index:p.index,total:p.slides.length,blank:!!p.safetyBlank&&!transparent,transparent:!!transparent,alwaysOnTop:!!p.alwaysOnTop,current:text(p.liveScripture?.active?p.liveScripture.slide:slide),next:text(next),nextTitle:[...new Set([next?.elementLabel||next?.sectionLabel,next?.elementTitle||next?.title].filter(Boolean))].join(' · ').slice(0,200),allowed,
     previewCurrent:p.safetyBlank&&p.safetyBlankMode==='transparent'?preview(presenterSafetyBlankSlide('transparent')):p.safetyBlank?'<div style="width:100%;height:100%;background:#000"></div>':preview(p.liveScripture?.active?p.liveScripture.slide:slide),previewNext:preview(next),
     music:!own&&!intro?'연결된 음원 없음':m.pending?'음원 준비 중':m.fadeStop?'페이드아웃 중':`${m.playing?'재생 중':'정지 / 일시정지'}${sync?.localTiming?m.autoSyncSuspended?' · 자동 넘김 해제':' · 자동 넘김':''}`,
     // Compare identities without disclosing media URLs or the full worship source.

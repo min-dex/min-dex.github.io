@@ -446,19 +446,19 @@ function resolvePresenterCitationTarget(serviceId, elementId, slotKey = "") {
   return { service, items, index, item: items[index] || null };
 }
 
-async function appendPresenterCitationReference(input) {
+async function appendPresenterCitationReference(input, options = {}) {
   const serviceId = String(input?.dataset?.serviceId || state.selectedServiceId || "").trim();
   const elementId = String(input?.dataset?.presenterCitationElementId || "").trim();
   const slotKey = String(input?.dataset?.presenterCitationSlotKey || "").trim();
   const rawValue = String(input?.value || "").trim();
-  if (!serviceId || !elementId || !rawValue) return;
+  if (!serviceId || !elementId || !rawValue) return { ok: false, message: "성구를 입력해 주세요." };
   const requestKey = `${serviceId}:${elementId}:${slotKey}`;
-  if (pendingPresenterCitationRequests.has(requestKey)) return;
+  if (pendingPresenterCitationRequests.has(requestKey)) return { ok: false, message: "말씀을 추가 중입니다. 잠시 후 다시 시도해 주세요." };
 
   const { service, items, index, item } = resolvePresenterCitationTarget(serviceId, elementId, slotKey);
   if (!service || !item || !isOptionalCitationScriptureServiceItem(item)) {
     showToast("인용 구절 항목을 찾지 못했습니다.", "error");
-    return;
+    return { ok: false, message: "인용 구절 항목을 찾지 못했습니다." };
   }
 
   const previousItem = { ...item };
@@ -481,10 +481,10 @@ async function appendPresenterCitationReference(input) {
   const addedReferences = normalizeServiceScriptureReferenceList(rawValue);
   if (!addedReferences.length || addedReferences.some((reference) => !parseBibleReference(reference))) {
     showToast("성경 주소를 확인해 주세요.", "error");
-    return;
+    return { ok: false, message: "성경 주소를 확인해 주세요." };
   }
 
-  const autoOutput = presenterCitationAutoOutput;
+  const autoOutput = options.autoOutput ?? presenterCitationAutoOutput;
   // Reserve within the Enter gesture; navigate only after the verse resolves.
   let reservedWindow = null;
   if (autoOutput && !isPresenterOutputWindowOpen() && !window.mindexElectron?.openPresenterOutput) {
@@ -520,10 +520,11 @@ async function appendPresenterCitationReference(input) {
     if (targetIndex < 0) {
       restoreCitationDraft();
       showToast("해당 성구를 찾지 못했습니다.", "error");
-      return;
+      return { ok: false, message: "해당 성구를 찾지 못했습니다." };
     }
     if (input.value.trim() === rawValue) input.value = "";
-    if (autoOutput && state.selectedServiceId === serviceId) {
+    const outputStillCurrent = !options.canOutput || options.canOutput();
+    if (autoOutput && outputStillCurrent && state.selectedServiceId === serviceId) {
       const shouldOpenOutput = !presenterControllerIsLive(serviceId);
       runPresenterAction("jump", serviceId, { index: targetIndex, scroll: false, scrollOutline: false });
       if (reservedWindow && !reservedWindow.closed) {
@@ -541,9 +542,13 @@ async function appendPresenterCitationReference(input) {
       _itemId: targetElementId, renderAfterSave: false, silent: true,
     });
     if (!saved && !input.value.trim()) input.value = rawValue;
+    if (!saved) return { ok: false, message: "말씀 저장을 완료하지 못했습니다. PC의 저장 상태를 확인해 주세요." };
+    if (autoOutput && (!outputStillCurrent || state.selectedServiceId !== serviceId)) return { ok: false, message: "구절은 추가했지만 PC 화면이 바뀌어 송출하지 않았습니다." };
+    return { ok: true, index: targetIndex };
   } catch (error) {
     restoreCitationDraft();
     showToast(error.message || "성구를 불러오지 못했습니다.", "error");
+    return { ok: false, message: error.message || "성구를 불러오지 못했습니다." };
   } finally {
     if (reservedWindow && !reservedWindow.closed) reservedWindow.close();
     pendingPresenterCitationRequests.delete(requestKey);

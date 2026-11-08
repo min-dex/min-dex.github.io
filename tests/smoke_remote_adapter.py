@@ -16,6 +16,7 @@ try:
     const check=(x,m)=>{if(!x)throw Error(m)},sid='remote-adapter';state.client=null;
     state.services=[{id:sid,type_id:'fixture',title:'검증 예배'}];state.serviceTypes=[{id:'fixture',name:'예배'}];
     state.serviceItems={[sid]:['첫 번째','두 번째','마지막'].map((title,i)=>({id:'remote-'+i,service_id:sid,label:'설교',raw_title:title,sort_order:i+1,_worshipSectionKey:'sermon',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'title',inputMode:'manual',outputMode:'title'})}))};
+    state.serviceItems[sid].push({id:'remote-citation',service_id:sid,label:'인용 구절',sort_order:4,memo:serializeServiceItemMemo({elementType:'scripture_body'})});
     state.loadedWorshipServiceIds=new Set([sid]);state.selectedServiceId=sid;state.module='presenter';state.loading=false;
     preparePresenterService(sid);state.presenter.index=0;state.presenter.outputSessionId='fixture';
     const output={closed:false,postMessage(){}};state.presenter.outputWindow=output;
@@ -23,27 +24,41 @@ try:
     const adapter=MindexRemote.adapter(sid,'fixture',output);
     check(adapter.read().live,'host live');await adapter.execute('next');check(state.presenter.index===1,'real next');
     await adapter.execute('prev');check(state.presenter.index===0,'real previous');
-    // Keep real presenter actions; substitute only scripture lookup/network.
-    const originalBuild=buildLiveScriptureSlide;
-    check(adapter.read().allowed.includes('scripture-show')&&adapter.read().allowed.includes('sermon-title'),'scripture actions missing '+JSON.stringify({slides:state.presenter.slides.map(s=>({id:s.elementId,type:s.type})),items:state.serviceItems[sid].map(i=>({id:i.id,label:i.label,key:i._worshipSectionKey,match:isPresenterPreparationSermonTitleItem(i)}))}));
-    buildLiveScriptureSlide=async query=>({type:'scripture',title:query,text:'검증 말씀',layout:'lower-bar-text'});
-    await adapter.execute('scripture-show',{query:'요 3:16'});
-    check(state.presenter.liveScripture.active&&adapter.read().liveReference==='요 3:16','remote scripture not published');
+    // Real shared citation generation/navigation; only DB lookup/save are synthetic.
+    const originalValidate=validateScriptureReferences,originalResolve=resolveServiceScriptureBeforeSave,originalSave=saveServiceItemPatch;
+    check(adapter.read().allowed.includes('scripture-show')&&adapter.read().allowed.includes('sermon-title'),'scripture actions missing');
+    validateScriptureReferences=async()=>({valid:true});
+    resolveServiceScriptureBeforeSave=async(service,index)=>{
+     const item=state.serviceItems[service][index],memo=parseServiceItemMemo(item.memo);
+     memo.manualScripture={reference:'요 3:16-17',verses:[{number:16,text:'첫 검증 구절'},{number:17,text:'다음 검증 구절'}]};
+     item.memo=serializeServiceItemMemo(memo);
+    };
+    let scriptureSaves=0;saveServiceItemPatch=async()=>{scriptureSaves++;return true};
+    const beforeCount=state.presenter.slides.length;
+    await adapter.execute('scripture-show',{query:'요 3:16-17'});
+    check(!state.presenter.liveScripture.active,'legacy scripture overlay used');
+    check(state.presenter.slides.length>=beforeCount+2&&scriptureSaves===1,'citation slides were not added and saved');
+    const citationSlide=state.presenter.slides[state.presenter.index];
+    check(citationSlide.scriptureContext==='citation'&&citationSlide.scriptureVerse===16,'first citation verse not selected');
+    check(adapter.read().liveReference===citationSlide.title,'remote reference differs from current citation');
+    const rendered=document.createElement('div');rendered.innerHTML=renderPresenterSlideFrame(citationSlide,{noChromakey:true});
+    check(rendered.querySelector('.presenter-scripture-reading-ref'),'current fullscreen citation layout missing');
+    await adapter.execute('next');check(state.presenter.slides[state.presenter.index].scriptureVerse===17,'next verse not reachable');
     await adapter.execute('sermon-title');
-    check(state.presenter.slides[state.presenter.index].elementId==='remote-0'&&!state.presenter.liveScripture.active,'real sermon return did not clear overlay');
+    check(state.presenter.slides[state.presenter.index].elementId==='remote-0'&&!state.presenter.liveScripture.active,'real sermon return failed');
     for(const query of ['', 'x'.repeat(201), 123]){
      let denied=false;try{await adapter.execute('scripture-show',{query})}catch{denied=true}check(denied,'invalid query allowed');
     }
-    const before=state.presenter.liveScripture;
-    buildLiveScriptureSlide=async()=>{throw Error('조회 실패')};
+    const before=state.presenter.index;
+    validateScriptureReferences=async()=>{throw Error('조회 실패')};
     let failed=false;try{await adapter.execute('scripture-show',{query:'요 3:16'})}catch(e){failed=e.message==='조회 실패'}
-    check(failed&&state.presenter.liveScripture===before,'lookup failure altered output');
-    let finish;buildLiveScriptureSlide=()=>new Promise(resolve=>finish=resolve);
+    check(failed&&state.presenter.index===before,'lookup failure altered output');
+    let finish;validateScriptureReferences=()=>new Promise(resolve=>finish=resolve);
     const pending=adapter.execute('scripture-show',{query:'요 3:16'}).then(()=>false,()=>true);
-    runPresenterAction('next',sid,{scroll:false});finish({title:'늦은 말씀',text:'늦음'});
+    runPresenterAction('next',sid,{scroll:false});finish({valid:true});
     check(await pending,'late lookup overwrote PC navigation');
     check(!state.presenter.liveScripture.active,'late scripture remained active');
-    buildLiveScriptureSlide=originalBuild;
+    validateScriptureReferences=originalValidate;resolveServiceScriptureBeforeSave=originalResolve;saveServiceItemPatch=originalSave;
     await adapter.execute('jump',{index:0,key:adapter.read().catalogKey});
     const catalog=adapter.browse({offset:0});check(catalog.total===state.presenter.slides.filter(s=>!presenterSlideIsHidden(s)).length&&catalog.items.length===Math.min(6,catalog.total),'visible catalog');
     const sample=state.presenter.slides[1],savedBody=sample.body;

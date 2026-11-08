@@ -675,3 +675,16 @@ only feedback/focus; authenticated command, freshness and offline guards remain.
 송출 코드는 인증된 화면에서만 표시한다. 접속 현황은 화면 복귀·온라인 복귀 때
 즉시 송출 목록을 다시 조회한다. 브라우저 접속과 송출 세션은 별도 식별자이므로
 기기 이름만으로 서로 억지로 매칭하지 않는다.
+
+### Remote scripture parity · 2026-11-08
+
+Remote scripture commands use the same citation append, verse resolution,
+slide generation and atomic item patch path as the PC composer. They explicitly
+request output without changing the PC auto-output preference. The old temporary
+lower-bar liveScripture overlay is not used. Multiple verses remain navigable
+slides in the existing citation element, and the remote catalog/reference follows
+the actual selected slide. No citation element produces an actionable error.
+A PC navigation change during lookup rejects the command; during shared append
+it preserves the newly added reference but suppresses a stale output jump and
+reports that distinction. Save failure is reported rather than acknowledged as
+a successful remote command. Sermon-title return retains the generated slides.
