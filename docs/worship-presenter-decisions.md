@@ -4921,9 +4921,10 @@ selection. It has no second confirmation for Keynote. A valid tab-local helper
 connection is reused. Only a missing connection opens the local approval flow.
 A failed automatic preparation offers a same-file retry and a verified manual
 folder. An original without playback, failed manifest, or active playback
-error exposes recovery for that item. Ready items hide those actions. Live
-play/pause remains available for the selected Keynote output. The original
-download is available under 자료 관리. PPTX keeps its own existing confirmation.
+error exposes one next action for that item. A prepared item shows its slide
+count or current on-air page. Selected live output exposes its media play and
+pause controls. 자료 관리 keeps original download and, when recovery is needed,
+manual folder connection and re-preparation. PPTX retains its confirmation.
 
 PPTX keeps its existing direct browser import. KEY upload first prepares the
 Apple HTML export through the paired Mac helper, verifies the original hash,

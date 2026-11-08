@@ -86,7 +86,8 @@ try:
      host.innerHTML=renderPresenterKeynoteHtmlControls({original,keynoteHtml},serviceId,itemId);
      const hasRecovery=Boolean(host.querySelector('[data-keynote-auto-connect]')&&host.querySelector('[data-keynote-html-files]')&&host.querySelector('[data-keynote-html-action="status"]'));
      if(hasRecovery!==needsRecovery)throw Error('incorrect recovery visibility');
-     if(status.value && !host.textContent.includes('준비 완료'))throw Error('ready status missing');
+     if(status.value && host.querySelector('[data-keynote-page]').textContent!=='20장')throw Error('ready page count missing');
+     if(needsRecovery && (!host.querySelector('details [data-keynote-html-files]') || host.querySelector('details').open || host.querySelector('details [data-keynote-html-action="status"]')))throw Error('advanced recovery must be collapsed, with one visible retry');
     };
     check({value:null,error:null},false);
     check({value:{},error:null},false);

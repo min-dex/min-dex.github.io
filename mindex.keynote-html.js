@@ -275,13 +275,13 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
 
 function presenterKeynoteHtmlPageLabel(asset, serviceId, itemId) {
   const descriptor = asset.keynoteHtml, entry = presenterKeynoteHtmlManifests.get(descriptor.url + '|' + descriptor.sha256);
-  if (!entry?.value) return entry?.error ? `슬라이드 ${descriptor.pages}장 · 목록 재연결 필요` : `슬라이드 ${descriptor.pages}장 불러오는 중…`;
+  if (!entry?.value) return entry?.error ? '슬라이드 목록을 열지 못했어요' : '슬라이드 불러오는 중…';
   const owner = state.presenter, active = presenterKeynoteHtmlSlide(owner.slides?.[owner.index]);
   const live = typeof presenterControllerIsLive === 'function' && presenterControllerIsLive(serviceId);
   const checkpoint = active?.elementId === itemId && owner.serviceId === serviceId && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active) ? owner.pptxProgress.checkpoint : null;
   if (live && active?.elementId === itemId && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active)
       && owner.pptxProgress.error) return 'Keynote 재생 확인 필요';
-  return live && checkpoint ? `송출 ${checkpoint.slide + 1}/${descriptor.pages} · 효과 재생` : `준비 완료 · ${descriptor.pages}장`;
+  return live && checkpoint ? `송출 ${checkpoint.slide + 1}/${descriptor.pages}` : `${descriptor.pages}장`;
 }
 function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId, download = '') {
   if (asset.original?.format !== 'key') return '';
@@ -294,13 +294,21 @@ function renderPresenterKeynoteHtmlControls(asset, serviceId, itemId, download =
     && active.asset.keynoteHtml.sha256 === descriptor.sha256 && presenterControllerIsLive(serviceId);
   const playbackFailed = onAir && owner.pptxProgress?.key === presenterKeynoteHtmlKey(owner, active) && owner.pptxProgress.error;
   const status = descriptor ? presenterKeynoteHtmlPageLabel(asset, serviceId, itemId) : '슬라이드 준비 필요';
-  const reconnect = manifestFailed || playbackFailed
-    ? `<button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>재생 연결 다시 시도</button>` : '';
-  const recovery = !descriptor || manifestFailed || playbackFailed
-    ? `${reconnect}<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>준비 다시 시도</button>
-      <label class="svc-reference-media-upload">폴더로 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity} aria-label="Keynote 재생 폴더 연결"></label>` : '';
-  const playback = onAir ? `<button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button><button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button>` : '';
-  return `<div class="svc-deck-controls"><div class="svc-deck-playback"><span class="svc-deck-status" data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${status}</span>${playback}${recovery}</div><details class="svc-deck-more"><summary>자료 관리</summary><div class="svc-deck-menu">${download}</div></details></div>`;
+  const needsReconnect = manifestFailed || playbackFailed;
+  const prepare = `<button class="btn secondary" type="button" data-keynote-auto-connect ${identity}>슬라이드 준비</button>`;
+  const retry = needsReconnect
+    ? `<button class="btn secondary" type="button" data-keynote-html-action="status" ${identity}>다시 시도</button>`
+    : (!descriptor ? prepare : '');
+  const folder = !descriptor || needsReconnect
+    ? `<label class="svc-reference-media-upload">폴더로 연결<input type="file" webkitdirectory multiple hidden data-keynote-html-files ${identity} aria-label="Keynote 재생 폴더 연결"></label>` : '';
+  const playback = onAir && !playbackFailed
+    ? `<button class="btn secondary" type="button" data-keynote-html-action="play" ${identity}>음원·영상 재생</button>
+      <button class="btn secondary" type="button" data-keynote-html-action="pause" ${identity}>일시정지</button>` : '';
+  const menu = `${needsReconnect ? prepare : ''}${folder}${download}`;
+  return `<div class="svc-deck-controls">
+    <div class="svc-deck-playback"><span class="svc-deck-status" data-keynote-page data-keynote-item-id="${escapeAttr(itemId)}">${status}</span>${playback}${retry}</div>
+    ${menu ? `<details class="svc-deck-more"><summary>자료 관리</summary><div class="svc-deck-menu">${menu}</div></details>` : ''}
+  </div>`;
 }
 async function validatePresenterKeynoteFolder(files, sourceSha256) {
   const module = await keynoteHtmlRuntime(), byName = new Map();let total = 0;
