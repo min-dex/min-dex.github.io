@@ -1,6 +1,6 @@
 // User-initiated device test only. No speakers, persistence or remote publishing.
 import {createAudioBuses} from './output-routing.mjs';
-export function mountCaptureInput({policy,onStart,onStop,video,root=document}){
+export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=document}){
  const $=id=>root.getElementById(id);let stream=null,context=null,buses=null,hall=null,broadcast=null,meter=null,timer=null,epoch=0,busy=false,disposed=false;
  const status=text=>$('captureStatus').textContent=text;
  function controls(){for(const id of ['capturePermission','captureRefresh','captureVideo','captureAudio','captureConnect'])$(id).disabled=busy||!!stream;$('captureDisconnect').disabled=!stream&&!busy;}
@@ -46,6 +46,7 @@ export function mountCaptureInput({policy,onStart,onStop,video,root=document}){
     $('captureLevel').textContent=`입력 ${(peak*100).toFixed(1)}% · 유튜브 ${((policy().broadcast?peak:0)*100).toFixed(1)}%`;};
    update();timer=setInterval(update,100);
    stream.getTracks().forEach(t=>t.addEventListener('ended',()=>{if(own===epoch)stop('장치 연결이 끊겼습니다. 다시 연결해 주세요.');}));
+   onReady?.();
    status(stream.getAudioTracks().length?'장치 연결됨 · 영상·오디오 신호 확인 · 스피커 출력 없음':'영상 연결됨 · 오디오는 선택하지 않았습니다.');
   }catch(error){if(own===epoch){stop(error?.name==='NotReadableError'?'장치를 열 수 없습니다. 다른 앱의 장치 사용 여부를 확인하세요.':'연결 실패 · 선택 장치·권한·케이블을 확인하세요.');}else acquired?.getTracks().forEach(t=>t.stop());}
   finally{if(own===epoch){busy=false;controls();}}

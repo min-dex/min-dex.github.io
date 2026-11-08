@@ -40,7 +40,15 @@ async function main() {
     const opened = app.waitForEvent('window');
     await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.find(x=>x.label==='방송').submenu.items[0].click());
     const panel = await opened;
+    await panel.locator('#ytStart').waitFor({state:'visible'});
+    assert(await panel.locator('#ytStart').isDisabled());
+    assert(await panel.locator('#test').isHidden());
+    assert.equal(await panel.locator('#title').inputValue(),'');
+    await panel.getByText('영상 파일 및 입력 확인',{exact:true}).click();
     await panel.locator('#file').setInputFiles(file('fixture.mp4'));
+    await panel.getByText('수동 자막 및 화면 설정',{exact:true}).click();
+    await panel.locator('#text').fill('기쁨으로 함께 예배해요');
+    await panel.locator('#apply').click();
     await panel.waitForFunction(()=>window.broadcastPrototype?.stats().source==='file');
     await panel.locator('#ytKey').fill(key);
     assert.equal(publishes,0);
@@ -48,6 +56,7 @@ async function main() {
     await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 중',null,{timeout:20000});
     assert.equal(await panel.locator('#ytKey').inputValue(),'');
     await sleep(2200);
+    await panel.getByText('유튜브 송출 차단',{exact:true}).click();
     await panel.locator('#excludeBroadcast').click();
     // The routing toggle applies before the next animation frame paints the local preview.
     await panel.waitForFunction(()=>!broadcastPrototype.routing().broadcast && document.querySelector('#program').getContext('2d').getImageData(10,10,1,1).data[2]>210,null,{timeout:5000});

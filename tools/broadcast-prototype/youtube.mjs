@@ -1,15 +1,21 @@
-export function mountYoutube(acquireStream) {
+export function mountYoutube(acquireStream, hasInput) {
   const engine = window.youtubeOutput;
-  if (!engine) return () => {};
+  if (!engine) return { abort() {}, syncInput() {} };
   const el = id => document.getElementById(id);
   el('youtube').hidden = false;
   let active;
+  function syncInput() {
+    if (active) return;
+    el('ytStart').disabled = !hasInput();
+    el('ytStatus').textContent = hasInput() ? '송출 대기' : '카메라 또는 영상 파일을 연결해 주세요.';
+  }
   function finish(run, text) {
     if (active !== run) return;
     active = null;
     if (run.recorder?.state === 'recording') run.recorder.stop();
     run.release?.();
-    el('ytKey').disabled = el('ytStart').disabled = false;
+    el('ytKey').disabled = false;
+    el('ytStart').disabled = !hasInput();
     el('ytStop').disabled = true;
     for (const id of ['file','test','captureConnect','captureDisconnect']) el(id).inert = false;
     el('ytStatus').textContent = text;
@@ -25,7 +31,7 @@ export function mountYoutube(acquireStream) {
     if (state === 'failed') void fail(active);
   });
   el('ytStart').onclick = async () => {
-    if (active || !el('ytKey').reportValidity()) return;
+    if (active || !hasInput() || !el('ytKey').reportValidity()) return;
     const run = active = {pending:Promise.resolve(),queued:0};
     el('ytKey').disabled = el('ytStart').disabled = true;
     el('ytStop').disabled = false;
@@ -70,5 +76,6 @@ export function mountYoutube(acquireStream) {
     if (run.recorder?.state === 'recording') run.recorder.stop();
     else { await engine.abort(); finish(run,'송출 종료'); }
   };
-  return () => { if (active) void fail(active); };
+  syncInput();
+  return { abort: () => { if (active) void fail(active); }, syncInput };
 }
