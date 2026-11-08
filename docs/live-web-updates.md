@@ -28,3 +28,7 @@ Electron 설치본의 바이너리 업데이트는 기존 전용 갱신 경로�
 실제 두 버전 탐색·입력 중 보존·서버 저장 대기·숨은 주보 초안·작업 중
 차단·저장된 문구와 줄바꿈의 갱신 후 복원. 기존 주보 입력과 서버 보관,
 초안 전달 검사도 유지한다.
+
+## Controller reload during live output
+
+After the output reconnects, restore from its latest stored slide snapshot and navigation record. If the receiver advanced while the controller was loading, the initial startup snapshot cannot rewind the output. Ownership checks and the current element’s content are preserved.

@@ -48,8 +48,12 @@ try:
    output.wait_for_function("()=>{const v=document.querySelector('#presenterOutputRoot > video.presenter-output-background-video');return v?.readyState>=2&&!v.paused&&v.style.opacity==='1'}")
    output.evaluate("window.beforeControllerReload=document.querySelector('#presenterOutputRoot > video.presenter-output-background-video')")
    main.reload();main.wait_for_function("!!window.MindexPresenterLifetime&&!document.body.classList.contains('ui-booting')")
-   prepare_server_state_fixture(main);main.evaluate(fixture,'updated')
-   main.wait_for_function('(id)=>MindexPresenterLifetime.owns(id)&&state.presenter.serviceId===svc.id&&state.presenter.index===2',arg=session)
+   prepare_server_state_fixture(main)
+   # The receiver may have moved after startup captured its restore snapshot.
+   main.evaluate("()=>{const latest=readPresenterStoredPayload();if(latest.index!==2)throw Error('latest frame fixture missing');state.presenter.restorePayload={...latest,index:1,slideAnchor:presenterSlideAnchor(latest.slides[1]),updatedAt:latest.updatedAt-1}}")
+   main.evaluate(fixture,'updated')
+   main.wait_for_function('(id)=>MindexPresenterLifetime.owns(id)&&state.presenter.serviceId===svc.id',arg=session)
+   assert main.evaluate('state.presenter.index===2'), 'controller reload republished the older frame'
    assert output.evaluate("document.body.textContent.includes('TWO')")
    assert main.evaluate("readPresenterStoredPayload().slides.some(s=>s.text==='UPDATED NEXT') && readPresenterStoredPayload().slides[2].text==='TWO'")
    assert output.evaluate("beforeControllerReload===document.querySelector('#presenterOutputRoot > video.presenter-output-background-video')&&!beforeControllerReload.paused")

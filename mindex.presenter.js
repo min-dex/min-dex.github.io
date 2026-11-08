@@ -1621,7 +1621,7 @@ function restorePresenterControllerSession() {
   // prevents an old local payload from reviving a presentation on app launch.
   if (state.presenter.serviceId || !isPresenterOutputHeartbeatOpen()) return "none";
 
-  const payload = state.presenter.restorePayload || readPresenterControllerRestorePayload();
+  const payload = readPresenterControllerRestorePayload() || state.presenter.restorePayload;
   if (!payload || (globalThis.MindexPresenterLifetime && !MindexPresenterLifetime.owns(payload.outputSessionId))) return "none";
 
   const service = state.services.find((candidate) => candidate.id === payload.serviceId);
