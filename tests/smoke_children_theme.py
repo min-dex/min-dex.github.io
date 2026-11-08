@@ -99,7 +99,7 @@ try:
         if(text)check(getComputedStyle(text).color===foreground,name+'/'+type+' foreground mismatch');
         const cross=root.querySelector('.presenter-slide--blank');
         if(cross)for(const pseudo of ['::before','::after'])check(getComputedStyle(cross,pseudo).backgroundColor===foreground,'cross ink mismatch');
-        for(const logo of root.querySelectorAll('.presenter-ready-screen-logo,.presenter-waiting-loop-logo'))check(getComputedStyle(logo).filter.includes('fullscreen-ink.svg')===(ink==='brown'),'logo ink mismatch');
+        for(const logo of root.querySelectorAll('.presenter-ready-screen-logo,.presenter-waiting-loop-logo'))check(getComputedStyle(logo).filter===(ink==='brown'?'brightness(0)':'none'),'logo ink mismatch');
        }
        if(slide.id==='emphasis')check(JSON.stringify(markerState(mini))===JSON.stringify(markerState(out)),'marker preview/output mismatch');
       }
@@ -132,9 +132,42 @@ try:
      check([...root.querySelectorAll('.presenter-text-highlight--color')].every(e=>getComputedStyle(e).backgroundImage==='none'),'chromakey acquired markers');
      applyPresenterOutputFrameState(root,frame);root.innerHTML=renderPresenterSlideFrame({...emphasis,title:'다른 문구'},{noChromakey:true});
      check([...root.querySelectorAll('.presenter-text-highlight--color')].every(e=>getComputedStyle(e).backgroundImage==='none'),'other copy acquired confession markers');
-     return 'PASS all registered backgrounds x four service types: white/brown text/cross/logo and PNG/WebP parity; custom decode/reset; confession-only markers; chromakey/reading isolation';
+     return 'PASS all registered backgrounds x four service types: white/brown text and cross, black/white logo and PNG/WebP parity; custom decode/reset; confession-only markers; chromakey/reading isolation';
     } finally {presenterBackgroundSourcesForService=original;}
    }''')
+   for background, logo_color in [('white', 'black'), ('black', 'white')]:
+    page.evaluate('''async background => {
+      const source = new URL('contrast-' + background + '.png', location.href).href;
+      await preloadPresenterOutputImage(source);
+      const service = state.services[0];
+      service.type_id = "children";
+      const slide = {id:'ready', type:'ready', readyServiceName:'어린이부 예배', outputContext:'clean'};
+      const host = document.getElementById('contrast-fixture');
+      document.body.append(host);
+      host.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;background:#777';
+      const original = presenterBackgroundSourcesForService;
+      presenterBackgroundSourcesForService = () => [source];
+      try {
+        host.innerHTML = '<div style="width:368px;height:207px;--presenter-preview-scale:0.191666667">' + renderPresenterSlideMiniPreview(slide,service.id) + '</div>';
+      } finally {
+        presenterBackgroundSourcesForService = original;
+      }
+      const out = document.createElement('main');
+      out.className = 'presenter-output-root';
+      out.style.cssText = 'position:relative;width:640px;height:360px';
+      host.append(out);
+      applyPresenterOutputFrameState(out, presenterOutputFrameStateForSlide(slide, {
+        chromakey:false, serviceType:service.type_id, backgroundImages:[source],
+      }));
+      out.innerHTML = renderPresenterSlideFrame(slide,{noChromakey:true});
+      await Promise.all(Array.from(host.querySelectorAll('.presenter-ready-screen-logo'), logo => logo.decode()));
+    }''', background)
+    for surface in ('.svc-slide-mini-canvas', 'main.presenter-output-root'):
+     logo = page.locator(f'#contrast-fixture {surface} .presenter-ready-screen-logo')
+     pixels = Image.open(io.BytesIO(logo.screenshot())).convert('RGB').getdata()
+     threshold = (lambda pixel: max(pixel) < 80) if logo_color == 'black' else (lambda pixel: min(pixel) > 175)
+     assert sum(map(threshold, pixels)) > 10, (engine, surface, background, logo_color,
+       logo.evaluate("logo => [getComputedStyle(logo).filter, logo.closest('.presenter-output-root').dataset.outputInk, logo.getBoundingClientRect().toJSON()]"))
    print(engine,result,flush=True)
    browser.close()
 finally:server.shutdown()

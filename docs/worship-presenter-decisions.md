@@ -4024,9 +4024,11 @@ long forms, medley action retention and unsaved text/focus through resizing.
 Supersedes the department-wide children brown foreground. Fullscreen still
 artwork uses white by default; switch to #332211 only when white's median
 contrast over the central artwork region is below3:1. The rule depends on image
-luminance, never service type, month or a hand-selected filename palette. Text,
-blank cross and monochrome ready/waiting logos share the foreground. Explicit
-service-design foreground choices remain authored overrides.
+luminance, never service type, month or a hand-selected filename palette. Text
+and the blank cross use that foreground color. Monochrome ready/waiting logos
+use the same luminance decision in controller thumbnails and live output, with
+black on bright artwork and white otherwise. Explicit service-design foreground
+choices remain authored overrides.
 
 Bundled original PNGs have generated median-luminance metadata (64×36 sampling,
 central x5–58/y4–31), shared with their WebP previews. This avoids downloading

@@ -306,7 +306,7 @@
   color: var(--presenter-output-fg);
 }
 .presenter-output-root.no-chromakey.has-background[data-output-ink="brown"] :is(.presenter-ready-screen-logo, .presenter-waiting-loop-logo) {
-  filter: url("assets/presenter/fullscreen-ink.svg#brown");
+  filter: brightness(0);
 }
 
 .presenter-output-root[data-output-theme="youth"],
