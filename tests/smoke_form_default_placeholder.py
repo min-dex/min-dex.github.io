@@ -36,6 +36,22 @@ try:
       check(nodes.map(n=>n.textContent).join('-')==='C-V1-C-C' && nodes[i].getAttribute('aria-current')==='step' && nodes.filter(n=>n.hasAttribute('aria-current')).length===1,'lyric occurrence '+i);
       check(!renderPresenterSlideFrame(s,{noChromakey:false}).includes('presenter-lyric-song-steps'),'chromakey label');
     });
+    const audioItem = {...nativeItem, id:'audio-lyrics', song_id:null, version_id:null,
+      memo:serializeServiceItemMemo({elementType:'praise', inputMode:'audio_praise', outputMode:'lyrics',
+        audioAsset:{kind:'audio',url:'/fixture.mp3'},slides:['[Lyrics]\\n첫 가사','[L]\\n다음 가사']})};
+    const audioLyrics = buildPresenterSlidesForServiceItem(audioItem,service,0,{allowHydration:false}).filter(slide => slide.type === 'lyrics');
+    check(audioLyrics.length === 2 && audioLyrics.every(slide => slide.songPosition.labels.join('-') === 'L-L'),'audio fixture has only generic lyrics steps');
+    for (const slide of audioLyrics) {
+      const clean = {...slide,outputContext:'clean'};
+      for (const html of [renderPresenterSlideFrame(clean,{noChromakey:true}),renderPresenterSlideMiniPreview(clean,service.id)]) {
+        const host = document.createElement('div');host.innerHTML = html;
+        check(!host.querySelector('.presenter-lyric-song-steps'),'generic lyrics do not create a progress row');
+        check(host.querySelector('.presenter-lyric-song-name')?.textContent.includes(native.title)
+          && host.querySelector('.presenter-slide-text')?.textContent.includes(slide.text),'generic lyrics keep title and body');
+      }
+      const mixed = {...clean,songPosition:{...clean.songPosition,labels:['L','C'],index:1}};
+      check(renderPresenterSlideFrame(mixed,{noChromakey:true}).includes('<span aria-current="step">C</span>'),'mixed forms retain real section and active step');
+    }
     const stage=document.createElement('div');
     stage.className='presenter-output-root no-chromakey';document.body.append(stage);
     const swap=(slide,clean=true)=>{

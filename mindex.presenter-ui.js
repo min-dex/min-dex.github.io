@@ -683,7 +683,7 @@ function renderPresenterSongPosition(slide, options = {}) {
   if (unionService) return (position.title ? `<div class="presenter-lyric-song-name">${escapeHtml(position.title)}</div>` : "")
     + `<div class="presenter-lyric-service-name" aria-label="ON FIRE"><span>ON</span><svg viewBox="0 0 48 100" aria-hidden="true" focusable="false"><path d="M24 0 C25 16 25 25 26 27 C30 28 40 28 48 29 C40 30 30 30 26 31 C25 35 25 80 24 100 C23 80 23 35 22 31 C18 30 8 30 0 29 C8 28 18 28 22 27 C23 25 23 16 24 0Z"/></svg><span>FIRE</span></div>`;
   const heading = position.title ? `<div class="presenter-lyric-song-name">♬ ${escapeHtml(position.title)}</div>` : "";
-  if (position.index < 0) return heading;
+  if (position.index < 0 || position.labels.every(label => canonicalServiceFormToken(label) === "L")) return heading;
   const steps = position.labels.map((label, i) =>
     `<span${i === position.index ? ' aria-current="step"' : ""}>${escapeHtml(label)}</span>`);
   return heading + `<div class="presenter-lyric-song-steps" aria-label="송폼">${steps.join('<i aria-hidden="true">-</i>')}</div>`;
