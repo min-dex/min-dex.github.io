@@ -37,7 +37,7 @@ def main():
                     check(fin.fontFamily===text.fontFamily,'Fin family differs from reading');
                     check(fin.fontStyle==='italic'&&fin.fontWeight==='600','Fin style');
                     check(text.fontWeight==='700'&&parseFloat(text.fontSize)===90,'reading body changed');
-                    if(clean)check(getComputedStyle(root.querySelector('.presenter-title-content-body')).fontWeight==='700','100px weight changed');
+                    if(clean)check(getComputedStyle(root.querySelector('.presenter-title-content-body')).fontWeight==='600','fullscreen support weight changed');
                   }
                   root.innerHTML='<div class="presenter-scripture-reading" style="position:absolute;inset:100px;width:auto;height:auto"><div class="presenter-scripture-reading-version">개역개정</div><div class="presenter-scripture-reading-text" style="margin-top:80px">하나님이 세상을 이처럼 사랑하사</div><div class="presenter-scripture-reading-fin">Fin.</div></div>';
                   return 'PASS citation tab = 700, liturgical body = 500, other tested 50px roles = 600; Fin family/italic; body and support preserved';

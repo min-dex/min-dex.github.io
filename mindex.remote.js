@@ -244,7 +244,7 @@
   if(!registryActive||registry||registryLoading||!hostContext())return;
   registryLoading=true;const epoch=registryEpoch;
   try{
-   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=11');
+   const {createOutputRegistry}=await import('./mindex.remote-admin.mjs?v=12');
    if(!registryActive||epoch!==registryEpoch)return;
    registry=createOutputRegistry(()=>{
     const c=hostContext();if(!c)return null;

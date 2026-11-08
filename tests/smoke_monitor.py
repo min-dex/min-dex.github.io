@@ -39,6 +39,9 @@ def main():
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
                     page.locator('[data-outputs]').get_by_text('주일예배 [3부]').wait_for()
+                    summary=page.evaluate("async()=>{const {outputDirectorySummary}=await import('./mindex.remote-admin.mjs?v=12');return outputDirectorySummary({title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224',code:'0123'})}")
+                    assert summary == {'title':'주일예배 [3부]','detail':'본당 PC · 슬라이드 93 / 224','code':''}
+                    assert summary['detail'] in page.locator('[data-outputs]').inner_text()
                     assert '0123' not in page.locator('[data-outputs]').inner_text()
                     assert '슬라이드 93 / 224' in page.locator('[data-outputs]').inner_text()
                     assert page.locator('[data-outputs]').inner_text().count('송출 대기') == 1

@@ -4718,7 +4718,7 @@ function presenterLyricLineWithoutInlineVerseNumber(line, verseNumber) {
 function escapePresenterSlideLine(line, slide) {
   const text = line || " ";
   if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT) {
-    return escapeHtml(text).replace(/ {2,}/g, (spaces) => "&nbsp;".repeat(spaces.length));
+    return renderPresenterHighlightedText(text, slide).replace(/ {2,}/g, (spaces) => "&nbsp;".repeat(spaces.length));
   }
   if (presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE) {
     return renderPresenterSongText(text, slide);
@@ -4759,9 +4759,9 @@ function renderPresenterHighlightedText(line, slide) {
   const highlights = normalizeServiceTextHighlights(slide?.textHighlights || slide?.text_highlights || slide?.highlights);
   const lyricParentheses = slide?.type === "lyrics"
     && presenterSlideElementType(slide) === PRESENTER_ELEMENT_TYPES.PRAISE;
-  const parentheses = slide?.announcementItems?.length || lyricParentheses
+  const parentheses = slide?.announcementItems?.length || lyricParentheses || slide?.type === "scripture"
     ? presenterAnnouncementParenthesisRanges(text) : [];
-  const parenthesisClass = lyricParentheses ? "presenter-lyric-paren" : "presenter-announcement-paren";
+  const parenthesisClass = lyricParentheses ? "presenter-lyric-paren" : slide?.type === "scripture" ? "presenter-scripture-paren" : "presenter-announcement-paren";
   const renderRange = (start, end) => {
     let cursor = start;
     const parts = [];

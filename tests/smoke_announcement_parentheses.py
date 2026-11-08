@@ -1,4 +1,4 @@
-"""Announcement-only typography, exact source retention and highlight overlap."""
+"""Announcement/scripture typography, exact source retention and highlight overlap."""
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 server,url=start_local_app_server()
@@ -41,6 +41,18 @@ try:
      const paren=host.querySelector('.presenter-announcement-paren');check(paren,'output parentheses missing');
      check(Math.abs(parseFloat(getComputedStyle(paren).fontSize)/parseFloat(getComputedStyle(paren.parentElement).fontSize)-.8)<.001,'output ratio '+type);
      check(JSON.stringify(item)===before,'stored source changed');
+    }
+    for(const mode of ['presenter-output-root','presenter-output-root no-chromakey']) {
+     host.className=mode;host.style.cssText='width:1920px;height:1080px;position:relative;container-type:size';
+     for(const context of ['reading','citation']) {
+      const slide={type:'scripture',elementType:PRESENTER_ELEMENT_TYPES.SCRIPTURE_TEXT,scriptureContext:context,title:'시편 1:1',text:'1 복 있는 사람 (작은 설명(안쪽))은 <말씀>을 따릅니다',textHighlights:[{text:'설명(안쪽)',bold:true}]};
+      const before=JSON.stringify(slide);host.innerHTML=renderPresenterSlideFrame(slide);
+      const spans=[...host.querySelectorAll('.presenter-scripture-paren')];check(spans.length>0,'scripture parentheses missing '+context);
+      for(const node of spans)check(Math.abs(parseFloat(getComputedStyle(node).fontSize)/parseFloat(getComputedStyle(node.parentElement).fontSize)-.8)<.001,'scripture ratio '+context);
+      check(!host.querySelector('.presenter-scripture-paren .presenter-scripture-paren'),'scripture nested shrink');
+      check(host.textContent.includes('복 있는 사람 (작은 설명(안쪽))은 <말씀>을 따릅니다'),'scripture source/number lost');
+      check(JSON.stringify(slide)===before,'scripture data changed');
+     }
     }
     const markdown='온세대 **월삭예배 (오후 8시)** <img src=x> **강조**';
     host.innerHTML=renderPresenterHighlightedText(markdown,{announcementItems:[{lines:[markdown]}],textHighlights:[{text:'월삭예배 (오후 8시)',bold:true}]});

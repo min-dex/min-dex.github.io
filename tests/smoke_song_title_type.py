@@ -79,9 +79,9 @@ def main():
                         page.screenshot(path=f'/tmp/mindex-song-title-{chromakey}.png')
                         for value in result.values():
                             assert value['weight'] == '800' and value['inside'] and value['clean'], result
-                            assert (56 if chromakey else 48) <= value['size'] <= (100.01 if chromakey else 150.01), result
+                            assert (56 if chromakey else 48) <= value['size'] <= (100.01 if chromakey else 140.01), result
                             if title == '임재':
-                                assert abs(value['size'] - (100 if chromakey else 150)) < 0.1, result
+                                assert abs(value['size'] - (100 if chromakey else 140)) < 0.1, result
                         print('PASS', chromakey, key, title, result, flush=True)
                 page.screenshot(path=f'/tmp/mindex-song-title-{chromakey}.png')
             browser.close()

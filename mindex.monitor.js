@@ -171,17 +171,17 @@
       if(serial!==outputRequest)return;
       if(token&&result?.error==='expired'){hideCodes();void refreshOutputs();return;}
       if(!result?.ok||!Array.isArray(result.outputs))throw Error();
+      const {outputDirectorySummary}=await import('./mindex.remote-admin.mjs?v=12');
+      if(serial!==outputRequest)return;
       const items=result.outputs;
       const key=JSON.stringify([!!token,items]);if(key===outputKey)return;
       outputKey=key;
       const rows=items.map(item=>{
         const row=document.createElement('div');row.className='monitor-device';
-        const title=document.createElement('strong');title.textContent=item.title||'예배';
+        const title=document.createElement('strong');title.textContent=outputDirectorySummary(item).title;
         const detail=document.createElement('p');detail.className='monitor-environment';
-        const device = item.position === '송출 대기'
-          ? item.device?.replace(/ · 송출 대기$/, '') : item.device;
-        const position = /^\d+\s*\/\s*\d+$/.test(item.position) ? `슬라이드 ${item.position}` : item.position;
-        detail.textContent=[device,position,/^\d{4}$/.test(item.code)&&token?'송출 코드 '+item.code:''].filter(Boolean).join(' · ');
+        const summary=outputDirectorySummary(item,!!token);
+        detail.textContent=[summary.detail,summary.code?'송출 코드 '+summary.code:''].filter(Boolean).join(' · ');
         row.append(title,detail);return row;
       });
       $('[data-outputs]').replaceChildren(...(rows.length?rows:['현재 등록된 송출이 없습니다.']));
@@ -248,10 +248,10 @@
   window.addEventListener("mindex-server-device-updated",hydrateServerName);
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { clearView(); }
-    else { if (enabled) { retryAt = 0; void upload(); } void refresh(); }
+    else { if (enabled) { retryAt = 0; void upload(); } void refreshOutputs(); void refresh(); }
   });
   window.addEventListener("offline", () => { remoteVerified = false; if (panel.open) renderRemote(); if (enabled) shareMessage("네트워크 연결 끊김 · 전송 대기"); });
-  window.addEventListener("online", () => { if (enabled) { retryAt = 0; void upload(); } void refresh(); });
+  window.addEventListener("online", () => { if (enabled) { retryAt = 0; void upload(); } void refreshOutputs(); void refresh(); });
   window.addEventListener("pagehide", () => { recordTab(true); shareSerial++; enabled = false; clearView(); });
   window.addEventListener("pageshow", (e) => {
     if (!e.persisted) return;

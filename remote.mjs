@@ -1,5 +1,5 @@
 import {obtainOutputPairing} from './mindex.output-pairing.mjs?v=5';
-import {adminRpc,relayRegistration} from './mindex.remote-admin.mjs?v=11';
+import {adminRpc,relayRegistration,outputDirectorySummary} from './mindex.remote-admin.mjs?v=12';
 import {createPreview,createListPreview} from './remote.preview.mjs?v=3';
 import {openRemote} from './mindex.remote-session.mjs?v=16';
 import {setupPhoneExperience} from './remote.screen.mjs?v=4';
@@ -74,11 +74,9 @@ async function listOutputs(){
    }
    button.remoteOutput=output;
    const row=button.querySelector('.output-row'),title=row.firstElementChild,code=row.lastElementChild,detail=button.querySelector('small');
-   title.textContent=output.title||'예배';code.hidden=!token;code.textContent=token?(output.code?'코드 '+output.code:'코드 준비 중'):'';
-   const device = output.position === '송출 대기'
-     ? output.device?.replace(/ · 송출 대기$/, '') : output.device;
-   const position = /^\d+\s*\/\s*\d+$/.test(output.position) ? `슬라이드 ${output.position}` : output.position;
-   detail.textContent=[device,position].filter(Boolean).join(' · ');
+   const summary=outputDirectorySummary(output,!!token);
+   title.textContent=summary.title;code.hidden=!token;code.textContent=token?(summary.code?'코드 '+summary.code:'코드 준비 중'):'';
+   detail.textContent=summary.detail;
   }
 
  }catch(e){$('status').textContent=token?e.message:'예배 목록을 불러오지 못했어요. 연결을 확인하면 자동으로 다시 불러와요.';if(e.code==='expired'){adminToken=null;$('outputList').replaceChildren();delete $('outputList').dataset.signature;connectionForms();}}

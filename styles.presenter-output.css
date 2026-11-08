@@ -201,12 +201,12 @@
   background: linear-gradient(to top, var(--presenter-output-bar-edge) 0 var(--presenter-output-bar-height), var(--presenter-chromakey) var(--presenter-output-bar-height) 100%);
 }
 .presenter-output-root.no-chromakey {
-  --presenter-weight-support: 700;
+  --presenter-weight-support: 600;
   --presenter-text-inset: 7.5cqw;
   /* Fullscreen output is read from a distance; chromakey keeps its lower-bar scale. */
-  --presenter-type-title: calc(170 * var(--presenter-stage-unit));
-  --presenter-type-main-song: calc(150 * var(--presenter-stage-unit));
-  --presenter-type-section: calc(140 * var(--presenter-stage-unit));
+  --presenter-type-title: calc(140 * var(--presenter-stage-unit));
+  --presenter-type-main-song: var(--presenter-type-title);
+  --presenter-type-section: var(--presenter-type-title);
   --presenter-type-content: calc(100 * var(--presenter-stage-unit));
   --presenter-type-lyrics: calc(105 * var(--presenter-stage-unit));
   --presenter-type-support: calc(80 * var(--presenter-stage-unit));
@@ -757,9 +757,6 @@
 .presenter-output-root.no-chromakey :is(.presenter-fullscreen-song-heading, .presenter-fullscreen-order-heading, .presenter-fullscreen-song-detail, .presenter-slide-meta) {
   font-size: var(--presenter-size-meta);
   font-weight: var(--presenter-weight-support);
-}
-.presenter-output-root.no-chromakey .presenter-fullscreen-song-detail {
-  font-weight: 600;
 }
 .presenter-slide--lyrics,
 .presenter-slide--song-title,
@@ -1551,6 +1548,7 @@
 }
 
 /* Announcement asides share the authored text and emphasis at 80% size. */
+span.presenter-scripture-paren,
 span.presenter-announcement-paren,
 :is(.svc-slide-mini-output, .presenter-output-root) .presenter-slide--lyrics .presenter-slide-text span.presenter-lyric-paren {
   font-size: .8em;

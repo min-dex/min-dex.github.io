@@ -64,6 +64,18 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    self.assertFalse(any(str(candidate) in args for args in calls))
 
 class CiCleanup(unittest.TestCase):
+ def test_cleanup_retries_only_windows_sharing_locks(self):
+  import cleanup_desktop_ci as clean
+  locked=PermissionError('still closing');locked.winerror=32
+  with patch.object(clean.shutil,'rmtree',side_effect=[locked,None]) as remove, patch.object(clean.time,'sleep') as sleep:
+   clean.remove_completed_tree('validated-fixture');self.assertEqual(remove.call_count,2);sleep.assert_called_once_with(1)
+  with patch.object(clean.shutil,'rmtree',side_effect=PermissionError('denied')), patch.object(clean.time,'sleep') as sleep:
+   with self.assertRaises(PermissionError):clean.remove_completed_tree('validated-fixture')
+   sleep.assert_not_called()
+  with patch.object(clean.shutil,'rmtree',side_effect=locked) as remove, patch.object(clean.time,'sleep'):
+   with self.assertRaises(PermissionError):clean.remove_completed_tree('validated-fixture')
+   self.assertEqual(remove.call_count,21)
+
  def test_internal_cleanup_retains_installers_and_signed_receipts(self):
   import cleanup_desktop_ci as clean
   import uuid

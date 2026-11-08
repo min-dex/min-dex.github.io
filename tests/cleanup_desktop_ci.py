@@ -5,6 +5,20 @@ from pathlib import Path
 import shutil
 import sys
 import tempfile
+import time
+
+
+def remove_completed_tree(folder):
+    # Windows may briefly retain app.asar after Electron exits. Retry only
+    # sharing/lock violations on the already validated disposable tree.
+    for attempt in range(21):
+        try:
+            shutil.rmtree(folder)
+            return
+        except OSError as error:
+            if getattr(error, "winerror", None) not in (32, 33) or attempt == 20:
+                raise
+            time.sleep(1)
 
 
 def cleanup(root, temp, phase):
@@ -46,7 +60,7 @@ def cleanup(root, temp, phase):
             assert not folder.is_symlink()
             if folder.exists(): paths.append(folder)
     for folder in paths:
-        shutil.rmtree(folder)
+        remove_completed_tree(folder)
     print(f'CI free space after cleanup: {shutil.disk_usage(temp).free / 1024**3:.2f} GiB', flush=True)
     print('Removed completed CI fixtures; proof JSON and internal installers retained', flush=True)
 

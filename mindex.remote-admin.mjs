@@ -80,3 +80,13 @@ export function createOutputRegistry(context,{interval=2000,onUpdate=()=>{}}={})
   async disconnectGuest(){const r=record,s=r?.guest.values().next().value;if(!s)return;await s.session?.end();},
  };
 }
+
+// Shared public/admin directory presentation. A code is never returned without opt-in.
+export function outputDirectorySummary(output={},showCode=false){
+ const title=String(output.title||'예배');
+ const position=String(output.position||'');
+ const device=String(output.device||'').replace(position==='송출 대기'?/ · 송출 대기$/:/$^/,'');
+ const slide=/^\d+\s*\/\s*\d+$/.test(position)?`슬라이드 ${position}`:position;
+ const code=showCode&&/^\d{4}$/.test(output.code)?String(output.code):'';
+ return {title,detail:[device,slide].filter(Boolean).join(' · '),code};
+}

@@ -77,13 +77,17 @@ try:
     const person=root.querySelector('.presenter-title-assignee-person');
     const meta=document.createElement('span');meta.className='presenter-slide-meta';meta.textContent='보조제목';root.append(meta);
     check(getComputedStyle(person).fontSize===getComputedStyle(meta).fontSize,'fullscreen assignee differs from support size');
-    check(getComputedStyle(person).fontWeight==='700','fullscreen assignee support weight differs');
+    check(getComputedStyle(person).fontWeight==='600','fullscreen assignee support weight differs');
     check(getComputedStyle(meta).fontWeight===getComputedStyle(person).fontWeight,'fullscreen metadata weight differs');
     check(parseFloat(getComputedStyle(person).fontSize)===80,'fullscreen support base differs');
     for(const cls of ['presenter-fullscreen-song-heading','presenter-fullscreen-order-heading','presenter-fullscreen-song-detail','presenter-title-content-body']) {
       const node=document.createElement('div');node.className=cls;node.textContent='보조정보';root.append(node);
       check(getComputedStyle(node).fontSize===getComputedStyle(person).fontSize,'support size exception '+cls);
-      check(getComputedStyle(node).fontWeight===(cls==='presenter-fullscreen-song-detail'?'600':'700'),'support role weight differs '+cls);node.remove();
+      check(getComputedStyle(node).fontWeight==='600','support role weight differs '+cls);node.remove();
+    }
+    for (const token of ['--presenter-type-title','--presenter-type-main-song','--presenter-type-section']) {
+      const node=document.createElement('div');node.style.fontSize=`var(${token})`;root.append(node);
+      check(Math.abs(parseFloat(getComputedStyle(node).fontSize)-140)<.01,'fullscreen primary role differs '+token);node.remove();
     }
     for(const kind of ['pair','solo','sermon','order-content','three-part']) {
       const sermon=kind==='sermon';

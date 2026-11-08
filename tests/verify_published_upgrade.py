@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 import urllib.request
+from cleanup_desktop_ci import remove_completed_tree
 
 BASE = 'https://github.com/min-dex/min-dex.github.io/releases/download/'
 SOURCES = {'1.0.0': 'c61f6a84e82d0ec81d102ca4e4947536eae853aa',
@@ -73,7 +74,7 @@ def main():
             assert root.parent.resolve() == Path(tempfile.gettempdir()).resolve()
             assert not root.is_symlink() and root.name.startswith('mindex-install-qa-')
             assert (root / 'fixture-only').read_text(encoding='utf-8') == 'kr.mindex.app.test'
-            shutil.rmtree(root)
+            remove_completed_tree(root)
             saved = json.loads(proof.read_text(encoding='utf-8'))
             profile = Path(saved['profile']).parent
             token = saved['token']
@@ -83,7 +84,7 @@ def main():
             marker = profile / 'fixture-only.json'
             assert not marker.is_symlink()
             assert json.loads(marker.read_text(encoding='utf-8')) == {'token': token, 'appId': 'kr.mindex.app.test'}
-            shutil.rmtree(profile)
+            remove_completed_tree(profile)
             print(f'PASS published {previous} -> {version} {target}; synthetic data preserved', flush=True)
 
 

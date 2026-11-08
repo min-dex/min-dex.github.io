@@ -667,3 +667,11 @@ to the selected group). Search typing during loading keeps its input focus.
 Live-scripture/sermon-return progress and errors appear beside the scripture
 form, not below media controls. Drafts remain unchanged on failure. This changes
 only feedback/focus; authenticated command, freshness and offline guards remain.
+
+### 접속 현황과 Remote 송출 목록 ·2026-11-08
+
+두 화면은 같은 공개 `mindex_remote_outputs`와 인증된 관리자 목록을 사용하며
+`outputDirectorySummary`로 예배명·기기명·슬라이드 위치·대기 중복 제거를 함께 처리한다.
+송출 코드는 인증된 화면에서만 표시한다. 접속 현황은 화면 복귀·온라인 복귀 때
+즉시 송출 목록을 다시 조회한다. 브라우저 접속과 송출 세션은 별도 식별자이므로
+기기 이름만으로 서로 억지로 매칭하지 않는다.
