@@ -209,7 +209,7 @@
   --presenter-type-section: calc(140 * var(--presenter-stage-unit));
   --presenter-type-content: calc(100 * var(--presenter-stage-unit));
   --presenter-type-lyrics: calc(105 * var(--presenter-stage-unit));
-  --presenter-type-support: calc(60 * var(--presenter-stage-unit));
+  --presenter-type-support: calc(80 * var(--presenter-stage-unit));
   --presenter-type-liturgical-heading: calc(100 * var(--presenter-stage-unit));
   --presenter-type-liturgical-body: calc(55 * var(--presenter-stage-unit));
   --presenter-type-caption: calc(80 * var(--presenter-stage-unit));
@@ -757,6 +757,9 @@
 .presenter-output-root.no-chromakey :is(.presenter-fullscreen-song-heading, .presenter-fullscreen-order-heading, .presenter-fullscreen-song-detail, .presenter-slide-meta) {
   font-size: var(--presenter-size-meta);
   font-weight: var(--presenter-weight-support);
+}
+.presenter-output-root.no-chromakey .presenter-fullscreen-song-detail {
+  font-weight: 600;
 }
 .presenter-slide--lyrics,
 .presenter-slide--song-title,

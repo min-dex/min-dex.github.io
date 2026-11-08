@@ -79,11 +79,11 @@ try:
     check(getComputedStyle(person).fontSize===getComputedStyle(meta).fontSize,'fullscreen assignee differs from support size');
     check(getComputedStyle(person).fontWeight==='700','fullscreen assignee support weight differs');
     check(getComputedStyle(meta).fontWeight===getComputedStyle(person).fontWeight,'fullscreen metadata weight differs');
-    check(parseFloat(getComputedStyle(person).fontSize)===60,'fullscreen support base differs');
+    check(parseFloat(getComputedStyle(person).fontSize)===80,'fullscreen support base differs');
     for(const cls of ['presenter-fullscreen-song-heading','presenter-fullscreen-order-heading','presenter-fullscreen-song-detail','presenter-title-content-body']) {
       const node=document.createElement('div');node.className=cls;node.textContent='보조정보';root.append(node);
       check(getComputedStyle(node).fontSize===getComputedStyle(person).fontSize,'support size exception '+cls);
-      check(getComputedStyle(node).fontWeight===getComputedStyle(person).fontWeight,'support weight exception '+cls);node.remove();
+      check(getComputedStyle(node).fontWeight===(cls==='presenter-fullscreen-song-detail'?'600':'700'),'support role weight differs '+cls);node.remove();
     }
     for(const kind of ['pair','solo','sermon','order-content','three-part']) {
       const sermon=kind==='sermon';

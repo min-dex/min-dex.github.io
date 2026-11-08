@@ -3,7 +3,7 @@
 Owned source: `output/desktop-audit-workspace`, `codex/native-dawn-startup`.
 User authorizes approved Dawn branding, native first-frame output reveal,
 retained worship outline during startup hydration, and fullscreen support text
-unification (60px / 700). Internal updater distinguishes public renderer parity
+unification (80px / 700; song subtitle 600). Internal updater distinguishes public renderer parity
 from latest installer availability; never reloads or installs during worship.
 Windows icon metadata editing remains enabled while signing remains disabled.
 Actual published 1.0.0/1.0.1 -> candidate preservation is added to native CI using
