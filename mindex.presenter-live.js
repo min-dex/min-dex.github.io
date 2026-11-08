@@ -525,7 +525,7 @@ async function appendPresenterCitationReference(input) {
     if (input.value.trim() === rawValue) input.value = "";
     if (autoOutput && state.selectedServiceId === serviceId) {
       const shouldOpenOutput = !presenterControllerIsLive(serviceId);
-      runPresenterAction("jump", serviceId, { index: targetIndex, scroll: false });
+      runPresenterAction("jump", serviceId, { index: targetIndex, scroll: false, scrollOutline: false });
       if (reservedWindow && !reservedWindow.closed) {
         const url = new URL(presenterOutputUrl());
         url.searchParams.set("fullscreen", "start");

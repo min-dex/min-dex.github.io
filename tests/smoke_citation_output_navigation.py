@@ -66,7 +66,10 @@ def main():
               window.open=()=>{reservations++;return {closed:false,location:{replace:()=>{}},close(){this.closed=true;closed++}}};
               openPresenterOutput=async()=>{opens++};
               presenterControllerIsLive=()=>live;
-              runPresenterAction=(action,id,options)=>actions.push(['live',action,options.index]);
+              runPresenterAction=(action,id,options)=>{
+                assert(options.scroll===false && options.scrollOutline===false,'citation submission requested scrolling');
+                actions.push(['live',action,options.index]);
+              };
               setPresenterPendingSlide=(id,index)=>actions.push(['pending',index]);
               renderPresenterControlState=()=>{};
               updateSaveState=()=>{};

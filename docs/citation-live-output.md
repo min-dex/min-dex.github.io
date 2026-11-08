@@ -1,13 +1,13 @@
 # Citation Quick Insert
 
 - The citation input exposes an `즉시 송출` checkbox, enabled by default.
-- The live scripture composer is in the controller toolbar. The citation section keeps its existing editing controls and has no duplicate shortcut to the toolbar input. Rerendering preserves the toolbar draft and caret.
+- The live scripture composer is centered in the controller toolbar and wraps to its own centered row when space is limited. The citation section keeps its existing editing controls and has no duplicate shortcut to the toolbar input. Rerendering preserves the toolbar draft and caret.
 - The controller session retains the setting across board renders. Changing the checkbox never changes the current output.
 - Enter captures the setting before asynchronous verse lookup. When enabled, successful lookup jumps to the first added verse and opens the output if needed. When disabled, it adds and saves without explicit selection, output opening, or scrolling.
 - A browser window is reserved synchronously within the Enter gesture when output is closed. It navigates to the presenter only after lookup succeeds, and closes on lookup failure.
 - Duplicate Enter requests for the same element are ignored while resolving. IME composition does not submit. Switching services while resolving prevents automatic navigation on completion.
 - Tests: `smoke_citation_sidebar.py`, `smoke_citation_output_navigation.py` and `smoke_citation_toggle_layout.py`.
-- Citation submission does not scroll the controller to the output slide. The toolbar input retains its draft across slide board refreshes. Explicit slide navigation retains its normal scrolling. Regression coverage: `smoke_citation_sidebar.py` (Chrome/WebKit).
+- Citation submission preserves the scroll position of the slide board and the order list. The toolbar input retains its draft across slide board refreshes. Explicit slide navigation retains its normal scrolling. Regression coverage: `smoke_citation_sidebar.py` (Chrome/WebKit).
 
 ## Shared scripture input contract ·2026-10-20
 

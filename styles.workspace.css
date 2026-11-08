@@ -6331,6 +6331,21 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .service-sidebar-date-groups.is-upcoming .service-sidebar-card { text-align:right; }
 .service-sidebar-date-groups.is-upcoming .service-sidebar-date-group { grid-template-columns:max-content minmax(0,1fr); }
 
+/* Center the scripture controls between equal side tracks when the toolbar fits. */
+.svc-presenter-toolbar:has(> .svc-presenter-toolbar-layout) { display:block; container-type:inline-size; }
+.svc-presenter-toolbar-layout { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; }
+.svc-presenter-toolbar-start, .svc-presenter-toolbar-end { display:flex; flex-wrap:wrap; align-items:center; gap:10px; min-width:0; max-width:100%; }
+.svc-presenter-toolbar-end { justify-content:flex-end; margin-inline-start:auto; }
+.svc-presenter-toolbar-end > .svc-output-action { order:3; min-height:35px; height:35px; margin:0; padding:0 10px; white-space:nowrap; }
+.svc-presenter-toolbar-layout > .svc-toolbar-scripture { flex:0 1 100%; order:5; }
+@container (min-width: 950px) {
+  .svc-presenter-toolbar-layout:has(> .svc-toolbar-scripture) {
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) minmax(280px, 36%) minmax(0, 1fr);
+  }
+  .svc-presenter-toolbar-layout > .svc-toolbar-scripture { order:0; width:100%; }
+}
+
 /* One live scripture composer in the shared toolbar; wrap using available space. */
 .svc-toolbar-scripture { order:1; flex:1 1 280px; min-width:0; max-width:520px; margin-inline:auto; }
 .svc-toolbar-scripture .svc-citation-composer { margin:0; padding:0; border:0; border-radius:0; background:none; display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; }
@@ -6340,6 +6355,13 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .svc-toolbar-scripture .svc-slide-citation-auto-output { order:1; }
 .svc-toolbar-scripture .svc-slide-citation-reference-input { width:100%; box-sizing:border-box; height:35px; min-height:35px; }
 .svc-toolbar-scripture .svc-citation-composer + .svc-citation-composer { margin-top:5px; }
+@container (min-width: 400px) {
+  .svc-presenter-toolbar-layout .svc-citation-composer {
+    display:grid; grid-template-columns:minmax(90px, 1fr) minmax(0, 3fr) minmax(90px, 1fr);
+  }
+  .svc-presenter-toolbar-layout .svc-citation-composer-entry { grid-column:2; grid-row:1; }
+  .svc-presenter-toolbar-layout .svc-slide-citation-auto-output { grid-column:3; grid-row:1; justify-self:end; }
+}
 
 .svc-toolbar-scripture .svc-slide-citation-reference-input:focus-visible { outline-offset:-2px; }
 .global-playback-volume { margin-top:10px; }

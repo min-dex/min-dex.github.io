@@ -26,7 +26,7 @@ try:
             page.wait_for_function("document.body.getAnimations().every(a=>!a.pending&&a.playState!=='running')")
             for theme in ('dark','light'):
                 page.evaluate('(theme)=>document.body.dataset.theme=theme',theme)
-                for width,height in [(1440,900),(1000,600),(768,700),(390,700),(320,700)]:
+                for width,height in [(1800,900),(1440,900),(1000,600),(768,700),(390,700),(320,700)]:
                     page.set_viewport_size({'width':width,'height':height})
                     page.wait_for_function("document.body.getAnimations().every(a=>!a.pending&&a.playState!=='running')")
                     result=page.evaluate('''async () => {
@@ -41,6 +41,12 @@ try:
                       const preview=sidebar.querySelector('.svc-presenter-live-panel');
                       assert(!sidebar.querySelector('[data-presenter-citation-reference-input]'),'sidebar duplicate');
                       assert(toolbar.contains(composer)&&toolbar.scrollWidth<=toolbar.clientWidth+1,'toolbar overflow');
+                      const toolRect=toolbar.getBoundingClientRect(),composerRect=composer.getBoundingClientRect();
+                      assert(Math.abs((toolRect.left+toolRect.right-composerRect.left-composerRect.right)/2)<2,'composer is not centered');
+                      const inputRect=input.getBoundingClientRect();
+                      if(toolbar.clientWidth>=400) assert(Math.abs((toolRect.left+toolRect.right-inputRect.left-inputRect.right)/2)<2,'input is not centered');
+
+
                       assert(composer.querySelector('.svc-citation-composer-heading > span').getClientRects().length,'label hidden');
                       assert(rail&&!sidebar.querySelector('.svc-presenter-input-rail'),'order input belongs to left rail '+JSON.stringify({rail:!!rail,side:!!sidebar.querySelector('.svc-presenter-input-rail'),list:refs.songList.innerHTML.slice(0,500)}));
                       assert(innerWidth<1000||sidebar.clientWidth>0,'desktop sidebar collapsed');

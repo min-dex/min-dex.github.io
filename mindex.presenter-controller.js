@@ -103,7 +103,7 @@ function runPresenterAction(action, serviceId = state.selectedServiceId, options
   syncServiceMusicWithPresenterContext(serviceId, { render: false });
   publishPresenterState();
   renderPresenterControlState(serviceId);
-  scrollPresenterOutlineToActive(serviceId);
+  if (options.scrollOutline !== false) scrollPresenterOutlineToActive(serviceId);
   if (options.scroll !== false && ["next", "prev", "first", "last", "jump"].includes(action)) {
     scrollPresenterBoardToIndexStable(serviceId, p.index, { force: false });
   }

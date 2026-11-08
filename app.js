@@ -25932,14 +25932,20 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
       aria-label="${escapeAttr(uiText("presenter.controls"))}"
     >
       <div class="svc-presenter-toolbar">
-        ${renderPresenterToolbarScripture(service, slides)}
-        ${renderPresenterThumbScaleControl()}
-        ${renderPresenterFocusView()}${renderWorshipDefaultOrderFillControl(service)}
-        ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
-        <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
-          ${renderServiceMusicPlayer()}
-          ${renderPresenterHelpControl()}
-        </span>
+        <div class="svc-presenter-toolbar-layout">
+          <div class="svc-presenter-toolbar-start">
+            ${renderPresenterFocusView()}${renderWorshipDefaultOrderFillControl(service)}
+          </div>
+          ${renderPresenterToolbarScripture(service, slides)}
+          <div class="svc-presenter-toolbar-end">
+            ${renderPresenterThumbScaleControl()}
+            ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
+            <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
+              ${renderServiceMusicPlayer()}
+              ${renderPresenterHelpControl()}
+            </span>
+          </div>
+        </div>
       </div>
       ${renderPastServiceEditingNotice(service)}
       <div class="svc-presenter-workspace">
