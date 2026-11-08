@@ -6420,3 +6420,30 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 
 /* Empty setlist reasons keep Korean words together without truncating copy. */
 .svc-setlist-week-status { word-break: keep-all; overflow-wrap: anywhere; }
+
+/* Keep the selected worship card above the independently scrolling order rail. */
+body[data-module="presenter"] .song-list:has(.service-sidebar-section--presenter-context) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+body[data-module="presenter"] .song-list:has(.service-sidebar-section--presenter-context) > .service-sidebar--presenter {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.service-sidebar--presenter:has(.service-sidebar-section--presenter-context) > .service-sidebar-section--presenter-context {
+  flex: 0 0 auto;
+}
+.service-sidebar--presenter:has(.service-sidebar-section--presenter-context) > .service-sidebar-section--current {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+.service-sidebar--presenter:has(.service-sidebar-section--presenter-context) > .service-sidebar-search-results {
+  flex: 0 1 auto;
+  max-height: 25%;
+  overflow-y: auto;
+}

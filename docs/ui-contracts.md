@@ -1222,3 +1222,12 @@ monthly time range, preventing that duplicate creation path. Other times, names
 and service types remain separate. For a scheduled monthly Friday, manual creation
 with the monthly alias resolves to the monthly type before saving. The form
 rejects a second monthly service on the same date if one is already loaded.
+
+## Presenter worship card and order scrolling · 2026-11-08
+
+In the presenter left sidebar, the search field and selected worship summary
+(name, date, status, output button and remote code) stay outside the order list's
+scroll viewport. Only the current order rail scrolls; search results have a
+bounded separate viewport. No worship data or output state changes follow from
+scrolling. Local Chromium/WebKit layout probes at 600px and 900px heights verify
+that the summary stays fixed while the order rail scrolls. Publication pending.
