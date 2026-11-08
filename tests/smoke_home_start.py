@@ -25,7 +25,7 @@ try:
    page.evaluate("()=>{state.module='home';state.selectedServiceTypeId=null;state.search='';render()}")
    assert page.locator('.home-module').count()==5
    assert page.locator('.home-next,.home-prep-outline,.service-week-board,.empty-verse').count()==0
-   assert '전체 현황' in page.locator('.home-start').inner_text()
+   assert 'Ministry Index' in page.locator('.home-start').inner_text()
    # Deferred worship hydration cannot replace the whole-app overview.
    page.evaluate("""async()=>{
     const saved=[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices];

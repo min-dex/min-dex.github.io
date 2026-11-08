@@ -16458,7 +16458,7 @@ function renderHomeStart() {
   ];
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
-      <header class="home-start-header"><div><h1>MINDEX</h1><p>전체 현황</p></div>
+      <header class="home-start-header"><div><h1>MINDEX</h1><p>Ministry Index</p></div>
         <div class="home-header-context"><time datetime="${toLocalDateStr(now)}">${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${serviceWeekdayLabel(now)}</time>
           ${calendarName ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(calendarName)}</span></button>` : ""}
         </div>

@@ -1,4 +1,4 @@
-"""Generated clean ready text uses the 16:9 stage; standalone media retains viewport fit."""
+"""Generated clean ready text uses the 16:9 stage; logo scales once in previews; standalone media retains viewport fit."""
 import os
 from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
@@ -23,6 +23,28 @@ try:
                 const prepared=presenterPreparationSlide(ratioService,{id:'ratio-waiting',label:'대기',memo:JSON.stringify({presenterRole:'ready'})},0);
                 window.ratioSlides=[ready,prepared,presenterElementTrailingBlankSlide({...ready,elementId:'ratio-element'},2,ratioService)];
                 window.ratioRoot=document.querySelector('#presenterOutputRoot');
+            }""")
+            page.evaluate("""async () => {
+                const preview = document.createElement('div');
+                preview.className = 'svc-presenter-live-preview';
+                preview.style.cssText = 'width:472px;--presenter-preview-scale:0.2458333333';
+                preview.innerHTML = renderPresenterSlideMiniPreview(ratioSlides[0], ratioService.id);
+                document.body.append(preview);
+                const stage = preview.querySelector('.svc-slide-mini-canvas');
+                const readyLogo = stage.querySelector('.presenter-ready-screen-logo');
+                await readyLogo.decode();
+                const width = preview.getBoundingClientRect().width;
+                const rect = readyLogo.getBoundingClientRect();
+                if (Math.abs(rect.width / width - .32) > .002 || Math.abs(rect.height / width - 64 / 1920) > .002) {
+                    throw Error('Ready logo must scale once with the preview: ' + rect.width + ' × ' + rect.height);
+                }
+                stage.innerHTML = renderPresenterGeneratedWaitingLoopSlide(ratioSlides[0]);
+                const waitingLogo = stage.querySelector('.presenter-waiting-loop-logo');
+                await waitingLogo.decode();
+                if (Math.abs(waitingLogo.getBoundingClientRect().width / width - .32) > .002) {
+                    throw Error('Waiting logo must share the ready logo sizing');
+                }
+                preview.remove();
             }""")
             for index in range(3):
                 page.evaluate("i=>renderPresenterOutput({serviceId:ratioService.id,serviceType:'children',chromakey:false,backgroundImages:['assets/worship-backgrounds/26-C2.png'],slides:ratioSlides,index:i})", index)

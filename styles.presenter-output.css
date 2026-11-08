@@ -422,13 +422,16 @@
 .presenter-ready-screen-field {
   display: none;
 }
+/* Measure in the design stage before the controller scales the whole canvas. */
+:is(.presenter-ready-screen-logo, .presenter-waiting-loop-logo) {
+  width: min(calc(614.4 * var(--presenter-stage-unit)), 640px);
+  max-height: calc(108 * var(--presenter-stage-unit));
+}
 .presenter-ready-screen-logo {
   display: block;
   position: relative;
   z-index: 1;
-  width: min(32cqw, 640px);
   height: calc(64 * var(--presenter-stage-unit));
-  max-height: 10cqh;
   object-fit: contain;
   opacity: 1;
 }
@@ -530,8 +533,6 @@
   display: block;
   position: relative;
   z-index: 2;
-  width: min(32cqw, 640px);
-  max-height: 10cqh;
   object-fit: contain;
   opacity: .82;
 }

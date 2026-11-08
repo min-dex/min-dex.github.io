@@ -688,7 +688,7 @@ output controls in the content sidebar do not move. Add/Save edit buttons share
 
 Popup copy: unsaved-change choices are explained by action labels. Beat setup retains existing-time preservation, with variable-beat guidance in an initially closed, keyboard-accessible disclosure. Photo filenames stay on individual photo rows; no repeated aggregate list.
 
-Home uses a compact wordmark/date header and a five-module overview with shared neutral surfaces, type and 5/10px spacing. Responsive columns keep summaries visible without a large hero. Errors are local to the affected module and never fall back to scripture.
+Home uses a compact MINDEX / Ministry Index wordmark and date header with a five-module overview with shared neutral surfaces, type and 5/10px spacing. Responsive columns keep summaries visible without a large hero. Errors are local to the affected module and never fall back to scripture.
 
 Service-data detail refresh must dispatch home to renderHomeDetail, including delayed supplemental data and background song completion. Home must not fall through to the service empty-state renderer after initial load.
 

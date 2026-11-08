@@ -4888,6 +4888,8 @@ rendered ready screen inside the centered 16:9 design stage, matching its blank
 cross transition. Only actual standalone media uses the viewport-fit exception.
 `smoke_ready_stage_ratio.py` exercises the real ready/preparation builders and
 output renderer at five viewport ratios, alongside the standalone-media checks.
+Ready and generated waiting logos use the shared design stage units before
+the thumbnail transform, so Chromium and WebKit apply the preview scale once.
 
 Image, video (including waiting-loop video), imported slide images and live PPTX
 use the entire output viewport as their available area. Fit the original aspect
