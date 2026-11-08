@@ -16,6 +16,7 @@ on:
       - internal-release.json
       - scripts/publish-internal.py
       - tests/test_internal_updater.cjs
+      - tests/test_internal_publication.py
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
