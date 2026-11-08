@@ -26,12 +26,26 @@ try:
     const video=elements.find(e=>e.element_type==='video');
     check(video&&video.song_id===null&&video.asset.url.endsWith('/1792893957703-.mp4'),'Exact original video');
     check(elements.filter(e=>e.element_type==='praise').length===0,'No duplicate praise');
+    check(video.source_ref.label==='봉헌영상'&&video.asset.name==='문들아 머리 들어라.mp4','Standard offering label and file name');
     const reopened=JSON.parse(JSON.stringify(rows));
     state.worshipSections=reopened.sections;state.worshipElements=reopened.elements;
     state.serviceItems[service.id]=groupWorshipElements(reopened.sections,reopened.elements)[service.id];
     const projected=getServiceItems(service.id);
     const videos=projected.filter(i=>parseServiceItemMemo(i.memo).asset?.url===video.asset.url);
-    check(videos.length===1,'Single video after reopen/projection');
+    check(videos.length===1&&videos[0].label==='봉헌영상','Single named offering video after reopen/projection');
+    for(const label of ['영상','어린이부 봉헌영상']){
+     const oldVideo={...video,source_ref:{...video.source_ref,label}};
+     const asset={...video.asset,name:'봉헌찬양 · 문들아 머리 들어라-송출용.mp4'};
+     oldVideo.config={...video.config,asset};
+     const before=JSON.stringify(oldVideo);
+     const item=groupWorshipElements(reopened.sections,[oldVideo])[service.id][0];
+     const actual=parseServiceItemMemo(item.memo).asset;
+     check(item.label==='봉헌영상'&&actual.name==='문들아 머리 들어라.mp4'&&actual.url===video.asset.url,'Legacy offering naming');
+     check(JSON.stringify(oldVideo)===before,'Legacy source not rewritten');
+     oldVideo.config.asset={...asset,name:'직접 지정한 파일.mp4'};
+     const custom=groupWorshipElements(reopened.sections,[oldVideo])[service.id][0];
+     check(parseServiceItemMemo(custom.memo).asset.name==='직접 지정한 파일.mp4','Custom name preserved');
+    }
     const legacy=projectWorshipServiceItemsFromTemplate(service,oldItems);
     check(JSON.stringify(oldItems)===oldBefore&&legacy.some(i=>i.raw_title==='기존 직접 입력'),'Old input preserved');
     check(!legacy.some(i=>parseServiceItemMemo(i.memo).asset?.url===video.asset.url),'No retroactive default');
@@ -44,7 +58,8 @@ try:
     const html=renderServicePresenterControls(service,slides,false,0);
     check(!html.includes('svc-source-panel')&&!html.includes('data-service-source-'),'No old editor entry');
     refs.detailPane.innerHTML=html;refreshIcons(refs.detailPane);
-    check(refs.detailPane.textContent.includes('문들아 머리 들어라'),'Original video shown in editor');
+    const field=refs.detailPane.querySelector('[data-service-item-field="asset_name"]');
+    check(field?.value==='문들아 머리 들어라.mp4'&&refs.detailPane.textContent.includes('봉헌영상'),'Clean offering video shown in editor');
     return 'PASS new-service original video, one element, reopen, existing input/projection preservation and retired UI absence';
    }'''),flush=True)
    for theme in ['light','dark']:

@@ -1860,6 +1860,9 @@ function syncServiceVersionFormErrors(field) {
   }
 }
 
+const CHILDREN_OFFERING_VIDEO_URL = "https://tdulobbnppmpiqqxbvqy.supabase.co/storage/v1/object/public/mindex-worship-media/services/222e03ec-096e-4530-af33-d952eb23f9b7/35e6f2a3-ec9a-456d-9a28-d648e3f91a03/1792893957703-.mp4";
+const CHILDREN_OFFERING_VIDEO_NAME = "문들아 머리 들어라.mp4";
+
 // Creation-only default: never applied by existing-service template projection.
 function applyChildrenOfferingCreationDefault(service, scaffold) {
   if (worshipAppServiceTypeId(service?.type_id) !== "children") return;
@@ -1868,13 +1871,13 @@ function applyChildrenOfferingCreationDefault(service, scaffold) {
   if (!element) return;
   const asset = {
     kind: "video",
-    name: "봉헌찬양 · 문들아 머리 들어라-송출용.mp4",
-    url: "https://tdulobbnppmpiqqxbvqy.supabase.co/storage/v1/object/public/mindex-worship-media/services/222e03ec-096e-4530-af33-d952eb23f9b7/35e6f2a3-ec9a-456d-9a28-d648e3f91a03/1792893957703-.mp4",
+    name: CHILDREN_OFFERING_VIDEO_NAME,
+    url: CHILDREN_OFFERING_VIDEO_URL,
   };
   Object.assign(element, {
     element_type: "video", title: "문들아 머리 들어라", song_id: null, song_version_id: null,
     input_mode: "asset", asset, template_modified: true,
-    source_ref: { ...element.source_ref, label: "영상", slotKey: "offering.video", placeholder: false },
+    source_ref: { ...element.source_ref, label: "봉헌영상", slotKey: "offering.video", placeholder: false },
     config: { ...element.config, elementType: "video", inputMode: "asset", asset },
   });
 }

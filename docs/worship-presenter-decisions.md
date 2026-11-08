@@ -5094,6 +5094,10 @@ followed by offering prayer. The existing original MP4 attachment from the
 The default is applied only in calendarAssigneeRowsForNewService, before the
 existing atomic create. Projection, reopen, save and existing services are not
 retrofitted; exact-request create retries retain their frozen element payload.
+2026-11-08: Use 봉헌영상 for the default order name and 문들아 머리 들어라.mp4
+for the default file name. Legacy default labels and the old -송출용 filename
+are normalized on read. Keep the original video URL, item identity and custom
+file names.
 
 ## 화면 진입·탭 복귀 시 최신 조회 · 2026-10-28
 
