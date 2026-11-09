@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261109-internal-105",
+  "version": "20261109-prayer-final",
   "options": {
     "compress": false,
     "mangle": {
@@ -14,10 +14,10 @@
       "comments": "@license|@preserve|^!"
     }
   },
-  "source_sha256": "ace2f3297f7fd13428860504859049cbc5827271ff73a8ef7e61bd539be5f1ba",
-  "runtime_sha256": "87d5f71ec44bb934139e8db6fba7a6efc26538972150e1ddd71b840bc6296396",
+  "source_sha256": "1b4220b3bac038324461a55941eab4b373c3e86452014e3943ee23a5fa9efbd5",
+  "runtime_sha256": "560509507fb8c6a0877a6198332feb593289da1fa6246d85e47a278f3298107d",
   "source_bytes": 1353190,
   "runtime_bytes": 965884,
-  "source_gzip": 309856,
-  "runtime_gzip": 242897
+  "source_gzip": 309858,
+  "runtime_gzip": 242899
 }

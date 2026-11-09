@@ -141,7 +141,13 @@
       "mindex-build.json",
       "product-release.json",
       "!data/**/*",
-      "tools/broadcast-prototype/**/*"
+      "tools/broadcast-prototype/**/*",
+      "!assets/presenter/dawn-free-prayer-69c12c677944.mp3",
+      "!assets/presenter/dawn-free-prayer-7838168016b7.mp3",
+      "!assets/presenter/dawn-free-prayer-9b2f77451de5.mp3",
+      "!assets/presenter/dawn-free-prayer-bac443d20c02.mp3",
+      "!assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3",
+      "!assets/presenter/dawn-free-prayer.mp3"
     ],
     "mac": {
       "target": [

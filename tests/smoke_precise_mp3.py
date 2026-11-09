@@ -6,7 +6,7 @@ from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from smoke_app import start_local_app_server, sync_playwright, launch_chromium
 
-SOURCE = './assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3'
+SOURCE = './assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3'
 
 def main():
     fingerprints = json.loads((Path(__file__).parent / 'fixtures/prayer-audio-timing-fingerprints.json').read_text())

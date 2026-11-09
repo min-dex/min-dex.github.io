@@ -27,20 +27,24 @@
 
 ## Audio
 
-- Current dawn default (2026-11-06, user-approved r2):
-  `assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3`, 87,865,100 bytes,
-  SHA-256 `f9ebf1aeed2385f27d61a3ad48908d2dad2cc0ca0a547a20b54a8a4aded7ddd3`; stereo48kHz, decoded3169.543625s unchanged.
-  Six localized interpolations total7ms relative to the v5 PCM master;
-  all other master samples, performance, levels and duration are unchanged.
-  MP3 delivery is lossy re-encoding, not byte-identical outside edits. Ambiguous
-  source transients remain unchanged; no blanket auditory-perfection claim.
-  Only `dawn.free` selects r2. Keep the immutable v5 URL and explicit attachments;
-  do not rewrite worship records, audio links, order, timing or media metadata.
-  Local source verification stays private. Independent decoded anchor fixtures
-  and default/explicit-source regression expectations follow the approved file.
+- Current dawn default (2026-11-09, user-approved integrated final):
+  `assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3`, 81,289,196 bytes,
+  SHA-256 `9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150`; stereo48kHz, decoded2946.712875s.
+  Seven vocal tracks followed by seven MR counterparts; MR begins1463.55s.
+  One constant gain per song and common output scale. No incoming fades,
+  automatic in-song leveling, limiter, compressor, EQ or time stretching.
+  Approved vocal joins1/2/5 and corresponding MR music positions are retained.
+  Only outgoing backing release and bounded click repair alter join windows;
+  retained song bodies match source plus fixed gains and R2 repairs. Two R2
+  repair locations are retained; four occur in approved removed MR tails.
+  Digital validation does not certify auditory perfection or separation artifacts.
+  Only `dawn.free` selects this file. Explicit user attachments and all worship
+  records, timings and metadata remain unchanged.
+  Superseded dawn files remain in source solely for original/packet regression
+  evidence, but `.gitattributes` and exact desktop exclusions keep them out of
+  current website and installer artifacts. Historical assertions remain active.
 
-
-- Dawn prayer audio v5 historical reference (2026-11-05):
+- Historical source regression reference only (v5, 2026-11-05; not shipped):
   `assets/presenter/dawn-free-prayer-bac443d20c02.mp3`, 87,865,148 bytes, 3169.543625 seconds decoded,
   stereo48kHz. SHA-256 `bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87`.
   Built from the first supplied original (SHA-256
@@ -58,7 +62,7 @@
   source/output transcription is supporting evidence, not human auditory review.
   Full decode, source preservation and player/source-isolation checks are separate
   from release/public readback. Private maps and evidence remain outside Git.
-  `dawn.free` selects the immutable file. Explicit attachments keep precedence.
+  Historical source is retained for regression evidence; the current default is above.
   No worship records, audio synchronization or media links are rewritten.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.

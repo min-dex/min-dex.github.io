@@ -17,14 +17,15 @@ for (const video of ['chromakey-ready-loop.mp4', 'chromakey-ready-loop-fast.mp4'
 const {files, ...record} = identity(process.cwd(), {test:process.argv[4]!=='internal',internal:process.argv[4]==='internal'});
 assert.deepEqual(JSON.parse(asar.extractFile(archive, 'mindex-build.json')), record);
 const gitBlob = bytes => crypto.createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
+for (const retired of ["assets/presenter/dawn-free-prayer-69c12c677944.mp3", "assets/presenter/dawn-free-prayer-7838168016b7.mp3", "assets/presenter/dawn-free-prayer-9b2f77451de5.mp3", "assets/presenter/dawn-free-prayer-bac443d20c02.mp3", "assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3", "assets/presenter/dawn-free-prayer.mp3"]) assert.ok(!packagedPaths.has(retired), "retired dawn audio must not ship: "+retired);
 let dawnAudio = null;
 for (const {name, blob} of files) {
  const bytes = asar.extractFile(archive, path.normalize(name));
  assert.equal(gitBlob(bytes), blob, name);
- if (name === 'assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3') {
+ if (name === 'assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3') {
   dawnAudio = {bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex')};
-  assert.equal(dawnAudio.bytes, 87865100);
-  assert.equal(dawnAudio.sha256, 'f9ebf1aeed2385f27d61a3ad48908d2dad2cc0ca0a547a20b54a8a4aded7ddd3');
+  assert.equal(dawnAudio.bytes, 81289196);
+  assert.equal(dawnAudio.sha256, '9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150');
  }
 }
 assert.ok(dawnAudio, 'approved dawn MP3 is included');
