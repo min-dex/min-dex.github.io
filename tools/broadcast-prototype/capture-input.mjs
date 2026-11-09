@@ -36,7 +36,11 @@ export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=docu
   try{
    acquired=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:$('captureVideo').value},width:{ideal:desktop?1920:1280},height:{ideal:desktop?1080:720},frameRate:{ideal:30}},audio:$('captureAudio').value?{deviceId:{exact:$('captureAudio').value},echoCancellation:false,noiseSuppression:false,autoGainControl:false}:false});
    if(disposed||own!==epoch){acquired.getTracks().forEach(t=>t.stop());return;}
-   stream=acquired;onStart();video.srcObject=stream;video.muted=true;await video.play();
+   stream=acquired;
+   const disconnected=()=>{if(own===epoch)stop('장치 연결이 끊겼습니다. 다시 연결해 주세요.');};
+   stream.getTracks().forEach(t=>t.addEventListener('ended',disconnected));
+   if(stream.getTracks().some(t=>t.readyState==='ended')){disconnected();return;}
+   onStart();video.srcObject=stream;video.muted=true;await video.play();
    if(disposed||own!==epoch)return;
    if(stream.getAudioTracks().length){
     context=new AudioContext();const source=context.createMediaStreamSource(stream);buses=createAudioBuses(context,source);meter=context.createAnalyser();meter.fftSize=2048;
@@ -46,7 +50,6 @@ export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=docu
    const update=()=>{buses?.apply(policy());let peak=0;if(meter){const data=new Float32Array(meter.fftSize);meter.getFloatTimeDomainData(data);for(const v of data)peak=Math.max(peak,Math.abs(v));}
     $('captureLevel').textContent=`입력 ${(peak*100).toFixed(1)}% · 유튜브 ${((policy().broadcast?peak:0)*100).toFixed(1)}%`;};
    update();timer=setInterval(update,100);
-   stream.getTracks().forEach(t=>t.addEventListener('ended',()=>{if(own===epoch)stop('장치 연결이 끊겼습니다. 다시 연결해 주세요.');}));
    onReady?.();
    status(stream.getAudioTracks().length?'장치 연결됨 · 영상·오디오 신호 확인 · 스피커 출력 없음':'영상 연결됨 · 오디오는 선택하지 않았습니다.');
   }catch(error){if(own===epoch){stop(error?.name==='NotReadableError'?'장치를 열 수 없습니다. 다른 앱의 장치 사용 여부를 확인하세요.':'연결 실패 · 선택 장치·권한·케이블을 확인하세요.');}else acquired?.getTracks().forEach(t=>t.stop());}
