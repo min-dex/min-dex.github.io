@@ -152,7 +152,12 @@ async function main() {
     // The receiver must still decode caption and tone, in sequence, below.
     await sleep(4500);
     await panel.locator('#ytStop').click();
-    await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 종료 · 녹화 저장 완료');
+    try {
+      await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 종료 · 녹화 저장 완료');
+    } catch (error) {
+      const status=await panel.locator('#ytStatus').textContent();
+      throw new Error('Recording stop status: '+status+'; receiver exited: '+(sink.exitCode!==null),{cause:error});
+    }
     await received;
     assert.equal(publishes,1); assert(matchingKey);
     assert.equal(await app.evaluate(()=>globalThis.__recordDialogFixture.calls),2);

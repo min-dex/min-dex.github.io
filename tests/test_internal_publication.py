@@ -90,11 +90,11 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    def read(url,**kwargs):
     self.assertNotIn('Authorization',url.headers)
     self.assertEqual(url.unredirected_hdrs.get('Authorization'),'Bearer fixture')
-    if '/tags/church-v1.0.0?mindexVerify=' in url.full_url:
+    if '/releases?per_page=100&mindexVerify=' in url.full_url:
      release={'tag_name':'church-v1.0.0','draft':False,'prerelease':False,
               'assets':[{'name':name,'id':i,'state':'uploaded'}
                         for i,name in enumerate(('internal-build.json',row['file']),1)]}
-     return io.BytesIO(json.dumps(release).encode())
+     return io.BytesIO(json.dumps([release]).encode())
     self.assertEqual(url.get_header('Accept'),'application/octet-stream')
     return io.BytesIO(json.dumps(receipt).encode() if '/assets/1?download=1&mindexVerify=' in url.full_url else payload)
    with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.5']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):

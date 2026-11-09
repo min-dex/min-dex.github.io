@@ -60,7 +60,7 @@ def retry_download(read):
 
 def read_receipt(url):
     with open_release(url, timeout=60) as response:
-        return json.loads(response.read(100000))
+        return json.loads(response.read(2000000))
 
 
 def api_request(path, token, accept='application/vnd.github+json'):
@@ -116,15 +116,18 @@ def main():
     receipt_dir.mkdir(exist_ok=True)
     temp_root = upgrade_temp_root()
     print(f'Published upgrade temporary root: {temp_root}', flush=True)
+    releases = retry_download(lambda: read_receipt(api_request('?per_page=100', token)))
+    published = {release['tag_name']: release for release in releases
+                 if not release['draft'] and not release['prerelease']}
     for previous in SOURCES:
         free = shutil.disk_usage(temp_root).free
         print(f'Published upgrade {previous}: free {free / 1024**3:.2f} GiB; required 26 GiB', flush=True)
         if free < 26 * 1024**3:
             raise RuntimeError('Need 20 GiB reserve plus 6 GiB for published upgrade fixture')
         tag = 'church-v' + previous
-        release = retry_download(lambda: read_receipt(api_request(f'/tags/{tag}', token)))
-        if release['tag_name'] != tag or release['draft'] or release['prerelease']:
-            raise ValueError('Unexpected release')
+        release = published.get(tag)
+        if not release:
+            raise ValueError(f'Missing published release: {tag}')
         receipt = retry_download(lambda: read_receipt(download_request(release, 'internal-build.json', token)))
         record = asset_record(receipt, previous, target)
         with tempfile.TemporaryDirectory(prefix='mindex-published-download-') as folder:
