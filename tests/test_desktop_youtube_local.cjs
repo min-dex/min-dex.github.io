@@ -39,7 +39,27 @@ async function main() {
     assert(await app.evaluate(({app}) => app.getPath('userData').includes('mindex-isolated-') && !!globalThis.__mindexTestIsolation?.networkBlocked), 'Requires isolated QA package');
     const isWindows = process.platform === 'win32';
     if (isWindows) {
-      await main.locator('#desktopBroadcastBtn').waitFor({state:'visible'});
+      // The isolated app blocks all remote requests. Start the controller in
+      // its unconfigured state so storage startup can reach real toolbar IPC.
+      await main.addInitScript(() => {
+        Object.defineProperty(window, 'MINDEX_SUPABASE', { get: () => ({}), set: () => {} });
+      });
+      await main.reload();
+      try {
+        await main.locator('#desktopBroadcastBtn').waitFor({state:'visible'});
+      } catch (error) {
+        const boot = await main.evaluate(() => ({
+          protocol: location.protocol,
+          controller: location.pathname.endsWith('/index.html') && !location.search.includes('output='),
+          binding: typeof bindElectronDesktopEvents,
+          platform: window.mindexElectron?.platform,
+          broadcast: typeof window.mindexElectron?.openBroadcast,
+          bootFailed: document.body?.dataset.bootFailed === 'true',
+          booting: document.body?.classList.contains('ui-booting'),
+          buttonHidden: document.getElementById('desktopBroadcastBtn')?.hidden,
+        }));
+        throw new Error('Windows toolbar boot: ' + JSON.stringify(boot), {cause:error});
+      }
       const left = main.locator('.topbar-module-strip button:visible');
       assert.equal(await left.count(), 6, 'Windows left toolbar must have six actions');
       const ids = ['themeBtn','saveAllBtn','remotePanelBtn','monitorPanelBtn','desktopUpdateBtn','desktopBroadcastBtn'];
