@@ -23,6 +23,9 @@ on:
       - tools/broadcast-engine/**
       - tools/broadcast-prototype/**
       - electron/**
+      - mindex.desktop-ui.js
+      - tests/test_desktop_update_ui.cjs
+      - tests/smoke_internal_update.py
       - mindex.presenter-lifetime.js
       - mindex.icons.js
       - tools/minimatch-compat/**
