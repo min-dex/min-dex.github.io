@@ -66,7 +66,7 @@ function createInstallerDownloader(session, tempPath) {
           request.item?.cancel();
           finish(Error('Installer download timed out'));
         }, 30 * 60 * 1000);
-        try { session.downloadURL(asset.url); }
+        try { session.downloadURL(asset.url, {headers:{Accept:'application/octet-stream'}}); }
         catch (error) { finish(error); }
       });
       return file;

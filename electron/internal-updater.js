@@ -1,6 +1,7 @@
 // Church-only installers require explicit user confirmation before opening.
 const ROOT = 'https://github.com/min-dex/min-dex.github.io/releases/download/';
-const API = 'https://api.github.com/repos/min-dex/min-dex.github.io/releases?per_page=100';
+const RELEASES = 'https://api.github.com/repos/min-dex/min-dex.github.io/releases';
+const API = RELEASES+'?per_page=100';
 const versionParts = value => /^\d+\.\d+\.\d+$/.test(value) ? value.split('.').map(Number) : null;
 const compare = (a,b) => { const x=versionParts(a),y=versionParts(b); if(!x||!y)throw Error('Invalid version'); for(let i=0;i<3;i++)if(x[i]!==y[i])return x[i]-y[i]; return 0; };
 function chooseRelease(rows, current, platform, arch) {
@@ -12,9 +13,10 @@ function chooseRelease(rows, current, platform, arch) {
   const name=`Mindex-${version}-${target}`;
   const url=ROOT+release.tag_name+'/'+name;
   const asset=(release.assets||[]).find(a=>a.name===name&&a.browser_download_url===url&&a.size>0&&a.state==='uploaded');
-  if(!asset || !Number.isSafeInteger(asset.size) || asset.size > 8 * 1024 ** 3 ||
+  if(!asset || !Number.isSafeInteger(asset.id) || asset.id < 1 ||
+      !Number.isSafeInteger(asset.size) || asset.size > 8 * 1024 ** 3 ||
       !/^sha256:[a-f0-9]{64}$/.test(asset.digest || '')) throw Error('Incomplete internal release');
-  return {version,url,name,size:asset.size,sha256:asset.digest.slice(7)};
+  return {version,url:RELEASES+'/assets/'+asset.id+'?download=1',name,size:asset.size,sha256:asset.digest.slice(7)};
  }
  return null;
 }

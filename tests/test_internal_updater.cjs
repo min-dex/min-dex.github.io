@@ -6,13 +6,14 @@ const {createInstallerDownloader,verifyInstaller,discardInstaller}=require('../e
 const payload=Buffer.from('installer fixture');
 const digest='sha256:'+createHash('sha256').update(payload).digest('hex');
 const {chooseRelease,createInternalUpdateController}=require('../electron/internal-updater');
-const release=(version='1.0.1',target='mac-arm64.dmg')=>({tag_name:'church-v'+version,assets:[{name:`Mindex-${version}-${target}`,browser_download_url:`https://github.com/min-dex/min-dex.github.io/releases/download/church-v${version}/Mindex-${version}-${target}`,state:'uploaded',size:payload.length,digest}]});
+const release=(version='1.0.1',target='mac-arm64.dmg')=>({tag_name:'church-v'+version,assets:[{name:`Mindex-${version}-${target}`,browser_download_url:`https://github.com/min-dex/min-dex.github.io/releases/download/church-v${version}/Mindex-${version}-${target}`,id:123,state:'uploaded',size:payload.length,digest}]});
 test('internal release selection uses semantic versions and exact architecture/repository',()=>{
  assert.equal(chooseRelease([release('1.0.2'),release('1.0.10')],'1.0.0','darwin','arm64').version,'1.0.10');
  assert.equal(chooseRelease([release('1.0.0')],'1.0.0','darwin','arm64'),null);
  assert.equal(chooseRelease([{...release(),draft:true},{...release(),prerelease:true}],'1.0.0','darwin','arm64'),null);
  for(const target of ['https://evil.invalid/a','file:///tmp/a']){const bad=release();bad.assets[0].browser_download_url=target;assert.throws(()=>chooseRelease([bad],'1.0.0','darwin','arm64'),/Incomplete/);}
  assert.throws(()=>chooseRelease([release()],'1.0.0','darwin','x64'),/Incomplete/);
+ assert.equal(chooseRelease([release()],'1.0.0','darwin','arm64').url,'https://api.github.com/repos/min-dex/min-dex.github.io/releases/assets/123?download=1');
  for(const digest of [null,'md5:bad','sha256:bad']){
   const bad=release();bad.assets[0].digest=digest;
   assert.throws(()=>chooseRelease([bad],'1.0.0','darwin','arm64'),/Incomplete/);
@@ -23,7 +24,9 @@ function nativeDownloadFixture({bytes=payload,redirect='https://release-assets.g
  const session=new EventEmitter();
  let filter,starts=0;
  session.webRequest={onBeforeRequest(cb){filter=cb;}};
- session.downloadURL=url=>{
+ session.downloadURL=(url,{headers})=>{
+  assert.equal(headers.Accept,'application/octet-stream');
+  assert.equal(url,'https://api.github.com/repos/min-dex/min-dex.github.io/releases/assets/123?download=1');
   starts++;
   for(const step of [url,redirect])filter({url:step},result=>{
    if(result.cancel)throw Error('Unexpected download URL');
