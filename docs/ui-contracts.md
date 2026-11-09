@@ -1231,13 +1231,14 @@ bounded separate viewport. No worship data or output state changes follow from
 scrolling. Local Chromium/WebKit layout probes at 600px and 900px heights verify
 that the summary stays fixed while the order rail scrolls. Publication pending.
 
-### Windows 앱의 상단 도구
+### 설치 앱의 상단 도구
 
-Windows 앱은 왼쪽 탐색 6개와 오른쪽 기본 도구 6개를 상단에 배치한다.
+Mac과 Windows 설치 앱은 왼쪽 탐색 6개와 오른쪽 기본 도구 6개를 같은 순서로 상단에 배치한다.
 오른쪽의 테마·저장·원격 조작·접속 현황 뒤에 업데이트와 방송을 둔다.
-두 도구는 Windows 네이티브 메뉴에서 제거한다. 업데이트는 기존 확인과
+macOS 메뉴 막대에서도 두 명령을 사용할 수 있다. 업데이트는 기존 확인과
 편집·송출 중 설치 차단을 사용한다. 방송 버튼은 방송 창을 열며 송출은
-그 창의 기존 별도 조작으로 시작한다. 웹과 다른 OS에는 새 버튼을 표시하지 않는다.
+그 창의 기존 별도 조작으로 시작한다. 두 버튼은 데스크톱 브리지가 해당 명령을 제공할 때 표시한다.
+설치 앱 UI와 동작의 변경은 Mac과 Windows에 같은 버전으로 제공하고, 두 플랫폼에서 검증한다.
 
 ## Compact home overview ·2026-11-09
 

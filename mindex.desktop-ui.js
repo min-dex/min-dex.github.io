@@ -64,22 +64,20 @@ function bindElectronDesktopEvents() {
     } catch { showFailure(); }
   };
   desktop.onCheckUpdateRequested?.(checkUpdate);
-  if (desktop.platform === "win32") {
-    const update = document.getElementById("desktopUpdateBtn");
-    const broadcast = document.getElementById("desktopBroadcastBtn");
-    if (update && typeof desktop.checkForUpdates === "function") {
-      update.hidden = false;
-      update.addEventListener("click", checkUpdate);
-    }
-    if (broadcast && typeof desktop.openBroadcast === "function") {
-      broadcast.hidden = false;
-      broadcast.addEventListener("click", async () => {
-        try {
-          if ((await desktop.openBroadcast())?.ok) return;
-        } catch {}
-        showToast("방송 창을 열지 못했습니다.", "error");
-      });
-    }
+  const update = document.getElementById("desktopUpdateBtn");
+  const broadcast = document.getElementById("desktopBroadcastBtn");
+  if (update && typeof desktop.checkForUpdates === "function") {
+    update.hidden = false;
+    update.addEventListener("click", checkUpdate);
+  }
+  if (broadcast && typeof desktop.openBroadcast === "function") {
+    broadcast.hidden = false;
+    broadcast.addEventListener("click", async () => {
+      try {
+        if ((await desktop.openBroadcast())?.ok) return;
+      } catch {}
+      showToast("방송 창을 열지 못했습니다.", "error");
+    });
   }
   desktop.getUpdateState?.().then(result => { if (result?.ok) void handleState(result.state); }).catch(() => {});
 }

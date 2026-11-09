@@ -4,13 +4,13 @@ const assert=require('node:assert/strict');
 const vm=require('node:vm'),fs=require('node:fs');
 const bind=readRuntimeSource('mindex.desktop-ui.js');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-function fixture(initial, platform){
+function fixture(initial, platform, isDesktop = true){
  let status=initial || {status:'available',version:'1.2.3',presenterOpen:false};let live=false,dirty=false,accept=true;
  let confirms=0,installs=0,downloads=0,broadcasts=0;const messages=[];
  const buttons=Object.fromEntries(['desktopUpdateBtn','desktopBroadcastBtn'].map(id=>[id,{
   hidden:true,addEventListener(_name,callback){this.click=callback;},
  }]));
- const bridge={isDesktop:true,platform,onUpdateState:cb=>bridge.event=cb,onCheckUpdateRequested:cb=>bridge.manual=cb,
+ const bridge={isDesktop,platform,onUpdateState:cb=>bridge.event=cb,onCheckUpdateRequested:cb=>bridge.manual=cb,
  getUpdateState:async()=>({ok:true,state:status}),checkForUpdates:async()=>({ok:true,state:status}),
  openBroadcast:async()=>{broadcasts++;return {ok:true};},
  installUpdate:async()=>{installs++;status={...status,status:'installing'};return {ok:true};},
@@ -20,8 +20,9 @@ function fixture(initial, platform){
  vm.runInNewContext(bind+'\nbindElectronDesktopEvents();',ctx);
  return {bridge,buttons,messages,live:v=>live=v,dirty:v=>dirty=v,accept:v=>accept=v,set:v=>status=v,counts:()=>({confirms,installs,downloads,broadcasts})};
 }
-test('Windows toolbar reuses update guards and opens only the broadcast window',async()=>{
- const f=fixture({status:'downloaded',version:'1.2.3',presenterOpen:true},'win32');
+for (const platform of ['win32','darwin']) {
+test(platform+' toolbar reuses update guards and opens only the broadcast window',async()=>{
+ const f=fixture({status:'downloaded',version:'1.2.3',presenterOpen:true},platform);
  f.live(true);await tick();
  assert.equal(f.buttons.desktopUpdateBtn.hidden,false);
  assert.equal(f.buttons.desktopBroadcastBtn.hidden,false);
@@ -34,8 +35,11 @@ test('Windows toolbar reuses update guards and opens only the broadcast window',
  assert.equal(f.counts().broadcasts,1);
  f.dirty(false);await f.buttons.desktopUpdateBtn.click();
  assert.equal(f.counts().installs,1);
- const mac=fixture({status:'current'},'darwin');
- assert(Object.values(mac.buttons).every(button=>button.hidden));
+});
+}
+test('web does not expose native toolbar actions',()=>{
+ const web=fixture({status:'current'},undefined,false);
+ assert(Object.values(web.buttons).every(button=>button.hidden));
 });
 test('declined update remains reachable from menu',async()=>{
  const f=fixture();f.accept(false);await tick();assert.equal(f.counts().confirms,1);

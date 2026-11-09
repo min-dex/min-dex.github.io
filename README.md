@@ -5,6 +5,21 @@ output, Praise data, Scripture lookup, calendar, and reference links. Worship
 and Presenter reliability are the live-operation priority; Praise and
 Scripture remain canonical data modules used by worship elements.
 
+## Install and use Mindex
+
+Download the installer for your computer from the
+[Mindex releases page](https://github.com/min-dex/min-dex.github.io/releases).
+
+- **Mac:** choose the Apple Silicon or Intel DMG, then move Mindex to Applications.
+- **Windows:** run the Windows x64 installer.
+
+Open Mindex from Applications or the Start menu. The installed app runs on its
+own, without a local web server or a localhost URL.
+
+To update, use the **Update** button in the app toolbar. For church internal
+releases, the app opens the matching installer download. Save your work and
+close Mindex before installing the update over your current copy.
+
 ## Collaboration Link
 
 Mindex can be shared as a static GitHub Pages app. Share collaborators a link
@@ -44,9 +59,11 @@ The app also reads a local injected config if you host it somewhere private:
 </script>
 ```
 
-## Run
+## Local development
 
-Use the included no-cache server (changes reflect on Cmd+R):
+### Web preview
+
+To preview source changes in a browser, start the development server:
 
 ```sh
 python3 serve.py
@@ -58,11 +75,10 @@ Then open:
 http://localhost:2300
 ```
 
-## Desktop App
+### Desktop development
 
-The desktop app uses Electron as a thin shell around the same static Mindex UI.
-It keeps Supabase as the primary data source and uses native windows for
-presenter output.
+The Electron app bundles the same Mindex UI, uses Supabase as its primary data
+source, and opens presenter output in native windows.
 
 Install JavaScript dependencies once:
 

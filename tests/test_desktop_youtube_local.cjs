@@ -14,7 +14,7 @@ async function main() {
   try {
     fs.writeFileSync(file('openssl.cnf'),'[req]\ndistinguished_name=dn\nx509_extensions=ext\nprompt=no\n[dn]\nCN=localhost\n[ext]\nsubjectAltName=DNS:localhost\nbasicConstraints=critical,CA:TRUE\n');
     execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-days','1','-config',file('openssl.cnf'),'-keyout',file('qa.key'),'-out',file('qa.pem')],{stdio:'ignore'});
-    execFileSync(ffmpeg,['-loglevel','error','-f','lavfi','-i','color=blue:size=320x180:rate=30','-f','lavfi','-i','sine=frequency=440','-t','3','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',file('fixture.mp4')]);
+    execFileSync(ffmpeg,['-loglevel','error','-f','lavfi','-i','color=blue:size=320x180:rate=30','-f','lavfi','-i','sine=frequency=440','-t','20','-c:v','libx264','-pix_fmt','yuv420p','-c:a','aac',file('fixture.mp4')]);
     const reserve = net.createServer().listen(0,'127.0.0.1'); await once(reserve,'listening');
     const port = reserve.address().port; await new Promise(ok=>reserve.close(ok));
     const key = 'isolated-demo-key';
@@ -38,44 +38,41 @@ async function main() {
     const main = await app.firstWindow();
     assert(await app.evaluate(({app}) => app.getPath('userData').includes('mindex-isolated-') && !!globalThis.__mindexTestIsolation?.networkBlocked), 'Requires isolated QA package');
     const isWindows = process.platform === 'win32';
-    if (isWindows) {
-      // The isolated app blocks all remote requests. Start the controller in
-      // its unconfigured state so storage startup can reach real toolbar IPC.
-      await main.addInitScript(() => {
-        Object.defineProperty(window, 'MINDEX_SUPABASE', { get: () => ({}), set: () => {} });
-      });
-      await main.reload();
-      try {
-        await main.locator('#desktopBroadcastBtn').waitFor({state:'visible'});
-      } catch (error) {
-        const boot = await main.evaluate(() => ({
-          protocol: location.protocol,
-          controller: location.pathname.endsWith('/index.html') && !location.search.includes('output='),
-          binding: typeof bindElectronDesktopEvents,
-          platform: window.mindexElectron?.platform,
-          broadcast: typeof window.mindexElectron?.openBroadcast,
-          bootFailed: document.body?.dataset.bootFailed === 'true',
-          booting: document.body?.classList.contains('ui-booting'),
-          buttonHidden: document.getElementById('desktopBroadcastBtn')?.hidden,
-        }));
-        throw new Error('Windows toolbar boot: ' + JSON.stringify(boot), {cause:error});
-      }
-      const left = main.locator('.topbar-module-strip button:visible');
-      assert.equal(await left.count(), 6, 'Windows left toolbar must have six actions');
-      const ids = ['themeBtn','saveAllBtn','remotePanelBtn','monitorPanelBtn','desktopUpdateBtn','desktopBroadcastBtn'];
-      const boxes = await Promise.all(ids.map(id => main.locator('#'+id).boundingBox()));
-      assert(boxes.every((box,index) => box && (index === 0 ||
-        Math.abs(box.y-boxes[0].y)<1 && box.x>boxes[index-1].x)),
-      'Windows right toolbar must have six ordered actions on one row');
-      assert(await app.evaluate(({Menu}) => !Menu.getApplicationMenu().items.some(
-        item => ['업데이트','방송'].includes(item.label))), 'Moved actions must be absent from the native menu');
-      await main.locator('#desktopUpdateBtn').click();
-      await main.getByText('자동 업데이트는 배포용 설치 앱에서 사용할 수 있습니다.',{exact:true}).waitFor();
-      console.log('PASS installed Windows 6+6 toolbar and update button IPC (isolated updates disabled)');
+    // The isolated app blocks all remote requests. Start the controller in
+    // its unconfigured state so storage startup can reach real toolbar IPC.
+    await main.addInitScript(() => {
+      Object.defineProperty(window, 'MINDEX_SUPABASE', { get: () => ({}), set: () => {} });
+    });
+    await main.reload();
+    try {
+      await main.locator('#desktopBroadcastBtn').waitFor({state:'visible'});
+    } catch (error) {
+      const boot = await main.evaluate(() => ({
+        protocol: location.protocol,
+        controller: location.pathname.endsWith('/index.html') && !location.search.includes('output='),
+        binding: typeof bindElectronDesktopEvents,
+        platform: window.mindexElectron?.platform,
+        broadcast: typeof window.mindexElectron?.openBroadcast,
+        bootFailed: document.body?.dataset.bootFailed === 'true',
+        booting: document.body?.classList.contains('ui-booting'),
+        buttonHidden: document.getElementById('desktopBroadcastBtn')?.hidden,
+      }));
+      throw new Error('Desktop toolbar boot: ' + JSON.stringify(boot), {cause:error});
     }
+    const left = main.locator('.topbar-module-strip button:visible');
+    assert.equal(await left.count(), 6, 'Desktop left toolbar must have six actions');
+    const ids = ['themeBtn','saveAllBtn','remotePanelBtn','monitorPanelBtn','desktopUpdateBtn','desktopBroadcastBtn'];
+    const boxes = await Promise.all(ids.map(id => main.locator('#'+id).boundingBox()));
+    assert(boxes.every((box,index) => box && (index === 0 ||
+      Math.abs(box.y-boxes[0].y)<1 && box.x>boxes[index-1].x)),
+    'Desktop right toolbar must have six ordered actions on one row');
+    if (isWindows) assert(await app.evaluate(({Menu}) => !Menu.getApplicationMenu().items.some(
+      item => ['업데이트','방송'].includes(item.label))), 'Moved actions must be absent from the native menu');
+    await main.locator('#desktopUpdateBtn').click();
+    await main.getByText('자동 업데이트는 배포용 설치 앱에서 사용할 수 있습니다.',{exact:true}).waitFor();
+    console.log('PASS installed desktop 6+6 toolbar and update button IPC (isolated updates disabled)');
     const opened = app.waitForEvent('window');
-    if (isWindows) await main.locator('#desktopBroadcastBtn').click();
-    else await app.evaluate(({Menu})=>Menu.getApplicationMenu().items.find(x=>x.label==='방송').submenu.items[0].click());
+    await main.locator('#desktopBroadcastBtn').click();
     const panel = await opened;
     await panel.locator('#ytStart').waitFor({state:'visible'});
     assert(await panel.locator('#ytStart').isDisabled());
@@ -118,7 +115,13 @@ async function main() {
     // The routing toggle applies before the next animation frame paints the local preview.
     await panel.waitForFunction(()=>!broadcastPrototype.routing().broadcast && document.querySelector('#program').getContext('2d').getImageData(10,10,1,1).data[2]>210,null,{timeout:5000});
     await sleep(2500);
-    await panel.locator('#excludeBroadcast').click(); await sleep(2500);
+    await panel.locator('#excludeBroadcast').click();
+    await panel.waitForFunction(() => broadcastPrototype.routing().broadcast &&
+      document.querySelector('#broadcast').getContext('2d').getImageData(10,10,1,1).data[2] > 210,
+    null,{timeout:10000});
+    // Give the installed Intel app time to encode a stable restored phase.
+    // The receiver must still decode caption and tone, in sequence, below.
+    await sleep(4500);
     await panel.locator('#ytStop').click();
     await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 종료 · 녹화 저장 완료');
     await received;
@@ -167,7 +170,7 @@ async function main() {
     await sleep(700);
     assert.equal(publishes,2);
     console.log('PASS receiver disconnect releases controls without automatic publication');
-    console.log('PASS desktop menu, key entry, authenticated TLS receiver, caption + tone → slate + silence → restored, CH8 retained, clean stop');
+    console.log('PASS desktop toolbar, key entry, authenticated TLS receiver, caption + tone → slate + silence → restored, CH8 retained, clean stop');
   }finally{if(app)await app.close();peer?.destroy();server?.close();sink?.kill('SIGKILL');fs.rmSync(tmp,{recursive:true,force:true});}
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
