@@ -35,7 +35,8 @@ class ElectronRuntimeFilesTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         package = json.loads((root / 'package.json').read_text(encoding="utf-8"))
         self.assertIn('electron/**/*', package['build']['files'])
-        for name in ['electron/updater.js', 'electron/main.js', 'electron/preload.js',
+        for name in ['electron/updater.js', 'electron/internal-updater.js', 'electron/internal-installer.js',
+                     'electron/main.js', 'electron/preload.js',
                      'scripts/release-electron.mjs', 'scripts/verify-release.mjs']:
             self.assertTrue((root / name).is_file(), name)
         self.assertIn('zip', package['build']['mac']['target'])

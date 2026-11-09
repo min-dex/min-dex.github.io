@@ -13,7 +13,7 @@ function fixture(initial, platform, isDesktop = true){
  const bridge={isDesktop,platform,onUpdateState:cb=>bridge.event=cb,onCheckUpdateRequested:cb=>bridge.manual=cb,
  getUpdateState:async()=>({ok:true,state:status}),checkForUpdates:async()=>({ok:true,state:status}),
  openBroadcast:async()=>{broadcasts++;return {ok:true};},
- installUpdate:async()=>{installs++;status={...status,status:'installing'};return {ok:true};},
+ installUpdate:async()=>{installs++;status={...status,status:'installing'};return status.manualInstall?{ok:true,installerOpened:true}:{ok:true};},
  downloadUpdate:async()=>{downloads++;status={...status,status:'downloaded'};bridge.event(status);return {ok:true};}};
  const ctx={window:{mindexElectron:bridge,confirm:()=>{confirms++;return accept;}},document:{getElementById:id=>buttons[id]},showToast:m=>messages.push(m),
  isPresenterOutputWindowOpen:()=>live,hasDirtyChanges:()=>dirty,currentSaveButtonState:()=>({dirty})};
@@ -62,6 +62,19 @@ test('renderer reload recovers already-downloaded update without a new download'
 
 test('manual internal download preserves edits and never schedules an automatic install',async()=>{
  const f=fixture({status:'available',version:'1.0.1',manualInstall:true});f.dirty(true);await tick();assert.equal(f.counts().downloads,0);assert.equal(f.counts().installs,0);
+});
+
+test('internal download requires a second confirmation and rechecks unsaved edits before opening',async()=>{
+ const f=fixture({status:'available',version:'1.0.6',manualInstall:true},'darwin');
+ f.accept(false);await tick();
+ f.accept(true);
+ const baseDownload=f.bridge.downloadUpdate;
+ f.bridge.downloadUpdate=async()=>{const result=await baseDownload();f.dirty(true);return result;};
+ await f.buttons.desktopUpdateBtn.click();await tick();
+ assert.equal(f.counts().installs,0);
+ f.dirty(false);await f.buttons.desktopUpdateBtn.click();await tick();
+ assert.equal(f.counts().downloads,1);assert.equal(f.counts().installs,1);
+ assert(f.messages.some(m=>m.includes('설치 화면을 열었습니다')));
 });
 
 test('manual check distinguishes matching web, pending web changes and unverified web without restarting',async()=>{

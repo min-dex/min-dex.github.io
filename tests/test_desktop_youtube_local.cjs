@@ -37,6 +37,26 @@ async function main() {
     app = await _electron.launch({executablePath:desktop,args:['--no-first-run'],env:{...process.env,MINDEX_ISOLATED_TEST:'1',MINDEX_QA_RTMPS_PORT:String(server.address().port),MINDEX_QA_RTMPS_CA:file('qa.pem')}});
     const main = await app.firstWindow();
     assert(await app.evaluate(({app}) => app.getPath('userData').includes('mindex-isolated-') && !!globalThis.__mindexTestIsolation?.networkBlocked), 'Requires isolated QA package');
+    const downloadSource = file('download-fixture');
+    fs.writeFileSync(downloadSource, 'Mindex installer download fixture');
+    await app.evaluate(async ({app,session}, source) => {
+      const path = process.getBuiltinModule('node:path');
+      const require = process.getBuiltinModule('node:module').createRequire(path.join(app.getAppPath(),'package.json'));
+      const fs = require('node:fs/promises');
+      const {pathToFileURL} = require('node:url');
+      const {createHash} = require('node:crypto');
+      const {createInstallerDownloader,verifyInstaller,discardInstaller} =
+        require(path.join(app.getAppPath(),'electron','internal-installer.js'));
+      const bytes = await fs.readFile(source);
+      const extension = process.platform === 'win32' ? '.exe' : '.dmg';
+      const asset = {url:pathToFileURL(source).href,name:'installer-fixture'+extension,
+        size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
+      const stage = createInstallerDownloader(session.fromPartition('installer-fixture'),path.dirname(source));
+      const downloaded = await stage(asset,()=>{});
+      try { await verifyInstaller(downloaded,asset); }
+      finally { await discardInstaller(downloaded); }
+    },downloadSource);
+    console.log('PASS packaged Electron installer download and SHA-256 verification');
     const isWindows = process.platform === 'win32';
     // The isolated app blocks all remote requests. Start the controller in
     // its unconfigured state so storage startup can reach real toolbar IPC.

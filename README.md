@@ -17,8 +17,8 @@ Open Mindex from Applications or the Start menu. The installed app runs on its
 own, without a local web server or a localhost URL.
 
 To update, use the **Update** button in the app toolbar. For church internal
-releases, the app opens the matching installer download. Save your work and
-close Mindex before installing the update over your current copy.
+releases, the app downloads and verifies the matching installer and offers to
+open it. Save your work and close Mindex before finishing the installation.
 
 ## Collaboration Link
 

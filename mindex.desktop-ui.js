@@ -10,6 +10,7 @@ function bindElectronDesktopEvents() {
       "presenter-active": "송출을 종료한 뒤 업데이트를 설치해 주세요.",
       "updates-unavailable": "자동 업데이트는 배포용 설치 앱에서 사용할 수 있습니다.",
       "update-not-ready": "업데이트 다운로드가 아직 끝나지 않았습니다.",
+      "installer-open-failed": "설치 화면을 열지 못했습니다. 업데이트 버튼으로 다시 시도해 주세요.",
     };
     showToast(messages[result?.reason] || "업데이트를 진행하지 못했습니다. 다시 확인해 주세요.", "error");
   };
@@ -25,7 +26,9 @@ function bindElectronDesktopEvents() {
     try {
       const installing = update.status === "downloaded";
       const message = update.manualInstall
-        ? `Mindex 새 버전 ${update.version || ""} 설치 파일을 받을까요? 저장·송출 종료 후 설치해 주세요.`
+        ? installing
+          ? "설치 파일 검증이 끝났습니다. 설치 화면을 열까요?"
+          : `Mindex 새 버전 ${update.version || ""} 설치 파일을 내려받을까요?`
         : installing
         ? "업데이트 준비가 끝났습니다. 지금 재시작해서 설치할까요?"
         : `Mindex 새 버전 ${update.version || ""}을 내려받을까요?`;
@@ -37,9 +40,10 @@ function bindElectronDesktopEvents() {
           return;
         }
       }
+      if (update.manualInstall && !installing) showToast("설치 파일 다운로드를 시작했습니다.");
       const result = await (installing ? desktop.installUpdate() : desktop.downloadUpdate());
       showFailure(result);
-      if(result?.ok && result.manualInstall) showToast('설치 파일 다운로드를 열었습니다. 앱을 종료한 뒤 새 버전을 설치해 주세요.');
+      if (result?.installerOpened) showToast('설치 화면을 열었습니다. 민덱스를 종료한 뒤 설치를 마쳐 주세요.');
     } catch { showFailure(); }
     finally {
       promptPending = false;

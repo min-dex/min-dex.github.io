@@ -16,11 +16,13 @@ The owner chooses unsigned church-only 1.0.0 delivery; equipment acceptance is
  configuration keeps Mindex app/profile identity and emits an internal build
  receipt, separate from isolated TEST packages and formal signed releases.
 
-Internal updates use the app's Update menu and startup notice to find a newer
- complete `church-vX.Y.Z` GitHub release and open the exact OS/architecture
- installer. Installation/app replacement is manual on both platforms; no claim
- of unsigned automatic installation. Prompts defer during output, download
- action rechecks output and unsaved edits, and no arbitrary URL/command executes.
+Internal updates find a newer complete `church-vX.Y.Z` GitHub release and
+download the exact OS/architecture installer through the desktop download
+manager. The main process verifies the GitHub asset's size and SHA-256 before
+offering to open it, and checks the file again before handing it to the OS.
+Installation and app replacement are manual on both platforms. Download and
+installer opening recheck active output and unsaved edits. Earlier internal
+versions still open the browser for the initial upgrade to this flow.
  Integrated web source `89fd081c` includes the completed lyric-timing preservation batch.
 Local ARM installer source `f4b9538d` passed package parity, local RTMPS and
 synthetic reinstall/restart data preservation; the combined source still needs
