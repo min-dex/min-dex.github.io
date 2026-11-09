@@ -1,8 +1,8 @@
 const pkg = require('./package.json');
 module.exports = {
  ...pkg.build,
- ...(process.env.MINDEX_CI_PINNED_ELECTRON === '1' && {
-    electronDownload: { checksums: require('electron/checksums.json'), mirrorOptions: {} },
+ ...(process.env.MINDEX_CI_ELECTRON_DIST && {
+    electronDist: process.env.MINDEX_CI_ELECTRON_DIST,
   }),
  icon: "assets/icon-512.png",
  publish: null,

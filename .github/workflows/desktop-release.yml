@@ -51,8 +51,6 @@ jobs:
     name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
-    env:
-      MINDEX_CI_PINNED_ELECTRON: '1'
     strategy:
       fail-fast: false
       matrix:
@@ -82,30 +80,49 @@ jobs:
           printf 'TEMP=%s\nTMP=%s\n' "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=moderate
-      - name: Fetch pinned Windows NSIS resources through the official asset API
-        if: runner.os == 'Windows' && !inputs.publish_release
+      - name: Fetch pinned packaging inputs through the official asset API
+        if: ${{ !inputs.publish_release }}
         shell: bash
         run: |
           python - <<'PYTHON'
           import hashlib, json, os, subprocess, tempfile
           from pathlib import Path
 
-          name = 'nsis-resources-3.4.1.7z'
-          tag = name.removesuffix('.7z')
-          api = 'https://api.github.com/repos/electron-userland/electron-builder-binaries/releases'
-          curl = ['curl', '-fsSL', '--retry', '3', '--max-time', '90']
-          release = json.loads(subprocess.check_output([*curl, f'{api}/tags/{tag}']))
-          asset = next(item for item in release['assets'] if item['name'] == name)
-          cache = Path(os.environ['LOCALAPPDATA']) / 'electron-builder' / 'Cache' / tag
-          cache.mkdir(parents=True, exist_ok=True)
-          with tempfile.TemporaryDirectory(dir=cache) as tmp:
-              archive = Path(tmp) / name
-              subprocess.run([*curl, '-H', 'Accept: application/octet-stream',
-                              f"{api}/assets/{int(asset['id'])}?download=1", '-o', str(archive)], check=True)
+          curl = ['curl', '-fsSL', '--retry', '3', '--max-time', '180']
+
+          def fetch(repository, tag, checksums, cache):
+              api = f'https://api.github.com/repos/{repository}/releases'
+              release = json.loads(subprocess.check_output([*curl, f'{api}/tags/{tag}']))
+              assets = {asset['name']: int(asset['id']) for asset in release['assets']}
+              cache.mkdir(parents=True, exist_ok=True)
+              with tempfile.TemporaryDirectory(dir=cache) as tmp:
+                  for name, checksum in checksums.items():
+                      archive = Path(tmp) / name
+                      subprocess.run([*curl, '-H', 'Accept: application/octet-stream',
+                                      f'{api}/assets/{assets[name]}?download=1', '-o', str(archive)], check=True)
+                      digest = hashlib.sha256()
+                      with archive.open('rb') as stream:
+                          for block in iter(lambda: stream.read(1024 * 1024), b''):
+                              digest.update(block)
+                      if digest.hexdigest() != checksum:
+                          raise RuntimeError(f'Packaging input checksum mismatch: {name}')
+                      archive.replace(cache / name)
+
+          if os.environ['RUNNER_OS'] == 'macOS':
+              electron = Path('node_modules/electron')
+              tag = 'v' + json.loads((electron / 'package.json').read_text())['version']
+              checksums = json.loads((electron / 'checksums.json').read_text())
+              names = [f'electron-{tag}-darwin-{arch}.zip' for arch in ('arm64', 'x64')]
+              cache = Path(os.environ['RUNNER_TEMP']) / 'mindex-electron-zips'
+              fetch('electron/electron', tag, {name: checksums[name] for name in names}, cache)
+              with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
+                  env.write(f'MINDEX_CI_ELECTRON_DIST={cache}\n')
+          else:
+              tag = 'nsis-resources-3.4.1'
+              cache = Path(os.environ['LOCALAPPDATA']) / 'electron-builder' / 'Cache' / tag
               # The same SHA-256 is pinned by app-builder-lib 26.15.3.
-              if hashlib.sha256(archive.read_bytes()).hexdigest() != '593a9a92ef958321293ac6a2ee61e64bf1bd543142a5bd6b3d310709cc924103':
-                  raise RuntimeError('NSIS resources checksum mismatch')
-              archive.replace(cache / name)
+              fetch('electron-userland/electron-builder-binaries', tag,
+                    {tag+'.7z':'593a9a92ef958321293ac6a2ee61e64bf1bd543142a5bd6b3d310709cc924103'}, cache)
           PYTHON
       - run: python tools/broadcast-engine/prepare.py
       - run: pnpm electron:check
