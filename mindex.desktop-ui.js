@@ -8,7 +8,7 @@ function bindElectronDesktopEvents() {
     if (result?.ok) return;
     const messages = {
       "presenter-active": "송출을 종료한 뒤 업데이트를 설치해 주세요.",
-      "updates-unavailable": "자동 업데이트는 배포용 설치 앱에서 사용할 수 있습니다.",
+      "updates-unavailable": "이 앱에서는 업데이트를 확인할 수 없습니다.",
       "update-not-ready": "업데이트 다운로드가 아직 끝나지 않았습니다.",
       "installer-open-failed": "설치 화면을 열지 못했습니다. 업데이트 버튼으로 다시 시도해 주세요.",
     };

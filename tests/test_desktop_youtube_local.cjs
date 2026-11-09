@@ -98,7 +98,7 @@ async function main() {
     if (isWindows) assert(await app.evaluate(({Menu}) => !Menu.getApplicationMenu().items.some(
       item => ['업데이트','방송'].includes(item.label))), 'Moved actions must be absent from the native menu');
     await main.locator('#desktopUpdateBtn').click();
-    await main.getByText('자동 업데이트는 배포용 설치 앱에서 사용할 수 있습니다.',{exact:true}).waitFor();
+    await main.getByText('이 앱에서는 업데이트를 확인할 수 없습니다.',{exact:true}).waitFor();
     console.log('PASS installed desktop 6+6 toolbar and update button IPC (isolated updates disabled)');
     const opened = app.waitForEvent('window');
     await main.locator('#desktopBroadcastBtn').click();

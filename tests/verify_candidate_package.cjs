@@ -11,6 +11,7 @@ const {fileIdentity} = require('../scripts/packaged-encoder-identity.cjs');
 const [resources, target] = process.argv.slice(2);
 const archive = path.join(resources, 'app.asar');
 const packagedPaths = new Set(asar.listPackage(archive).map(name => name.replace(/\\/g, '/').replace(/^\//, '')));
+assert.ok(!packagedPaths.has('tools/broadcast-prototype/encoder-test.mjs'), 'unused encoder rehearsal must stay out of the installer');
 for (const video of ['chromakey-ready-loop.mp4', 'chromakey-ready-loop-fast.mp4']) {
  assert.ok(!packagedPaths.has('assets/presenter/' + video), video + ' must stay out of the installer');
 }
