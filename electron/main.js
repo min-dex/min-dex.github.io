@@ -200,14 +200,14 @@ function configureAutoUpdater() {
   try {
     const build = require('../mindex-build.json');
     if (build.channel === 'internal') {
-      const { createInstallerDownloader, verifyInstaller, discardInstaller } = require('./internal-installer');
+      const { createInstallerDownloader, verifyInstaller, markInstaller, discardInstaller } = require('./internal-installer');
       updateController = require('./internal-updater').createInternalUpdateController({
         version: app.getVersion(), platform: process.platform, arch: process.arch, rendererTree: build.rendererTree,
         enabled: updatesEnabled,
         presenterOpen: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()) || require('./youtube-window').isActive(),
         notify: state => { if(mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('mindex:update-state',state); },
         downloadInstaller: createInstallerDownloader(session.fromPartition('mindex-installer'), app.getPath('temp')),
-        verifyInstaller, discardInstaller,
+        verifyInstaller, markInstaller, discardInstaller,
         openInstaller: file => require('electron').shell.openPath(file),
       });
       return updateController;

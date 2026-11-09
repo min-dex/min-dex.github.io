@@ -12,7 +12,7 @@ import urllib.error
 import urllib.request
 from cleanup_desktop_ci import remove_completed_tree
 
-BASE = 'https://github.com/min-dex/min-dex.github.io/releases/download/'
+API = 'https://api.github.com/repos/min-dex/min-dex.github.io/releases'
 SOURCES = {'1.0.0': 'c61f6a84e82d0ec81d102ca4e4947536eae853aa',
            '1.0.1': '37d12af3f619b3c4c71a16d070c8ca861a8e28c4',
            '1.0.2': 'd66c40c5cff97ce734bb323edea67d0c16f722e4',
@@ -62,6 +62,14 @@ def read_receipt(url):
         return json.loads(response.read(100000))
 
 
+def download_request(release, name):
+    assets = [item for item in release['assets'] if item['name'] == name and item['state'] == 'uploaded']
+    if len(assets) != 1 or type(assets[0]['id']) is not int or assets[0]['id'] <= 0:
+        raise ValueError('Missing/duplicate published asset')
+    return urllib.request.Request(f"{API}/assets/{assets[0]['id']}?download=1",
+                                  headers={'Accept': 'application/octet-stream'})
+
+
 def download_installer(url, installer, record):
     digest = hashlib.sha256()
     with urllib.request.urlopen(url, timeout=120) as response, installer.open('wb') as out:
@@ -89,12 +97,15 @@ def main():
         print(f'Published upgrade {previous}: free {free / 1024**3:.2f} GiB; required 26 GiB', flush=True)
         if free < 26 * 1024**3:
             raise RuntimeError('Need 20 GiB reserve plus 6 GiB for published upgrade fixture')
-        base = BASE + 'church-v' + previous + '/'
-        receipt = retry_download(lambda: read_receipt(base + 'internal-build.json'))
+        tag = 'church-v' + previous
+        release = retry_download(lambda: read_receipt(f'{API}/tags/{tag}'))
+        if release['tag_name'] != tag or release['draft'] or release['prerelease']:
+            raise ValueError('Unexpected release')
+        receipt = retry_download(lambda: read_receipt(download_request(release, 'internal-build.json')))
         record = asset_record(receipt, previous, target)
         with tempfile.TemporaryDirectory(prefix='mindex-published-download-') as folder:
             installer = Path(folder) / record['file']
-            retry_download(lambda: download_installer(base + record['file'], installer, record))
+            retry_download(lambda: download_installer(download_request(release, record['file']), installer, record))
             state = receipt_dir / (previous + '-install.json')
             proof = receipt_dir / (previous + '-proof.json')
             subprocess.run([sys.executable, 'tests/install_test_fixture.py', str(installer), str(state), 'internal'], check=True)

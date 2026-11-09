@@ -51,6 +51,8 @@ jobs:
     name: Build ${{ matrix.platform }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
+    env:
+      MINDEX_CI_PINNED_ELECTRON: '1'
     strategy:
       fail-fast: false
       matrix:
@@ -80,6 +82,31 @@ jobs:
           printf 'TEMP=%s\nTMP=%s\n' "$RUNNER_TEMP" "$RUNNER_TEMP" >> "$GITHUB_ENV"
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=moderate
+      - name: Fetch pinned Windows NSIS resources through the official asset API
+        if: runner.os == 'Windows' && !inputs.publish_release
+        shell: bash
+        run: |
+          python - <<'PYTHON'
+          import hashlib, json, os, subprocess, tempfile
+          from pathlib import Path
+
+          name = 'nsis-resources-3.4.1.7z'
+          tag = name.removesuffix('.7z')
+          api = 'https://api.github.com/repos/electron-userland/electron-builder-binaries/releases'
+          curl = ['curl', '-fsSL', '--retry', '3', '--max-time', '90']
+          release = json.loads(subprocess.check_output([*curl, f'{api}/tags/{tag}']))
+          asset = next(item for item in release['assets'] if item['name'] == name)
+          cache = Path(os.environ['LOCALAPPDATA']) / 'electron-builder' / 'Cache' / tag
+          cache.mkdir(parents=True, exist_ok=True)
+          with tempfile.TemporaryDirectory(dir=cache) as tmp:
+              archive = Path(tmp) / name
+              subprocess.run([*curl, '-H', 'Accept: application/octet-stream',
+                              f"{api}/assets/{int(asset['id'])}?download=1", '-o', str(archive)], check=True)
+              # The same SHA-256 is pinned by app-builder-lib 26.15.3.
+              if hashlib.sha256(archive.read_bytes()).hexdigest() != '593a9a92ef958321293ac6a2ee61e64bf1bd543142a5bd6b3d310709cc924103':
+                  raise RuntimeError('NSIS resources checksum mismatch')
+              archive.replace(cache / name)
+          PYTHON
       - run: python tools/broadcast-engine/prepare.py
       - run: pnpm electron:check
       - name: Check native build disk budget

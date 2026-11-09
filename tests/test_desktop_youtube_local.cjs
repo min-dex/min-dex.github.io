@@ -45,7 +45,7 @@ async function main() {
       const fs = require('node:fs/promises');
       const {pathToFileURL} = require('node:url');
       const {createHash} = require('node:crypto');
-      const {createInstallerDownloader,verifyInstaller,discardInstaller} =
+      const {createInstallerDownloader,verifyInstaller,markInstaller,discardInstaller} =
         require(path.join(app.getAppPath(),'electron','internal-installer.js'));
       const bytes = await fs.readFile(source);
       const extension = process.platform === 'win32' ? '.exe' : '.dmg';
@@ -53,7 +53,16 @@ async function main() {
         size:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};
       const stage = createInstallerDownloader(session.fromPartition('installer-fixture'),path.dirname(source));
       const downloaded = await stage(asset,()=>{});
-      try { await verifyInstaller(downloaded,asset); }
+      try {
+        await verifyInstaller(downloaded,asset);
+        await markInstaller(downloaded);
+        if (process.platform === 'darwin') {
+          require('node:child_process').execFileSync('/usr/bin/xattr',['-p','com.apple.quarantine',downloaded]);
+        } else {
+          const zone = await fs.readFile(downloaded+':Zone.Identifier','utf8');
+          if (!/^ZoneId=[34]\s*$/m.test(zone)) throw Error('Missing Windows download zone');
+        }
+      }
       finally { await discardInstaller(downloaded); }
     },downloadSource);
     console.log('PASS packaged Electron installer download and SHA-256 verification');

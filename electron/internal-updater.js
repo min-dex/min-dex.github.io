@@ -20,7 +20,7 @@ function chooseRelease(rows, current, platform, arch) {
  }
  return null;
 }
-function createInternalUpdateController({version,platform,arch,rendererTree,enabled,presenterOpen,notify,fetchImpl=fetch,downloadInstaller,verifyInstaller,discardInstaller,openInstaller}) {
+function createInternalUpdateController({version,platform,arch,rendererTree,enabled,presenterOpen,notify,fetchImpl=fetch,downloadInstaller,verifyInstaller,markInstaller,discardInstaller,openInstaller}) {
  let state={status:'idle',version:'',manualInstall:true},candidate=null,checking=null,downloading=null,opening=null,verifiedFile=null;
  const snapshot=()=>({...state,enabled:enabled(),presenterOpen:presenterOpen()});
  const publish=()=>notify(snapshot());
@@ -88,7 +88,10 @@ function createInternalUpdateController({version,platform,arch,rendererTree,enab
    if(!verifiedFile||state.status!=='downloaded')return Promise.resolve({ok:false,reason:'update-not-ready'});
    const file=verifiedFile;
    opening=Promise.resolve().then(async()=>{
-    try{await verifyInstaller(file,candidate);}
+    try{
+     await verifyInstaller(file,candidate);
+     await markInstaller(file);
+    }
     catch{
      verifiedFile=null;
      await discardInstaller(file);

@@ -19,7 +19,8 @@ The owner chooses unsigned church-only 1.0.0 delivery; equipment acceptance is
 Internal updates find a newer complete `church-vX.Y.Z` GitHub release and
 download the exact OS/architecture installer through the desktop download
 manager. The main process verifies the GitHub asset's size and SHA-256 before
-offering to open it, and checks the file again before handing it to the OS.
+offering to open it. Before handing it to the OS, it checks the file again
+and preserves or sets the platform’s internet download marker.
 Installation and app replacement are manual on both platforms. Download and
 installer opening recheck active output and unsaved edits. Earlier internal
 versions still open the browser for the initial upgrade to this flow.

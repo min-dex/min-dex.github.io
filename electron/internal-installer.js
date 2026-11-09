@@ -1,6 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
+const execFile = require('node:util').promisify(require('node:child_process').execFile);
 
 const assetOrigins = new Set([
   'https://release-assets.githubusercontent.com',
@@ -15,8 +16,7 @@ function isAssetUrl(url, source) {
   } catch { return false; }
 }
 
-// Use the native download manager so the downloaded file follows the usual
-// OS security checks when the user opens it.
+// Keep the transfer isolated from the main window and its browser session.
 function createInstallerDownloader(session, tempPath) {
   let transfer = null;
   session.webRequest.onBeforeRequest(({url}, done) => {
@@ -85,8 +85,29 @@ async function verifyInstaller(file, asset) {
   if (hash.digest('hex') !== asset.sha256) throw Error('Installer digest mismatch');
 }
 
+async function markInstaller(file) {
+  if (process.platform === 'darwin') {
+    const attribute = 'com.apple.quarantine';
+    try {
+      await execFile('/usr/bin/xattr', ['-p', attribute, file]);
+      return;
+    } catch { /* The desktop download may have no quarantine attribute. */ }
+    const timestamp = Math.floor(Date.now() / 1000).toString(16);
+    await execFile('/usr/bin/xattr', ['-w', attribute, '0081;'+timestamp+';Mindex;', file]);
+  } else if (process.platform === 'win32') {
+    const zone = file+':Zone.Identifier';
+    const existing = await fs.promises.readFile(zone, 'utf8').catch(error => {
+      if (error.code !== 'ENOENT') throw error;
+      return '';
+    });
+    if (!/^ZoneId=[34]\s*$/m.test(existing)) {
+      await fs.promises.writeFile(zone, '[ZoneTransfer]\r\nZoneId=3\r\n');
+    }
+  }
+}
+
 function discardInstaller(file) {
   return fs.promises.rm(path.dirname(file), {recursive: true, force: true}).catch(() => {});
 }
 
-module.exports = { createInstallerDownloader, verifyInstaller, discardInstaller };
+module.exports = { createInstallerDownloader, verifyInstaller, markInstaller, discardInstaller };

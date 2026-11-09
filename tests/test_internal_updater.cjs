@@ -60,7 +60,7 @@ for(const [platform,arch,target] of [
    presenterOpen:()=>live,notify:state=>states.push(state),fetchImpl:async()=>{
     reads++;if(fail)throw Error('offline secret');
     return {ok:true,text:async()=>JSON.stringify([release('1.0.1',target)])};
-   },downloadInstaller:createInstallerDownloader(native.session,root),verifyInstaller,discardInstaller,
+   },downloadInstaller:createInstallerDownloader(native.session,root),verifyInstaller,discardInstaller,markInstaller:async()=>{},
    openInstaller:async file=>{opens++;openedFile=file;return openFailure?'blocked':'';}});
   fail=true;assert.equal((await c.check()).ok,false);assert(!JSON.stringify(states).includes('secret'));
   fail=false;await Promise.all([c.check(),c.check()]);assert.equal(reads,2);
@@ -85,7 +85,7 @@ test('failed, corrupt and untrusted downloads leave no staged installer',async t
   const native=nativeDownloadFixture(fixture);
   const c=createInternalUpdateController({version:'1.0.0',platform:'darwin',arch:'arm64',enabled:()=>true,
    presenterOpen:()=>false,notify:()=>{},fetchImpl:async()=>({ok:true,text:async()=>JSON.stringify([release()])}),
-   downloadInstaller:createInstallerDownloader(native.session,root),verifyInstaller,discardInstaller,
+   downloadInstaller:createInstallerDownloader(native.session,root),verifyInstaller,discardInstaller,markInstaller:async()=>{},
    openInstaller:async()=>assert.fail('Unverified installer cannot be opened')});
   await c.check();assert.equal((await c.download()).ok,false);
   assert.equal((await c.install()).reason,'update-not-ready');
