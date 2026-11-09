@@ -86,7 +86,7 @@ class PublishedUpgradeIdentity(unittest.TestCase):
  def test_failed_old_install_acceptance_stops_before_candidate_install(self):
   import io, types, verify_published_upgrade as upgrade
   with tempfile.TemporaryDirectory() as folder:
-   root=pathlib.Path(folder);candidate=root/'Mindex-1.0.5-win-x64.exe';candidate.write_bytes(b'candidate')
+   root=pathlib.Path(folder);candidate=root/'Mindex-1.0.7-win-x64.exe';candidate.write_bytes(b'candidate')
    payload=b'published fixture';row={'file':'Mindex-1.0.0-win-x64.exe','id':1,'bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}
    receipt={'version':'1.0.0','channel':'internal','sourceCommit':upgrade.SOURCES['1.0.0'],'assets':[row]}
    calls=[]
@@ -103,7 +103,7 @@ class PublishedUpgradeIdentity(unittest.TestCase):
     return io.BytesIO(payload)
    manifest=root/'manifest.json'
    manifest.write_text(json.dumps({version:receipt for version in upgrade.SOURCES}))
-   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade,'PUBLISHED_FIXTURES',manifest),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.5']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
+   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade,'PUBLISHED_FIXTURES',manifest),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.7']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
     with self.assertRaisesRegex(RuntimeError,'synthetic seed failure'):upgrade.main()
    self.assertEqual(len(calls),2)
    self.assertFalse(any(str(candidate) in args for args in calls))
