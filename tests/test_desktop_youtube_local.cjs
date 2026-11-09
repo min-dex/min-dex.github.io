@@ -124,15 +124,23 @@ async function main() {
     await received;
     assert.equal(publishes,1); assert(matchingKey);
     assert.equal(await app.evaluate(()=>globalThis.__recordDialogFixture.calls),2);
-    const packetHashes = source => execFileSync(ffmpeg,['-loglevel','error','-i',file(source),'-map','0:v:0','-map','0:a:0','-c','copy','-f','framehash','pipe:1'],{encoding:'utf8'});
-    const recorded=packetHashes('recording.mp4'), transmitted=packetHashes('received.flv');
+    const packetHashes = (source,format) => {
+      // The stream-copy sender reads fragmented MP4 from a non-seekable
+      // pipe. Hash the recorded bytes through the same demuxer input mode.
+      const input=fs.openSync(file(source),'r');
+      try {
+        return execFileSync(ffmpeg,['-loglevel','error','-f',format,'-i','pipe:0','-map','0:v:0','-map','0:a:0','-c','copy','-f','framehash','pipe:1'],
+          {encoding:'utf8',stdio:[input,'pipe','pipe']});
+      } finally { fs.closeSync(input); }
+    };
+    const recorded=packetHashes('recording.mp4','mp4'), transmitted=packetHashes('received.flv','flv');
     assert.match(recorded,/#dimensions 0: 1920x1080/);
     const streamHashes = (output,stream) => output.split(/\r?\n/)
       .filter(line=>line.trimStart().startsWith(stream+','))
       .map(line=>line.split(',').at(-1).trim());
     for (const stream of [0,1]) {
       assert(streamHashes(recorded,stream).length>0);
-      assert.deepEqual(streamHashes(recorded,stream),streamHashes(transmitted,stream));
+      assert.deepEqual(streamHashes(recorded,stream),streamHashes(transmitted,stream),'Recorded and transmitted packets differ for stream '+stream);
     }
     console.log('PASS packaged MP4 dialog cancellation and 1080p recording match local RTMPS packets');
     const decode = args => execFileSync(ffmpeg,['-loglevel','error','-i',file('received.flv'),...args,'pipe:1'],{maxBuffer:40*1024*1024});
