@@ -1,5 +1,8 @@
 """Headless server-state persistence/recovery; fixture HTTP only, no live writes."""
 import json
+import os
+from pathlib import Path
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from urllib.parse import urlsplit
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -47,6 +50,8 @@ def main():
                                 data={'key':args['p_key'],'value':args['p_value'],'revision':str(int(args['p_revision'])+1),'requestId':args['p_request_id']}
                                 db[key]=data
                         route.fulfill(json={'data':data});return
+                    if urlsplit(request.url).path == '/app.runtime.js':
+                        route.fulfill(path=str(Path(__file__).resolve().parents[1]/'app.js'), content_type='text/javascript');return
                     if urlsplit(request.url).netloc==origin:route.continue_()
                     else:route.abort()
                 try:
@@ -170,8 +175,16 @@ def main():
                     page.get_by_role('button',name='이 창의 보관 요청 사용',exact=True).click()
                     page.wait_for_function("document.querySelector('.server-conflict-review [role=alert]').textContent.length>0")
                     assert db[conflict_key]['value']=='other window'
-                    control['offline']=False
+                    page.wait_for_function("document.querySelector('.server-conflict-review').getAttribute('aria-busy')==='false'")
+                    control['offline']=False;control['hold']=True
                     page.get_by_role('button',name='이 창의 보관 요청 사용',exact=True).click()
+                    page.wait_for_function("document.querySelector('.server-conflict-review').getAttribute('aria-busy')==='true'")
+                    assert page.locator('.server-conflict-actions button:enabled').count()==0
+                    page.keyboard.press('Escape')
+                    assert page.locator('.server-conflict-review').is_visible()
+                    control['hold']=False
+                    for pending_route in held[:]:route_request(pending_route)
+                    held.clear()
                     page.get_by_role('dialog').wait_for(state='detached')
                     assert db[conflict_key]['value']=='this window'
                     archives=[json.loads(value['value']) for key,value in db.items() if key[2].startswith('mindex.state.recovery.v1:')]

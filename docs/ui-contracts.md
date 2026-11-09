@@ -1252,3 +1252,23 @@ counts retain their existing units and counting rules without duplicate explanat
 labels. Normal Praise capability lists and Scripture edition-name lists are omitted
 from overview cards; loading, error and retry states remain visible. Recent empty
 states read 최근 작업이 없습니다 / 최근 수정이 없습니다. The home wordmark retains its approved Ministry Index subtitle.
+
+## Save-conflict and presence actions · 2026-11-09
+
+Open native/ARIA modal dialogs own their actions: Ctrl/Cmd+S must not save the
+editor behind them, and dialog key/pointer interaction must not request music
+resume. Normal editor save shortcuts, IME guards and output controls are unchanged.
+
+Worship conflict review distinguishes loading, reviewed server content, unresolved
+prior save, deletion and read failure. Initial focus is the non-writing return
+action. The exact draft archive/revision checks remain mandatory. While a choice
+is archiving/adopting, disable competing choices/close and defer Escape. An
+outdated review disables adoption until an explicit reread; failed reads retain
+the input and return action. Text actions use the standard 35px control rhythm.
+
+Presence refresh exposes loading and disables duplicate clicks. Code-entry
+expansion is accessible; PIN verification blocks competing code toggles. Connection
+name save status is separate from heartbeat status, preserves later typing and
+provides retry after failure. Enter/blur of the same pending name coalesces; server
+refresh must not replace an unsaved name. Closing restores focus to the launcher.
+No worship, permission, PIN-validation or remote command semantics change.

@@ -119,7 +119,7 @@ function bindPresenterViewportLifecycleEvents() {
 
 function bindPresenterInputGuardEvents() {
   window.addEventListener("keydown", (event) => {
-    if (event.target.closest?.(".worship-conflict-dialog")) return;
+    if (event.target.closest?.('dialog[open], [aria-modal="true"]')) return;
     scheduleServiceMusicResume("keydown");
     const presenterJumpInput = event.target.closest?.("[data-presenter-jump-input]");
     if (presenterJumpInput && event.key === "Escape") {
@@ -139,7 +139,7 @@ function bindPresenterInputGuardEvents() {
   }, { capture: true });
 
   window.addEventListener("pointerup", (event) => {
-    if (event.target.closest?.(".worship-conflict-dialog")) return;
+    if (event.target.closest?.('dialog[open], [aria-modal="true"]')) return;
     scheduleServiceMusicResume("pointerup");
   }, { capture: true });
 }

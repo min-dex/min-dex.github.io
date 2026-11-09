@@ -55,8 +55,12 @@
    const archiveValue=JSON.stringify({schema:1,key,...review,queued:localValue,savedAt:Date.now()});
    if(connection!==captured)return;
    dialog=document.createElement('dialog');dialog.className='server-conflict-review';
-   const title=document.createElement('h2');title.textContent='보관 중인 내용 확인';dialog.append(title);
-   const note=document.createElement('p');
+   dialog.setAttribute('aria-labelledby','serverConflictTitle');dialog.setAttribute('aria-describedby','serverConflictNote');
+   let choosing=false;const previousFocus=document.activeElement;
+   dialog.addEventListener('keydown',event=>event.stopPropagation());
+   dialog.addEventListener('cancel',event=>{if(choosing)event.preventDefault()});
+   const title=document.createElement('h2');title.id='serverConflictTitle';title.textContent='보관 중인 내용 확인';dialog.append(title);
+   const note=document.createElement('p');note.id='serverConflictNote';
    const atomic=/^mindex\.atomic\./.test(key);
    note.textContent=atomic?'양쪽 요청을 보관한 뒤 서버 요청을 확인합니다. 편집 입력은 유지됩니다. 이후 예배 저장에서 이전 요청의 결과를 확인해 주세요.':'양쪽 내용을 별도로 보관한 뒤 사용할 저장본을 선택합니다. 편집창의 입력은 바뀌지 않습니다.';dialog.append(note);
    for(const [label,value] of [['이 창의 보관 요청',localValue],['서버 보관본',review.current]]){
@@ -67,7 +71,9 @@
    const actions=document.createElement('div');actions.className='server-conflict-actions';dialog.append(actions);
    const add=(label,choice)=>{const button=document.createElement('button');button.className='btn secondary';button.type='button';button.textContent=label;actions.append(button);
     button.onclick=async()=>{
+     if(choosing)return;
      if(choice===null){dialog.close();return}
+     choosing=true;dialog.setAttribute('aria-busy','true');errorText.textContent='양쪽 내용을 보관하고 있습니다…';
      for(const b of actions.children)b.disabled=true;
      try{
       if(connection!==captured||writers.has(id)||queued.get(id)!==queuedBefore)throw Error('새 입력이 있어 다시 확인해 주세요.');
@@ -78,10 +84,11 @@
       failures.delete(id);announce(name);status();dialog.close();
       window.dispatchEvent?.(new Event('mindex-server-state-settled'));
      }catch(error){errorText.textContent=error.message==='STATE_CONFLICT_CHANGED'?'다른 창에서 내용이 다시 바뀌었습니다. 취소 후 충돌 내용을 다시 확인해 주세요.':'보관을 완료하지 못했습니다. 현재 내용은 유지됩니다. 연결을 확인한 뒤 다시 시도해 주세요.';for(const b of actions.children)b.disabled=false}
+     finally{choosing=false;dialog.setAttribute('aria-busy','false');}
     };
    };
    add('취소',null);add(atomic?'서버 요청 확인':'서버 보관본 유지','current');if(!atomic)add('이 창의 보관 요청 사용','local');
-   dialog.addEventListener('close',()=>{dialog.remove();reviewing=false},{once:true});document.body.append(dialog);dialog.showModal();
+   dialog.addEventListener('close',()=>{dialog.remove();reviewing=false;if(previousFocus?.isConnected)previousFocus.focus()},{once:true});document.body.append(dialog);dialog.showModal();actions.firstElementChild.focus();
   }catch(error){if(dialog)dialog.remove();reviewing=false;failures.set(id,error);status()}
   finally{if(!dialog)reviewing=false}
  }

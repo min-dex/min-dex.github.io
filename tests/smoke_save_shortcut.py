@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -9,6 +12,7 @@ def main():
                 browser = launch_chromium(p) if engine == 'chromium' else p.webkit.launch()
                 page = browser.new_page()
                 page.route('**/*supabase*/**', lambda r: r.abort())
+                page.route("**/app.runtime.js*",lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/"app.js"),content_type="text/javascript"))
                 page.goto(url+'?mindexSmokeRaw=1', wait_until='domcontentloaded')
                 page.wait_for_function("typeof handleSaveShortcut === 'function'")
                 print(engine, page.evaluate('''async () => {
@@ -32,6 +36,10 @@ def main():
                     field.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,cancelable:true,...options}));
                     check(calls===before,'unintended save');
                   }
+                  const dialog=document.createElement('dialog');dialog.append(field);document.body.append(dialog);dialog.showModal();
+                  const beforeModal=calls;
+                  for(const options of [{key:'s',metaKey:true},{key:'s',ctrlKey:true}])field.dispatchEvent(new KeyboardEvent('keydown',{bubbles:true,cancelable:true,...options}));
+                  check(calls===beforeModal,'modal saved background editor');dialog.close();dialog.remove();
                   field.remove();
                   let liveCalls=0,jumpCalls=0;
                   runLiveScriptureAction=()=>{liveCalls++};jumpPresenterToSlideInput=()=>{jumpCalls++};clearPresenterJumpDraft=()=>{jumpCalls++};

@@ -1,5 +1,16 @@
 # Read-only operations panel
 
+## Presence controls and name-save feedback · 2026-11-09
+
+Refresh reports busy state for presence/output reads and blocks duplicate clicks.
+Connection-name blur/Enter saves retain their server storage path; identical pending
+values coalesce. A separate status/retry control distinguishes name-save failure
+from automatic heartbeat reporting and preserves edits made during a save.
+Code visibility still requires the existing PIN; the expanded input and verification
+state are exposed accessibly. Modal interactions cannot save the underlying
+worship or trigger music resume. Closing returns focus to the launcher.
+No actual worship, reporting payload, access policy or remote command is changed.
+
 ## Concise presence copy · 2026-10-23
 
 The toolbar and dialog both say 접속 현황. The local section says 이 브라우저

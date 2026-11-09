@@ -24,19 +24,30 @@
   const browser = /Whale\//.test(ua) ? "Whale" : /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser";
   const panel = document.createElement("dialog");
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
-  panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
+  panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" type="button" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
 
     <div class="monitor-scroll"><section class="monitor-section" aria-label="송출 현황">
-    <div class="monitor-section-heading"><h3>송출 현황</h3><button class="btn secondary" type="button" data-show-codes>코드 보기</button></div>
-    <div data-code-entry hidden><label>관리자 PIN <input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label> <button class="btn secondary" type="button" data-check-pin>확인</button></div>
+    <div class="monitor-section-heading"><h3>송출 현황</h3><button class="btn secondary" type="button" data-show-codes aria-expanded="false" aria-controls="monitorCodeEntry">코드 보기</button></div>
+    <div id="monitorCodeEntry" data-code-entry hidden><label>관리자 PIN <input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label> <button class="btn secondary" type="button" data-check-pin>확인</button></div>
     <p data-code-status role="status"></p><div data-outputs></div></section>
-    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
+    <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" type="button" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
     <p class="monitor-message" role="status"></p><div data-devices></div></section>
-    <section class="monitor-section"><h3>이 브라우저</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC"></div><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section></div>`;
+    <section class="monitor-section"><h3>이 브라우저</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC" aria-describedby="monitorNameStatus"><button class="btn secondary" type="button" data-name-retry hidden>다시 저장</button></div><p id="monitorNameStatus" data-name-status role="status"></p><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section></div>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("#monitorName").value = name || `${os} ${browser}`;
   function message(text) { $(".monitor-message").textContent = text; }
+  panel.addEventListener('keydown', event => event.stopPropagation());
+  let nameDirty = false, nameSaveSerial = 0, nameSaving = false, nameRequested = null;
+  function updateReadControls() {
+    const busy = reading || outputBusy;
+    $('[data-refresh]').disabled = busy;
+    $('[data-refresh]').setAttribute('aria-busy', String(busy));
+    $('[data-refresh]').setAttribute('aria-label', busy ? '접속 현황 확인 중' : '접속 현황 새로고침');
+    $('[data-refresh]').title = busy ? '접속 현황 확인 중' : '접속 현황 새로고침';
+    $('[data-devices]').setAttribute('aria-busy', String(reading));
+    $('[data-outputs]').setAttribute('aria-busy', String(outputBusy));
+  }
   function shareMessage(text) { $(".monitor-share-status").textContent = text; }
   function timestamp(value) {
     const time = Date.parse(value);
@@ -162,10 +173,11 @@
     $('[data-outputs]').replaceChildren();$('[data-pin]').value='';
     $('[data-code-entry]').hidden=true;$('[data-code-status]').textContent='';
     $('[data-show-codes]').textContent='코드 보기';
+    $('[data-show-codes]').setAttribute('aria-expanded','false');updateReadControls();
   }
   async function refreshOutputs(){
     if(!panel.open||document.hidden||outputBusy)return;
-    const serial=++outputRequest, token=codeToken;outputBusy=true;
+    const serial=++outputRequest, token=codeToken;outputBusy=true;updateReadControls();
     try{
       const result=token?await rpc('mindex_remote_admin',{p_action:'list',p_token:token}):await rpc('mindex_remote_outputs',{});
       if(serial!==outputRequest)return;
@@ -186,26 +198,28 @@
       });
       $('[data-outputs]').replaceChildren(...(rows.length?rows:['현재 등록된 송출이 없습니다.']));
     }catch{if(serial===outputRequest){outputKey='';$('[data-outputs]').textContent='송출 정보를 불러오지 못했습니다.';}}
-    finally{if(serial===outputRequest)outputBusy=false;}
+    finally{if(serial===outputRequest){outputBusy=false;updateReadControls();}}
   }
   $('[data-show-codes]').onclick=()=>{
     if(codeToken){hideCodes();void refreshOutputs();return;}
-    const entry=$('[data-code-entry]');entry.hidden=!entry.hidden;if(!entry.hidden)$('[data-pin]').focus();
+    const entry=$('[data-code-entry]');entry.hidden=!entry.hidden;
+    $('[data-show-codes]').setAttribute('aria-expanded',String(!entry.hidden));
+    if(!entry.hidden)$('[data-pin]').focus();
   };
   $('[data-pin]').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('[data-check-pin]').click();}};
   $('[data-check-pin]').onclick=async()=>{
     const pin=$('[data-pin]'),button=$('[data-check-pin]'),serial=viewSerial;
     if(button.disabled||!/^\d{4}$/.test(pin.value)){if(!button.disabled)$('[data-code-status]').textContent='숫자 4자리를 입력해 주세요.';return;}
-    button.disabled=true;
+    button.disabled=true;button.setAttribute("aria-busy","true");$("[data-show-codes]").disabled=true;
     try{
       const request=rpc('mindex_remote_admin_login',{p_pin:pin.value});pin.value='';
       const result=await request;
       if(serial!==viewSerial||!panel.open){logout(result?.token);return;}
       if(!result?.ok||!result.token)throw Error(result?.error==='locked'?'잠시 후 다시 시도해 주세요.':'PIN을 확인해 주세요.');
-      codeToken=result.token;outputRequest++;outputBusy=false;$('[data-code-entry]').hidden=true;
+      codeToken=result.token;outputRequest++;outputBusy=false;$('[data-code-entry]').hidden=true;$('[data-show-codes]').setAttribute('aria-expanded','false');
       $('[data-code-status]').textContent='';$('[data-show-codes]').textContent='코드 숨기기';void refreshOutputs();
     }catch(e){if(serial===viewSerial)$('[data-code-status]').textContent=e.message;}
-    finally{button.disabled=false;}
+    finally{button.disabled=false;button.setAttribute("aria-busy","false");$("[data-show-codes]").disabled=false;}
   };
   function clearView() {
     viewSerial++;hideCodes();
@@ -217,7 +231,7 @@
     if (!panel.open || document.hidden) return;
     if (reading) return;
     renderRemote();
-    const serial = viewSerial; reading = true;
+    const serial = viewSerial; reading = true; updateReadControls();
     try {
       const rows = await rpc("mindex_monitor_presence", {});
       if (serial !== viewSerial || !panel.open) return;
@@ -227,22 +241,41 @@
 
       message("");
     } catch (e) { if (serial === viewSerial) { remoteVerified = false; renderRemote(); message(e.message); } }
-    finally { reading = false; }
+    finally { reading = false; updateReadControls(); }
   }
   trigger.onclick = () => { if (!panel.open) panel.showModal(); void refreshOutputs(); void refresh(); window.lucide?.createIcons({ root: panel }); };
-  $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", clearView);
+  $("[data-close]").onclick = () => panel.close(); panel.addEventListener("close", () => { clearView(); if(trigger.isConnected)trigger.focus(); });
   $("[data-refresh]").onclick = () => { void refreshOutputs(); void refresh(); if (enabled && Date.now() - lastReportAt >= REPORT_MS) { retryAt = 0; void upload(); } };
-  $("#monitorName").onchange = async () => {
-    const next=$("#monitorName").value.trim().slice(0,60);
+  const nameField = $("#monitorName"), nameStatus = $('[data-name-status]'), nameRetry = $('[data-name-retry]');
+  nameField.oninput = () => { nameDirty = true; nameStatus.textContent = '수정 중 · 입력을 마치면 저장합니다.'; };
+  async function saveName() {
+    const next=nameField.value.trim().slice(0,60);
+    if ((nameSaving && next === nameRequested) || (!nameSaving && !nameDirty && next === name)) return;
+    const serial=++nameSaveSerial;nameRequested=next;
+    nameSaving=true;nameRetry.disabled=true;nameField.setAttribute('aria-busy','true');
+    nameStatus.textContent='접속명 저장 중…';
     try{
       if(!window.MINDEX_SERVER_STORAGE?.ready)throw Error("서버 연결을 확인해 주세요.");
       await window.MINDEX_SERVER_STORAGE.setItem("local","mindex.monitor.name",next);
+      if(serial!==nameSaveSerial)return;
       name=next;retryAt=0;void upload();
-    }catch{shareMessage("접속명을 서버에 저장하지 못했습니다. 다시 시도해 주세요.");}
+      nameDirty=nameField.value.trim()!==next;
+      nameRetry.hidden=true;nameStatus.textContent=nameDirty?'추가 입력은 아직 저장하지 않았습니다.':'접속명을 저장했습니다.';
+    }catch{
+      if(serial!==nameSaveSerial)return;
+      nameDirty=true;nameRetry.hidden=false;nameStatus.textContent='접속명을 저장하지 못했습니다. 입력은 유지됩니다.';
+    }finally{
+      if(serial===nameSaveSerial){nameSaving=false;nameRetry.disabled=false;nameField.setAttribute('aria-busy','false');}
+    }
+  }
+  nameField.onchange = () => void saveName();
+  nameField.onkeydown = event => {
+    if(event.key==='Enter'&&!event.isComposing){event.preventDefault();if(!nameSaving)void saveName();}
   };
+  nameRetry.onclick = () => { if(!nameSaving)void saveName(); };
   function hydrateServerName(){
     name=window.MINDEX_SERVER_STORAGE.getItem("local","mindex.monitor.name","");
-    if(document.activeElement!==$("#monitorName"))$("#monitorName").value=name||`${os} ${browser}`;
+    if(!nameDirty&&!nameSaving&&document.activeElement!==$("#monitorName"))$("#monitorName").value=name||`${os} ${browser}`;
   }
   window.addEventListener("mindex-server-storage-ready",hydrateServerName);
   window.addEventListener("mindex-server-device-updated",hydrateServerName);

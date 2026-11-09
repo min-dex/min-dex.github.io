@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+os.environ["MINDEX_SMOKE_OFFLINE"]="1"
 """Read-only monitor UI, isolation and privacy checks; no live DB traffic."""
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
@@ -12,6 +15,7 @@ def main():
                     page = browser.new_page(viewport={'width': 1280, 'height': 900})
                     page.route('**/*supabase*/**', lambda r: r.abort())
                     page.add_init_script("localStorage.setItem('mindex.monitor.share','false')")
+                    page.route("**/app.runtime.js*",lambda r:r.fulfill(path=str(Path(__file__).resolve().parents[1]/"app.js"),content_type="text/javascript"))
                     page.goto(url, wait_until='networkidle')
                     page.wait_for_function("!!document.querySelector('.monitor-panel')")
                     page.evaluate('''() => {
@@ -84,7 +88,50 @@ def main():
                         page.set_viewport_size({'width': width, 'height': 900})
                         assert page.locator('.monitor-panel').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
                         page.screenshot(path=f'/tmp/mindex-monitor-{engine}-{width}-{theme}.png')
+                    # Busy reads and failed name saves retain actionable feedback without touching output.
+                    page.evaluate("monitorMode='pending'")
+                    page.locator('[data-refresh]').click()
+                    page.wait_for_function("typeof monitorRelease==='function'")
+                    assert page.locator('[data-refresh]').is_disabled()
+                    assert page.locator('[data-refresh]').get_attribute('aria-busy')=='true'
+                    page.evaluate("monitorMode='ok';monitorRelease({data:[],error:null})")
+                    page.wait_for_function("!document.querySelector('[data-refresh]').disabled")
+                    page.evaluate("""()=>{
+                      window.nameWrites=[];window.nameFail=true;
+                      window.MINDEX_SERVER_STORAGE={ready:true,getItem:()=>'',setItem:async(scope,key,value)=>{nameWrites.push(value);if(nameFail)throw Error('offline')}};
+                    }""")
+                    name=page.get_by_label('접속명',exact=True)
+                    name.fill('테스트 접속명');name.press('Enter')
+                    page.wait_for_function("document.querySelector('[data-name-retry]').hidden===false")
+                    assert name.input_value()=='테스트 접속명'
+                    assert '입력은 유지' in page.locator('[data-name-status]').inner_text()
+                    page.evaluate("window.dispatchEvent(new Event('online'))")
+                    assert '입력은 유지' in page.locator('[data-name-status]').inner_text()
+                    page.evaluate('nameFail=false')
+                    page.locator('[data-name-retry]').click()
+                    page.wait_for_function("document.querySelector('[data-name-status]').textContent==='접속명을 저장했습니다.'")
+                    assert page.locator('[data-name-retry]').is_hidden()
+                    # Saving an older input must not acknowledge or overwrite typing during that save.
+                    page.evaluate("()=>{MINDEX_SERVER_STORAGE.setItem=(scope,key,value)=>new Promise(r=>{window.releaseName=r;nameWrites.push(value)})}")
+                    name.fill('먼저 저장');name.press('Enter')
+                    page.wait_for_function("typeof releaseName==='function'")
+                    writes=page.evaluate('nameWrites.length')
+                    name.press('Enter')
+                    assert page.evaluate('nameWrites.length')==writes
+                    name.fill('저장 중 새 입력')
+                    page.evaluate("releaseName();window.dispatchEvent(new Event('mindex-server-device-updated'))")
+                    page.wait_for_function("document.querySelector('[data-name-status]').textContent.includes('추가 입력')")
+                    assert name.input_value()=='저장 중 새 입력'
+                    name.press('Enter');page.evaluate('releaseName()')
+                    page.wait_for_function("document.querySelector('[data-name-status]').textContent==='접속명을 저장했습니다.'")
+                    assert page.evaluate('nameWrites[nameWrites.length-1]')=='저장 중 새 입력'
+                    # A modal must not trigger the underlying worship save shortcut.
+                    page.evaluate("window.shortcutSaves=0;window.musicResumes=[];saveAll=async()=>{shortcutSaves++};scheduleServiceMusicResume=reason=>{musicResumes.push(reason)}")
+                    name.press('Control+s');name.press('Meta+s')
+                    assert page.evaluate('shortcutSaves')==0
+                    assert page.evaluate("musicResumes.every(reason=>!['keydown','pointerup'].includes(reason))"),page.evaluate('musicResumes')
                     page.locator('[data-close]').click()
+                    assert page.locator('#monitorPanelBtn').evaluate('e=>e===document.activeElement')
                     assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_login')")
                     page.wait_for_function("document.querySelector('[data-devices]').textContent === ''")
                     assert page.evaluate("state.presenter.index===2&&state.presenter.serviceId==='output'&&state.selectedServiceId==='editing'")

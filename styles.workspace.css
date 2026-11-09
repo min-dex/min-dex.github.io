@@ -6447,3 +6447,9 @@ body[data-module="presenter"] .song-list:has(.service-sidebar-section--presenter
   max-height: 25%;
   overflow-y: auto;
 }
+
+/* Conflict choices are text actions; close remains the shared icon control. */
+:is(.worship-conflict-actions, .server-conflict-actions) .btn {
+  min-height: 35px; padding-inline: 10px; white-space: normal;
+  font-size: var(--ui-row-size); font-weight: var(--ui-row-weight);
+}

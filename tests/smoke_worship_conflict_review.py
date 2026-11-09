@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
@@ -10,6 +13,7 @@ def main():
                 for width, height in [(1440, 900), (390, 844)]:
                     page = browser.new_page(viewport={"width": width, "height": height})
                     page.route("**/*supabase*/**", lambda route: route.abort())
+                    page.route("**/app.runtime.js*", lambda r: r.fulfill(path=str(Path(__file__).resolve().parents[1]/"app.js"), content_type="text/javascript"))
                     page.goto(url + "?mindexSmokeRaw=1", wait_until="domcontentloaded")
                     page.wait_for_function("typeof openWorshipConflictReview === 'function'")
                     print(engine, width, page.evaluate("""async () => {
@@ -33,6 +37,9 @@ def main():
                       await new Promise(resolve => setTimeout(resolve, 0));
                       const dialog = document.querySelector('.worship-conflict-dialog');
                       check(dialog?.open, 'modal not visible');
+                      check(dialog.querySelector('[data-conflict-title]').textContent.includes('확인하고'), 'loading claims conflict before evidence');
+                      check(document.activeElement===dialog.querySelector('[data-conflict-keep]'),'safe return not initially focused');
+                      check(dialog.getAttribute('aria-busy')==='true','read busy not exposed');
                       check(!dialog.querySelector('.worship-conflict-details').open, 'source comparison starts expanded');
                       check(dialog.querySelector('[aria-label="저장 충돌 요약"]'), 'conflict summary missing');
                       await openWorshipConflictReview(service.id);
@@ -41,6 +48,8 @@ def main():
                       release(); await opening;
                       check(items[0].raw_title === '저장 이후 새 입력', 'review overwrote active draft');
                       check(!dialog.querySelector('[data-conflict-keep]').disabled && !dialog.querySelector('[data-conflict-reopen]').disabled, 'loaded conflict choices remain disabled');
+                      check(dialog.getAttribute('aria-busy')==='false','read busy stuck');
+                      check(!dialog.querySelector('[data-conflict-retry]').hidden,'manual reread unavailable');
                       check(dialog.querySelector('[aria-label="내 입력"]').value.includes('<script>'), 'text not preserved');
                       check(!dialog.querySelector('script'), 'user text interpreted as HTML');
                       check(dialog.querySelector('[data-conflict-server-summary]').textContent.includes('1행부터 차이'), 'server revision summary missing');
@@ -54,6 +63,12 @@ def main():
                       const rect = dialog.getBoundingClientRect();
                       check(rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight, 'dialog overflow');
                       check(dialog.scrollWidth <= dialog.clientWidth + 1, 'horizontal overflow');
+                      for(const button of dialog.querySelectorAll('button')) {
+                        if(!button.getClientRects().length)continue;
+                        check(button.type==='button','implicit submit button');
+                        check((button.getAttribute('aria-label')||button.textContent).trim(),'unnamed button');
+                        check(button.getBoundingClientRect().height>=35,'undersized conflict action');
+                      }
                       return 'PASS gated, frozen draft, no writes, no audio interaction, responsive comparison';
                     }"""), flush=True)
                     page.screenshot(path=f"/private/tmp/mindex-conflict-{engine}-{width}.png")
@@ -81,6 +96,32 @@ def main():
                       release({latest:null,baseline:null}); await pending;
                       if (document.querySelector('.worship-conflict-dialog')?.open) throw Error('late read reopened closed dialog');
                       return 'PASS failure retains draft; late response does not reopen dismissed review';
+                    }"""), flush=True)
+                    page.wait_for_selector(".worship-conflict-dialog", state="detached")
+                    print(page.evaluate("""async () => {
+                      const check=(v,m)=>{if(!v)throw Error(m)};
+                      worshipAtomicClient=async()=>({inspectConflict:async(id,draft)=>({serviceId:id,draft,latest:{revision:'5',service:{source_ref:{mindexServiceDocument:{sourceText:'latest'}}}}})});
+                      await openWorshipConflictReview('review-fixture');
+                      const dialog=document.querySelector('.worship-conflict-dialog');
+                      const preserve=preserveWorshipConflictServerSnapshot;let release;
+                      preserveWorshipConflictServerSnapshot=()=>new Promise(r=>release=r);
+                      dialog.querySelector('[data-conflict-keep]').click();
+                      check(dialog.getAttribute('aria-busy')==='true','archive busy missing');
+                      for(const key of ['close','keep','retry','reopen'])check(dialog.querySelector('[data-conflict-'+key+']').disabled,'archive permits competing '+key);
+                      const cancel=new Event('cancel',{cancelable:true});dialog.dispatchEvent(cancel);
+                      check(cancel.defaultPrevented&&dialog.open,'escape closes while archive pending');
+                      release();await new Promise(r=>dialog.addEventListener('close',r,{once:true}));
+                      preserveWorshipConflictServerSnapshot=preserve;
+                      await openWorshipConflictReview('review-fixture');
+                      const next=document.querySelector('.worship-conflict-dialog'),reopen=reopenWorshipConflict;
+                      reopenWorshipConflict=async()=>{throw Error('REVIEW_OUTDATED')};
+                      next.querySelector('[data-conflict-reopen]').click();await new Promise(r=>setTimeout(r,0));
+                      check(next.querySelector('[data-conflict-reopen]').disabled,'stale review still actionable');
+                      check(!next.querySelector('[data-conflict-retry]').hidden&&!next.querySelector('[data-conflict-retry]').disabled,'stale review lacks retry');
+                      next.querySelector('[data-conflict-retry]').click();await new Promise(r=>setTimeout(r,0));
+                      check(!next.querySelector('[data-conflict-reopen]').disabled,'fresh review did not unlock');
+                      reopenWorshipConflict=reopen;next.close();
+                      return 'PASS archive locks competing actions; stale review requires reread';
                     }"""), flush=True)
                     page.wait_for_selector(".worship-conflict-dialog", state="detached")
                     print(page.evaluate("""async () => {
