@@ -736,7 +736,7 @@ async function init() {
   refreshIcons();
   applyRuntimePlatformClass();
   applyTheme(readTheme());
-  applyPresenterThumbColumns(readPresenterThumbColumns());
+  applyPresenterThumbLevel(readPresenterThumbLevel());
   const linkParams = readLinkParams();
   state.config = readConfig(linkParams);
   const legacyProject = safeStorageGet("local", STORAGE.url, "");
@@ -744,7 +744,7 @@ async function init() {
   if (state.client) {
     await window.MINDEX_SERVER_STORAGE.initialize(state.client, state.config.url, {legacyProject, prepare: prepareLegacyServerValue});
     applyTheme(readTheme());
-    applyPresenterThumbColumns(readPresenterThumbColumns());
+    applyPresenterThumbLevel(readPresenterThumbLevel());
     pendingSundayEditSync.clear();
     for (const [key, value] of readPendingSundayEditSync()) pendingSundayEditSync.set(key, value);
     state.serviceMusic.fadeStopEnabled = safeStorageGet("local", "mindex.music.fadeStop", "true") === "true";
@@ -761,7 +761,7 @@ async function init() {
   initializeDepartmentTabSync();
   const hydrateServerPreferences = () => {
     applyTheme(readTheme());
-    applyPresenterThumbColumns(readPresenterThumbColumns());
+    applyPresenterThumbLevel(readPresenterThumbLevel());
     state.worshipBackgroundRegistry = readWorshipBackgroundRegistry();
     state.serviceMusic.fadeStopEnabled = safeStorageGet("local", "mindex.music.fadeStop", "true") === "true";
   };
@@ -2214,38 +2214,38 @@ function toggleTheme() {
 }
 
 // Keep the existing device storage tokens so the preference survives upgrades.
-const PRESENTER_THUMB_COLUMNS = { "1": "2", "2": "1.5", "3": "1" };
+const PRESENTER_THUMB_LEVELS = { "1": "1", "2": "1.5", "3": "2" };
 
-function readPresenterThumbColumns() {
+function readPresenterThumbLevel() {
   const saved = safeStorageGet("local", STORAGE.presenterThumbScale);
   if (["1.3", "1.6"].includes(saved)) return "2";
-  return Object.keys(PRESENTER_THUMB_COLUMNS).find((columns) =>
-    PRESENTER_THUMB_COLUMNS[columns] === saved) || "3";
+  return Object.keys(PRESENTER_THUMB_LEVELS).find((level) =>
+    PRESENTER_THUMB_LEVELS[level] === saved) || "1";
 }
 
-function applyPresenterThumbColumns(columns) {
-  const value = Object.hasOwn(PRESENTER_THUMB_COLUMNS, columns) ? columns : "3";
-  document.documentElement.style.setProperty("--svc-thumb-columns", value);
-  document.documentElement.dataset.thumbColumns = value;
+function applyPresenterThumbLevel(level) {
+  const value = Object.hasOwn(PRESENTER_THUMB_LEVELS, level) ? level : "1";
+  document.documentElement.style.setProperty("--svc-thumb-columns", String(4 - Number(value)));
+  document.documentElement.dataset.thumbLevel = value;
   return value;
 }
 
-function setPresenterThumbColumns(columns) {
-  const value = applyPresenterThumbColumns(columns);
-  safeStorageSet("local", STORAGE.presenterThumbScale, PRESENTER_THUMB_COLUMNS[value]);
-  document.querySelectorAll("[data-presenter-thumb-columns]").forEach((button) => {
-    button.setAttribute("aria-pressed", String(button.dataset.presenterThumbColumns === value));
+function setPresenterThumbLevel(level) {
+  const value = applyPresenterThumbLevel(level);
+  safeStorageSet("local", STORAGE.presenterThumbScale, PRESENTER_THUMB_LEVELS[value]);
+  document.querySelectorAll("[data-presenter-thumb-level]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.presenterThumbLevel === value));
   });
   schedulePresenterPreviewLayoutUpdate(document);
 }
 
-function renderPresenterThumbColumnsControl() {
-  const current = document.documentElement.dataset.thumbColumns || readPresenterThumbColumns();
+function renderPresenterThumbLevelControl() {
+  const current = document.documentElement.dataset.thumbLevel || readPresenterThumbLevel();
   return `
-    <div class="svc-board-scale" role="group" aria-label="슬라이드 보기 단수">
-      <span class="svc-board-scale-icon" title="슬라이드 보기 단수 · 송출 화면에는 적용되지 않아요" aria-hidden="true"><i data-lucide="layout-grid"></i></span>
-      ${Object.keys(PRESENTER_THUMB_COLUMNS).map((columns) => `
-        <button type="button" data-presenter-thumb-columns="${columns}" aria-label="슬라이드 보기 ${columns}단" title="슬라이드 보기 ${columns}단" aria-pressed="${columns === current}">${columns}단</button>`).join("")}
+    <div class="svc-board-scale" role="group" aria-label="슬라이드 보기 크기">
+      <span class="svc-board-scale-icon" title="슬라이드 보기 크기 · 송출 화면에는 적용되지 않아요" aria-hidden="true"><i data-lucide="layout-grid"></i></span>
+      ${Object.keys(PRESENTER_THUMB_LEVELS).map((level) => `
+        <button type="button" data-presenter-thumb-level="${level}" aria-label="슬라이드 보기 크기 ${level}단계" title="슬라이드 보기 크기 ${level}단계" aria-pressed="${level === current}">${level}</button>`).join("")}
     </div>`;
 }
 
@@ -9054,11 +9054,11 @@ function handlePresenterDetailClick(event) {
     return true;
   }
 
-  const thumbColumns = event.target.closest("[data-presenter-thumb-columns]");
-  if (thumbColumns) {
+  const thumbLevel = event.target.closest("[data-presenter-thumb-level]");
+  if (thumbLevel) {
     event.preventDefault();
     event.stopPropagation();
-    setPresenterThumbColumns(thumbColumns.dataset.presenterThumbColumns);
+    setPresenterThumbLevel(thumbLevel.dataset.presenterThumbLevel);
     return true;
   }
 
@@ -25889,7 +25889,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
           </div>
           ${renderPresenterToolbarScripture(service, slides)}
           <div class="svc-presenter-toolbar-end">
-            ${renderPresenterThumbColumnsControl()}
+            ${renderPresenterThumbLevelControl()}
             ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
             <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
               ${renderServiceMusicPlayer()}

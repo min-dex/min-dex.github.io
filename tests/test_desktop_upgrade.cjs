@@ -154,8 +154,8 @@ async function main(){
    }
    const actual=Object.fromEntries(Object.keys(values).map(key=>[key,storage.getItem('local',key)]));
    for(const key in values)if(actual[key]!==values[key])throw Error('Raw fixture mismatch: '+key);
-   const columns = typeof readPresenterThumbColumns === 'function' ? readPresenterThumbColumns() : null;
-   if(columns === null ? readPresenterThumbScale() !== '1.5' : columns !== '2') {
+   const level = typeof readPresenterThumbLevel === 'function' ? readPresenterThumbLevel() : null;
+   if(level === null ? readPresenterThumbScale() !== '1.5' : level !== '2') {
     throw Error('Controller slide view recovery mismatch');
    }
    const restored=JSON.parse(actual[Object.keys(values)[0]]);
