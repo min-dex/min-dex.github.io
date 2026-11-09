@@ -6,14 +6,14 @@ os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from urllib.parse import urlsplit
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
-INIT = """async () => {
+INIT = """async (legacyProject) => {
  const client={rpc:async(name,args)=>{
   if(name==='mindex_state_write_v1' && args.p_key==='mindex.worship.edit-sync.v1' && window.syncFixtureDelay)
    await new Promise(resolve=>setTimeout(resolve,window.syncFixtureDelay));
   const response=await fetch('/state-fixture/'+name,{method:'POST',body:JSON.stringify(args)});
   const result=await response.json();if(result.error)return {error:Error(result.error)};return result;
  }};
- await window.MINDEX_SERVER_STORAGE.initialize(client,'fixture');
+ await window.MINDEX_SERVER_STORAGE.initialize(client,'fixture',{legacyProject});
  return window.MINDEX_SERVER_STORAGE.ready;
 }"""
 
@@ -63,7 +63,18 @@ def main():
                     page.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof persistServerValue === "function" && !document.body.classList.contains("ui-booting")')
                     page.locator(".mindex-boot").wait_for(state="hidden")
                     page.evaluate("document.fonts.ready")
-                    assert page.evaluate(INIT)
+                    assert page.evaluate("""() => {
+                      localStorage.setItem('mindex.worshipRecoverySnapshot.latest.v1.legacy-fixture','legacy recovery');
+                      localStorage.setItem('unrelated.app','keep');
+                      return true;
+                    }""")
+                    assert page.evaluate(INIT, 'fixture')
+                    assert page.evaluate("""() => {
+                      const key='mindex.worshipRecoverySnapshot.latest.v1.legacy-fixture';
+                      return localStorage.getItem(key)===null &&
+                        safeStorageGet('local',key)==='legacy recovery' &&
+                        localStorage.getItem('unrelated.app')==='keep';
+                    }""")
                     key='mindex.worship.edit-sync.v1'
                     timings=page.evaluate("""async()=>{
                       window.syncFixtureDelay=250;

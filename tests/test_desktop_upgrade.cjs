@@ -7,6 +7,11 @@ async function main(){
  assert(['seed','restart','upgrade'].includes(phase));
  let record=phase==='seed'?{token:crypto.randomBytes(16).toString('hex'),rows:{}}:JSON.parse(fs.readFileSync(proof));
  const originalRows=JSON.stringify(record.rows);
+ const legacyCopies={
+  'mindex.worshipRecoverySnapshot.latest.v1.fixture-worship':'synthetic old worship recovery',
+  'mindex.bulletin.v1:fixture-worship':'synthetic old bulletin draft'
+ };
+ let retiredLegacyCopies=false;
  let restoring=false;
  const app=await _electron.launch({executablePath:path.resolve(exe),env:{...process.env,MINDEX_ISOLATED_TEST:'1',MINDEX_TEST_PROFILE_TOKEN:record.token}});
  try {
@@ -123,12 +128,12 @@ async function main(){
    const scope=args.p_scope==='shared'?'shared':args.p_scope+':'+args.p_token;
    const rows=record.rows[scope]||{};
    if(name==='mindex_state_read_v1')return {data:Object.values(rows),error:null};
-   assert.equal(name,'mindex_state_write_v1');assert(phase==='seed'||restoring,'Readback must not mutate saved records');
+   assert.equal(name,'mindex_state_write_v1');assert(phase==='seed'||restoring||(phase==='upgrade'&&Object.hasOwn(legacyCopies,args.p_key)),'Readback must not mutate saved records');
    assert.equal(args.p_revision,'0');assert(!rows[args.p_key]);
    const row={key:args.p_key,value:args.p_value,revision:'1',requestId:args.p_request_id};
    (record.rows[scope]||= {})[row.key]=row;return {data:row,error:null};
   });
-  const data=await page.evaluate(async seed=>{
+  const data=await page.evaluate(async ({seed,legacyCopies})=>{
    const service={id:'fixture-worship',service_date:'2026-11-04',service_alias:'설치 보존 시험'};
    const client=window.supabase.createClient('https://fixture.invalid','fixture-public-id',{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async (url,options)=>{
     if(!String(url).includes('/rest/v1/mindex_worship_service')||(options?.method||'GET')!=='GET')throw Error('Unexpected fixture request');
@@ -143,14 +148,17 @@ async function main(){
     'mindex.editor.recovery.v1:service:fixture-worship:rehearsal':JSON.stringify({schema:1,module:'service',id:service.id,draft,current:{service,items:[],serviceTypes:[]},createdAt:'2026-11-04T00:00:00.000Z'}),
     'mindex.theme':'dark','mindex.music.fadeStop':'true','mindex.ui.presenterThumbScale':'1.5'
    };
-   if(seed)for(const [key,value]of Object.entries(values))await storage.setItem('local',key,value);
+   if(seed){
+    for(const [key,value]of Object.entries(values))await storage.setItem('local',key,value);
+    for(const [key,value]of Object.entries(legacyCopies))localStorage.setItem(key,value);
+   }
    const actual=Object.fromEntries(Object.keys(values).map(key=>[key,storage.getItem('local',key)]));
    for(const key in values)if(actual[key]!==values[key])throw Error('Raw fixture mismatch: '+key);
    if(readPresenterThumbScale()!=='1.5')throw Error('Controller scale recovery mismatch');
    const restored=JSON.parse(actual[Object.keys(values)[0]]);
    if(restored.value.items[0].raw_body!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
    return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:restored.value.items[0].raw_body,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};
-  },phase==='seed');
+  },{seed:phase==='seed',legacyCopies});
   assert.equal(data.identity.length,64);
   if(phase==='seed'){
    record={...record,profile:native.profile,data,hashes:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)]))};
@@ -158,6 +166,15 @@ async function main(){
   }else{
    assert.deepEqual(data,record.data);assert.equal(JSON.stringify(record.rows),originalRows);
    assert.deepEqual(Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)])),record.hashes);
+  }
+  if(phase==='upgrade'){
+   retiredLegacyCopies=await page.evaluate(async copies=>{
+    const entries=Object.entries(copies);
+    if(entries.some(([key,value])=>localStorage.getItem(key)!==value))throw Error('Old profile copies missing before cleanup');
+    await MINDEX_SERVER_STORAGE.initialize({rpc:(name,args)=>window.fixtureRpc(name,args)},'upgrade-fixture',{legacyProject:'upgrade-fixture'});
+    return entries.every(([key,value])=>localStorage.getItem(key)===null&&MINDEX_SERVER_STORAGE.getItem('local',key)===value);
+   },legacyCopies);
+   assert(retiredLegacyCopies);
   }
   const beforeRestore=structuredClone(record.rows);
   restoring=true;
@@ -174,7 +191,7 @@ async function main(){
   const draft=JSON.parse(record.data.values['mindex.editor.draft.v2:service:fixture-worship:rehearsal']);
   assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
   for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
-  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,bundledAudio,waitingAndFriday,previewCacheContract,preciseAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
+  console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,retiredLegacyCopies,bundledAudio,waitingAndFriday,previewCacheContract,preciseAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
  }finally{
   // Test teardown discards only the recovered synthetic editor, not persisted records.
   for(const page of app.windows())await page.close({runBeforeUnload:false});

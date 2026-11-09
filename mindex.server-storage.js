@@ -214,9 +214,9 @@
    const next=Object.fromEntries(['shared','device','session'].map(name=>[name,createServerState({rpc,token,scope:name==='session'?'session:'+session:name})]));
    await Promise.all(Object.values(next).map(s=>s.load()));
    if(connection!==captured)throw Error('SERVER_STORAGE_PROJECT_CHANGED');
-   let migrationSummary={confirmed:[],retained:[],archived:[]};
+   let migrationSummary={confirmed:[],retained:[],archived:[]},removed=[];
    if(legacyProject){
-    const {legacyStateDestination,migrateLegacyState}=await import(`./mindex.legacy-state.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE||'server-state')}`);
+    const {legacyStateDestination,migrateLegacyState,retireConfirmedLegacyState}=await import(`./mindex.legacy-state.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE||'server-state')}`);
     const entries=[];
     for(const [scope,source] of [['local',localStorage],['session',sessionStorage]]){
      for(let i=0;i<source.length;i++){
@@ -230,6 +230,8 @@
      throw Error('LEGACY_STATE_MIGRATION_PENDING: '+reasons.join(', '));
     }
     migrationSummary=migration;
+    if(connection!==captured)throw Error('SERVER_STORAGE_PROJECT_CHANGED');
+    removed=retireConfirmedLegacyState(migration,scope=>scope==='session'?sessionStorage:localStorage);
    }
    if(connection!==captured)throw Error('SERVER_STORAGE_PROJECT_CHANGED');
    stores=next;ready=true;status();
@@ -238,6 +240,7 @@
     document.body.dataset.serverStateMigrated=String(migrationSummary.confirmed.length);
     document.body.dataset.serverStateRetained=String(migrationSummary.retained.length);
     document.body.dataset.serverStateArchived=String(migrationSummary.archived.length);
+    document.body.dataset.serverStateRetired=String(removed.length);
    }
    try{
     localChannel=new BroadcastChannel('mindex-server-state:'+project);
