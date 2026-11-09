@@ -64,6 +64,17 @@ class PublishedUpgradeIdentity(unittest.TestCase):
   for change in [{'sourceCommit':'b'*40},{'channel':'release'},{'assets':[row,row]},{'assets':[{**row,'sha256':'bad'}]},{'assets':[{**row,'bytes':-1}]}]:
    with self.assertRaises(ValueError):asset_record({**receipt,**change},'1.0.0','win-x64')
   with self.assertRaises(ValueError):asset_record(receipt,'1.0.0','mac-arm64')
+ def test_rejected_token_retries_the_same_public_asset_without_credentials(self):
+  import io, verify_published_upgrade as upgrade
+  request=upgrade.api_request('/assets/1?download=1','fixture','application/octet-stream')
+  rejected=upgrade.urllib.error.HTTPError(request.full_url,401,'Unauthorized',{},io.BytesIO())
+  with patch.object(upgrade.urllib.request,'urlopen',side_effect=[rejected,io.BytesIO(b'fixture')]) as read:
+   self.assertEqual(upgrade.open_release(request,60).read(),b'fixture')
+  public=read.call_args.args[0]
+  self.assertFalse(public.has_header('Authorization'))
+  self.assertEqual(public.full_url,request.full_url+'&public=1')
+  self.assertEqual(public.get_header('Accept'),'application/octet-stream')
+
  def test_failed_old_install_acceptance_stops_before_candidate_install(self):
   import io, types, verify_published_upgrade as upgrade
   with tempfile.TemporaryDirectory() as folder:
@@ -79,13 +90,13 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    def read(url,**kwargs):
     self.assertNotIn('Authorization',url.headers)
     self.assertEqual(url.unredirected_hdrs.get('Authorization'),'Bearer fixture')
-    if url.full_url.endswith('/tags/church-v1.0.0'):
+    if '/tags/church-v1.0.0?mindexVerify=' in url.full_url:
      release={'tag_name':'church-v1.0.0','draft':False,'prerelease':False,
               'assets':[{'name':name,'id':i,'state':'uploaded'}
                         for i,name in enumerate(('internal-build.json',row['file']),1)]}
      return io.BytesIO(json.dumps(release).encode())
     self.assertEqual(url.get_header('Accept'),'application/octet-stream')
-    return io.BytesIO(json.dumps(receipt).encode() if url.full_url.endswith('/assets/1?download=1') else payload)
+    return io.BytesIO(json.dumps(receipt).encode() if '/assets/1?download=1&mindexVerify=' in url.full_url else payload)
    with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.5']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
     with self.assertRaisesRegex(RuntimeError,'synthetic seed failure'):upgrade.main()
    self.assertEqual(len(calls),2)

@@ -90,13 +90,15 @@ jobs:
           MINDEX_QA_GITHUB_TOKEN: ${{ github.token }}
         run: |
           python - <<'PYTHON'
-          import hashlib, json, os, platform, tempfile, time
+          import hashlib, json, os, platform, tempfile, time, uuid
           import urllib.error, urllib.request
           from pathlib import Path
 
           token = os.environ.pop('MINDEX_QA_GITHUB_TOKEN', '')
 
           def open_url(url, accept, authenticated):
+              separator = '&' if '?' in url else '?'
+              url += separator + 'mindexVerify=' + uuid.uuid4().hex
               request = urllib.request.Request(url, headers={'Accept': accept})
               if authenticated:
                   request.add_unredirected_header('Authorization', 'Bearer ' + token)

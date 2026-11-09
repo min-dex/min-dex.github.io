@@ -10,6 +10,7 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+import uuid
 from cleanup_desktop_ci import remove_completed_tree
 
 API = 'https://api.github.com/repos/min-dex/min-dex.github.io/releases'
@@ -48,7 +49,7 @@ def retry_download(read):
         try:
             return read()
         except urllib.error.HTTPError as error:
-            if error.code not in (408, 429, 500, 502, 503, 504) or attempt == 2:
+            if error.code not in (401, 403, 408, 429, 500, 502, 503, 504) or attempt == 2:
                 raise
             error.close()
         except (TimeoutError, ConnectionError, urllib.error.URLError):
@@ -58,16 +59,31 @@ def retry_download(read):
 
 
 def read_receipt(url):
-    with urllib.request.urlopen(url, timeout=60) as response:
+    with open_release(url, timeout=60) as response:
         return json.loads(response.read(100000))
 
 
 def api_request(path, token, accept='application/vnd.github+json'):
-    request = urllib.request.Request(API + path, headers={'Accept': accept})
+    # Do not reuse a prior runner's cached authorization error or expired CDN redirect.
+    separator = '&' if '?' in path else '?'
+    url = API + path + separator + 'mindexVerify=' + uuid.uuid4().hex
+    request = urllib.request.Request(url, headers={'Accept': accept})
     if token:
         # GitHub redirects downloads to its asset CDN. Do not forward the token.
         request.add_unredirected_header('Authorization', 'Bearer ' + token)
     return request
+
+
+def open_release(request, timeout):
+    try:
+        return urllib.request.urlopen(request, timeout=timeout)
+    except urllib.error.HTTPError as error:
+        if error.code not in (401, 403) or not isinstance(request, urllib.request.Request) or not request.has_header('Authorization'):
+            raise
+        error.close()
+        # Public assets may remain available even if a runner token is rejected.
+        public = urllib.request.Request(request.full_url + '&public=1', headers=request.headers)
+        return urllib.request.urlopen(public, timeout=timeout)
 
 
 def download_request(release, name, token):
@@ -79,7 +95,7 @@ def download_request(release, name, token):
 
 def download_installer(url, installer, record):
     digest = hashlib.sha256()
-    with urllib.request.urlopen(url, timeout=120) as response, installer.open('wb') as out:
+    with open_release(url, timeout=120) as response, installer.open('wb') as out:
         for block in iter(lambda: response.read(1024 * 1024), b''):
             out.write(block)
             digest.update(block)
