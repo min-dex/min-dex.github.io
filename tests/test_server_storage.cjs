@@ -4,14 +4,20 @@ const vm=require('node:vm');
 const {webcrypto}=require('node:crypto');
 (async()=>{
  const {createServerState}=await import('../mindex.server-state.mjs');
- const storage=()=>{const values=new Map();return {values,getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v)}};
+ const migrationModule=await import('../mindex.legacy-state.mjs');
+ const storage=()=>{
+  const values=new Map();
+  return {values,getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k),
+   get length(){return values.size},key:i=>[...values.keys()][i]??null};
+ };
  const localStorage=storage(),sessionStorage=storage(),nodes=new Map(),events=new Map(),timers=new Map();let clock=0;
  const window={addEventListener:(name,fn)=>events.set(name,fn)};
- const sandbox={window,localStorage,sessionStorage,crypto:webcrypto,Uint8Array,console,Event,stateFactory:createServerState,
+ const sandbox={window,localStorage,sessionStorage,crypto:webcrypto,Uint8Array,console,Event,stateFactory:createServerState,migrationModule,
   document:{getElementById:id=>nodes.get(id),createElement:()=>({setAttribute(){},append(){}}),body:{append:node=>nodes.set(node.id,node)}},
   setTimeout:(fn,delay)=>{fn.delay=delay;timers.set(++clock,fn);return clock},clearTimeout:id=>timers.delete(id)};
  const source=fs.readFileSync(new URL('../mindex.server-storage.js',`file://${__filename}`),'utf8')
-  .replace(/await import\(`\.\/mindex\.server-state\.mjs\?v=\$\{[^\n]+\}`\)/,'({createServerState:stateFactory})');
+  .replace(/await import\(`\.\/mindex\.server-state\.mjs\?v=\$\{[^\n]+\}`\)/,'({createServerState:stateFactory})')
+  .replace(/await import\(`\.\/mindex\.legacy-state\.mjs\?v=\$\{[^\n]+\}`\)/,'migrationModule');
  vm.runInNewContext(source,sandbox);
  const bridge=window.MINDEX_SERVER_STORAGE,db=new Map(),writes=[];
  let release,block=false,fail=false,lose=false;const faults=new Map();
@@ -105,6 +111,18 @@ const {webcrypto}=require('node:crypto');
  assert.equal(bridge.getItem('local','mindex.ui.presenterThumbScale'),'1.5');
  assert.equal(db.get('shared:mindex.ui.presenterThumbScale').value,'2');
  assert.equal(db.get('device:mindex.ui.presenterThumbScale').value,'1.5');
+ // Startup retires only values verified on the server, leaving unrelated site data alone.
+ const recoveryKey='mindex.worshipRecoverySnapshot.latest.v1.fixture';
+ localStorage.setItem(recoveryKey,'old browser recovery');
+ localStorage.setItem('another-app.draft','keep');
+ fail=true;
+ await assert.rejects(bridge.initialize({...client},'fixture',{legacyProject:'fixture'}),/LEGACY_STATE_MIGRATION_PENDING/);
+ assert.equal(localStorage.getItem(recoveryKey),'old browser recovery');
+ fail=false;
+ await bridge.initialize({...client},'fixture',{legacyProject:'fixture'});
+ assert.equal(localStorage.getItem(recoveryKey),null);
+ assert.equal(bridge.getItem('local',recoveryKey),'old browser recovery');
+ assert.equal(localStorage.getItem('another-app.draft'),'keep');
  // Permission failures and confirmed content conflicts never enter automatic retry.
  timers.clear();faults.set('mindex.private.denied',{code:'42501',message:'permission denied'});
  await assert.rejects(bridge.setItem('local','mindex.private.denied','retained'));

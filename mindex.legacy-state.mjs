@@ -11,7 +11,7 @@ export function legacyStateDestination(scope,key,project){
  return scope==='session'?'session':'device';
 }
 export async function migrateLegacyState({entries,project,legacyProject,stores,prepare=async entry=>entry.value}){
- const result={confirmed:[],retained:[],archived:[],failed:[]};
+ const result={confirmed:[],retained:[],archived:[],retirable:[],failed:[]};
  // An unlabelled old browser snapshot must not silently enter another project.
  if(!project||legacyProject!==project){result.retained=entries.map(entry=>({key:entry.key,reason:'PROJECT_UNKNOWN'}));return result}
  const checked=[];
@@ -39,10 +39,10 @@ export async function migrateLegacyState({entries,project,legacyProject,stores,p
      // or replayed archives require another independent readback.
      if(needsReadback)await backup.load();
      const archived=JSON.parse(backup.getItem(archiveKey)||'null');
-     if(archived?.sourceHash!==sourceHash||archived.key!==entry.key||archived.scope!==entry.scope)throw Error('MIGRATION_ARCHIVE_READBACK_FAILED');
+     if(archived?.sourceHash!==sourceHash||archived.key!==entry.key||archived.scope!==entry.scope||typeof archived.value!=='string')throw Error('MIGRATION_ARCHIVE_READBACK_FAILED');
      result.archived.push({key:entry.key,archiveKey});
     }
-    result.retained.push({key:entry.key,reason:'SERVER_RECORD_EXISTS'});continue;
+    result.retirable.push({scope:entry.scope,key:entry.key,original:entry.value});continue;
    }
    const value=await prepare(entry);
    if(typeof value!=='string')throw Error('MIGRATION_VALUE_REQUIRED');
@@ -70,7 +70,7 @@ export async function migrateLegacyState({entries,project,legacyProject,stores,p
 }
 export function retireConfirmedLegacyState(result,storageForScope){
  const removed=[];
- for(const entry of result.confirmed){
+ for(const entry of [...result.confirmed,...result.retirable]){
   const source=storageForScope(entry.scope);
   if(source.getItem(entry.key)!==entry.original)continue;
   source.removeItem(entry.key);removed.push(entry.key);
