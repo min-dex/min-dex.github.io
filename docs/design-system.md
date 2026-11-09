@@ -243,3 +243,12 @@ Paperlogy is now an explicit preview/output exception only for union service
 retain their existing default fonts; vendored Paperlogy faces remain available
 without local installation for that service. This supersedes the global default
 paragraph above and does not change authored service/bulletin/reading typefaces.
+
+
+## Broadcast and preparation controls · 2026-11-09
+
+The broadcast window and its sanctuary popup share the bundled Pretendard UI
+font, 5px control radius, 35px standard button height and 14px/600 controls.
+The sanctuary canvas remains square at the edges. Home recent-view tabs keep
+the same 14px/600 type in both states. Keynote's utility disclosure uses a
+30px target, 5px radius, 12px/600 label and visible keyboard focus.

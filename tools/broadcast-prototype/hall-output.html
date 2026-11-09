@@ -1,3 +1,16 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MINDEX · 본당 출력</title><style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;color:#fff;font:15px system-ui,sans-serif}canvas{display:block;width:100%;height:100%;object-fit:contain}nav{position:fixed;inset:16px 16px auto;display:flex;align-items:center;gap:10px;padding:12px;background:#191a17ee;border:1px solid #45463d;border-radius:8px}span{flex:1}button{min-height:38px;padding:8px 12px;background:#303129;color:inherit;border:1px solid #5e6051;border-radius:6px;font:inherit;cursor:pointer}button:focus-visible{outline:2px solid #d77ca7}html:fullscreen nav,html.output-only nav{display:none}html:fullscreen{cursor:none}@media(max-width:600px){nav{flex-wrap:wrap;font-size:12px}span{flex-basis:100%}}
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MINDEX · 본당 출력</title><link rel="stylesheet" href="prototype.css">
+<style>
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+canvas { height: 100%; object-fit: contain; border: 0; border-radius: 0; }
+nav {
+  position: fixed; inset: 15px 15px auto; display: flex; align-items: center; gap: 10px;
+  padding: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+}
+nav span { flex: 1; font-size: 12px; font-weight: 500; }
+html:fullscreen nav, html.output-only nav { display: none; }
+html:fullscreen { cursor: none; }
+@media (max-width: 600px) {
+  nav { flex-wrap: wrap; }
+  nav span { flex-basis: 100%; }
+}
 </style></head><body><canvas id="hall" width="1280" height="720" aria-label="본당에 표시할 화면"></canvas><nav><span id="status" role="status">이 창을 본당에 연결된 화면으로 옮긴 뒤 전체 화면을 누르세요. 소리는 출력하지 않습니다.</span><button id="fullscreen">전체 화면</button><button id="hideControls">메뉴 숨기기</button><button id="close">닫기</button></nav><script src="hall-window.js"></script></body></html>

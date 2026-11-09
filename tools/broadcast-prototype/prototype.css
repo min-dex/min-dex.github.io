@@ -1,5 +1,15 @@
+@font-face {
+  font-family: "Pretendard Variable";
+  src: url("../../vendor/fonts/pretendard/PretendardVariable.woff2") format("woff2");
+  font-weight: 45 930;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
+  --r: 5px;
+  --control-height: 35px;
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --canvas: #181816;
   --panel: #232320;
   --field: #32322d;
@@ -12,7 +22,7 @@
   --danger: #ffaba4;
   background: var(--canvas);
   color: var(--ink);
-  font: 14px/1.5 system-ui, sans-serif;
+  font: 14px/1.5 var(--font-sans);
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
@@ -25,7 +35,7 @@ header {
   background: var(--panel);
   border-bottom: 1px solid var(--line);
 }
-header img { width: 30px; height: 30px; border-radius: 5px; }
+header img { width: 30px; height: 30px; border-radius: var(--r); }
 header strong { font-size: 12px; }
 header h1 { margin: 0 0 0 10px; font-size: 22px; line-height: 1.25; }
 main {
@@ -41,9 +51,9 @@ main {
 .preview-heading { margin-bottom: 10px; }
 .preview-heading h2, aside h2 { margin: 0; font-size: 16px; font-weight: 700; }
 .preview-heading span, .status { color: var(--muted); font-size: 12px; }
-canvas { display: block; width: 100%; height: auto; aspect-ratio: 16/9; background: #000; border: 1px solid var(--line); border-radius: 5px; }
+canvas { display: block; width: 100%; height: auto; aspect-ratio: 16/9; background: #000; border: 1px solid var(--line); border-radius: var(--r); }
 .status { padding-block: 5px; }
-aside { align-self: start; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; }
+aside { align-self: start; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); }
 aside section { padding: 15px; }
 aside section + section { border-top: 1px solid var(--line); }
 aside h2 { margin-bottom: 10px; }
@@ -52,14 +62,14 @@ input:not([type=checkbox]), textarea, select {
   display: block;
   width: 100%;
   min-width: 0;
-  min-height: 35px;
+  min-height: var(--control-height);
   margin-top: 5px;
   padding: 5px 10px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: var(--r);
   background: var(--field);
   color: inherit;
-  font: 600 14px/1.5 system-ui, sans-serif;
+  font: 600 14px/1.5 var(--font-sans);
 }
 input[type=file] { font-size: 12px; }
 input[type=checkbox], input[type=range] { accent-color: var(--accent); }
@@ -68,13 +78,13 @@ textarea { resize: vertical; }
 .row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
 .row button { flex: 1 1 auto; }
 button {
-  min-height: 35px;
+  min-height: var(--control-height);
   padding: 5px 10px;
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: var(--r);
   background: transparent;
   color: inherit;
-  font: 600 14px/1.5 system-ui, sans-serif;
+  font: 600 14px/1.5 var(--font-sans);
   cursor: pointer;
 }
 button:not(:disabled):hover, summary:hover { background: var(--field); }
@@ -85,10 +95,10 @@ button:disabled { opacity: .5; cursor: default; }
 :is(button, input, textarea, select, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 p { margin: 5px 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
 details { margin-top: 10px; padding-top: 5px; border-top: 1px solid var(--line); }
-summary { padding: 5px; border-radius: 5px; cursor: pointer; font-weight: 600; }
+summary { min-height: 30px; padding: 5px 10px; border-radius: var(--r); cursor: pointer; font-weight: 600; }
 details[open] > summary { margin-bottom: 5px; }
 .input-monitor { margin-block: 10px; }
-.input-monitor video { display: block; width: 100%; max-width: 200px; aspect-ratio: 16/9; object-fit: contain; background: #000; border-radius: 5px; }
+.input-monitor video { display: block; width: 100%; max-width: 200px; aspect-ratio: 16/9; object-fit: contain; background: #000; border-radius: var(--r); }
 @media (max-width: 760px) {
   main { grid-template-columns: minmax(0, 1fr); gap: 15px; padding: 15px; }
 }
