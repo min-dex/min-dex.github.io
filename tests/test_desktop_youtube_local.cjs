@@ -90,11 +90,27 @@ async function main() {
     assert.equal(await panel.locator('#ytBitrate').inputValue(),'14000');
     assert(await panel.locator('#ytRecord').isChecked());
     assert.deepEqual(await panel.locator('#broadcast').evaluate(c=>[c.width,c.height]),[1920,1080]);
-    await panel.locator('#ytRecord').uncheck();
+    // Stub only the OS dialog result. The packaged renderer, preload, main
+    // handler, encoder and MP4 filesystem write still use their real paths.
+    await app.evaluate(({dialog}) => {
+      globalThis.__recordDialogFixture = {calls:0, destination:null};
+      dialog.showSaveDialog = async (_window, options) => {
+        if (!options.defaultPath.endsWith('.mp4') || !options.filters.some(filter => filter.extensions.includes('mp4'))) {
+          throw Error('Expected a recording save dialog with an MP4 filter');
+        }
+        const fixture = globalThis.__recordDialogFixture;
+        fixture.calls++;
+        return fixture.destination ? {canceled:false,filePath:fixture.destination} : {canceled:true};
+      };
+    });
     await panel.locator('#ytKey').fill(key);
-    assert.equal(publishes,0);
     await panel.locator('#ytStart').click();
-    await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 중',null,{timeout:20000});
+    await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='저장 선택을 취소했습니다.');
+    assert.equal(publishes,0);
+    assert.equal(await app.evaluate(()=>globalThis.__recordDialogFixture.calls),1);
+    await app.evaluate((_electron,destination)=>{ globalThis.__recordDialogFixture.destination=destination; },file('recording.mp4'));
+    await panel.locator('#ytStart').click();
+    await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출·녹화 중',null,{timeout:30000});
     assert.equal(await panel.locator('#ytKey').inputValue(),'');
     await sleep(2200);
     await panel.getByText('유튜브 송출 차단',{exact:true}).click();
@@ -104,9 +120,21 @@ async function main() {
     await sleep(2500);
     await panel.locator('#excludeBroadcast').click(); await sleep(2500);
     await panel.locator('#ytStop').click();
-    await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 종료');
+    await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 종료 · 녹화 저장 완료');
     await received;
     assert.equal(publishes,1); assert(matchingKey);
+    assert.equal(await app.evaluate(()=>globalThis.__recordDialogFixture.calls),2);
+    const packetHashes = source => execFileSync(ffmpeg,['-loglevel','error','-i',file(source),'-map','0:v:0','-map','0:a:0','-c','copy','-f','framehash','pipe:1'],{encoding:'utf8'});
+    const recorded=packetHashes('recording.mp4'), transmitted=packetHashes('received.flv');
+    assert.match(recorded,/#dimensions 0: 1920x1080/);
+    const streamHashes = (output,stream) => output.split(/\r?\n/)
+      .filter(line=>line.trimStart().startsWith(stream+','))
+      .map(line=>line.split(',').at(-1).trim());
+    for (const stream of [0,1]) {
+      assert(streamHashes(recorded,stream).length>0);
+      assert.deepEqual(streamHashes(recorded,stream),streamHashes(transmitted,stream));
+    }
+    console.log('PASS packaged MP4 dialog cancellation and 1080p recording match local RTMPS packets');
     const decode = args => execFileSync(ffmpeg,['-loglevel','error','-i',file('received.flv'),...args,'pipe:1'],{maxBuffer:40*1024*1024});
     const frames = decode(['-an','-vf','fps=4,scale=160:90','-pix_fmt','rgb24','-f','rawvideo']);
     const audio = decode(['-vn','-ac','1','-ar','8000','-f','s16le']);
@@ -122,6 +150,7 @@ async function main() {
     const sequence=phases.filter(x=>x!=='transition').filter((x,i,a)=>!i||a[i-1]!==x);
     assert.deepEqual(sequence,['caption+tone','slate+silent','caption+tone'],JSON.stringify(phases));
     sink = spawn(ffmpeg,['-loglevel','error','-listen','1','-timeout','30','-i','rtmp://127.0.0.1:'+port+'/live2/'+key,'-c','copy','-f','null','-'],{stdio:'ignore'});
+    await panel.locator('#ytRecord').uncheck();
     await panel.locator('#ytKey').fill(key);
     await panel.locator('#ytStart').click();
     await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 중');

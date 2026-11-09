@@ -15,7 +15,7 @@ async function main(){
   await page.getByText('수동 자막 및 화면 설정',{exact:true}).click();await page.locator('#text').fill('1080p 자막 확인');await page.locator('#apply').click();
   await page.waitForTimeout(900);
   assert(await page.locator('#broadcast').evaluate(c=>{const d=c.getContext('2d').getImageData(0,850,1920,230).data;for(let i=0;i<d.length;i+=4)if(d[i]>220&&d[i+1]>220&&d[i+2]>220)return true;return false;}),'caption visible at full resolution');
-  await page.screenshot({path:'/private/tmp/mindex-broadcast-1080-preview.png',fullPage:true});
+  if(process.env.MINDEX_TEST_OUTPUT_DIR)await page.screenshot({path:path.join(process.env.MINDEX_TEST_OUTPUT_DIR,'mindex-broadcast-1080-preview.png'),fullPage:true});
   await page.evaluate(async()=>{
    const {mountYoutube}=await import('./youtube.mjs');
    window.qa={released:0,options:null,cancel:true};

@@ -131,3 +131,9 @@ H.264/AAC를 한 번 인코딩한 fragmented MP4 바이트를 파일과 RTMP rem
 `node tests/test_youtube_engine_local.cjs /path/to/ffmpeg` (동일 디렉터리 ffprobe 필요).
 로컬 TLS 수신기로 1080p30/GOP 60, 정상 종료 및 녹화/수신 영상·음성 패킷 해시 일치를 검사한다.
 기존 packaged desktop acceptance는 기본값·캔버스 크기를 검사하고 녹화 선택을 해제한 송출 경로를 유지한다.
+
+
+The packaged acceptance opens the installed app's broadcast window and exercises
+the real dialog IPC with synthetic cancel and MP4 destination results. It
+checks that cancel never contacts the local receiver and that the completed
+recording has the same encoded packet hashes as the local RTMPS stream.

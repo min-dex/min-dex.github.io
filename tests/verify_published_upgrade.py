@@ -15,7 +15,8 @@ from cleanup_desktop_ci import remove_completed_tree
 BASE = 'https://github.com/min-dex/min-dex.github.io/releases/download/'
 SOURCES = {'1.0.0': 'c61f6a84e82d0ec81d102ca4e4947536eae853aa',
            '1.0.1': '37d12af3f619b3c4c71a16d070c8ca861a8e28c4',
-           '1.0.2': 'd66c40c5cff97ce734bb323edea67d0c16f722e4'}
+           '1.0.2': 'd66c40c5cff97ce734bb323edea67d0c16f722e4',
+           '1.0.4': '2976cde847676d1af2c13162deccb11ea4c0b66d'}
 
 
 def asset_record(receipt, version, target):
