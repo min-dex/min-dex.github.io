@@ -240,16 +240,16 @@ def main():
                     second.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof safeStorageGet === "function" && !document.body.classList.contains("ui-booting")');assert second.evaluate(INIT)
                     assert second.evaluate("safeStorageGet('local','mindex.theme')")=='dark'
                     assert second.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")==''
-                    # Controller scale is a per-profile value even against the same project/server.
-                    page.evaluate("async()=>{setPresenterThumbScale('1.5');await MINDEX_SERVER_STORAGE.flush()}")
-                    assert second.evaluate("readPresenterThumbScale()")=='1'
-                    second.evaluate("async()=>{setPresenterThumbScale('2');await MINDEX_SERVER_STORAGE.flush()}")
-                    assert page.evaluate("readPresenterThumbScale()")=='1.5'
+                    # Controller column count is a per-profile value even against the same project/server.
+                    page.evaluate("async()=>{setPresenterThumbColumns('2');await MINDEX_SERVER_STORAGE.flush()}")
+                    assert second.evaluate("readPresenterThumbColumns()")=='3'
+                    second.evaluate("async()=>{setPresenterThumbColumns('1');await MINDEX_SERVER_STORAGE.flush()}")
+                    assert page.evaluate("readPresenterThumbColumns()")=='2'
                     assert page.evaluate("state.scriptures[0].body==='New edit before recovery' && state.dirty.scripture")
                     second.reload(wait_until='domcontentloaded')
-                    second.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof readPresenterThumbScale === "function" && !document.body.classList.contains("ui-booting")')
+                    second.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof readPresenterThumbColumns === "function" && !document.body.classList.contains("ui-booting")')
                     assert second.evaluate(INIT)
-                    assert second.evaluate("readPresenterThumbScale()")=='2'
+                    assert second.evaluate("readPresenterThumbColumns()")=='1'
                     assert not any(r['p_scope']=='shared' and r['p_key']=='mindex.ui.presenterThumbScale' for r in requests)
                     print('PASS',engine,'hidden recovery UI, archived drafts preserved, offline retry, reload and private/shared profile boundary')
                     other.close();context.close()

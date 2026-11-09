@@ -92,8 +92,8 @@ try:
         pane.scrollTop=0;window.scrollTo(0,0);
       }""")
       if width >= 1000:
-       for scale in ('1','1.5','2'):
-        page.locator('[data-presenter-thumb-scale="'+scale+'"]').click()
+       for columns in ('1','2','3'):
+        page.locator('[data-presenter-thumb-columns="'+columns+'"]').click()
         page.evaluate("async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}")
         page.evaluate("""()=>{
           restorePresenterViewportSnapshot(capturePresenterViewportSnapshot(state.selectedServiceId));

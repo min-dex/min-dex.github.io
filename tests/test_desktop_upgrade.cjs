@@ -154,7 +154,10 @@ async function main(){
    }
    const actual=Object.fromEntries(Object.keys(values).map(key=>[key,storage.getItem('local',key)]));
    for(const key in values)if(actual[key]!==values[key])throw Error('Raw fixture mismatch: '+key);
-   if(readPresenterThumbScale()!=='1.5')throw Error('Controller scale recovery mismatch');
+   const columns = typeof readPresenterThumbColumns === 'function' ? readPresenterThumbColumns() : null;
+   if(columns === null ? readPresenterThumbScale() !== '1.5' : columns !== '2') {
+    throw Error('Controller slide view recovery mismatch');
+   }
    const restored=JSON.parse(actual[Object.keys(values)[0]]);
    if(restored.value.items[0].raw_body!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
    return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:restored.value.items[0].raw_body,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};

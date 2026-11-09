@@ -1,4 +1,4 @@
-"""Controller slide size setting: applies to the board only, persists, and never reaches the output window."""
+"""Controller slide column setting: applies to the board only, persists, and never reaches the output window."""
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright, prepare_server_state_fixture
 
 
@@ -12,69 +12,76 @@ def main():
                 page = ctx.new_page()
                 page.route('**/*supabase*/**', lambda r: r.abort())
                 page.goto(url, wait_until='domcontentloaded')
-                page.wait_for_function("typeof setPresenterThumbScale === 'function'")
+                page.wait_for_function("typeof setPresenterThumbColumns === 'function'")
                 prepare_server_state_fixture(page)
                 print(engine, page.evaluate('''async () => {
                   const check=(v,m)=>{if(!v)throw Error(m)};
                   const host=document.createElement('div'); host.id='scale-host';
-                  host.innerHTML=renderPresenterThumbScaleControl()+'<div class="svc-board-grid" id="g" style="display:block"><i id="probe" style="display:block;height:1px;width:var(--svc-thumb-width)"></i></div>';
+                  const slide={layout:'blank',type:'blank'};
+                  const slides=Array.from({length:5},(_,index)=>renderPresenterSlideThumb(slide,index,-1,'fixture')).join('');
+                  host.innerHTML=renderPresenterThumbColumnsControl()+'<div class="svc-board-grid" id="g">'+slides+'</div>';
                   document.body.append(host); bindDetailInteractionRoot(host);
                   const input=document.createElement('input');input.value='미저장 입력';host.append(input);input.focus();input.setSelectionRange(1,3);
                   const outputBefore=JSON.stringify(state.presenter);
-                  const buttons=[...host.querySelectorAll('[data-presenter-thumb-scale]')];
-                  check(buttons.length===3 && buttons[0].getAttribute('aria-pressed')==='true','default is 기본');
-                  const width=()=>document.getElementById('probe').getBoundingClientRect().width;
-                  check(width()===184,'base width '+width());
+                  const buttons=[...host.querySelectorAll('[data-presenter-thumb-columns]')];
+                  check(buttons.map(b=>b.textContent).join()==='1단,2단,3단','column labels');
+                  check(buttons[2].getAttribute('aria-pressed')==='true','default is three columns');
                   buttons[1].click();await MINDEX_SERVER_STORAGE.flush();
-                  check(document.documentElement.dataset.thumbScale==='1.5','click applies');
-                  check(Math.abs(width()-184*1.5)<0.01,'scaled width '+width());
-                  check(safeStorageGet('local', STORAGE.presenterThumbScale)==='1.5','persisted '+JSON.stringify(safeStorageGet('local', STORAGE.presenterThumbScale)));
+                  check(document.documentElement.dataset.thumbColumns==='2','click applies');
+                  check(safeStorageGet('local', STORAGE.presenterThumbScale)==='1.5','compatible device preference');
                   check(buttons.map(b=>b.getAttribute('aria-pressed')).join()==='false,true,false','pressed state follows');
-                  check(readPresenterThumbScale()==='1.5','read back');
-                  for(const old of ['1.3','1.6']) { safeStorageSet('local', STORAGE.presenterThumbScale,old); await MINDEX_SERVER_STORAGE.flush(); check(readPresenterThumbScale()==='1.5','legacy scale'); }
-                  safeStorageSet('local', STORAGE.presenterThumbScale,'9');await MINDEX_SERVER_STORAGE.flush();
-                  check(readPresenterThumbScale()==='1','invalid stored value falls back');
-                  applyPresenterThumbScale('nope');
-                  check(document.documentElement.dataset.thumbScale==='1','invalid key falls back');
-                  const board=document.getElementById('g');board.style.display='grid';board.style.width='900px';
-                  board.innerHTML='<div class="svc-slide-thumb-wrap"><div class="svc-slide-thumb" style="aspect-ratio:16/9"></div></div>';
-                  for(const scale of ['1','1.5','2']) {
-                    setPresenterThumbScale(scale);
-                    const frame=board.querySelector('.svc-slide-thumb').getBoundingClientRect();
-                    check(Math.abs(frame.width-184*Number(scale))<1,'actual frame width '+frame.width);
-                    check(Math.abs(frame.width/frame.height-16/9)<0.02,'actual ratio');
+                  for(const [old,columns] of [['1','3'],['1.3','2'],['1.5','2'],['1.6','2'],['2','1'],['9','3']]) {
+                    safeStorageSet('local', STORAGE.presenterThumbScale,old);await MINDEX_SERVER_STORAGE.flush();
+                    check(readPresenterThumbColumns()===columns,'legacy preference '+old);
                   }
-                  board.style.width='160px';setPresenterThumbScale('2');
-                  check(board.scrollWidth>board.clientWidth && board.querySelector('.svc-slide-thumb').getBoundingClientRect().width===368,'narrow board shrinks frame');
-                  const probe=document.createElement('i');probe.id='probe';probe.style.cssText='display:block;height:1px;width:var(--svc-thumb-width)';board.append(probe);
+                  check(applyPresenterThumbColumns('nope')==='3','invalid selection falls back');
+                  const board=document.getElementById('g');
                   const focus=document.createElement('section');focus.id='servicePresenterControls';focus.dataset.focusView='true';
-                  focus.innerHTML='<div class="svc-slide-board"><div class="svc-slide-thumb-wrap"><div class="svc-slide-thumb" style="aspect-ratio:16/9"></div></div></div>';host.append(focus);
-                  for(const scale of ['1','1.5','2']) { setPresenterThumbScale(scale);const frame=focus.querySelector('.svc-slide-thumb').getBoundingClientRect();check(Math.abs(frame.width-184*Number(scale))<1,'focus frame width');check(Math.abs(frame.width/frame.height-16/9)<0.02,'focus ratio'); }
+                  focus.innerHTML='<div class="svc-slide-board">'+slides+'</div>';host.append(focus);
+                  const strip=focus.firstElementChild;
+                  const rects=root=>[...root.querySelectorAll('.svc-slide-thumb-wrap')].map(node=>node.getBoundingClientRect());
+                  for(const width of [900, 460, 220]) {
+                    board.style.width=strip.style.width=width+'px';
+                    for(const columns of [1,2,3]) {
+                      setPresenterThumbColumns(String(columns));
+                      for(const [surface,gap] of [[board,12],[strip,10]]) {
+                        const thumbs=rects(surface), first=thumbs.slice(0,columns);
+                        const frame=surface.querySelector('.svc-slide-thumb-frame').getBoundingClientRect();
+                        check(Math.abs(frame.width/frame.height-16/9)<0.02,'thumbnail aspect ratio');
+                        check(Math.abs(first.at(-1).right-surface.getBoundingClientRect().right)<1,'row fills width');
+                        check(thumbs.every(t=>Math.abs(t.width-first[0].width)<1),'equal slide widths');
+                        check(first.slice(1).every((t,i)=>Math.abs(t.left-first[i].right-gap)<1),'fixed gap');
+                        if(surface===board) {
+                          check(thumbs[columns].top>first[0].top,'wrap at selected column count');
+                          check(Math.abs(thumbs.at(-1).left-first[(thumbs.length-1)%columns].left)<1,'last row stays aligned');
+                          check(surface.scrollWidth<=surface.clientWidth,'board overflows');
+                        } else {
+                          check(thumbs.every(t=>Math.abs(t.top-first[0].top)<1),'filmstrip stays on one row');
+                          check(surface.scrollWidth>surface.clientWidth,'filmstrip remains scrollable');
+                        }
+                      }
+                    }
+                  }
                   check(input.isConnected && document.activeElement===input && input.value==='미저장 입력' && input.selectionStart===1 && input.selectionEnd===3,'editor focus/input changed');
                   check(JSON.stringify(state.presenter)===outputBefore,'output model changed');
                   return 'PASS';
-                }'''), 'controls, scaling, persistence, fallback', flush=True)
-                # narrow breakpoints keep the multiplier
-                for w, base in [(1100, 168), (700, 148)]:
-                    page.set_viewport_size({'width': w, 'height': 800})
-                    got = page.evaluate('''() => { setPresenterThumbScale('1.5'); return document.getElementById('probe').getBoundingClientRect().width; }''')
-                    assert abs(got - base * 1.5) < 0.01, (w, got)
-                page.evaluate("setPresenterThumbScale('2')")
+                }'''), 'controls, equal columns, fixed gaps, persistence', flush=True)
+                page.evaluate("setPresenterThumbColumns('2')")
                 # A fresh controller load restores it; the output window never applies it.
                 page.evaluate("MINDEX_SERVER_STORAGE.flush()")
                 page.reload(wait_until='domcontentloaded')
-                page.wait_for_function("typeof readPresenterThumbScale === 'function'")
+                page.wait_for_function("typeof readPresenterThumbColumns === 'function'")
                 prepare_server_state_fixture(page)
-                page.evaluate("applyPresenterThumbScale(readPresenterThumbScale())")
-                assert page.evaluate("document.documentElement.dataset.thumbScale") == '2', 'restored on reload'
+                page.evaluate("applyPresenterThumbColumns(readPresenterThumbColumns())")
+                assert page.evaluate("document.documentElement.dataset.thumbColumns") == '2', 'restored on reload'
                 out = ctx.new_page()
                 out.route('**/*supabase*/**', lambda r: r.abort())
                 out.goto(url + '?output=presenter', wait_until='domcontentloaded')
                 out.wait_for_function("typeof renderPresenterOutput === 'function'")
                 out.wait_for_timeout(300)
-                assert out.evaluate("document.documentElement.dataset.thumbScale || ''") == '', 'output window must not get the controller scale'
-                assert out.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--svc-thumb-scale').trim()") == '', 'output scale var'
-                print(engine, 'PASS restore on reload, breakpoints, output window untouched', flush=True)
+                assert out.evaluate("document.documentElement.dataset.thumbColumns || ''") == '', 'output window must not get the controller columns'
+                assert out.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--svc-thumb-columns').trim()") == '', 'output columns var'
+                print(engine, 'PASS restore on reload, output window untouched', flush=True)
                 browser.close()
     finally:
         server.shutdown()

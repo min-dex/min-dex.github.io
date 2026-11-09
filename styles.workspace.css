@@ -4068,13 +4068,10 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 .svc-slide-form-badge:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .svc-board-grid {
   display: grid;
-  --svc-thumb-width: calc(184px * var(--svc-thumb-scale, 1));
   --svc-thumb-ring-space: 4px;
-  --svc-thumb-wrap-min-width: calc(var(--svc-thumb-width) + (var(--svc-thumb-ring-space) * 2));
   width: 100%;
   min-width: 0;
-  grid-template-columns: repeat(auto-fill, var(--svc-thumb-wrap-min-width));
-  justify-content: space-between;
+  grid-template-columns: repeat(var(--svc-thumb-columns, 3), minmax(0, 1fr));
   gap: 12px;
   max-width: 100%;
   overflow-x: auto;
@@ -4706,9 +4703,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 @media (max-width: 1180px) {
   .service-dashboard { grid-template-columns: minmax(0, 1fr); }
-  .svc-board-grid {
-    --svc-thumb-width: calc(168px * var(--svc-thumb-scale, 1));
-  }
   body.right-sidebar-open { --right-sidebar-w: 324px; }
   .svc-presenter-main {
     width: max-content;
@@ -4758,9 +4752,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 }
 
 @media (max-width: 760px) {
-  .svc-board-grid {
-    --svc-thumb-width: calc(148px * var(--svc-thumb-scale, 1));
-  }
   .svc-presenter-main,
   .svc-presenter-action-group {
     border-radius: var(--r);
@@ -5766,11 +5757,12 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
 #servicePresenterControls[data-focus-view="true"] .svc-board-subgroup-head-row > :not(.svc-board-subgroup-head) { display: none; }
 #servicePresenterControls[data-focus-view="true"] .svc-slide-board {
   --svc-thumb-ring-space: 4px;
-  --svc-focus-thumb-width: calc(184px * var(--svc-thumb-scale, 1) + 8px);
+  --svc-focus-thumb-gap: 10px;
+  --svc-focus-thumb-width: calc((100% + var(--svc-focus-thumb-gap)) / var(--svc-thumb-columns, 3) - var(--svc-focus-thumb-gap));
   display: flex;
   flex-wrap: nowrap;
   align-items: flex-start;
-  gap: 10px;
+  gap: var(--svc-focus-thumb-gap);
   min-width: 0;
   max-width: 100%;
   padding: 5px 0 10px;
@@ -5792,7 +5784,7 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   width: var(--svc-focus-thumb-width);
 }
 #servicePresenterControls[data-focus-view="true"] .svc-board-section--deferred {
-  flex: 0 0 calc(var(--svc-deferred-slide-count) * (var(--svc-focus-thumb-width) + 10px) - 10px);
+  flex: 0 0 calc(var(--svc-deferred-slide-count) * (var(--svc-focus-thumb-width) + var(--svc-focus-thumb-gap)) - var(--svc-focus-thumb-gap));
   min-height: 130px;
   height: 130px;
   overflow: hidden;

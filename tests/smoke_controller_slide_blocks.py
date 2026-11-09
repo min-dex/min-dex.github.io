@@ -133,23 +133,21 @@ try:
          if(!(b.left>a.right || b.top>a.bottom))throw Error('same-color blocks joined');
        }
        const grid=document.getElementById('blocks');
-       for (const scale of [1, 1.5, 2]) {
-         grid.style.setProperty('--svc-thumb-scale', scale);
+       for (const cols of [1, 2, 3]) {
+         grid.style.setProperty('--svc-thumb-columns', cols);
          const origin=grid.getBoundingClientRect();
          const thumbs=[...grid.querySelectorAll('.svc-slide-thumb-wrap')].map(node=>node.getBoundingClientRect());
-         const gap=parseFloat(getComputedStyle(grid).columnGap);
-         const cols=Math.max(1, Math.floor((origin.width+gap+0.1)/(thumbs[0].width+gap)));
          const first=thumbs.slice(0, cols);
          if (first.some(rect=>Math.abs(rect.top-first[0].top)>1)
            || (thumbs[cols] && thumbs[cols].top<=first[0].top)) throw Error('column count changed');
-         if (cols>1 && Math.abs(first.at(-1).right-origin.right)>1) throw Error('full row leaves unused right space');
+         if (Math.abs(first.at(-1).right-origin.right)>1) throw Error('full row leaves unused right space');
          for (const [index, rect] of thumbs.entries()) {
            if (Math.abs(rect.left-first[index%cols].left)>1 || Math.abs(rect.width-first[0].width)>1) {
-             throw Error('short row or fixed thumbnail width changed');
+             throw Error('short row or column alignment changed');
            }
          }
        }
-       grid.style.removeProperty('--svc-thumb-scale');
+       grid.style.removeProperty('--svc-thumb-columns');
        for(const meta of grid.querySelectorAll('.svc-slide-thumb-meta')) {
          const number=meta.querySelector('.svc-slide-thumb-no'), badge=meta.querySelector('.svc-slide-form-badge');
          const nr=number.getBoundingClientRect(), mr=meta.getBoundingClientRect();

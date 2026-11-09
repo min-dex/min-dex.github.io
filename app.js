@@ -736,7 +736,7 @@ async function init() {
   refreshIcons();
   applyRuntimePlatformClass();
   applyTheme(readTheme());
-  applyPresenterThumbScale(readPresenterThumbScale());
+  applyPresenterThumbColumns(readPresenterThumbColumns());
   const linkParams = readLinkParams();
   state.config = readConfig(linkParams);
   const legacyProject = safeStorageGet("local", STORAGE.url, "");
@@ -744,7 +744,7 @@ async function init() {
   if (state.client) {
     await window.MINDEX_SERVER_STORAGE.initialize(state.client, state.config.url, {legacyProject, prepare: prepareLegacyServerValue});
     applyTheme(readTheme());
-    applyPresenterThumbScale(readPresenterThumbScale());
+    applyPresenterThumbColumns(readPresenterThumbColumns());
     pendingSundayEditSync.clear();
     for (const [key, value] of readPendingSundayEditSync()) pendingSundayEditSync.set(key, value);
     state.serviceMusic.fadeStopEnabled = safeStorageGet("local", "mindex.music.fadeStop", "true") === "true";
@@ -761,7 +761,7 @@ async function init() {
   initializeDepartmentTabSync();
   const hydrateServerPreferences = () => {
     applyTheme(readTheme());
-    applyPresenterThumbScale(readPresenterThumbScale());
+    applyPresenterThumbColumns(readPresenterThumbColumns());
     state.worshipBackgroundRegistry = readWorshipBackgroundRegistry();
     state.serviceMusic.fadeStopEnabled = safeStorageGet("local", "mindex.music.fadeStop", "true") === "true";
   };
@@ -2213,43 +2213,39 @@ function toggleTheme() {
   applyTheme(next);
 }
 
-// Slide thumbnail size of the controller board. It is an app-level setting on purpose: browser zoom is
-// shared by every window of the site, so it would resize the output window too.
-const PRESENTER_THUMB_SCALES = [
-  { key: "1", label: "기본" },
-  { key: "1.5", label: "크게" },
-  { key: "2", label: "가장 크게" },
-];
+// Keep the existing device storage tokens so the preference survives upgrades.
+const PRESENTER_THUMB_COLUMNS = { "1": "2", "2": "1.5", "3": "1" };
 
-function readPresenterThumbScale() {
-  const previous = safeStorageGet("local", STORAGE.presenterThumbScale);
-  const saved = ["1.3", "1.6"].includes(previous) ? "1.5" : previous;
-  return PRESENTER_THUMB_SCALES.some((scale) => scale.key === saved) ? saved : "1";
+function readPresenterThumbColumns() {
+  const saved = safeStorageGet("local", STORAGE.presenterThumbScale);
+  if (["1.3", "1.6"].includes(saved)) return "2";
+  return Object.keys(PRESENTER_THUMB_COLUMNS).find((columns) =>
+    PRESENTER_THUMB_COLUMNS[columns] === saved) || "3";
 }
 
-function applyPresenterThumbScale(key) {
-  const value = PRESENTER_THUMB_SCALES.some((scale) => scale.key === key) ? key : "1";
-  document.documentElement.style.setProperty("--svc-thumb-scale", value);
-  document.documentElement.dataset.thumbScale = value;
+function applyPresenterThumbColumns(columns) {
+  const value = Object.hasOwn(PRESENTER_THUMB_COLUMNS, columns) ? columns : "3";
+  document.documentElement.style.setProperty("--svc-thumb-columns", value);
+  document.documentElement.dataset.thumbColumns = value;
   return value;
 }
 
-function setPresenterThumbScale(key) {
-  const value = applyPresenterThumbScale(key);
-  safeStorageSet("local", STORAGE.presenterThumbScale, value);
-  document.querySelectorAll("[data-presenter-thumb-scale]").forEach((button) => {
-    button.setAttribute("aria-pressed", String(button.dataset.presenterThumbScale === value));
+function setPresenterThumbColumns(columns) {
+  const value = applyPresenterThumbColumns(columns);
+  safeStorageSet("local", STORAGE.presenterThumbScale, PRESENTER_THUMB_COLUMNS[value]);
+  document.querySelectorAll("[data-presenter-thumb-columns]").forEach((button) => {
+    button.setAttribute("aria-pressed", String(button.dataset.presenterThumbColumns === value));
   });
   schedulePresenterPreviewLayoutUpdate(document);
 }
 
-function renderPresenterThumbScaleControl() {
-  const current = document.documentElement.dataset.thumbScale || readPresenterThumbScale();
+function renderPresenterThumbColumnsControl() {
+  const current = document.documentElement.dataset.thumbColumns || readPresenterThumbColumns();
   return `
-    <div class="svc-board-scale" role="group" aria-label="보기 배율">
-      <span class="svc-board-scale-icon" title="보기 배율 · 송출 화면에는 적용되지 않아요" aria-hidden="true"><i data-lucide="layout-grid"></i></span>
-      ${PRESENTER_THUMB_SCALES.map((scale) => `
-        <button type="button" data-presenter-thumb-scale="${scale.key}" aria-label="보기 배율 ${Math.round(Number(scale.key) * 100)}%" title="보기 배율 ${Math.round(Number(scale.key) * 100)}%" aria-pressed="${scale.key === current ? "true" : "false"}">${Math.round(Number(scale.key) * 100)}%</button>`).join("")}
+    <div class="svc-board-scale" role="group" aria-label="슬라이드 보기 단수">
+      <span class="svc-board-scale-icon" title="슬라이드 보기 단수 · 송출 화면에는 적용되지 않아요" aria-hidden="true"><i data-lucide="layout-grid"></i></span>
+      ${Object.keys(PRESENTER_THUMB_COLUMNS).map((columns) => `
+        <button type="button" data-presenter-thumb-columns="${columns}" aria-label="슬라이드 보기 ${columns}단" title="슬라이드 보기 ${columns}단" aria-pressed="${columns === current}">${columns}단</button>`).join("")}
     </div>`;
 }
 
@@ -9058,11 +9054,11 @@ function handlePresenterDetailClick(event) {
     return true;
   }
 
-  const thumbScale = event.target.closest("[data-presenter-thumb-scale]");
-  if (thumbScale) {
+  const thumbColumns = event.target.closest("[data-presenter-thumb-columns]");
+  if (thumbColumns) {
     event.preventDefault();
     event.stopPropagation();
-    setPresenterThumbScale(thumbScale.dataset.presenterThumbScale);
+    setPresenterThumbColumns(thumbColumns.dataset.presenterThumbColumns);
     return true;
   }
 
@@ -25893,7 +25889,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
           </div>
           ${renderPresenterToolbarScripture(service, slides)}
           <div class="svc-presenter-toolbar-end">
-            ${renderPresenterThumbScaleControl()}
+            ${renderPresenterThumbColumnsControl()}
             ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
             <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
               ${renderServiceMusicPlayer()}
