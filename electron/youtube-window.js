@@ -1,8 +1,9 @@
-const {app,BrowserWindow,ipcMain} = require('electron');
+const {app,BrowserWindow,ipcMain,dialog} = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const {pathToFileURL} = require('node:url');
 const {startEncoder} = require('./youtube-engine');
+const {bitrate} = require('./youtube-profile');
 const entry = path.join(app.getAppPath(),'tools/broadcast-prototype/index.html');
 const expected = pathToFileURL(entry).href;
 let panel, owner, encoder;
@@ -15,6 +16,18 @@ ipcMain.handle('mindex:youtube',async (event,action,value) => {
     if (owner) throw Error('송출이 진행 중입니다.');
     const token = owner = new AbortController();
     try {
+      const options = typeof value === 'string' ? {key:value} : value;
+      if (!options || typeof options !== 'object') throw Error('송출 설정을 확인해 주세요.');
+      const bitrateKbps = bitrate(options.bitrateKbps);
+      let recordingPath;
+      if (options.record === true) {
+        const chosen = await dialog.showSaveDialog(panel,{title:'송출과 같은 품질로 녹화',
+          defaultPath:path.join(app.getPath('videos'),'Mindex-'+new Date().toISOString().replace(/[:.]/g,'-')+'.mp4'),
+          filters:[{name:'MP4 녹화',extensions:['mp4']}]});
+        token.signal.throwIfAborted();
+        if (chosen.canceled || !chosen.filePath) { cancel(); return {cancelled:true}; }
+        recordingPath = chosen.filePath;
+      }
       let destination;
       if (require('../package.json').mindexTestBuild === true || globalThis.__mindexTestIsolation) {
         const port = Number(process.env.MINDEX_QA_RTMPS_PORT);
@@ -22,13 +35,13 @@ ipcMain.handle('mindex:youtube',async (event,action,value) => {
         destination = {host:'127.0.0.1',servername:'localhost',port,ca:fs.readFileSync(process.env.MINDEX_QA_RTMPS_CA)};
       }
       const exe = path.join(process.resourcesPath,'broadcast-engine',process.platform === 'win32'?'ffmpeg.exe':'ffmpeg');
-      const run = await startEncoder({exe,key:value,destination,signal:token.signal,onState(state) {
+      const run = await startEncoder({exe,key:options.key,bitrateKbps,recordingPath,destination,signal:token.signal,onState(state) {
         if (owner !== token) return;
         panel.webContents.send('mindex:youtube-state',state);
         if (state !== 'live') { owner = null; encoder = null; }
       }});
       if (owner === token) encoder = run;
-      return;
+      return {recording:recordingPath?path.basename(recordingPath):null};
     } catch { if (owner === token) cancel(); throw Error('방송 연결을 열지 못했습니다.'); }
   }
   if (action === 'abort') { cancel(); return; }

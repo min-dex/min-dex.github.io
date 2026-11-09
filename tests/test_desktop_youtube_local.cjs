@@ -87,6 +87,10 @@ async function main() {
     await panel.locator('#text').fill('기쁨으로 함께 예배해요');
     await panel.locator('#apply').click();
     await panel.waitForFunction(()=>window.broadcastPrototype?.stats().source==='file');
+    assert.equal(await panel.locator('#ytBitrate').inputValue(),'14000');
+    assert(await panel.locator('#ytRecord').isChecked());
+    assert.deepEqual(await panel.locator('#broadcast').evaluate(c=>[c.width,c.height]),[1920,1080]);
+    await panel.locator('#ytRecord').uncheck();
     await panel.locator('#ytKey').fill(key);
     assert.equal(publishes,0);
     await panel.locator('#ytStart').click();

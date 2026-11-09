@@ -11,22 +11,25 @@ const desktop=Boolean(window.youtubeOutput);
 for(const control of document.querySelectorAll('[data-demo-only]')) control.hidden=desktop;
 const canvas=$('program'),ctx=canvas.getContext('2d',{alpha:false});
 const broadcast=$('broadcast'),broadcastCtx=broadcast.getContext('2d',{alpha:false}),outputPolicy=createOutputPolicy(),exclusions=new Map();
+const outputWidth=desktop?1920:1280,outputHeight=desktop?1080:720,outputScale=outputWidth/1280;
+for(const c of [canvas,broadcast]){c.width=outputWidth;c.height=outputHeight;c.getContext('2d').scale(outputScale,outputScale);}
 let routeKey='sample:0',audioContext=null,audioBuses=null,hallAudio=null,broadcastAudio=null;
 function paintRoute(){const policy=outputPolicy.read();audioBuses?.apply(policy);captureInput?.applyPolicy();if(!policy.broadcast)drawBroadcast(broadcastCtx,canvas,policy);$('routeStatus').textContent=`${policy.broadcast?'유튜브 송출 허용':policy.reason} · 본당 화면 유지 · 유튜브 음성 ${policy.broadcast?'허용 경로':'차단 경로'}`;$('excludeBroadcast').setAttribute('aria-pressed',String(policy.manual));$('excludeBroadcast').textContent=policy.manual?'수동 제외 해제':'방송 제외';}
 function routeSlide(key,value=false){const wasExcluded=outputPolicy.read().excluded;routeKey=key;outputPolicy.setExcluded(exclusions.has(key)?exclusions.get(key):value===true);$('excludeSlide').checked=outputPolicy.read().excluded;if(wasExcluded&&!outputPolicy.read().excluded)captionTransition.set(emptyCaption,{immediate:true});paintRoute();}
 $('excludeBroadcast').onclick=()=>{outputPolicy.setManual(!outputPolicy.read().manual);paintRoute();};
 $('excludeSlide').onchange=()=>{exclusions.set(routeKey,$('excludeSlide').checked);outputPolicy.setExcluded($('excludeSlide').checked);paintRoute();};
-const layer=document.createElement('canvas');layer.width=1280;layer.height=720;
-const ink=layer.getContext('2d'),captionTransition=createCaptionTransition();
-const hallLayer=document.createElement('canvas');hallLayer.width=1280;hallLayer.height=720;
-const hallInk=hallLayer.getContext('2d'),hallTransition=createCaptionTransition();
+const layer=document.createElement('canvas');layer.width=outputWidth;layer.height=outputHeight;
+const ink=layer.getContext('2d'),captionTransition=createCaptionTransition({width:outputWidth,height:outputHeight});
+const hallLayer=document.createElement('canvas');hallLayer.width=outputWidth;hallLayer.height=outputHeight;
+const hallInk=hallLayer.getContext('2d'),hallTransition=createCaptionTransition({width:outputWidth,height:outputHeight});
+ink.scale(outputScale,outputScale);hallInk.scale(outputScale,outputScale);
 let lyrics=null;
-const emptyCaption=document.createElement('canvas');emptyCaption.width=1280;emptyCaption.height=720;
+const emptyCaption=document.createElement('canvas');emptyCaption.width=outputWidth;emptyCaption.height=outputHeight;
 let blackScreen=false,sourceBlack=false,manualCaptionHidden=false;
 function caption(options){buildCaption();captionTransition.set(layer,options);
  hallInk.clearRect(0,0,1280,720);
  if(lyrics!==null&&visible&&!manualCaptionHidden&&mode!=='camera')drawLyrics(hallInk,lyrics,true);
- else hallInk.drawImage(layer,0,0);
+ else hallInk.drawImage(layer,0,0,1280,720);
  hallTransition.set(hallLayer,options);$('clear').textContent=manualCaptionHidden?'자막 표시':'자막 숨김';}
 function setBlack(value){blackScreen=value;syncBlack();}
 function syncBlack(){$('black').disabled=sourceBlack;$('black').setAttribute('aria-pressed',String(blackScreen||sourceBlack));$('black').textContent=sourceBlack?'송출 암전':blackScreen?'암전 해제':'암전';}
@@ -108,9 +111,9 @@ function render(now,schedule=true){if(disposed)return;frame++;if(!paused)ticks++
  if(blackScreen||sourceBlack){ctx.fillStyle='#000';ctx.fillRect(0,0,1280,720);drawBroadcast(broadcastCtx,canvas,policy);}
  else{
   drawBroadcast(broadcastCtx,canvas,policy);
-  if(policy.broadcast)broadcastCtx.drawImage(captionTransition.draw(now),0,0);
-  ctx.drawImage(hallTransition.draw(now),0,0);
- }if(now-last>=1000){$('metrics').textContent=`${Math.round(frame*1000/(now-last))} fps · 1280 × 720`;frame=0;last=now;}if(schedule)raf=requestAnimationFrame(render);
+  if(policy.broadcast)broadcastCtx.drawImage(captionTransition.draw(now),0,0,1280,720);
+  ctx.drawImage(hallTransition.draw(now),0,0,1280,720);
+ }if(now-last>=1000){$('metrics').textContent=`${Math.round(frame*1000/(now-last))} fps · ${outputWidth} × ${outputHeight}`;frame=0;last=now;}if(schedule)raf=requestAnimationFrame(render);
 }
 function applyFollowedText(title,text){slide={title:String(title||''),text:String(text||'')};}
 function setSlide(value){lyrics=value.type==='lyrics'?String(value.text||''):null;routeSlide('sample:'+sample,value.broadcastExcluded);outputPolicy.setPending(false);paintRoute();frameGeneration++;importedImage=null;importedFrames=[];$('slideList').disabled=true;slide={title:String(value.title||'').slice(0,120),text:String(value.text||'').slice(0,2000)};visible=true;caption();}

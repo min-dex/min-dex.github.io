@@ -1752,3 +1752,14 @@ ID검사cache 소스·검증(bcb04765), 최신코드/테스트 운영규칙(88f5
 새 inline 실제충돌 회귀, font cache72cases, runtime/solid/governance PASS.
 final gate 이후 범위 추가 금지. 운영 DB 신규쓰기/실재생/송출/인쇄 없음.
 필수4shard·동일SHA main/Pages·공개파일/UI 검증 전 완료 보고 금지.
+
+
+## 2026-11-09 방송 1080p·동일 품질 녹화 소스 후보
+
+- 브랜치 `codex/broadcast-1080-recording`, 작업 경로 `/private/tmp/mindex-broadcast-1080`.
+- 1080p30 / H.264 CBR 14 Mbps / GOP 60, 비트레이트 5–30 Mbps 조절·유지.
+- 설치 앱 캡처 요청·합성 캔버스 1080p, 브라우저 중간 VP8 비트레이트 증가.
+- 선택형 MP4 녹화 기본 켬, 저장 대화상자 취소 시 방송 미시작. H.264/AAC 인코딩 결과를 파일과 RTMP remuxer가 공유.
+- 세부 계약·검사 명령은 `docs/youtube-desktop-candidate.md` 마지막 절.
+- 공개 배포·설치 앱 교체·실제 교회 채널 송출은 수행하지 않음. 전체 필수 CI 및 플랫폼 패키지 acceptance 통과 전 배포 완료로 표시하지 말 것.
+- 로컬 검증 통과: 프로필·격리·업데이트 단위 11개, 합성 브라우저 1080p 자막/비트레이트/저장 취소/녹화 종료, TLS 수신 MP4↔FLV 패킷 해시 일치·GOP 60·녹화 끔·18 Mbps·단절 정리. 전체 Cloud gate와 packaged acceptance는 아직 실행하지 않음.

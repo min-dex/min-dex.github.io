@@ -8,6 +8,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_youtube_profile.cjs",
     "test_product_identity.cjs",
     "test_internal_updater.cjs",
     "test_desktop_update_ui.cjs",

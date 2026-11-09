@@ -25,7 +25,9 @@
     "electron:release:win": "node scripts/release-electron.mjs --platform=win",
     "electron:test:mac": "node scripts/verify-release.mjs --offline && electron-builder --config electron-builder.test.cjs --mac dmg --arm64 --x64 --publish never",
     "electron:test:win": "node scripts/verify-release.mjs --offline && electron-builder --config electron-builder.test.cjs --win nsis --x64 --publish never",
-    "product:check": "node --test tests/test_product_identity.cjs"
+    "product:check": "node --test tests/test_product_identity.cjs",
+    "test:broadcast:profile": "node --test tests/test_youtube_profile.cjs && node tests/test_broadcast_profile_browser.cjs",
+    "test:broadcast:engine": "node tests/test_youtube_engine_local.cjs"
   },
   "build": {
     "appId": "kr.mindex.app",

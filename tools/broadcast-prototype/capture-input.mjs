@@ -34,7 +34,7 @@ export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=docu
   if(busy||stream)return;if(!$('captureVideo').value){status('영상 장치를 먼저 선택하세요.');return;}
   busy=true;controls();const own=++epoch;let acquired=null;
   try{
-   acquired=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:$('captureVideo').value},width:{ideal:1280},height:{ideal:720},frameRate:{ideal:30}},audio:$('captureAudio').value?{deviceId:{exact:$('captureAudio').value},echoCancellation:false,noiseSuppression:false,autoGainControl:false}:false});
+   acquired=await navigator.mediaDevices.getUserMedia({video:{deviceId:{exact:$('captureVideo').value},width:{ideal:desktop?1920:1280},height:{ideal:desktop?1080:720},frameRate:{ideal:30}},audio:$('captureAudio').value?{deviceId:{exact:$('captureAudio').value},echoCancellation:false,noiseSuppression:false,autoGainControl:false}:false});
    if(disposed||own!==epoch){acquired.getTracks().forEach(t=>t.stop());return;}
    stream=acquired;onStart();video.srcObject=stream;video.muted=true;await video.play();
    if(disposed||own!==epoch)return;

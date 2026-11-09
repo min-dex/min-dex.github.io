@@ -95,7 +95,11 @@
         </details>
       </section>
       <section id="youtube" hidden aria-labelledby="outputHeading">
-        <h2 id="outputHeading">송출</h2>
+        <h2 id="outputHeading">송출·녹화</h2>
+        <p>1920 × 1080 · 30fps · H.264 · 키프레임 2초</p>
+        <label>영상 비트레이트 (Kbps)<input id="ytBitrate" type="number" min="5000" max="30000" step="1" value="14000" required></label>
+        <label class="check"><input id="ytRecord" type="checkbox" checked> 송출과 같은 품질로 녹화</label>
+        <p>시작할 때 저장할 파일을 선택합니다. 송출과 녹화는 함께 종료됩니다. 중단된 녹화는 마지막 부분을 확인해 주세요.</p>
         <label>스트림 키<input id="ytKey" type="password" autocomplete="off" spellcheck="false" required pattern="[A-Za-z0-9_\-]{6,128}" maxlength="128"></label>
         <p id="ytStatus" role="status">영상 입력 대기</p>
         <div class="row">
