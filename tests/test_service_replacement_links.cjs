@@ -76,21 +76,8 @@ console.log('PASS linked replacements preserve absence, route all three card lay
 
 assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3')).digest('hex'),'9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150','Restored dawn audio must match the verified candidate');
 
-// Lossless packet preservation: only 144 silent MP3 frames were removed.
-{
- const original = fs.readFileSync('assets/presenter/dawn-free-prayer.mp3');
- const restored = fs.readFileSync('assets/presenter/dawn-free-prayer-7838168016b7.mp3');
- assert.equal(require('node:crypto').createHash('sha256').update(original).digest('hex'), 'b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9');
- assert.deepEqual(restored.subarray(428), Buffer.concat([original.subarray(237,27630669), original.subarray(27644493)]), 'Every retained original audio packet must be byte-identical');
-}
-
-// Historical v5 source remains preserved for regression evidence, outside new packages.
-assert.equal(require("node:crypto").createHash("sha256").update(fs.readFileSync("assets/presenter/dawn-free-prayer-bac443d20c02.mp3")).digest("hex"),"bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87");
-
-// Final-only delivery must not weaken the historical source checks above.
-const packageFiles=JSON.parse(fs.readFileSync("package.json","utf8")).build.files;
-const exportRules=fs.readFileSync(".gitattributes","utf8");
-for (const name of ["assets/presenter/dawn-free-prayer-69c12c677944.mp3", "assets/presenter/dawn-free-prayer-7838168016b7.mp3", "assets/presenter/dawn-free-prayer-9b2f77451de5.mp3", "assets/presenter/dawn-free-prayer-bac443d20c02.mp3", "assets/presenter/dawn-free-prayer-f9ebf1aeed23.mp3", "assets/presenter/dawn-free-prayer.mp3"]) {
- assert.ok(packageFiles.includes("!"+name), "retired dawn source excluded from desktop: "+name);
- assert.ok(exportRules.includes(name+" export-ignore"), "retired dawn source excluded from Pages: "+name);
-}
+// The user retired all original/intermediate All Nations assets on 2026-11-09.
+// Preserve the approved final bytes and prevent any stale variant from returning.
+const dawnAssets=fs.readdirSync('assets/presenter').filter(name=>/^dawn-free-prayer.*\.mp3$/.test(name));
+assert.deepEqual(dawnAssets,['dawn-free-prayer-9b788b6e16dd.mp3']);
+assert.equal(fs.statSync('assets/presenter/'+dawnAssets[0]).size,81289196);

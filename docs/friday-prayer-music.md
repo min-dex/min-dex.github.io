@@ -40,30 +40,13 @@
   Digital validation does not certify auditory perfection or separation artifacts.
   Only `dawn.free` selects this file. Explicit user attachments and all worship
   records, timings and metadata remain unchanged.
-  Superseded dawn files remain in source solely for original/packet regression
-  evidence, but `.gitattributes` and exact desktop exclusions keep them out of
-  current website and installer artifacts. Historical assertions remain active.
-
-- Historical source regression reference only (v5, 2026-11-05; not shipped):
-  `assets/presenter/dawn-free-prayer-bac443d20c02.mp3`, 87,865,148 bytes, 3169.543625 seconds decoded,
-  stereo48kHz. SHA-256 `bac443d20c0228b70fd8df3fc5b978c6616efda0026b086d3185c524ce40ad87`.
-  Built from the first supplied original (SHA-256
-  `b8939186c2434d0280e787d02103cbfd136c77ea73b2096faa01a85ab026f7d9`).
-  User-approved scope is inter-song transitions for congregational prayer;
-  song interiors, their rests, performances and levels remain original.
-  Ten explicit boundary windows are edited; three instrumental transitions remain
-  original. No amplitude-triggered cutting, whole-file normalization, EQ or time
-  stretching. Eleven retained PCM spans including the ending exactly match source
-  before MP3 quality0 delivery encoding. Delivery is lossy, not packet-identical.
-  Rejected earlier candidates are not selected. Version5 restores the complete
-  incoming phrase at transition4 (incoming source starts882.8s), and transition3
-  ends its outgoing tail before the incoming first phrase. Complete source phrases
-  are preserved in unchanged master spans at both repaired transitions; local
-  source/output transcription is supporting evidence, not human auditory review.
-  Full decode, source preservation and player/source-isolation checks are separate
-  from release/public readback. Private maps and evidence remain outside Git.
-  Historical source is retained for regression evidence; the current default is above.
-  No worship records, audio synchronization or media links are rewritten.
+  On 2026-11-09 the user explicitly finalized MP3-only delivery and retired
+  original/intermediate All Nations audio and edit records. Only the approved
+  final asset remains in the current source tree. Its exact hash, independent
+  decoded PCM timing fingerprints, playback/seek and attachment-isolation
+  regressions remain required. Historical packet/v5 assertions are retired with
+  the obsolete assets; this does not change the current playback checks.
+  No re-encoding is performed. Existing Git history is not rewritten.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`
