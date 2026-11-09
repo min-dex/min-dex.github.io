@@ -26,7 +26,7 @@ export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=docu
  $('capturePermission').onclick=async()=>{
   if(busy||stream)return;busy=true;controls();const own=++epoch;
   try{const permission=await navigator.mediaDevices.getUserMedia({video:true,audio:true});permission.getTracks().forEach(t=>t.stop());if(own===epoch&&!disposed)await refresh();}
-  catch{if(own===epoch)status('카메라·오디오 권한을 허용하지 못했습니다. 브라우저와 시스템 설정을 확인하세요.');}
+  catch{if(own===epoch)status(desktop?'카메라·마이크 권한을 허용하지 못했습니다. 시스템 설정에서 민덱스 권한을 확인해 주세요.':'카메라·마이크 권한을 허용하지 못했습니다. 브라우저 권한을 확인해 주세요.');}
   finally{if(own===epoch){busy=false;controls();}}
  };
  $('captureRefresh').onclick=refresh;

@@ -1,16 +1,15 @@
-## 2026-11-08 church 1.0.2 candidate — not published yet
+## Church internal desktop releases · 2026-11-09
 
-Owned source: `output/desktop-audit-workspace`, `codex/native-dawn-startup`.
-User authorizes approved Dawn branding, native first-frame output reveal,
-retained worship outline during startup hydration, and fullscreen support text
-unification (80px / 700; song subtitle 600). Internal updater distinguishes public renderer parity
-from latest installer availability; never reloads or installs during worship.
-Windows icon metadata editing remains enabled while signing remains disabled.
-Actual published 1.0.0/1.0.1 -> candidate preservation is added to native CI using
-hash-verified installers and marker-owned synthetic profiles only. No real
-broadcast, production DB operation, or physical equipment certification.
-Local scoped node, Chromium/WebKit rendering/fitting/Keynote/bootstrap checks pass;
-final combined Cloud/native gates and public readback remain required.
+1.0.2 was published from `d66c40c5cff97ce734bb323edea67d0c16f722e4`.
+The public Apple Silicon, Intel and Windows installers matched their receipt
+after full download. The macOS Apple Silicon app was also installed and
+restarted with the existing profile.
+
+1.0.3 was skipped. The 1.0.4 batch covers the home overview, ready preview logo,
+fixed worship card, Windows toolbar, broadcast and sanctuary controls, and
+connection-status UI. Its isolated upgrade checks start with the published
+1.0.0, 1.0.1 and 1.0.2 installers. Publication requires the full checks and
+Pages result for the same commit.
 
 ## 2026-11-06 Church internal delivery — supersedes signing choice below
 
