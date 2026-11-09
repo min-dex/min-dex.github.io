@@ -144,6 +144,48 @@ try:
     assert isinstance(target,int) and target!=2
     row.dblclick()
     assert page.evaluate('state.presenter.index')==target
+    for height in (600,900):
+     result=page.evaluate('''height=>{
+       const service={id:'order-layout-fixture',type_id:'fixture',date:'2026-10-25',title:'다니엘기도회'};
+       const host=document.createElement('div');
+       host.className='song-list';
+       host.style.cssText=`position:fixed;top:0;left:0;width:260px;height:${height}px`;
+       document.body.append(host);
+       state.loadedWorshipServiceIds.add(service.id);
+       function layout(count){
+        state.serviceItems[service.id]=Array.from({length:count},(_,i)=>({
+          id:'order-'+i,service_id:service.id,label:['준비','공동기도','자율기도'][i%3],
+          raw_title:'예배 순서 '+i,sort_order:i+1,_worshipSectionId:'section-'+i,
+          _worshipElementTemplateModified:true,
+          memo:serializeServiceItemMemo({elementType:'title',inputMode:'manual',outputMode:'title'}),
+        }));
+        host.innerHTML=renderPresenterSidebar('',[],service,renderServiceCurrentSidebar(service,[]));
+        return host.querySelector('.svc-presenter-input-rail');
+       }
+       try{
+        const short=layout(3),list=short.querySelector('.service-outline-list');
+        const first=list.firstElementChild.getBoundingClientRect();
+        const last=list.lastElementChild.getBoundingClientRect();
+        const headings=Array.from(list.querySelectorAll('.service-outline-row--section'));
+        const compact=headings.length===3 && headings.every(row=>row.offsetHeight<=40);
+        const groups=Array.from(list.children,group=>group.getBoundingClientRect());
+        const gap=parseFloat(getComputedStyle(list).rowGap);
+        const normalGaps=groups.slice(1).every((group,i)=>Math.abs(group.top-groups[i].bottom-gap)<=1);
+        const topAligned=Math.abs(first.top-short.getBoundingClientRect().top)<=1;
+        const spare=short.getBoundingClientRect().bottom-last.bottom;
+        const long=layout(40),card=host.querySelector('.service-sidebar-presenter-context');
+        const cardTop=card.getBoundingClientRect().top;
+        long.scrollTop=long.scrollHeight;
+        return {compact,normalGaps,topAligned,spare,scroll:long.scrollTop,cardShift:card.getBoundingClientRect().top-cardTop};
+       }finally{
+        delete state.serviceItems[service.id];
+        state.loadedWorshipServiceIds.delete(service.id);
+        host.remove();
+       }
+     }''',height)
+     assert result['compact'] and result['normalGaps'] and result['topAligned'] and result['spare']>100,(engine,height,result)
+     assert result['scroll']>0 and abs(result['cardShift'])<1,(engine,height,result)
+     print(engine,height,'PASS compact short order and fixed card while long order scrolls',flush=True)
     print(engine,'PASS left single editor, IME/selection/draft, themes/widths, sticky tools and output/audio preservation',flush=True)
     page.unroute_all(behavior='wait')
    finally:browser.close()

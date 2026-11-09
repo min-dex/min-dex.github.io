@@ -1226,10 +1226,10 @@ rejects a second monthly service on the same date if one is already loaded.
 
 In the presenter left sidebar, the search field and selected worship summary
 (name, date, status, output button and remote code) stay outside the order list's
-scroll viewport. Only the current order rail scrolls; search results have a
-bounded separate viewport. No worship data or output state changes follow from
-scrolling. Local Chromium/WebKit layout probes at 600px and 900px heights verify
-that the summary stays fixed while the order rail scrolls. Publication pending.
+scroll viewport. Only the current order rail scrolls, and search results have
+a separate bounded viewport. Short orders keep their normal row heights and
+gaps at the top of the rail. Chromium/WebKit checks at 600px and 900px cover
+compact short orders and fixed summaries while long orders scroll.
 
 ### 설치 앱의 상단 도구
 
