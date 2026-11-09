@@ -1,3 +1,7 @@
+## 현재 미완료 작업 확인 · 2026-11-09
+
+찬양 데이터 정비와 저장·접속 현황 UI 후속은 [진행 중 작업대장](docs/work-register.md)에서 확인한다. 아래 날짜별 기록의 과거 미완료 수치를 현재 상태로 재사용하지 않는다. 완료 근거와 복구 이력은 보존하며, 다른 담당의 설치본·현장 검증은 해당 계약을 따른다.
+
 ## Church internal desktop releases · 2026-11-09
 
 1.0.2 was published from `d66c40c5cff97ce734bb323edea67d0c16f722e4`.

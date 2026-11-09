@@ -4,6 +4,11 @@ Read `HANDOFF.md` first, then open the smallest current document for the task.
 When documents disagree, use the current contract or decision log and update the
 stale document in the same change.
 
+## 진행 중 작업
+
+- [진행 중 작업대장](work-register.md): 찬양 빈 판본·자료 대기·의도적 보류·저장 UI 배포와 운영 검증의 최신 인수인계. 완료 근거와 로컬 증빙 위치 포함.
+- 날짜별 보고서는 당시 상태를 보존한다. 완료한 작업을 다시 시작하기 전에 작업대장의 완료 경계와 최신 증빙을 대조한다.
+
 ## Current Contracts
 
 - [설치 앱 유튜브 직접 송출 후보](youtube-desktop-candidate.md)
