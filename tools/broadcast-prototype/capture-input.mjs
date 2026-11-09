@@ -2,10 +2,11 @@
 import {createAudioBuses} from './output-routing.mjs';
 export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=document}){
  const $=id=>root.getElementById(id);let stream=null,context=null,buses=null,hall=null,broadcast=null,meter=null,timer=null,epoch=0,busy=false,disposed=false;
+ const desktop=Boolean(window.youtubeOutput);
  const status=text=>$('captureStatus').textContent=text;
  function controls(){for(const id of ['capturePermission','captureRefresh','captureVideo','captureAudio','captureConnect'])$(id).disabled=busy||!!stream;$('captureDisconnect').disabled=!stream&&!busy;}
  async function refresh(){
-  if(!navigator.mediaDevices?.enumerateDevices){status('장치 입력을 지원하는 브라우저에서 localhost로 열어 주세요.');return;}
+  if(!navigator.mediaDevices?.enumerateDevices){status(desktop?'이 앱에서 장치 목록을 열 수 없습니다. 시스템의 카메라·마이크 설정을 확인해 주세요.':'장치 입력은 민덱스 설치 앱에서 열어 주세요.');return;}
   try{
    const devices=await navigator.mediaDevices.enumerateDevices();
    for(const [id,kind] of [['captureVideo','videoinput'],['captureAudio','audioinput']]){
@@ -13,8 +14,8 @@ export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=docu
     let n=0;for(const device of devices.filter(d=>d.kind===kind&&d.deviceId)){select.add(new Option(device.label||`${kind==='audioinput'?'오디오':'영상'} 입력 ${++n}`,device.deviceId));}
     if([...select.options].some(o=>o.value===old))select.value=old;
    }
-   status('GC553 영상과 해당 오디오를 선택하세요. 이름이 없으면 권한 허용 후 다시 확인하세요.');
-  }catch{status('장치 목록을 읽지 못했습니다. 브라우저 권한을 확인하세요.');}
+   status('영상 장치와 오디오를 선택하세요. 장치 이름이 없으면 권한을 허용한 뒤 다시 확인하세요.');
+  }catch{status(desktop?'장치 목록을 읽지 못했습니다. 앱의 카메라·마이크 권한을 확인해 주세요.':'장치 목록을 읽지 못했습니다. 브라우저의 카메라·마이크 권한을 확인해 주세요.');}
  }
  function stop(message='장치 연결 해제'){
   ++epoch;clearInterval(timer);timer=null;

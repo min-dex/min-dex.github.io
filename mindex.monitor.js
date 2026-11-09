@@ -27,8 +27,8 @@
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
 
     <div class="monitor-scroll"><section class="monitor-section" aria-label="송출 현황">
-    <div class="monitor-section-heading"><h3>송출 현황</h3><button type="button" data-show-codes>코드 보기</button></div>
-    <div data-code-entry hidden><label>관리자 PIN <input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label> <button type="button" data-check-pin>확인</button></div>
+    <div class="monitor-section-heading"><h3>송출 현황</h3><button class="btn secondary" type="button" data-show-codes>코드 보기</button></div>
+    <div data-code-entry hidden><label>관리자 PIN <input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label> <button class="btn secondary" type="button" data-check-pin>확인</button></div>
     <p data-code-status role="status"></p><div data-outputs></div></section>
     <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
     <p class="monitor-message" role="status"></p><div data-devices></div></section>

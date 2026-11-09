@@ -221,7 +221,9 @@ subtitles; status text only appears when present.
 The connection-status dialog shares the Remote dialog shell: token radius (`--r`),
 20px insets at desktop and phone widths, card-title size/weight, and a non-wrapping
 header with 10px gap and 20px bottom margin. Close and refresh retain the standard
-35px icon target with 16px/1.5 Lucide icons. Presence and refresh behavior are unchanged.
+35px icon target with 16px/1.5 Lucide icons. Code actions use neutral 35px buttons,
+5px corners and 14px/600 text. The PIN and device name use the shared field
+size and focus treatment. Presence and refresh behavior are unchanged.
 
 ## Default webfont ·2026-11-03
 
