@@ -2,7 +2,7 @@
 export function mountHallOutput({getFrame,root=document}){
  const $=id=>root.getElementById(id);let popup=null,timer=null,disposed=false;
  function status(text){$('hallOutputStatus').textContent=text;$('hallOutputClose').disabled=!popup||popup.closed;}
- function close(){clearInterval(timer);timer=null;if(popup&&!popup.closed)popup.close();popup=null;status('CH8 출력 창 닫힘');}
+ function close(){clearInterval(timer);timer=null;if(popup&&!popup.closed)popup.close();popup=null;status('본당 출력 창 닫힘');}
  $('hallOutputOpen').onclick=()=>{
   if(disposed)return;
   if(popup&&!popup.closed){popup.focus();return;}
@@ -13,10 +13,10 @@ export function mountHallOutput({getFrame,root=document}){
   own.addEventListener('load',()=>{try{
    if(disposed||own!==popup||own.closed)return;
    if(typeof own.attachHallOutput!=='function')throw Error('output page');
-   own.attachHallOutput(token,getFrame);status('CH8 출력 창 열림 · 믹서 CH8에 연결된 확장 화면으로 옮긴 뒤 전체 화면을 누르세요.');
+   own.attachHallOutput(token,getFrame);status('본당 출력 창 열림 · 본당에 연결된 화면으로 옮긴 뒤 전체 화면을 누르세요.');
   }catch{if(own===popup){close();status('출력 창 연결 실패 · 다시 열어 주세요.');}}},{once:true});
-  status('CH8 출력 창 준비 중');timer=setInterval(()=>{if(popup?.closed){clearInterval(timer);timer=null;popup=null;status('CH8 출력 창 닫힘');}},300);
+  status('본당 출력 창 준비 중');timer=setInterval(()=>{if(popup?.closed){clearInterval(timer);timer=null;popup=null;status('본당 출력 창 닫힘');}},300);
  };
- $('hallOutputClose').onclick=close;status('CH8 출력 대기 · 왼쪽 CH8용 합성 화면을 출력합니다.');
+ $('hallOutputClose').onclick=close;status('본당 출력 대기 중');
  return ()=>{disposed=true;close();};
 }

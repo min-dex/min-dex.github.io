@@ -15,7 +15,7 @@
  }catch{document.getElementById('status').textContent='전체 화면 전환이 지원되지 않거나 거절됐습니다. 브라우저의 전체 화면 기능을 사용해 주세요.';}};
  document.getElementById('hideControls').onclick=()=>document.documentElement.classList.add('output-only');
  window.addEventListener('keydown',event=>{if(event.key==='Escape')document.documentElement.classList.remove('output-only');});
- if(!window.opener)document.getElementById('status').textContent='테스트 조작 화면에서 CH8 출력 창을 열어 주세요.';
+ if(!window.opener)document.getElementById('status').textContent='방송 창에서 본당 출력 창을 열어 주세요.';
  document.getElementById('close').onclick=()=>window.close();
  window.addEventListener('pagehide',()=>{closed=true;read=null;cancelAnimationFrame(raf);blank();});raf=requestAnimationFrame(render);
 })();
