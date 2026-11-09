@@ -58,12 +58,20 @@ class PublishedUpgradeIdentity(unittest.TestCase):
     self.assertEqual(open_url.call_count,1)
  def test_source_target_size_and_hash_are_required_before_install(self):
   from verify_published_upgrade import SOURCES, asset_record
-  row={'file':'Mindex-1.0.0-win-x64.exe','bytes':100,'sha256':'a'*64}
+  row={'file':'Mindex-1.0.0-win-x64.exe','id':1,'bytes':100,'sha256':'a'*64}
   receipt={'version':'1.0.0','channel':'internal','sourceCommit':SOURCES['1.0.0'],'assets':[row]}
   self.assertEqual(asset_record(receipt,'1.0.0','win-x64'),row)
   for change in [{'sourceCommit':'b'*40},{'channel':'release'},{'assets':[row,row]},{'assets':[{**row,'sha256':'bad'}]},{'assets':[{**row,'bytes':-1}]}]:
    with self.assertRaises(ValueError):asset_record({**receipt,**change},'1.0.0','win-x64')
   with self.assertRaises(ValueError):asset_record(receipt,'1.0.0','mac-arm64')
+ def test_required_published_upgrade_fixture_records_are_complete(self):
+  import verify_published_upgrade as upgrade
+  fixtures=json.loads(upgrade.PUBLISHED_FIXTURES.read_text())
+  self.assertEqual(fixtures.keys(),upgrade.SOURCES.keys())
+  for version,receipt in fixtures.items():
+   for target in ('mac-arm64','mac-x64','win-x64'):
+    self.assertGreater(upgrade.asset_record(receipt,version,target)['bytes'],1000000)
+
  def test_rejected_token_retries_the_same_public_asset_without_credentials(self):
   import io, verify_published_upgrade as upgrade
   request=upgrade.api_request('/assets/1?download=1','fixture','application/octet-stream')
@@ -79,7 +87,7 @@ class PublishedUpgradeIdentity(unittest.TestCase):
   import io, types, verify_published_upgrade as upgrade
   with tempfile.TemporaryDirectory() as folder:
    root=pathlib.Path(folder);candidate=root/'Mindex-1.0.5-win-x64.exe';candidate.write_bytes(b'candidate')
-   payload=b'published fixture';row={'file':'Mindex-1.0.0-win-x64.exe','bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}
+   payload=b'published fixture';row={'file':'Mindex-1.0.0-win-x64.exe','id':1,'bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}
    receipt={'version':'1.0.0','channel':'internal','sourceCommit':upgrade.SOURCES['1.0.0'],'assets':[row]}
    calls=[]
    def run(args,**kwargs):
@@ -90,14 +98,12 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    def read(url,**kwargs):
     self.assertNotIn('Authorization',url.headers)
     self.assertEqual(url.unredirected_hdrs.get('Authorization'),'Bearer fixture')
-    if '/releases?per_page=100&mindexVerify=' in url.full_url:
-     release={'tag_name':'church-v1.0.0','draft':False,'prerelease':False,
-              'assets':[{'name':name,'id':i,'state':'uploaded'}
-                        for i,name in enumerate(('internal-build.json',row['file']),1)]}
-     return io.BytesIO(json.dumps([release]).encode())
+    self.assertIn('/assets/1?download=1&mindexVerify=',url.full_url)
     self.assertEqual(url.get_header('Accept'),'application/octet-stream')
-    return io.BytesIO(json.dumps(receipt).encode() if '/assets/1?download=1&mindexVerify=' in url.full_url else payload)
-   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.5']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
+    return io.BytesIO(payload)
+   manifest=root/'manifest.json'
+   manifest.write_text(json.dumps({version:receipt for version in upgrade.SOURCES}))
+   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade,'PUBLISHED_FIXTURES',manifest),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.5']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
     with self.assertRaisesRegex(RuntimeError,'synthetic seed failure'):upgrade.main()
    self.assertEqual(len(calls),2)
    self.assertFalse(any(str(candidate) in args for args in calls))

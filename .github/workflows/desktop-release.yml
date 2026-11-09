@@ -33,6 +33,7 @@ on:
       - tests/test_desktop_youtube_local.cjs
       - tests/test_desktop_upgrade.cjs
       - tests/verify_published_upgrade.py
+      - tests/fixtures/published-desktop-upgrades.json
       - tests/cleanup_desktop_ci.py
       - tests/install_test_fixture.py
       - tests/test_electron_updater.cjs

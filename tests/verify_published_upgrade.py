@@ -14,6 +14,8 @@ import uuid
 from cleanup_desktop_ci import remove_completed_tree
 
 API = 'https://api.github.com/repos/min-dex/min-dex.github.io/releases'
+PUBLIC = 'https://github.com/min-dex/min-dex.github.io/releases/download/'
+PUBLISHED_FIXTURES = Path(__file__).resolve().parent / 'fixtures' / 'published-desktop-upgrades.json'
 SOURCES = {'1.0.0': 'c61f6a84e82d0ec81d102ca4e4947536eae853aa',
            '1.0.1': '37d12af3f619b3c4c71a16d070c8ca861a8e28c4',
            '1.0.2': 'd66c40c5cff97ce734bb323edea67d0c16f722e4',
@@ -30,6 +32,8 @@ def asset_record(receipt, version, target):
     if len(records) != 1:
         raise ValueError('Missing/duplicate published installer')
     row = records[0]
+    if type(row.get('id')) is not int or row['id'] <= 0:
+        raise ValueError('Invalid published asset ID')
     if not isinstance(row.get('bytes'), int) or not 0 < row['bytes'] < 5 * 1024**3:
         raise ValueError('Invalid installer size')
     if len(row.get('sha256', '')) != 64 or any(c not in '0123456789abcdef' for c in row['sha256']):
@@ -58,11 +62,6 @@ def retry_download(read):
         time.sleep(2 ** attempt)
 
 
-def read_receipt(url):
-    with open_release(url, timeout=60) as response:
-        return json.loads(response.read(2000000))
-
-
 def api_request(path, token, accept='application/vnd.github+json'):
     # Do not reuse a prior runner's cached authorization error or expired CDN redirect.
     separator = '&' if '?' in path else '?'
@@ -86,13 +85,6 @@ def open_release(request, timeout):
         return urllib.request.urlopen(public, timeout=timeout)
 
 
-def download_request(release, name, token):
-    assets = [item for item in release['assets'] if item['name'] == name and item['state'] == 'uploaded']
-    if len(assets) != 1 or type(assets[0]['id']) is not int or assets[0]['id'] <= 0:
-        raise ValueError('Missing/duplicate published asset')
-    return api_request(f"/assets/{assets[0]['id']}?download=1", token, 'application/octet-stream')
-
-
 def download_installer(url, installer, record):
     digest = hashlib.sha256()
     with open_release(url, timeout=120) as response, installer.open('wb') as out:
@@ -103,6 +95,19 @@ def download_installer(url, installer, record):
                 raise RuntimeError('Installer exceeds recorded size')
     if installer.stat().st_size != record['bytes'] or digest.hexdigest() != record['sha256']:
         raise RuntimeError('Published installer integrity mismatch')
+
+
+def download_published_installer(installer, record, version, token):
+    try:
+        retry_download(lambda: download_installer(
+            api_request(f"/assets/{record['id']}?download=1", token, 'application/octet-stream'),
+            installer, record))
+    except (TimeoutError, ConnectionError, urllib.error.URLError):
+        # A public browser download serves the same immutable asset. The
+        # pinned size and digest checks still apply to every byte.
+        url = PUBLIC + 'church-v' + version + '/' + record['file']
+        retry_download(lambda: download_installer(
+            url + '?mindexVerify=' + uuid.uuid4().hex, installer, record))
 
 
 def main():
@@ -116,23 +121,18 @@ def main():
     receipt_dir.mkdir(exist_ok=True)
     temp_root = upgrade_temp_root()
     print(f'Published upgrade temporary root: {temp_root}', flush=True)
-    releases = retry_download(lambda: read_receipt(api_request('?per_page=100', token)))
-    published = {release['tag_name']: release for release in releases
-                 if not release['draft'] and not release['prerelease']}
+    published = json.loads(PUBLISHED_FIXTURES.read_text(encoding='utf-8'))
+    if published.keys() != SOURCES.keys():
+        raise ValueError('Published upgrade fixture versions differ from the required matrix')
     for previous in SOURCES:
         free = shutil.disk_usage(temp_root).free
         print(f'Published upgrade {previous}: free {free / 1024**3:.2f} GiB; required 26 GiB', flush=True)
         if free < 26 * 1024**3:
             raise RuntimeError('Need 20 GiB reserve plus 6 GiB for published upgrade fixture')
-        tag = 'church-v' + previous
-        release = published.get(tag)
-        if not release:
-            raise ValueError(f'Missing published release: {tag}')
-        receipt = retry_download(lambda: read_receipt(download_request(release, 'internal-build.json', token)))
-        record = asset_record(receipt, previous, target)
+        record = asset_record(published[previous], previous, target)
         with tempfile.TemporaryDirectory(prefix='mindex-published-download-') as folder:
             installer = Path(folder) / record['file']
-            retry_download(lambda: download_installer(download_request(release, record['file'], token), installer, record))
+            download_published_installer(installer, record, previous, token)
             state = receipt_dir / (previous + '-install.json')
             proof = receipt_dir / (previous + '-proof.json')
             subprocess.run([sys.executable, 'tests/install_test_fixture.py', str(installer), str(state), 'internal'], check=True)
