@@ -14662,7 +14662,7 @@ function renderHomeRecentWork() {
       }
       const meta = service ? `${entry.kind} · ${formatServiceDate(service, {compact:true})}` : entry.kind;
       return `<button type="button" data-home-recent="${escapeAttr(entry.key)}"><span><small>${escapeHtml(meta)}</small><strong title="${escapeAttr(title)}">${escapeHtml(title)}</strong>${edits ? `<time datetime="${escapeAttr(entry.savedAt)}">${escapeHtml(new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"numeric",day:"numeric",hour:"numeric",minute:"2-digit"}).format(new Date(entry.savedAt)))}</time>` : ""}</span><i data-lucide="arrow-up-right"></i></button>`;
-    }).join("")}` : `<p class="home-module-detail">${edits ? (homeRecentEditsCache?.promise ? '최근 수정 불러오는 중…' : '저장한 항목이 여기에 표시됩니다.') : '열어 본 항목이 여기에 표시됩니다.'}</p>`}
+    }).join("")}` : `<p class="home-module-detail">${edits ? (homeRecentEditsCache?.promise ? '최근 수정 불러오는 중…' : '최근 수정이 없습니다.') : '최근 작업이 없습니다.'}</p>`}
     </div>
     </section>`;
 }
@@ -16370,7 +16370,6 @@ function renderHomeStart() {
   const stats = homeOverviewStats?.client === state.client ? homeOverviewStats : null;
   const songCount = stats?.songs ?? (songCatalogLoaded ? groupPraiseSongs(state.songs.filter(isSelectablePraiseSong)).length : null);
   const editionCount = stats?.editions ?? (state.bibleTranslations.length ? state.bibleTranslations.length : null);
-  const editionNames = stats?.editions != null ? stats.names : homeBibleEditionNames(state.bibleTranslations);
   const week = recentServiceWeeks(now)[0];
   const servicesReady = state.serviceTypes.length > 0 && !state.serviceError;
   const services = serviceUpcomingDisplayServices(state.services).filter(service => !service._expected && !serviceIsNoGathering(service));
@@ -16380,14 +16379,14 @@ function renderHomeStart() {
   const departments = [...new Set(bulletins.map(service => serviceNavigationName(service)))];
   const calendarName = state.calendarLoaded && !state.calendarError ? String(state.calendarData.find(row => row.date === toLocalDateStr(now))?.liturgical || "").trim() : "";
   const modules = [
-    {id:"service", label:"예배", icon:"church", value:servicesReady ? `${thisWeek.length}회` : "—", unit:"이번 주 등록 예배",
+    {id:"service", label:"예배", icon:"church", value:servicesReady ? `${thisWeek.length}회` : "—", unit:"이번 주",
       detail:state.serviceError ? "예배 목록을 불러오지 못했습니다." : next ? `${formatServiceDate(next, {compact:true})} · ${serviceNavigationName(next)}` : servicesReady ? "다가오는 예배가 없습니다." : "예배 목록 불러오는 중…"},
-    {id:"bulletin", label:"주보", icon:"newspaper", value:servicesReady ? `${departments.length}개 부서` : "—", unit:"예배와 연결된 주보",
+    {id:"bulletin", label:"주보", icon:"newspaper", value:servicesReady ? `${departments.length}개 부서` : "—", unit:"",
       detail:state.serviceError ? "주보 목록을 불러오지 못했습니다." : departments.join(" · ") || (servicesReady ? "연결된 주보가 없습니다." : "주보 목록 불러오는 중…")},
-    {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"같은 곡 기준",
-      detail:stats?.errors.songs ? "곡 수를 불러오지 못했습니다." : songCount != null ? "가사 · 버전 · 악보 · 음원" : "곡 수 조회 중…", retry:stats?.errors.songs},
-    {id:"scripture", label:"말씀", icon:"book-open", value:editionCount != null ? `${editionCount}개 역본` : "—", unit:"설치된 역본과 본문",
-      detail:stats?.errors.editions ? "역본 수를 불러오지 못했습니다." : editionCount != null ? editionNames.join(" · ") || "설치된 역본이 없습니다." : "역본 수 조회 중…", retry:stats?.errors.editions},
+    {id:"praise", label:"찬양", icon:"music", value:songCount != null ? `${formatCount(songCount)}곡` : "—", unit:"",
+      detail:stats?.errors.songs ? "곡 수를 불러오지 못했습니다." : songCount != null ? "" : "곡 수 조회 중…", retry:stats?.errors.songs},
+    {id:"scripture", label:"말씀", icon:"book-open", value:editionCount != null ? `${editionCount}개 역본` : "—", unit:"",
+      detail:stats?.errors.editions ? "역본 수를 불러오지 못했습니다." : editionCount != null ? "" : "역본 수 조회 중…", retry:stats?.errors.editions},
   ];
   refs.detailPane.innerHTML = `
     <main class="home-start" aria-label="홈">
@@ -16396,12 +16395,11 @@ function renderHomeStart() {
           ${calendarName ? `<button class="home-calendar-context" type="button" data-home-module="calendar"><i data-lucide="calendar-days"></i><span>${escapeHtml(calendarName)}</span></button>` : ""}
         </div>
       </header>
-      ${renderHomeRecentWork()}
       <div class="home-overview">
         ${modules.map(module => `<section class="home-module" aria-labelledby="home-${module.id}-heading">
           <h2 id="home-${module.id}-heading"><button type="button" data-home-module="${module.id}"><span><i data-lucide="${module.icon}"></i>${module.label}</span><i data-lucide="arrow-right"></i></button></h2>
-          <div class="home-module-value">${escapeHtml(module.value)}<span>${escapeHtml(module.unit)}</span></div>
-          <p class="home-module-detail">${escapeHtml(module.detail)}</p>${module.retry ? '<button class="btn secondary" type="button" data-home-overview-retry>다시 조회</button>' : ""}
+          <div class="home-module-value">${escapeHtml(module.value)}${module.unit ? `<span>${escapeHtml(module.unit)}</span>` : ""}</div>
+          ${module.detail ? `<p class="home-module-detail">${escapeHtml(module.detail)}</p>` : ""}${module.retry ? '<button class="btn secondary" type="button" data-home-overview-retry>다시 조회</button>' : ""}
         </section>`).join("")}
         <section class="home-module home-module--operations" aria-labelledby="home-operations-heading">
           <h2 id="home-operations-heading"><button type="button" data-home-module="operations"><span><i data-lucide="notebook-tabs"></i>운영</span><i data-lucide="arrow-right"></i></button></h2>
@@ -16409,6 +16407,7 @@ function renderHomeStart() {
           </div>
         </section>
       </div>
+      ${renderHomeRecentWork()}
     </main>`;
   refreshIcons();
   void loadHomeOverviewStats();

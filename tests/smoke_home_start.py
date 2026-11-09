@@ -26,6 +26,10 @@ try:
    assert page.locator('.home-module').count()==5
    assert page.locator('.home-next,.home-prep-outline,.service-week-board,.empty-verse').count()==0
    assert 'Ministry Index' in page.locator('.home-start').inner_text()
+   assert page.locator('.home-start > .home-overview + .home-recent').count()==1
+   assert '전체 현황' not in page.locator('.home-start').inner_text()
+   assert page.locator('.home-module-value').first.text_content().strip()=='0회이번 주'
+   assert '같은 곡 기준' not in page.locator('.home-start').inner_text()
    # Deferred worship hydration cannot replace the whole-app overview.
    page.evaluate("""async()=>{
     const saved=[fetchCachedSupabasePaged,loadCalendarData,ensureUpcomingPublicWorshipServices];
@@ -86,17 +90,19 @@ try:
    assert page.evaluate('state.recentEdits.length')==2
    page.locator('[data-home-recent-view="work"]').click()
    assert page.locator('.home-recent-list time').count()==0
-   # Populated views reserve card slots; an empty view collapses to its notice.
+   # Recent history is below all cards; switching it cannot move the overview.
    for width in (1280,800,390):
     page.set_viewport_size({'width':width,'height':800})
     page.locator('[data-home-recent-view="work"]').click()
-    top=page.locator('.home-module').first.bounding_box()['y']
+    top=page.locator('.home-module').first.evaluate('el=>el.offsetTop')
     has_work=page.locator('.home-recent-list button').count()>0
     if not has_work:
      assert page.locator('.home-recent-list').bounding_box()['height']<50
     page.locator('[data-home-recent-view="edits"]').click()
-    edits_top=page.locator('.home-module').first.bounding_box()['y']
-    assert abs(edits_top-top)<1 if has_work else edits_top>top
+    edits_top=page.locator('.home-module').first.evaluate('el=>el.offsetTop')
+    assert abs(edits_top-top)<1
+    assert page.locator('.home-recent').evaluate('el=>el.offsetTop >= document.querySelector(".home-overview").offsetTop + document.querySelector(".home-overview").offsetHeight')
+    page.screenshot(path=os.path.join(tempfile.gettempdir(),f'home-compact-{engine}-{width}.png'),full_page=True)
     assert page.locator('.home-recent-note').count()==0
     assert page.locator('.home-recent-list button').first.bounding_box()['height']==80
    page.set_viewport_size({'width':1280,'height':800})

@@ -1512,7 +1512,7 @@ def main() -> int:
                     and len(home_design_state['values']) == 4
                     and all(home_design_state['values'])
                     and not home_design_state['duplicateCatalogue']
-                    and '이번 주 등록 예배' in home_design_state['text']
+                    and '이번 주' in home_design_state['text']
                     and home_design_state['overflow'] <= 2):
                     pass_('home-design-shell', json.dumps(home_design_state, ensure_ascii=False))
                 else:

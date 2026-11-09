@@ -1205,8 +1205,7 @@ are unchanged; this is CSS layout only.
 ## Consistent counts and reviewed duplicate navigation ·2026-11-05
 
 Home Praise counts the same selectable explicit same_song groups as the complete
-Praise list, excluding only valid retiredInto sources. The home count labels this
-basis as 같은 곡 기준. Native counting uses the
+Praise list, excluding only valid retiredInto sources. The count retains this grouping basis without an extra explanatory label on the home card. Native counting uses the
 existing catalogue's ID/relation metadata, never a second lyric/audio payload
 fetch. Category filters still show their own subset. Service/Section/Element/Slide
 UI labels read 예배/섹션/항목/슬라이드. Default empty setlist reasons use concise
@@ -1239,3 +1238,16 @@ Windows 앱은 왼쪽 탐색 6개와 오른쪽 기본 도구 6개를 상단에 �
 두 도구는 Windows 네이티브 메뉴에서 제거한다. 업데이트는 기존 확인과
 편집·송출 중 설치 차단을 사용한다. 방송 버튼은 방송 창을 열며 송출은
 그 창의 기존 별도 조작으로 시작한다. 웹과 다른 OS에는 새 버튼을 표시하지 않는다.
+
+## Compact home overview ·2026-11-09
+
+Home places all five module cards before the recent-work/recent-edit switch and
+list in DOM and visual order. Switching recent views must not move the overview,
+including empty states and narrow widths. Keep the existing history, confirmed-save
+receipts, navigation and persistence behavior.
+
+The service count uses the short label 이번 주. Bulletin, Praise and Scripture
+counts retain their existing units and counting rules without duplicate explanatory
+labels. Normal Praise capability lists and Scripture edition-name lists are omitted
+from overview cards; loading, error and retry states remain visible. Recent empty
+states read 최근 작업이 없습니다 / 최근 수정이 없습니다. The home wordmark retains its approved Ministry Index subtitle.
