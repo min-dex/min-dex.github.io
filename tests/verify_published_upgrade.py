@@ -62,12 +62,19 @@ def read_receipt(url):
         return json.loads(response.read(100000))
 
 
-def download_request(release, name):
+def api_request(path, token, accept='application/vnd.github+json'):
+    request = urllib.request.Request(API + path, headers={'Accept': accept})
+    if token:
+        # GitHub redirects downloads to its asset CDN. Do not forward the token.
+        request.add_unredirected_header('Authorization', 'Bearer ' + token)
+    return request
+
+
+def download_request(release, name, token):
     assets = [item for item in release['assets'] if item['name'] == name and item['state'] == 'uploaded']
     if len(assets) != 1 or type(assets[0]['id']) is not int or assets[0]['id'] <= 0:
         raise ValueError('Missing/duplicate published asset')
-    return urllib.request.Request(f"{API}/assets/{assets[0]['id']}?download=1",
-                                  headers={'Accept': 'application/octet-stream'})
+    return api_request(f"/assets/{assets[0]['id']}?download=1", token, 'application/octet-stream')
 
 
 def download_installer(url, installer, record):
@@ -85,6 +92,7 @@ def download_installer(url, installer, record):
 def main():
     if os.environ.get('GITHUB_ACTIONS') != 'true':
         raise RuntimeError('Disposable CI runner required; never install over a real profile')
+    token = os.environ.pop('MINDEX_QA_GITHUB_TOKEN', '')
     candidate, target, sha, version = sys.argv[1:]
     candidate = Path(candidate).resolve()
     assert candidate.is_file() and version not in SOURCES
@@ -98,14 +106,14 @@ def main():
         if free < 26 * 1024**3:
             raise RuntimeError('Need 20 GiB reserve plus 6 GiB for published upgrade fixture')
         tag = 'church-v' + previous
-        release = retry_download(lambda: read_receipt(f'{API}/tags/{tag}'))
+        release = retry_download(lambda: read_receipt(api_request(f'/tags/{tag}', token)))
         if release['tag_name'] != tag or release['draft'] or release['prerelease']:
             raise ValueError('Unexpected release')
-        receipt = retry_download(lambda: read_receipt(download_request(release, 'internal-build.json')))
+        receipt = retry_download(lambda: read_receipt(download_request(release, 'internal-build.json', token)))
         record = asset_record(receipt, previous, target)
         with tempfile.TemporaryDirectory(prefix='mindex-published-download-') as folder:
             installer = Path(folder) / record['file']
-            retry_download(lambda: download_installer(download_request(release, record['file']), installer, record))
+            retry_download(lambda: download_installer(download_request(release, record['file'], token), installer, record))
             state = receipt_dir / (previous + '-install.json')
             proof = receipt_dir / (previous + '-proof.json')
             subprocess.run([sys.executable, 'tests/install_test_fixture.py', str(installer), str(state), 'internal'], check=True)

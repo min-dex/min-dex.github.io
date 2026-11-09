@@ -258,6 +258,21 @@ jobs:
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" "$version"
           python tests/cleanup_desktop_ci.py internal
+      - name: Verify preservation from published versions
+        if: ${{ !inputs.publish_release }}
+        shell: bash
+        env:
+          MINDEX_QA_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            target=win-x64
+            installer="dist/internal/Mindex-${version}-${target}.exe"
+          else
+            target="mac-$(node -p process.arch)"
+            installer="dist/internal/Mindex-${version}-${target}.dmg"
+          fi
           python tests/verify_published_upgrade.py "$installer" "$target" "$GITHUB_SHA" "$version"
       - name: Retain published-version upgrade receipts
         if: always()
@@ -388,7 +403,14 @@ jobs:
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" "$version"
           python tests/cleanup_desktop_ci.py intel-internal
-          python tests/verify_published_upgrade.py "$installer" mac-x64 "$GITHUB_SHA" "$version"
+      - name: Verify Intel preservation from published versions
+        shell: bash
+        env:
+          MINDEX_QA_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          export NODE_PATH="$(node -p 'require("path").join(process.env.RUNNER_TEMP, "mindex-qa", "node_modules")')"
+          python tests/verify_published_upgrade.py "dist/internal/Mindex-${version}-mac-x64.dmg" mac-x64 "$GITHUB_SHA" "$version"
 
       - name: Retain Intel published-version upgrade receipts
         if: always()

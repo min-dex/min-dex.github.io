@@ -72,19 +72,21 @@ class PublishedUpgradeIdentity(unittest.TestCase):
    receipt={'version':'1.0.0','channel':'internal','sourceCommit':upgrade.SOURCES['1.0.0'],'assets':[row]}
    calls=[]
    def run(args,**kwargs):
+    self.assertNotIn('MINDEX_QA_GITHUB_TOKEN',os.environ)
     calls.append(args)
     if args[1]=='tests/install_test_fixture.py':pathlib.Path(args[3]).write_text(json.dumps({'exe':'synthetic.exe'}))
     else:raise RuntimeError('synthetic seed failure')
    def read(url,**kwargs):
-    if isinstance(url,str):
-     self.assertTrue(url.endswith('/tags/church-v1.0.0'))
+    self.assertNotIn('Authorization',url.headers)
+    self.assertEqual(url.unredirected_hdrs.get('Authorization'),'Bearer fixture')
+    if url.full_url.endswith('/tags/church-v1.0.0'):
      release={'tag_name':'church-v1.0.0','draft':False,'prerelease':False,
               'assets':[{'name':name,'id':i,'state':'uploaded'}
                         for i,name in enumerate(('internal-build.json',row['file']),1)]}
      return io.BytesIO(json.dumps(release).encode())
     self.assertEqual(url.get_header('Accept'),'application/octet-stream')
     return io.BytesIO(json.dumps(receipt).encode() if url.full_url.endswith('/assets/1?download=1') else payload)
-   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.5']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
+   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.5']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
     with self.assertRaisesRegex(RuntimeError,'synthetic seed failure'):upgrade.main()
    self.assertEqual(len(calls),2)
    self.assertFalse(any(str(candidate) in args for args in calls))
