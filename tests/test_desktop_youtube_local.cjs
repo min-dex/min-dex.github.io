@@ -117,7 +117,12 @@ async function main() {
     assert(boxes.every((box,index) => box && (index === 0 ||
       Math.abs(box.y-boxes[0].y)<1 && box.x>boxes[index-1].x)),
     'Desktop right toolbar must have six ordered actions on one row');
-    for (const [id, label] of [['desktopBroadcastBtn','유튜브 송출'],['desktopUpdateBtn','업데이트 확인']]) {
+    for (const [id, label] of [
+      ['remotePanelBtn','원격 조작'],
+      ['desktopBroadcastBtn','유튜브 송출'],
+      ['desktopUpdateBtn','업데이트 확인'],
+      ['monitorPanelBtn','접속 현황'],
+    ]) {
       const button = main.locator('#'+id);
       assert.equal(await button.getAttribute('title'),label);
       assert.equal(await button.getAttribute('aria-label'),label);
