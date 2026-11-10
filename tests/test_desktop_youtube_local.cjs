@@ -21,17 +21,40 @@ async function main() {
     sink = spawn(ffmpeg,['-loglevel','error','-listen','1','-timeout','45','-i','rtmp://127.0.0.1:'+port+'/live2/'+key,'-c','copy','-f','flv',file('received.flv')],{stdio:'ignore'});
     const received = once(sink,'close');
     let publishes = 0, matchingKey = false;
+    const connectReceiver = async socket => {
+      // The FFmpeg listener starts asynchronously, especially on a cold Intel runner.
+      // Keep this TLS session open until the loopback receiver can accept it.
+      for (let attempt = 0; attempt < 40 && !socket.destroyed; attempt++) {
+        const receiver = net.connect(port,'127.0.0.1');
+        try {
+          await once(receiver,'connect');
+          if (socket.destroyed) { receiver.destroy(); return; }
+          receiver.on('error',()=>socket.destroy());
+          socket.on('error',()=>receiver.destroy());
+          socket.on('close',()=>receiver.destroy());
+          let previous = Buffer.alloc(0);
+          socket.on('data',data=>{
+            if(matchingKey) return;
+            const sample=Buffer.concat([previous,data]); matchingKey=sample.includes(Buffer.from(key)); previous=sample.subarray(-key.length);
+          });
+          receiver.pipe(socket).pipe(receiver);
+          return;
+        } catch (error) {
+          receiver.destroy();
+          if (error.code !== 'ECONNREFUSED' || sink.exitCode !== null) throw error;
+          await sleep(50);
+        }
+      }
+      if (!socket.destroyed) throw new Error('Loopback RTMP receiver did not become ready');
+    };
     server = tls.createServer({key:fs.readFileSync(file('qa.key')),cert:fs.readFileSync(file('qa.pem'))},socket=>{
       peer=socket; publishes++;
-      const receiver = net.connect(port,'127.0.0.1');
-      let previous = Buffer.alloc(0);
-      socket.on('data',data=>{
-        if(matchingKey) return;
-        const sample=Buffer.concat([previous,data]); matchingKey=sample.includes(Buffer.from(key)); previous=sample.subarray(-key.length);
+      socket.pause();
+      socket.on('error',()=>socket.destroy());
+      void connectReceiver(socket).catch(error=>{
+        console.error('Loopback RTMP receiver:',error.code || error.message);
+        socket.destroy();
       });
-      receiver.on('error',()=>socket.destroy());socket.on('error',()=>receiver.destroy());
-      socket.on('close',()=>receiver.destroy());
-      receiver.pipe(socket).pipe(receiver);
     }).listen(0,'127.0.0.1');
     await once(server,'listening');
     app = await _electron.launch({executablePath:desktop,args:['--no-first-run'],env:{...process.env,MINDEX_ISOLATED_TEST:'1',MINDEX_QA_RTMPS_PORT:String(server.address().port),MINDEX_QA_RTMPS_CA:file('qa.pem')}});
@@ -198,7 +221,12 @@ async function main() {
     await panel.locator('#ytRecord').uncheck();
     await panel.locator('#ytKey').fill(key);
     await panel.locator('#ytStart').click();
-    await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 중');
+    try {
+      await panel.waitForFunction(()=>document.querySelector('#ytStatus').textContent==='송출 중');
+    } catch (error) {
+      const status = await panel.locator('#ytStatus').textContent();
+      throw new Error('Second broadcast status: '+status+'; TLS connections: '+publishes+'; receiver exit: '+sink.exitCode,{cause:error});
+    }
     peer.destroy();
     await panel.waitForFunction(()=>!document.querySelector('#ytStart').disabled && document.querySelector('#ytStatus').textContent.includes('중단'));
     await sleep(700);
