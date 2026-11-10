@@ -20,7 +20,8 @@ SOURCES = {'1.0.0': 'c61f6a84e82d0ec81d102ca4e4947536eae853aa',
            '1.0.1': '37d12af3f619b3c4c71a16d070c8ca861a8e28c4',
            '1.0.2': 'd66c40c5cff97ce734bb323edea67d0c16f722e4',
            '1.0.4': '2976cde847676d1af2c13162deccb11ea4c0b66d',
-           '1.0.5': '816705288a3c5abcc66e4903e48905290a5f00bc'}
+           '1.0.5': '816705288a3c5abcc66e4903e48905290a5f00bc',
+           '1.0.7': 'c5e87ee15a365e8fc24e8f8e805807b1c8be5402'}
 
 
 def asset_record(receipt, version, target):
