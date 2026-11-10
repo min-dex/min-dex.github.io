@@ -1893,7 +1893,7 @@ body[data-theme="dark"] .service-week-card:hover {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
-  gap: 24px;
+  gap: 20px;
 }
 .svc-presenter-side-panel {
   --svc-panel-control-height: 35px;
@@ -3120,7 +3120,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   max-width: 100%;
-  gap: 16px;
+  gap: 15px;
   align-items: start;
   overflow-x: hidden;
   padding: 4px 0 0;
@@ -4072,7 +4072,7 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   width: 100%;
   min-width: 0;
   grid-template-columns: repeat(var(--svc-thumb-columns, 3), minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
   max-width: 100%;
   overflow-x: auto;
   padding: 0;
@@ -5816,7 +5816,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 .svc-focus-transport .btn:disabled { opacity: .45; }
 .svc-focus-transport [data-focus-music-status] { flex-basis: 100%; color: var(--ink-3); font-size: 12px; margin-bottom: 5px; }
 .svc-focus-filmstrip-heading { border-top: 1px solid var(--line); padding-top: 15px; color: var(--ink-3); font-size: 12px; font-weight: 600; }
-#servicePresenterControls[data-focus-view="true"] .svc-slide-board { gap: 10px; padding-top: 10px; }
+#servicePresenterControls[data-focus-view="true"] .svc-slide-board { padding-top: 10px; }
 #servicePresenterControls[data-focus-view="true"] .svc-slide-thumb-meta { font-variant-numeric: tabular-nums; }
 
 /* Both presenter views share a stable, wrapping toolbar. */

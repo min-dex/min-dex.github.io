@@ -9,7 +9,7 @@ function renderPresenterSlideBoard(slides, index, serviceId) {
   const chromakey = presenterServiceUsesChromakey(service);
   const deferredGroups = presenterDeferredBoardGroupIndexes(groups, index, slides.length);
   return `
-    <div class="svc-slide-board svc-slide-board--${escapeAttr(theme)}${chromakey ? "" : " svc-slide-board--clean"}" role="list" aria-label="Presenter slide board">
+    <div class="svc-slide-board svc-slide-board--${escapeAttr(theme)}${chromakey ? "" : " svc-slide-board--clean"}" role="list" aria-label="슬라이드 목록">
       ${groups.map((group, groupIndex) => {
         return deferredGroups.has(groupIndex)
           ? renderDeferredPresenterBoardSection(group, serviceId, groupIndex)

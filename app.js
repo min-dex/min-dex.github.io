@@ -2231,7 +2231,21 @@ function applyPresenterThumbLevel(level) {
 }
 
 function setPresenterThumbLevel(level) {
+  const root = document.getElementById("servicePresenterControls");
+  const snapshot = capturePresenterViewportSnapshot();
+  const anchor = presenterViewportRestoreTarget(root, snapshot);
+  const filmstrip = root?.dataset.focusView === "true" ? root.querySelector(".svc-slide-board") : null;
+  const thumb = filmstrip?.querySelector(".svc-slide-thumb-wrap");
+  const gap = filmstrip ? parseFloat(getComputedStyle(filmstrip).columnGap) || 0 : 0;
+  const offset = thumb && filmstrip.scrollLeft
+    ? filmstrip.scrollLeft / (thumb.getBoundingClientRect().width + gap)
+    : 0;
   const value = applyPresenterThumbLevel(level);
+  if (anchor) {
+    const pane = refs.detailPane;
+    pane.scrollTop += anchor.getBoundingClientRect().top - pane.getBoundingClientRect().top - snapshot.offsetTop;
+  }
+  if (offset) filmstrip.scrollLeft = offset * (thumb.getBoundingClientRect().width + gap);
   safeStorageSet("local", STORAGE.presenterThumbScale, PRESENTER_THUMB_LEVELS[value]);
   document.querySelectorAll("[data-presenter-thumb-level]").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.presenterThumbLevel === value));

@@ -45,7 +45,7 @@ def main():
                     for(const [level, columns] of [[1,3],[2,2],[3,1]]) {
                       buttons[level-1].click();
                       check(document.documentElement.dataset.thumbLevel===String(level),'selected level');
-                      for(const [surface,gap] of [[board,12],[strip,10]]) {
+                      for(const [surface,gap] of [[board,10],[strip,10]]) {
                         const thumbs=rects(surface), first=thumbs.slice(0,columns);
                         const frame=surface.querySelector('.svc-slide-thumb-frame').getBoundingClientRect();
                         check(Math.abs(frame.width/frame.height-16/9)<0.02,'thumbnail aspect ratio');

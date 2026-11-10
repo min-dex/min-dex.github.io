@@ -46,6 +46,23 @@ try:
       if(JSON.stringify(state.presenter)!==outputBefore||state.serviceMusic.audio!==musicBefore.audio||state.serviceMusic.audio.currentTime!==musicBefore.time)throw Error('output changed');
       orderField.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true,data:'보존'}));
     }""")
+    page.evaluate("""()=>{
+      setPresenterThumbLevel('1');
+      const pane=refs.detailPane;
+      pane.scrollTop=400;
+      const snapshot=capturePresenterViewportSnapshot();
+      const root=document.getElementById('servicePresenterControls');
+      const anchor=presenterViewportRestoreTarget(root,snapshot);
+      if(!anchor)throw Error('No slide anchor for view-size test');
+      const oldTop=anchor.getBoundingClientRect().top;
+      const oldScroll=pane.scrollTop;
+      setPresenterThumbLevel('3');
+      if(Math.abs(anchor.getBoundingClientRect().top-oldTop)>1||pane.scrollTop===oldScroll)throw Error('Slide moved during size change');
+      if(root.querySelector('.svc-slide-board').getAttribute('aria-label')!=='슬라이드 목록')throw Error('Missing Korean slide-list name');
+      if(JSON.stringify(state.presenter)!==outputBefore||orderField.value!=='추가 입력 보존')throw Error('Size change affected output or draft');
+      setPresenterThumbLevel('1');
+      pane.scrollTop=0;
+    }""")
     for theme in ('dark','light'):
      page.evaluate('(theme)=>applyTheme(theme)',theme)
      for width in (1440,1000,700):
