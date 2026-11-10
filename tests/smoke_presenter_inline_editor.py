@@ -272,7 +272,7 @@ def exercise(page, url, engine):
     panel(2).locator('[data-presenter-inline-apply]').click()
     conflict = page.get_by_role('dialog')
     conflict.wait_for(state='visible')
-    assert '서버에 새 저장본이 있습니다' in conflict.inner_text()
+    conflict.get_by_role('heading', name='서버 저장본과 내 입력을 비교해 주세요', exact=True).wait_for()
     conflict.get_by_role('button', name='편집 계속하기', exact=True).click()
     assert field(2, '설교 제목').input_value() == '충돌 시 보존할 제목'
     check("inlineFixture.checkQuiet()")
