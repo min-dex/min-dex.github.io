@@ -89,7 +89,6 @@ async function main() {
       finally { await discardInstaller(downloaded); }
     },downloadSource);
     console.log('PASS packaged Electron installer download and SHA-256 verification');
-    const isWindows = process.platform === 'win32';
     // The isolated app blocks all remote requests. Start the controller in
     // its unconfigured state so storage startup can reach real toolbar IPC.
     await main.addInitScript(() => {
@@ -118,7 +117,7 @@ async function main() {
     assert(boxes.every((box,index) => box && (index === 0 ||
       Math.abs(box.y-boxes[0].y)<1 && box.x>boxes[index-1].x)),
     'Desktop right toolbar must have six ordered actions on one row');
-    if (isWindows) assert(await app.evaluate(({Menu}) => !Menu.getApplicationMenu().items.some(
+    assert(await app.evaluate(({Menu}) => !Menu.getApplicationMenu().items.some(
       item => ['업데이트','방송'].includes(item.label))), 'Moved actions must be absent from the native menu');
     await main.locator('#desktopUpdateBtn').click();
     await main.getByText('이 앱에서는 업데이트를 확인할 수 없습니다.',{exact:true}).waitFor();

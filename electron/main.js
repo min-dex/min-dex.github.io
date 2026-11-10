@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, Menu, MenuItem, session } = require("electron");
+const { app, BrowserWindow, ipcMain, screen, Menu, session } = require("electron");
 const path = require("node:path");
 const testIsolation = require("./test-isolation").configureTestIsolation({ app, session }, require("../package.json"));
 globalThis.__mindexTestIsolation = testIsolation;
@@ -227,24 +227,11 @@ function configureAutoUpdater() {
   return updateController;
 }
 
-function bindUpdateMenu() {
+function bindApplicationMenu() {
   const menu = Menu.getApplicationMenu() || Menu.buildFromTemplate([
     ...(process.platform === "darwin" ? [{ role: "appMenu" }] : []),
     { role: "fileMenu" }, { role: "editMenu" }, { role: "viewMenu" }, { role: "windowMenu" },
   ]);
-  if (process.platform === "win32") {
-    Menu.setApplicationMenu(menu);
-    return;
-  }
-  menu.append(new MenuItem({ label: "업데이트", submenu: [{
-    label: "업데이트 확인…",
-    click: () => {
-      ensureMainWindowVisible();
-      mainWindow.webContents.send("mindex:check-update-requested");
-    },
-  }] }));
-  const openBroadcast = require('./youtube-window');
-  menu.append(new MenuItem({label:'방송',submenu:[{label:'유튜브 송출',click:()=>openBroadcast(mainWindow)}]}));
   Menu.setApplicationMenu(menu);
 }
 
@@ -335,7 +322,7 @@ ipcMain.handle("mindex:import-keynote-deck", async (event, payload = {}) => {
 
 app.whenReady().then(() => {
   createMainWindow();
-  bindUpdateMenu();
+  bindApplicationMenu();
   let attempts = 0;
   mainWindowEnsureTimer = setInterval(() => {
     attempts += 1;

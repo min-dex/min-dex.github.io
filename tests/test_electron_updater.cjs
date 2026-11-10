@@ -42,7 +42,7 @@ test('late install attempt rechecks live output, and current-version state clear
 });
 test('main-process IPC accepts controller only and blocks install while presenter exists',async()=>{
  const vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
- const handlers={},windows=[];let installed=0,testBuild=false,broadcastActive=false;
+ const handlers={},windows=[];let installed=0,testBuild=false,broadcastActive=false,applicationMenu;
  class Window extends EventEmitter {
   constructor(options){super();this.options=options;this.shown=0;this.fullscreen=false;this.webContents=new EventEmitter();this.webContents.send=()=>{};this.webContents.mainFrame={};windows.push(this);}
   isDestroyed(){return false;} isVisible(){return true;} isMinimized(){return false;}
@@ -53,12 +53,14 @@ test('main-process IPC accepts controller only and blocks install while presente
  updater.downloadUpdate=async()=>updater.emit('update-downloaded',{version:'1.0.0'});updater.quitAndInstall=()=>installed++;
  const display={id:1,bounds:{x:0,y:0,width:1920,height:1080}};
  const electron={app,BrowserWindow:Window,ipcMain:{handle:(k,h)=>handlers[k]=h},
-  screen:{getAllDisplays:()=>[display],getPrimaryDisplay:()=>display},Menu:{getApplicationMenu:()=>null,buildFromTemplate:()=>({append(){}}),setApplicationMenu(){}},MenuItem:class {}};
+  screen:{getAllDisplays:()=>[display],getPrimaryDisplay:()=>display},Menu:{getApplicationMenu:()=>null,buildFromTemplate:items=>({items}),setApplicationMenu:menu=>{applicationMenu=menu;}}};
  const broadcast = Object.assign(()=>{}, {isActive:()=>broadcastActive});
  const context={require:name=>name==='./youtube-window'?broadcast:name==='./test-isolation'?require('../electron/test-isolation'):name==='../mindex-build.json'?{channel:'release'}:name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
   process:{platform:'darwin',env:{}},__dirname:path.resolve(__dirname,'../electron'),console,setTimeout:()=>0,setInterval:()=>0,clearInterval(){},clearTimeout(){}};
  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../electron/main.js'),'utf8'),context);
- await new Promise(r=>setImmediate(r));const event={sender:windows[0].webContents,senderFrame:windows[0].webContents.mainFrame};
+ await new Promise(r=>setImmediate(r));
+ assert.deepEqual(Array.from(applicationMenu.items,item=>item.role),['appMenu','fileMenu','editMenu','viewMenu','windowMenu']);
+ const event={sender:windows[0].webContents,senderFrame:windows[0].webContents.mainFrame};
  for(const name of ["open-presenter","close-presenter","fullscreen-presenter","set-presenter-always-on-top","import-keynote-deck","check-for-updates"]){
   for(const foreign of [{sender:{}},{sender:event.sender,senderFrame:{}}])assert.equal((await handlers["mindex:"+name](foreign,{})).reason,"untrusted-window");
  }

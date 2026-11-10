@@ -10,7 +10,7 @@ function fixture(initial, platform, isDesktop = true){
  const buttons=Object.fromEntries(['desktopUpdateBtn','desktopBroadcastBtn'].map(id=>[id,{
   hidden:true,addEventListener(_name,callback){this.click=callback;},
  }]));
- const bridge={isDesktop,platform,onUpdateState:cb=>bridge.event=cb,onCheckUpdateRequested:cb=>bridge.manual=cb,
+ const bridge={isDesktop,platform,onUpdateState:cb=>bridge.event=cb,
  getUpdateState:async()=>({ok:true,state:status}),checkForUpdates:async()=>({ok:true,state:status}),
  openBroadcast:async()=>{broadcasts++;return {ok:true};},
  installUpdate:async()=>{installs++;status={...status,status:'installing'};return status.manualInstall?{ok:true,installerOpened:true}:{ok:true};},
@@ -41,18 +41,18 @@ test('web does not expose native toolbar actions',()=>{
  const web=fixture({status:'current'},undefined,false);
  assert(Object.values(web.buttons).every(button=>button.hidden));
 });
-test('declined update remains reachable from menu',async()=>{
+test('declined update remains reachable from the toolbar',async()=>{
  const f=fixture();f.accept(false);await tick();assert.equal(f.counts().confirms,1);
  await tick();assert.equal(f.counts().confirms,1);
- f.accept(true);await f.bridge.manual();await tick();await tick();assert.equal(f.counts().downloads,1);assert.equal(f.counts().installs,1);
+ f.accept(true);await f.buttons.desktopUpdateBtn.click();await tick();await tick();assert.equal(f.counts().downloads,1);assert.equal(f.counts().installs,1);
 });
 test('no prompt during output; pending downloaded state offered after output closes',async()=>{
  const f=fixture();f.live(true);f.set({status:'downloaded',version:'1.2.3',presenterOpen:true});await tick();assert.equal(f.counts().confirms,0);
  f.live(false);f.set({status:'downloaded',version:'1.2.3',presenterOpen:false});f.bridge.event((await f.bridge.getUpdateState()).state);await tick();assert.equal(f.counts().installs,1);
 });
-test('unsaved changes block restart; saved work can install from menu',async()=>{
+test('unsaved changes block restart; saved work can install from the toolbar',async()=>{
  const f=fixture();f.dirty(true);f.set({status:'downloaded',version:'1.2.3'});await tick();await tick();assert.equal(f.counts().installs,0);assert.ok(f.messages.some(m=>m.includes('먼저 저장')));
- f.dirty(false);await f.bridge.manual();await tick();assert.equal(f.counts().installs,1);
+ f.dirty(false);await f.buttons.desktopUpdateBtn.click();await tick();assert.equal(f.counts().installs,1);
 });
 
 test('renderer reload recovers already-downloaded update without a new download',async()=>{
@@ -79,7 +79,7 @@ test('internal download requires a second confirmation and rechecks unsaved edit
 
 test('manual check distinguishes matching web, pending web changes and unverified web without restarting',async()=>{
  for(const webSync of ['matched','different','unknown']){
-  const f=fixture({status:'current',manualInstall:true,webSync});await tick();await f.bridge.manual();
+  const f=fixture({status:'current',manualInstall:true,webSync});await tick();await f.buttons.desktopUpdateBtn.click();
   assert.equal(f.counts().installs,0);assert.equal(f.counts().downloads,0);
   assert(f.messages.some(m=>m.includes(webSync==='matched'?'모두 최신':webSync==='different'?'다른 변경':'확인하지 못')));
  }

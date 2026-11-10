@@ -164,12 +164,13 @@ Packaged apps check on startup. The main process owns update state across render
 reloads. Downloads and installation both require operator confirmation. Automatic
 installation on quit is disabled; do not silently update on ordinary app exit.
 
-- Native `업데이트 → 업데이트 확인…` retries failed checks, reports the current
-  version/download progress, or offers a downloaded update again after "later".
+- The controller toolbar provides `업데이트 확인` and `방송` on Mac and Windows.
+  The OS menu keeps the standard app commands. The update button retries failed
+  checks, reports progress, and offers a downloaded update again after "later".
 - Defer prompts while the native presenter is open. Main-process installation
   also rechecks the presenter window immediately before `quitAndInstall`.
 - Renderer blocks installation while edits or saves are pending. Save first and
-  use the update menu again. Update errors must not print token-bearing URLs.
+  use the toolbar update button again. Update errors must not print token-bearing URLs.
 - Only the controller window can invoke update IPC. Output-window reloads cannot
   download or install updates. Preload event subscriptions return unsubscribe.
 - `MINDEX_DISABLE_UPDATES=1` keeps packaged test builds offline. Dev builds never
