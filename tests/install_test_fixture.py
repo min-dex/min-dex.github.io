@@ -1,5 +1,6 @@
 """Install an unsigned TEST artifact in a marker-owned temporary directory only."""
-import json, os, pathlib, shutil, subprocess, sys, tempfile
+import errno
+import json, os, pathlib, shutil, subprocess, sys, tempfile, time
 artifact=pathlib.Path(sys.argv[1]).resolve()
 state=pathlib.Path(sys.argv[2]).resolve()
 if state.exists():
@@ -21,7 +22,13 @@ if sys.platform=='darwin':
         if destination.exists(): shutil.rmtree(destination)
         subprocess.run(['ditto',str(source),str(destination)],check=True)
     finally:
-        subprocess.run(['hdiutil','detach',str(mount)],check=True,stdout=subprocess.DEVNULL)
+        # Disk Arbitration can briefly hold the CI volume after ditto exits.
+        for attempt in range(5):
+            result = subprocess.run(['hdiutil', 'detach', str(mount)], stdout=subprocess.DEVNULL)
+            if result.returncode != errno.EBUSY or attempt == 4:
+                result.check_returncode()
+                break
+            time.sleep(attempt + 1)
     exe=destination/'Contents/MacOS'/app_name
 elif sys.platform=='win32':
     assert os.environ.get('GITHUB_ACTIONS')=='true'
