@@ -190,8 +190,8 @@ Draft restore, conflict decisions and playback semantics are unchanged.
 ## Remote utility icon ·2026-10-22
 
 The topbar remote control uses the pinned Lucide smartphone icon and shared
-icon-btn sizing, padding and stroke, at its existing position before device
-status. Preserve the 원격 조작 tooltip and accessible label; hydrate the dynamic
+icon-btn sizing, padding and stroke. It sits after the theme control and before
+Broadcast, update, and device status. Preserve the 원격 조작 tooltip and accessible label; hydrate the dynamic
 button immediately so initial load does not depend on a later view render.
 
 ## Remote controls ·2026-10-22
@@ -254,3 +254,13 @@ font, 5px control radius, 35px standard button height and 14px/600 controls.
 The sanctuary canvas remains square at the edges. Home recent-view tabs keep
 the same 14px/600 type in both states. Keynote's utility disclosure uses a
 30px target, 5px radius, 12px/600 label and visible keyboard focus.
+
+
+## Controller toolbar · 2026-11-10
+
+View and scale share a 35px outlined group, 28px segments, 5px radius,
+12px/600 text, neutral hover, accent-soft selection and inset keyboard focus.
+Toolbar command icons use the 16px/1.5 tokens. The radio icon beside live
+scripture is a decorative 14px helper, with the same stroke. BGM and Help use
+the shared neutral hover and inset focus. Desktop icon-only shortcuts use the
+same accessible name and tooltip for YouTube broadcast and update checking.

@@ -76,6 +76,28 @@ def main():
                   const bgm=toolbar.querySelector('.svc-music-name');
                   check(view.nextElementSibling===scale && toolbar.lastElementChild===scripture,'toolbar order');
                   check(scale.textContent.includes('배율') && bgm.textContent.trim()==='BGM','visible toolbar labels');
+                  const iconStyle=node=>{
+                    const style=getComputedStyle(node);
+                    return [style.width,style.height,style.strokeWidth].join(',');
+                  };
+                  const radio=()=>scripture.querySelector('i[data-lucide],svg.lucide');
+                  check(iconStyle(radio())==='14px,14px,1.5px','scripture placeholder icon');
+                  refreshIcons(shell);
+                  check(radio().matches('svg.lucide') && iconStyle(radio())==='14px,14px,1.5px','scripture SVG icon');
+                  check(iconStyle(bgm.querySelector('svg.lucide'))==='16px,16px,1.5px','BGM command icon');
+                  const theme=document.body.dataset.theme;
+                  for(const appearance of ['dark','light']) {
+                    document.body.dataset.theme=appearance;
+                    const viewActive=view.querySelector('[aria-pressed=true]');
+                    const scaleActive=scale.querySelector('[aria-pressed=true]');
+                    const activeStyles=[viewActive,scaleActive].map(button=>getComputedStyle(button));
+                    for(const prop of ['backgroundColor','color','height','borderRadius','fontWeight']) {
+                      check(activeStyles[0][prop]===activeStyles[1][prop],'matching segment '+prop+' '+appearance);
+                    }
+                    check(activeStyles[0].height==='28px'&&activeStyles[0].borderRadius==='5px','segment dimensions');
+                  }
+                  if(theme===undefined) delete document.body.dataset.theme;
+                  else document.body.dataset.theme=theme;
                   for(const width of [1200, 700, 400]) {
                     shell.style.width=width+'px';
                     const bounds=toolbar.getBoundingClientRect(), live=scripture.getBoundingClientRect();

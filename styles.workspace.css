@@ -1857,37 +1857,50 @@ body[data-theme="dark"] .service-week-card:hover {
   gap: 0;
   align-items: start;
 }
-.svc-board-scale {
-  display: flex;
-  flex-wrap: wrap;
+:is(.svc-board-scale, .svc-presenter-view-switch) {
+  display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  margin: -6px 0 10px;
-  color: var(--ink-4);
-  font-size: var(--ui-label-size);
-  font-weight: 700;
+  height: var(--ui-icon-btn-size);
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  box-sizing: border-box;
+  white-space: nowrap;
 }
-.svc-board-scale > span { margin-right: 4px; }
-.svc-board-scale button {
-  height: 26px;
+.svc-board-scale-label {
+  padding: 0 10px;
+  color: var(--ink-3);
+  font-size: var(--ui-meta-size);
+  font-weight: var(--ui-label-weight);
+}
+:is(.svc-board-scale, .svc-presenter-view-switch) > button {
+  height: var(--ui-icon-btn-inline);
+  min-height: var(--ui-icon-btn-inline);
+  padding: 0 10px;
   border: 0;
   border-radius: var(--r);
   background: transparent;
   color: var(--ink-3);
   cursor: pointer;
   font: inherit;
-  padding: 0 10px;
+  font-size: var(--ui-meta-size);
+  font-weight: var(--ui-label-weight);
+  line-height: 1;
+  transition: none;
   white-space: nowrap;
 }
-.svc-board-scale button:hover,
-.svc-board-scale button:focus-visible {
+:is(.svc-board-scale, .svc-presenter-view-switch) > button:not([aria-pressed="true"]):hover {
   background: var(--ui-surface-field);
   color: var(--ink);
 }
-.svc-board-scale button[aria-pressed="true"] {
+:is(.svc-board-scale, .svc-presenter-view-switch) > button[aria-pressed="true"] {
   background: var(--accent-soft);
   color: var(--ink);
+}
+:is(.svc-board-scale, .svc-presenter-view-switch) > button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 .svc-presenter-board-column {
   display: grid;
@@ -4211,7 +4224,12 @@ body.is-chromium .svc-slide-thumb-wrap.active:has(.svc-slide-thumb:focus-visible
   gap: 5px;
   font-weight: 600;
 }
-.svc-citation-composer-heading svg { width: 14px; height: 14px; }
+.svc-citation-composer-heading :is(i[data-lucide], svg.lucide) {
+  width: var(--ui-icon-sm);
+  height: var(--ui-icon-sm);
+  flex: 0 0 var(--ui-icon-sm);
+  stroke-width: var(--ui-icon-stroke);
+}
 .svc-citation-composer-entry {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -5049,12 +5067,6 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 
 .svc-presenter-toolbar-utilities .svc-music-player .svc-music-toggle { min-height: 28px; height: 28px; font-size: var(--ui-label-size); }
 
-/* Quiet, compact preview zoom control. */
-.svc-presenter-toolbar .svc-board-scale{gap:0;margin:0;padding:2px;flex-wrap:nowrap;white-space:nowrap;border:1px solid var(--line);border-radius:var(--r);height:35px;box-sizing:border-box}
-.svc-presenter-toolbar .svc-board-scale-label{margin:0;padding:0 8px;color:var(--ink-3);font-weight:600}
-.svc-presenter-toolbar .svc-board-scale button{height:28px;min-height:28px;padding:0 10px;font-size:var(--ui-meta-size);font-weight:500;font-variant-numeric:tabular-nums}
-.svc-presenter-toolbar .svc-board-scale button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-
 .svc-setlist-song-detail { color: var(--ink-3); font-size: var(--ui-meta-size); font-weight: var(--ui-meta-weight); }
 
 [data-inline-bold-editor] > [data-inline-bold-button]{justify-self:start;flex-shrink:0}
@@ -5817,10 +5829,6 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 
 /* Both presenter views share a stable, wrapping toolbar. */
 .svc-presenter-toolbar { display: flex; flex-wrap: wrap; gap: 10px; overflow: visible; }
-.svc-presenter-view-switch { order: 0; display: inline-flex; flex: 0 0 auto; gap: 0; padding: 2px; border: 1px solid var(--line); border-radius: var(--r); height: 35px; box-sizing: border-box; }
-.svc-presenter-view-switch .btn { min-height: 28px; height: 28px; padding: 0 10px; font-size: var(--ui-meta-size); white-space: nowrap; }
-.svc-presenter-view-switch .btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink, #fff); }
-.svc-presenter-view-switch .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .svc-presenter-toolbar > .svc-output-action { order: 3; }
 .svc-presenter-toolbar-utilities { order: 4; }
 .svc-focus-transport { align-items: flex-start; }
@@ -6044,7 +6052,16 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 
 /* Peer presenter controls share the standard command rhythm. */
 .svc-presenter-toolbar .svc-music-player { height:35px; padding:0; }
-.svc-presenter-toolbar .svc-music-name { height:35px; min-height:35px; padding:0 10px; font-weight:600; }
+.svc-presenter-toolbar .svc-music-name { height:35px; min-height:35px; padding:0 10px; border-radius:var(--r); font-weight:600; }
+.svc-presenter-toolbar .svc-music-name:is(:hover, :focus-visible) { background:var(--ui-surface-field); }
+.svc-presenter-toolbar :is(.svc-music-name, .svc-presenter-help > summary):focus-visible {
+  outline:2px solid var(--accent);
+  outline-offset:-2px;
+}
+.svc-presenter-toolbar .svc-presenter-help[open] > summary {
+  background:var(--accent-soft);
+  color:var(--ink);
+}
 .svc-presenter-side-panel .svc-presenter-action-group--nav { height:35px; }
 .svc-presenter-side-panel .svc-presenter-action-group--nav .icon-btn { width:35px; height:35px; flex:0 0 35px; }
 .svc-presenter-input-rail button.svc-presenter-preparation-apply { min-height:35px; height:35px; padding:0 10px; font-weight:600; }

@@ -994,7 +994,7 @@ function renderPresenterCitationComposer(subgroup, serviceId) {
   return `
     <div class="svc-citation-composer" role="group" aria-label="실시간 말씀 입력">
       <div class="svc-citation-composer-heading">
-        <span><i data-lucide="radio"></i>실시간 말씀</span>
+        <span><i data-lucide="radio" aria-hidden="true"></i>실시간 말씀</span>
         <label class="svc-slide-citation-auto-output">
           <input type="checkbox" data-presenter-citation-auto-output ${presenterCitationAutoOutput ? "checked" : ""} />
           <span>즉시 송출</span>
