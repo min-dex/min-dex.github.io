@@ -24,13 +24,13 @@ def main():
                   const input=document.createElement('input');input.value='미저장 입력';host.append(input);input.focus();input.setSelectionRange(1,3);
                   const outputBefore=JSON.stringify(state.presenter);
                   const buttons=[...host.querySelectorAll('[data-presenter-thumb-level]')];
-                  check(buttons.map(b=>b.textContent).join()==='1,2,3','level labels');
-                  check(buttons[0].getAttribute('aria-pressed')==='true','default is level one');
-                  buttons[1].click();await MINDEX_SERVER_STORAGE.flush();
+                  check(buttons.map(b=>b.textContent).join()==='작게,기본,크게','level labels');
+                  check(buttons[1].getAttribute('aria-pressed')==='true','default size is selected');
+                  buttons[2].click();await MINDEX_SERVER_STORAGE.flush();
                   check(document.documentElement.dataset.thumbLevel==='2','click applies');
                   check(safeStorageGet('local', STORAGE.presenterThumbScale)==='1.5','compatible device preference');
-                  check(buttons.map(b=>b.getAttribute('aria-pressed')).join()==='false,true,false','pressed state follows');
-                  for(const [old,level] of [['1','1'],['1.3','2'],['1.5','2'],['1.6','2'],['2','3'],['9','1']]) {
+                  check(buttons.map(b=>b.getAttribute('aria-pressed')).join()==='false,false,true','pressed state follows');
+                  for(const [old,level] of [['0.75','0'],['1','1'],['1.3','2'],['1.5','2'],['1.6','2'],['2','2'],['9','1']]) {
                     safeStorageSet('local', STORAGE.presenterThumbScale,old);await MINDEX_SERVER_STORAGE.flush();
                     check(readPresenterThumbLevel()===level,'legacy preference '+old);
                   }
@@ -42,8 +42,8 @@ def main():
                   const rects=root=>[...root.querySelectorAll('.svc-slide-thumb-wrap')].map(node=>node.getBoundingClientRect());
                   for(const width of [900, 460, 220]) {
                     board.style.width=strip.style.width=width+'px';
-                    for(const [level, columns] of [[1,3],[2,2],[3,1]]) {
-                      buttons[level-1].click();
+                    for(const [level, columns] of [[0,4],[1,3],[2,2]]) {
+                      buttons[level].click();
                       check(document.documentElement.dataset.thumbLevel===String(level),'selected level');
                       for(const [surface,gap] of [[board,10],[strip,10]]) {
                         const thumbs=rects(surface), first=thumbs.slice(0,columns);
@@ -65,16 +65,36 @@ def main():
                   }
                   check(input.isConnected && document.activeElement===input && input.value==='미저장 입력' && input.selectionStart===1 && input.selectionEnd===3,'editor focus/input changed');
                   check(JSON.stringify(state.presenter)===outputBefore,'output model changed');
+                  focus.remove();
+                  const shell=document.createElement('div');
+                  shell.innerHTML=renderServicePresenterControls({id:'fixture'},[{...slide,elementId:'citation',liveScriptureControl:true}]);
+                  host.append(shell);
+                  const toolbar=shell.querySelector('.svc-presenter-toolbar-layout');
+                  const view=toolbar.querySelector('.svc-presenter-view-switch');
+                  const scale=toolbar.querySelector('.svc-board-scale');
+                  const scripture=toolbar.querySelector('.svc-toolbar-scripture');
+                  const bgm=toolbar.querySelector('.svc-music-name');
+                  check(view.nextElementSibling===scale && toolbar.lastElementChild===scripture,'toolbar order');
+                  check(scale.textContent.includes('배율') && bgm.textContent.trim()==='BGM','visible toolbar labels');
+                  for(const width of [1200, 700, 400]) {
+                    shell.style.width=width+'px';
+                    const bounds=toolbar.getBoundingClientRect(), live=scripture.getBoundingClientRect();
+                    check(Math.abs(live.right-bounds.right)<1,'live scripture must stay on the right');
+                    check(scale.offsetHeight===35 && view.offsetHeight===35 && getComputedStyle(toolbar).gap==='10px','consistent control heights and gap');
+                    check(toolbar.scrollWidth<=toolbar.clientWidth+1,'toolbar overflows');
+                    const input=scripture.querySelector('input[type="text"]');
+                    check(input.getBoundingClientRect().right<=live.right+1,'scripture input overflows');
+                  }
                   return 'PASS';
                 }'''), 'controls, equal columns, fixed gaps, persistence', flush=True)
-                page.evaluate("setPresenterThumbLevel('2')")
+                page.evaluate("setPresenterThumbLevel('0')")
                 # A fresh controller load restores it; the output window never applies it.
                 page.evaluate("MINDEX_SERVER_STORAGE.flush()")
                 page.reload(wait_until='domcontentloaded')
                 page.wait_for_function("typeof readPresenterThumbLevel === 'function'")
                 prepare_server_state_fixture(page)
                 page.evaluate("applyPresenterThumbLevel(readPresenterThumbLevel())")
-                assert page.evaluate("document.documentElement.dataset.thumbLevel") == '2', 'restored on reload'
+                assert page.evaluate("document.documentElement.dataset.thumbLevel") == '0', 'restored on reload'
                 out = ctx.new_page()
                 out.route('**/*supabase*/**', lambda r: r.abort())
                 out.goto(url + '?output=presenter', wait_until='domcontentloaded')

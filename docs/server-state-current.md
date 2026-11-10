@@ -411,8 +411,9 @@ server-state DB tests also pass. Runtime/client code is unchanged.
 `mindex.ui.presenterThumbScale` uses the device namespace, scoped by the browser
 profile identity. It is not a shared worship/project setting. Existing shared
 scale values are ignored, not copied to other devices; without a device value
-the controller starts at size level 1. The legacy 100/150/200% storage values
-represent levels 1/2/3. Legacy browser-local scale migrates to device.
+the controller starts at the default size. The legacy 100% value maps to default,
+while 130/150/160/200% map to large. The new small setting stores 0.75.
+Legacy browser-local scale migrates to device.
 The output window and Remote do not receive this controller view setting.
 
 ## Native Praise discard · 2026-11-06

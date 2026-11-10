@@ -157,7 +157,6 @@ const UI_MESSAGES = {
     "presenter.mode.praise": "찬양",
     "presenter.mode.slide": "{number}번",
     "presenter.mode.noSlides": "슬라이드 없음",
-    "presenter.music.default": "음악",
     "presenter.music.play": "음악 재생",
     "presenter.music.pause": "음악 정지",
     "presenter.music.volume": "음악 볼륨",
@@ -197,7 +196,6 @@ const UI_MESSAGES = {
     "presenter.mode.praise": "Song",
     "presenter.mode.slide": "Slide {number}",
     "presenter.mode.noSlides": "No slides",
-    "presenter.music.default": "Music",
     "presenter.music.play": "Play music",
     "presenter.music.pause": "Pause music",
     "presenter.music.volume": "Music volume",
@@ -2215,13 +2213,17 @@ function toggleTheme() {
 }
 
 // Keep the existing device storage tokens so the preference survives upgrades.
-const PRESENTER_THUMB_LEVELS = { "1": "1", "2": "1.5", "3": "2" };
+const PRESENTER_THUMB_LEVELS = {
+  "0": { label: "작게", saved: "0.75" },
+  "1": { label: "기본", saved: "1" },
+  "2": { label: "크게", saved: "1.5" },
+};
 
 function readPresenterThumbLevel() {
   const saved = safeStorageGet("local", STORAGE.presenterThumbScale);
-  if (["1.3", "1.6"].includes(saved)) return "2";
+  if (["1.3", "1.6", "2"].includes(saved)) return "2";
   return Object.keys(PRESENTER_THUMB_LEVELS).find((level) =>
-    PRESENTER_THUMB_LEVELS[level] === saved) || "1";
+    PRESENTER_THUMB_LEVELS[level].saved === saved) || "1";
 }
 
 function applyPresenterThumbLevel(level) {
@@ -2247,7 +2249,7 @@ function setPresenterThumbLevel(level) {
     pane.scrollTop += anchor.getBoundingClientRect().top - pane.getBoundingClientRect().top - snapshot.offsetTop;
   }
   if (offset) filmstrip.scrollLeft = offset * (thumb.getBoundingClientRect().width + gap);
-  safeStorageSet("local", STORAGE.presenterThumbScale, PRESENTER_THUMB_LEVELS[value]);
+  safeStorageSet("local", STORAGE.presenterThumbScale, PRESENTER_THUMB_LEVELS[value].saved);
   document.querySelectorAll("[data-presenter-thumb-level]").forEach((button) => {
     button.setAttribute("aria-pressed", String(button.dataset.presenterThumbLevel === value));
   });
@@ -2257,10 +2259,10 @@ function setPresenterThumbLevel(level) {
 function renderPresenterThumbLevelControl() {
   const current = document.documentElement.dataset.thumbLevel || readPresenterThumbLevel();
   return `
-    <div class="svc-board-scale" role="group" aria-label="슬라이드 보기 크기">
-      <span class="svc-board-scale-icon" title="슬라이드 보기 크기 · 송출 화면에는 적용되지 않아요" aria-hidden="true"><i data-lucide="layout-grid"></i></span>
-      ${Object.keys(PRESENTER_THUMB_LEVELS).map((level) => `
-        <button type="button" data-presenter-thumb-level="${level}" aria-label="슬라이드 보기 크기 ${level}단계" title="슬라이드 보기 크기 ${level}단계" aria-pressed="${level === current}">${level}</button>`).join("")}
+    <div class="svc-board-scale" role="group" aria-label="슬라이드 보기 배율">
+      <span class="svc-board-scale-label" aria-hidden="true">배율</span>
+      ${Object.entries(PRESENTER_THUMB_LEVELS).map(([level, { label }]) => `
+        <button type="button" data-presenter-thumb-level="${level}" aria-label="보기 배율 ${label}" title="보기 배율 ${label}" aria-pressed="${level === current}">${label}</button>`).join("")}
     </div>`;
 }
 
@@ -25927,17 +25929,18 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
       <div class="svc-presenter-toolbar">
         <div class="svc-presenter-toolbar-layout">
           <div class="svc-presenter-toolbar-start">
-            ${renderPresenterFocusView()}${renderWorshipDefaultOrderFillControl(service)}
-          </div>
-          ${renderPresenterToolbarScripture(service, slides)}
-          <div class="svc-presenter-toolbar-end">
+            ${renderPresenterFocusView()}
             ${renderPresenterThumbLevelControl()}
+            ${renderWorshipDefaultOrderFillControl(service)}
+          </div>
+          <div class="svc-presenter-toolbar-end">
             ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
             <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
               ${renderServiceMusicPlayer()}
               ${renderPresenterHelpControl()}
             </span>
           </div>
+          ${renderPresenterToolbarScripture(service, slides)}
         </div>
       </div>
       ${renderPastServiceEditingNotice(service)}
@@ -29838,7 +29841,7 @@ function renderServiceMusicPlayer(options = {}) {
   const music = slotOwned ? { ...state.serviceMusic, sourceKey: "", sourceLabel: "", objectUrl: "", fileName: "", playing: false, pending: false } : state.serviceMusic;
   const context = slotOwned ? {} : currentPresenterAudioContext();
   const activeLabel = music.sourceLabel && music.sourceKey ? music.sourceLabel : "";
-  const fileLabel = activeLabel || context.label || (music.fileName ? music.fileName : uiText("presenter.music.default"));
+  const fileLabel = activeLabel || context.label || music.fileName;
   const hasSource = Boolean(options.source || music.sourceKey || context.source || music.objectUrl);
   const inline = Boolean(options.source);
   const attached = Boolean(options.elementId);
@@ -29855,9 +29858,9 @@ function renderServiceMusicPlayer(options = {}) {
     <span class="svc-music-player${inline ? " svc-music-player--inline" : ""}" ${binding}>
       ${inline ? `<span class="svc-music-label">${escapeHtml(options.label)}</span>` : `
       <input class="svc-music-file" type="file" accept="audio/*" data-service-music-file hidden />
-      <button class="svc-music-name" type="button" data-service-music-action="choose" title="음악 선택">
+      <button class="svc-music-name" type="button" data-service-music-action="choose" aria-label="BGM 선택" title="${escapeAttr(fileLabel ? `BGM 선택 · ${fileLabel}` : "BGM 선택")}">
         <i data-lucide="${context.source ? "volume-2" : "music"}"></i>
-        <span>${escapeHtml(fileLabel)}</span>
+        <span>BGM</span>
       </button>
       `}
       <span class="svc-music-transport">

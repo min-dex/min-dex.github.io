@@ -243,13 +243,13 @@ def main():
                     # Controller slide size level is a per-profile value even against the same project/server.
                     page.evaluate("async()=>{setPresenterThumbLevel('2');await MINDEX_SERVER_STORAGE.flush()}")
                     assert second.evaluate("readPresenterThumbLevel()")=='1'
-                    second.evaluate("async()=>{setPresenterThumbLevel('3');await MINDEX_SERVER_STORAGE.flush()}")
+                    second.evaluate("async()=>{setPresenterThumbLevel('0');await MINDEX_SERVER_STORAGE.flush()}")
                     assert page.evaluate("readPresenterThumbLevel()")=='2'
                     assert page.evaluate("state.scriptures[0].body==='New edit before recovery' && state.dirty.scripture")
                     second.reload(wait_until='domcontentloaded')
                     second.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof readPresenterThumbLevel === "function" && !document.body.classList.contains("ui-booting")')
                     assert second.evaluate(INIT)
-                    assert second.evaluate("readPresenterThumbLevel()")=='3'
+                    assert second.evaluate("readPresenterThumbLevel()")=='0'
                     assert not any(r['p_scope']=='shared' and r['p_key']=='mindex.ui.presenterThumbScale' for r in requests)
                     print('PASS',engine,'hidden recovery UI, archived drafts preserved, offline retry, reload and private/shared profile boundary')
                     other.close();context.close()

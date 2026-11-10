@@ -56,7 +56,7 @@ try:
       if(!anchor)throw Error('No slide anchor for view-size test');
       const oldTop=anchor.getBoundingClientRect().top;
       const oldScroll=pane.scrollTop;
-      setPresenterThumbLevel('3');
+      setPresenterThumbLevel('2');
       if(Math.abs(anchor.getBoundingClientRect().top-oldTop)>1||pane.scrollTop===oldScroll)throw Error('Slide moved during size change');
       if(root.querySelector('.svc-slide-board').getAttribute('aria-label')!=='슬라이드 목록')throw Error('Missing Korean slide-list name');
       if(JSON.stringify(state.presenter)!==outputBefore||orderField.value!=='추가 입력 보존')throw Error('Size change affected output or draft');
@@ -109,7 +109,7 @@ try:
         pane.scrollTop=0;window.scrollTo(0,0);
       }""")
       if width >= 1000:
-       for level in ('1','2','3'):
+       for level in ('0','1','2'):
         page.locator('[data-presenter-thumb-level="'+level+'"]').click()
         page.evaluate("async()=>{await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}")
         page.evaluate("""()=>{
