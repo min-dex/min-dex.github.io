@@ -444,6 +444,7 @@ const state = {
   applyingPageTab: false,
   selectedSongId: null,
   selectedVersionId: null,
+  praiseVersionCompareGroupId: null,
   selectedScriptureId: null,
   selectedBookCode: null,
   selectedBibleTranslationId: null,
@@ -8840,6 +8841,19 @@ function handleDetailClick(event) {
   const serviceDbBtn = event.target.closest("[data-service-db-song], [data-service-db-reference]");
   if (serviceDbBtn) {
     void openServiceDbTab(serviceDbBtn);
+    return;
+  }
+
+  const compareVersions = event.target.closest("[data-compare-praise-versions]");
+  if (compareVersions) {
+    const song = getSelectedSong();
+    const group = praiseDisplayGroup(song);
+    if (!song?._singleSongRecord || group.members.length < 2) return;
+    const viewport = captureDetailViewportSnapshot();
+    state.praiseVersionCompareGroupId = state.praiseVersionCompareGroupId === group.id ? null : group.id;
+    renderDetail();
+    restoreDetailViewportSnapshot(viewport);
+    refs.detailPane.querySelector("[data-compare-praise-versions]")?.focus({ preventScroll: true });
     return;
   }
 
@@ -17777,14 +17791,27 @@ function shouldReviewVersionStructure(song, version, forms = version?.forms || [
 
 function renderFormsTab(song) {
   const versions = song.versions || [];
-  const linkedEntries = linkedSongVersionEntries(song).filter(entry => !song._singleSongRecord || !praiseDisplayGroup(song).members.some(row => row.id === entry.song.id));
+  const group = song._singleSongRecord ? praiseDisplayGroup(song) : null;
+  const comparing = group?.members.length > 1 && state.praiseVersionCompareGroupId === group.id;
+  const linkedEntries = linkedSongVersionEntries(song).filter(entry => !group?.members.some(row => row.id === entry.song.id));
+  const activeLabel = comparing ? praiseVariantLabel(song, group.members) : "";
+  if (comparing) {
+    const peers = group.members.filter(row => row.id !== song.id).map(peer => {
+      const version = peer.versions[0];
+      return {
+        song: peer, version, label: praiseVariantLabel(peer, group.members),
+        forms: getFormsForVersion(version),
+      };
+    });
+    linkedEntries.unshift(...peers);
+  }
   return `
     <section class="panel praise-forms-panel">
-      ${renderSingleSongVersionPicker(song)}
+      ${renderSingleSongVersionPicker(song, group?.members, comparing)}
       ${renderFormToolbar(song)}
       ${
         versions.length > 1 || linkedEntries.length
-          ? renderVersionCompare(song, versions, linkedEntries)
+          ? renderVersionCompare(song, versions, linkedEntries, activeLabel)
           : renderSingleVersionForms()
       }
     </section>
@@ -17832,7 +17859,7 @@ function renderSingleVersionForms() {
   `;
 }
 
-function renderVersionCompare(song, versions, linkedEntries = []) {
+function renderVersionCompare(song, versions, linkedEntries = [], activeLabel = "") {
   const versionForms = versions.map((version) => ({
     version,
     forms: getFormsForVersion(version),
@@ -17846,7 +17873,7 @@ function renderVersionCompare(song, versions, linkedEntries = []) {
   return `
     <div class="version-compare-grid">
       <div class="version-compare-head" style="${gridStyle}">
-        ${versions.map((version) => renderVersionCompareHead(song, version)).join("")}
+        ${versions.map((version) => renderVersionCompareHead(song, version, activeLabel)).join("")}
         ${linkedEntries.map(renderLinkedSongVersionHead).join("")}
       </div>
       <div class="version-compare-columns" style="${gridStyle} --version-compare-rows: ${rowCount};">
@@ -17916,22 +17943,23 @@ function renderCopyVersionButton(version, forms) {
   `;
 }
 
-function renderVersionCompareHead(song, version) {
+function renderVersionCompareHead(song, version, label = "") {
   const active = version.id === getSelectedVersionId();
   const forms = getFormsForVersion(version);
   return `
     <div class="version-compare-title version-picker${active ? " active" : ""}" data-version-id="${escapeAttr(version.id)}" role="button" tabindex="0">
-      ${renderVersionTitleContent(song, version, forms, { active })}
+      ${renderVersionTitleContent(song, version, forms, { active, label })}
     </div>
   `;
 }
 
 function renderLinkedSongVersionHead(entry) {
+  const title = entry.label || linkedSongVersionTitle(entry.song, entry.version);
   return `
     <div class="version-compare-title linked-version-title" data-open-song="${escapeAttr(entry.song.id)}" role="button" tabindex="0">
       <div class="version-title-main">
-        <span class="version-title-text" title="${escapeAttr(linkedSongVersionTitle(entry.song, entry.version))}">${escapeHtml(linkedSongVersionTitle(entry.song, entry.version))}</span>
-        <span class="linked-version-badge">Linked</span>
+        <span class="version-title-text" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
+        ${entry.label ? "" : '<span class="linked-version-badge">Linked</span>'}
       </div>
       <div class="version-title-actions">
         <span class="linked-version-open" aria-hidden="true"><i data-lucide="external-link"></i></span>
@@ -17960,7 +17988,7 @@ function renderVersionTitleContent(song, version, forms, options = {}) {
   const versionName = versionEditableName(song, version || {});
   return `
     <div class="version-title-main">
-      ${song?._singleSongRecord ? renderNativeVersionHeading(song,version) : `      <input class="version-title-input" type="text" data-version-name-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(versionName)}" aria-label="버전 이름" />
+      ${song?._singleSongRecord ? (options.label ? `<span class="version-title-text">${escapeHtml(options.label)}</span>` : renderNativeVersionHeading(song,version)) : `      <input class="version-title-input" type="text" data-version-name-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(versionName)}" aria-label="버전 이름" />
       <input class="version-output-title-input" type="text" data-version-output-title-field="${escapeAttr(version?.id || "")}" value="${escapeAttr(version?.output_title || "")}" placeholder="${escapeAttr(`버전 전용 제목 · 미입력 시 ${song?.title || "대표 제목"}`)}" aria-label="버전 전용 제목" title="비워 두면 대표 제목으로 출력합니다" />` }
       ${renderVersionAttentionStatus(song, version, forms, { active })}
     </div>

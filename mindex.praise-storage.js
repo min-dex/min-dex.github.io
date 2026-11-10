@@ -447,11 +447,12 @@ function praiseVariantLabel(song, peers) {
   const detail = song.title;
   return `${name} · ${detail}${peers.filter(row => row.title === detail).length > 1 ? ` · ${peers.findIndex(row=>row.id===song.id)+1}` : ""}`;
 }
-function renderSingleSongVersionPicker(song) {
-  if (!song?._singleSongRecord) return "";
-  const peers = praiseDisplayGroup(song).members;
+function renderSingleSongVersionPicker(song, peers = song?._singleSongRecord ? praiseDisplayGroup(song).members : [], comparing = false) {
   if (peers.length < 2) return "";
-  return `<label class="field compact single-song-version-picker"><span>판본</span><select data-single-version-select aria-label="곡 판본">${peers.map(row => `<option value="${escapeAttr(row.id)}"${row.id === song.id ? " selected" : ""}>${escapeHtml(praiseVariantLabel(row,peers))}</option>`).join("")}</select></label>`;
+  return `<div class="single-song-version-controls">
+    <label class="field compact single-song-version-picker"><span>판본</span><select data-single-version-select aria-label="곡 판본">${peers.map(row => `<option value="${escapeAttr(row.id)}"${row.id === song.id ? " selected" : ""}>${escapeHtml(praiseVariantLabel(row, peers))}</option>`).join("")}</select></label>
+    <button class="btn secondary" type="button" data-compare-praise-versions aria-pressed="${comparing}">판본 비교</button>
+  </div>`;
 }
 async function selectSingleSongVersion(field) {
   const song = getSelectedSong(), id = field.value;

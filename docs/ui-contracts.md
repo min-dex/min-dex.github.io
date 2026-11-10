@@ -578,6 +578,8 @@ and bulletin editor/preview in Chromium and WebKit; no service data is saved.
 
 ## Praise version comparison
 
+- 찬양에 같은 곡으로 묶인 판본이 둘 이상이면 판본 선택 옆 `판본 비교`로 나란히 본다. 현재 판본은 편집할 수 있고 나머지는 읽기 전용으로 표시한다. 비교 열기와 닫기는 선택, 미저장 가사, 원본 레코드를 유지한다. 좁은 화면에서는 비교 영역 안에서 가로로 스크롤한다.
+
 - Version columns share row heights by displayed block position, including linked songs. Editing/read-only headers reserve the same 30px minimum. Longer lyrics expand the corresponding row in every column; shorter versions do not fabricate lyric blocks. This is visual alignment only and never changes forms, order, or source lyrics.
 
 - Song form UI labels separate numbered parts from A/B and put a space before @ (Verse 2 B, Chorus @, Verse 1 @A). Stored/copy labels and canonical playback tokens are unchanged; readonly editor rendering formats the label only at display time.

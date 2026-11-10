@@ -102,6 +102,26 @@ try:
     assert page.evaluate("JSON.stringify([state.songs,state.forms])===compactBefore&&state.selectedSongId==='compact-a'")
     native.locator('summary').click()
     assert page.evaluate("JSON.stringify([state.songs,state.forms])===compactBefore&&state.dirty.forms")
+   compare=page.get_by_role('button',name='판본 비교',exact=True)
+   assert compare.get_attribute('aria-pressed')=='false'
+   page.set_viewport_size({'width':1400,'height':950})
+   compare.focus()
+   page.keyboard.press('Enter')
+   assert compare.get_attribute('aria-pressed')=='true' and compare.evaluate('e=>e===document.activeElement')
+   grid=page.locator('.version-compare-grid')
+   assert grid.locator('.version-compare-column').count()==2
+   assert grid.locator('.version-compare-title .version-title-text').all_text_contents()==['기본','영어']
+   assert grid.locator('.version-compare-column.active textarea').first.input_value()=='보존할 미저장 가사'
+   assert grid.locator('.linked-version-column textarea').count()==0
+   assert page.evaluate("JSON.stringify([state.songs,state.forms])===compactBefore&&state.selectedSongId==='compact-a'&&state.dirty.forms")
+   page.set_viewport_size({'width':400,'height':950})
+   assert grid.evaluate("e=>e.scrollWidth>e.clientWidth&&getComputedStyle(e).overflowX==='auto'")
+   grid.locator('.version-compare-column.active textarea').first.fill('비교 중에 추가한 가사')
+   compare.click()
+   assert compare.get_attribute('aria-pressed')=='false'
+   assert page.locator('.single-version textarea').first.input_value()=='비교 중에 추가한 가사'
+   assert page.evaluate("JSON.stringify(state.songs)===JSON.stringify(JSON.parse(compactBefore)[0])&&state.dirty.forms")
+   assert counts['writes']==0,counts
    from pathlib import Path
    proof=Path('output/praise-compact-controls-20261104');proof.mkdir(parents=True,exist_ok=True)
    page.set_viewport_size({'width':1400,'height':950});page.locator('.praise-forms-panel').screenshot(path=str(proof/(engine+'.png')))
