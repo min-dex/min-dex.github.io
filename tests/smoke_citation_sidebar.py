@@ -42,11 +42,10 @@ try:
                       assert(!sidebar.querySelector('[data-presenter-citation-reference-input]'),'sidebar duplicate');
                       assert(toolbar.contains(composer)&&toolbar.scrollWidth<=toolbar.clientWidth+1,'toolbar overflow');
                       const toolRect=toolbar.getBoundingClientRect(),composerRect=composer.getBoundingClientRect();
-                      assert(Math.abs((toolRect.left+toolRect.right-composerRect.left-composerRect.right)/2)<2,'composer is not centered');
+                      assert(Math.abs(toolRect.right-composerRect.right)<2,'composer is not aligned to the right');
+                      assert(toolbar.querySelector('.svc-presenter-toolbar-layout').lastElementChild===composer.closest('.svc-toolbar-scripture'),'scripture is not the final toolbar group');
                       const inputRect=input.getBoundingClientRect();
-                      if(toolbar.clientWidth>=400) assert(Math.abs((toolRect.left+toolRect.right-inputRect.left-inputRect.right)/2)<2,'input is not centered');
-
-
+                      assert(inputRect.width>0&&inputRect.left>=composerRect.left-1&&inputRect.right<=composerRect.right+1,'input overflows composer');
                       assert(composer.querySelector('.svc-citation-composer-heading > span').getClientRects().length,'label hidden');
                       assert(rail&&!sidebar.querySelector('.svc-presenter-input-rail'),'order input belongs to left rail '+JSON.stringify({rail:!!rail,side:!!sidebar.querySelector('.svc-presenter-input-rail'),list:refs.songList.innerHTML.slice(0,500)}));
                       assert(innerWidth<1000||sidebar.clientWidth>0,'desktop sidebar collapsed');
@@ -61,7 +60,7 @@ try:
                       input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true}));
                       assert(submissions===0,'IME submitted scripture');
                       input.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
-                      assert(submissions===1,'toolbar Enter lost handler');appendPresenterCitationReference=append;
+                      assert(submissions===1,'toolbar Enter lost handler ');appendPresenterCitationReference=append;
                       const retained=document.querySelector('.svc-presenter-toolbar [data-presenter-citation-reference-input]');
                       assert(retained===input&&retained.value==='요 15:9','DOM owner or draft lost');
                       assert(document.activeElement===retained && retained.selectionStart===2 && retained.selectionEnd===4,'focus/caret lost');
