@@ -2,7 +2,7 @@
  'use strict';
  if(isPresenterOutputRoute())return;
  const trigger=document.createElement('button');trigger.type='button';trigger.className='icon-btn';trigger.id='remotePanelBtn';trigger.innerHTML='<i data-lucide="smartphone"></i>';trigger.title='원격 조작';trigger.setAttribute('aria-label','원격 조작');
- document.getElementById('monitorPanelBtn')?.before(trigger);window.lucide?.createIcons({root:trigger});
+ document.getElementById('desktopBroadcastBtn')?.before(trigger);window.lucide?.createIcons({root:trigger});
  let ending=false,remoteRevision=0,remoteBusy=false,remoteState={code:'',connected:false,available:false};
  const buttonLabel=()=>remoteState.code||'원격 조작';
  const codeFor=id=>hostContext()?.serviceId===id?remoteState.code||'':'';

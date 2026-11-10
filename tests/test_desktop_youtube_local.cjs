@@ -112,11 +112,20 @@ async function main() {
     }
     const left = main.locator('.topbar-module-strip button:visible');
     assert.equal(await left.count(), 6, 'Desktop left toolbar must have six actions');
-    const ids = ['themeBtn','saveAllBtn','remotePanelBtn','monitorPanelBtn','desktopUpdateBtn','desktopBroadcastBtn'];
+    const ids = ['saveAllBtn','themeBtn','remotePanelBtn','desktopBroadcastBtn','desktopUpdateBtn','monitorPanelBtn'];
     const boxes = await Promise.all(ids.map(id => main.locator('#'+id).boundingBox()));
     assert(boxes.every((box,index) => box && (index === 0 ||
       Math.abs(box.y-boxes[0].y)<1 && box.x>boxes[index-1].x)),
     'Desktop right toolbar must have six ordered actions on one row');
+    const topbar = await main.locator('.topbar').boundingBox();
+    const leftBoxes = await Promise.all((await left.all()).map(button => button.boundingBox()));
+    for (const [index, box] of boxes.entries()) {
+      const mirror = leftBoxes[boxes.length - 1 - index];
+      assert(Math.abs(mirror.x - topbar.x - (topbar.x + topbar.width - box.x - box.width)) < 1,
+        'Desktop toolbar positions must mirror the module buttons');
+      assert(Math.abs(box.y + box.height/2 - (mirror.y + mirror.height/2)) < 1
+        && box.width===40 && box.height===40, 'Desktop utilities must share the module button center line');
+    }
     assert(await app.evaluate(({Menu}) => !Menu.getApplicationMenu().items.some(
       item => ['업데이트','방송'].includes(item.label))), 'Moved actions must be absent from the native menu');
     await main.locator('#desktopUpdateBtn').click();

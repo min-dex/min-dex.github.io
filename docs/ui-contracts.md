@@ -35,8 +35,9 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 - Opening the right panel must not change the detail pane gutter.
 - Topbar icon buttons are square, `40px` by `40px`.
 - Home, theme, and save controls share the same button geometry at all widths.
-- Left topbar actions align to the left rail edge. Right topbar actions align to
-  the right rail edge because they belong to the app-level utility side.
+- The left module buttons and the right desktop utilities share a row, 40px slots,
+  zero gap and matching outer insets. Right-side order is Save, theme, Remote,
+  Broadcast, update, then device status. Broadcast and update are desktop-only.
 - Mindex brand/home buttons may navigate home, but should not add hover motion.
 - Keep inputs responsive inside their panels. The screen canvas has a minimum
   width of `max(700px, left sidebar + 320px content + right panel)`; below it,
