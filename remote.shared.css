@@ -183,7 +183,6 @@
   --shadow: 0 1px 2px rgba(16, 16, 16, .04), 0 10px 30px rgba(16, 16, 16, .055);
   --shadow-soft: 0 1px 10px rgba(16, 16, 16, .035);
   --r: 5px; --s1: 5px; --s2: 10px; --s3: 15px; --s4: 20px; --s5: 25px; --h: 35px;
-  --shell-edge-inset: 5px;
   --tab-active-bg: var(--bg);
   --tab-hover-bg: var(--ui-surface-field);
   --right-sidebar-w: var(--rail-w);
@@ -205,11 +204,12 @@
   --topbar-face-size: 32px;
   --module-nav-btn-size: 40px;
   --topbar-action-slot-count: 6;
+  --topbar-action-inset: calc((var(--sidebar-reference-w) - var(--topbar-btn-size) * var(--topbar-action-slot-count)) / 2);
   --shell-face-inset: 5px;
   --sidebar-icon-size: var(--ui-icon-size);
   --rail-motion: 120ms cubic-bezier(.2, 0, .2, 1);
   --module-tab-w: 180px;
-  --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--shell-edge-inset) * 2) + 50px);
+  --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--topbar-action-inset) * 2) + 50px);
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-presenter: "Mindex Presenter", "Freesentation", sans-serif;
   font-family: var(--font-sans);

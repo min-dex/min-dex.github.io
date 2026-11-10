@@ -122,6 +122,13 @@ async function main() {
       assert.equal(await button.getAttribute('title'),label);
       assert.equal(await button.getAttribute('aria-label'),label);
     }
+    for (const id of ids) {
+      const icon = main.locator('#'+id+' svg.lucide');
+      assert(await icon.evaluate(node => {
+        const style = getComputedStyle(node);
+        return style.width === '16px' && style.height === '16px' && style.strokeWidth === '1.5px';
+      }), 'Shared icon geometry: '+id);
+    }
     const topbar = await main.locator('.topbar').boundingBox();
     const leftBoxes = await Promise.all((await left.all()).map(button => button.boundingBox()));
     for (const [index, box] of boxes.entries()) {
