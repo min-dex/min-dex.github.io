@@ -69,11 +69,17 @@ def main():
 
                 # Move focus just before the shortcut's scheduled rAF executes.
                 # A user's new control must retain ownership.
-                page.evaluate('''() => window.addEventListener('keydown', () => {
-                  requestAnimationFrame(() => document.getElementById('focus-other-control').focus());
-                }, {once:true,capture:true})''')
+                page.evaluate('''() => {
+                  window.focusOwnershipFrameDone=false;
+                  window.addEventListener('keydown', () => {
+                    requestAnimationFrame(() => {
+                      document.getElementById('focus-other-control').focus();
+                      requestAnimationFrame(() => { window.focusOwnershipFrameDone=true; });
+                    });
+                  }, {once:true,capture:true});
+                }''')
                 page.keyboard.press('ArrowRight')
-                page.wait_for_timeout(100)
+                page.wait_for_function('window.focusOwnershipFrameDone === true')
                 assert focus_state(page)['other'] == 'focus-other-control', focus_state(page)
                 page.evaluate('renderPresenterDetail()')
                 assert focus_state(page)['other'] == 'focus-other-control', focus_state(page)

@@ -11,24 +11,6 @@ const {pipeline} = require('node:stream/promises');
 const youtube = {host:'a.rtmps.youtube.com', port:443, servername:'a.rtmps.youtube.com'};
 const validKey = key => typeof key === 'string' && /^[A-Za-z0-9_-]{6,128}$/.test(key);
 
-// Acceptance into a bounded Writable buffer is enough to accept an IPC chunk.
-// Waiting for every small OS pipe write can prevent the next chunk / EOF from
-// reaching a Windows reader that is still filling its input buffer.
-function writeInput(stream, bytes) {
-  return new Promise((resolve,reject) => {
-    const done = error => {
-      stream.removeListener('drain',drained);
-      stream.removeListener('error',failed);
-      stream.removeListener('close',closed);
-      error ? reject(error) : resolve();
-    };
-    const drained=()=>done(), failed=error=>done(error), closed=()=>done(Error('방송 입력이 닫혔습니다.'));
-    if (stream.destroyed || stream.writableEnded) { closed(); return; }
-    stream.once('drain',drained);stream.once('error',failed);stream.once('close',closed);
-    try { if (stream.write(bytes)) done(); } catch(error) { done(error); }
-  });
-}
-
 // Only the main process supplies a destination. The password travels to FFmpeg
 // through a private pipe, never in argv, a settings file, or diagnostic output.
 async function startEncoder({exe, key, destination = youtube, onState, signal, bitrateKbps = 14000, recordingPath}) {
@@ -110,9 +92,10 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
     });
     const encoderClosed=closed(child), muxerClosed=closed(muxer);
     muxerClosed.then(ok => { if (!ok && !closing) cleanup(); });
+    const write = (target, bytes) => new Promise((resolve,reject) => target.write(bytes,error => error?reject(error):resolve()));
     transfer = pipeline(child.stdout,new Writable({
       write(bytes, _encoding, done) {
-        Promise.all([writeInput(muxer.stdin,bytes),...(recording?[writeInput(recording,bytes)]:[])]).then(()=>done(),done);
+        Promise.all([write(muxer.stdin,bytes),...(recording?[write(recording,bytes)]:[])]).then(()=>done(),done);
       },
       final(done) {
         const end = target => new Promise((resolve,reject) => {
@@ -142,7 +125,7 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
         if (writing || closing || !(bytes instanceof Uint8Array) || !bytes.length || bytes.length > 1048576)
           throw Error('방송 입력을 확인해 주세요.');
         writing = true;
-        try { await writeInput(child.stdin, bytes); }
+        try { await new Promise((ok, fail) => child.stdin.write(bytes, err => err ? fail(err) : ok())); }
         finally { writing = false; }
       },
       async stop() {
@@ -158,4 +141,4 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
     throw Error('방송 서버 연결에 실패했습니다.');
   }
 }
-module.exports = {startEncoder,writeInput};
+module.exports = {startEncoder};

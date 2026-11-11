@@ -2,9 +2,10 @@
 
 비공개 소스 전환은 사용자 요청으로 준비만 유지한다. 이 후보는 현행 공개
 1.0.8에서 분리했으며 이관 workflow·게시 경로·권한·refs 변경을 포함하지 않는다.
-Windows 입력 pipe의 bounded buffer acceptance를 사용해 작은 write callback
-대기로 EOF가 막히는 경로를 수정한다. drain/error/close, end/finished 및
-녹화·수신 패킷 동일성 검사는 유지한다. Safari Dawn ICO/PNG 경로를 포함한다.
+Windows 종료 지연은 미해결이다. 효과가 입증되지 않은 pipe acceptance 변경은
+후보에서 제거했다. 고정 WebM 입력은 Windows 정상 종료와 녹화·수신 패킷
+동일성 검사를 통과했으며 브라우저 캡처 경로는 진단 중이다. Safari Dawn
+ICO/PNG 경로를 포함한다. 해결 전 게시하지 않는다.
 공개 1.0.8에서 1.0.9로 격리 업데이트하며 자료·초안·설정 보존을 검사한다.
 기존 1.0.8 asset은 불변이다. 현재는 후보이며 전체 gate·공개 게시 완료가 아니다.
 
