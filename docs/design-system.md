@@ -266,3 +266,5 @@ the shared neutral hover and inset focus. Desktop icon-only shortcuts use the
 same accessible name and tooltip for YouTube broadcast and update checking.
 
 Web tab icons use the same approved Dawn PNG artwork as the native icon. Main and Remote reference assets/favicon-dawn.png so browsers refresh the tab icon after the earlier SVG path.
+
+Safari fallback ICO and Apple touch icons also use dedicated Dawn paths (assets/favicon-dawn.ico and assets/apple-touch-icon-dawn.png), preserving the approved artwork byte-for-byte. Changing only query parameters is insufficient for browsers that retain icon associations by path.
