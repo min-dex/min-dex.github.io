@@ -264,3 +264,5 @@ Toolbar command icons use the 16px/1.5 tokens. The radio icon beside live
 scripture is a decorative 14px helper, with the same stroke. BGM and Help use
 the shared neutral hover and inset focus. Desktop icon-only shortcuts use the
 same accessible name and tooltip for YouTube broadcast and update checking.
+
+Web tab icons use the same approved Dawn PNG artwork as the native icon. Main and Remote reference assets/favicon-dawn.png so browsers refresh the tab icon after the earlier SVG path.
