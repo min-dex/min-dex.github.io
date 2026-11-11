@@ -1,3 +1,13 @@
+## 1.0.9 Windows 송출 종료·파비콘 후보 · 2026-11-11
+
+비공개 소스 전환은 사용자 요청으로 준비만 유지한다. 이 후보는 현행 공개
+1.0.8에서 분리했으며 이관 workflow·게시 경로·권한·refs 변경을 포함하지 않는다.
+Windows 입력 pipe의 bounded buffer acceptance를 사용해 작은 write callback
+대기로 EOF가 막히는 경로를 수정한다. drain/error/close, end/finished 및
+녹화·수신 패킷 동일성 검사는 유지한다. Safari Dawn ICO/PNG 경로를 포함한다.
+공개 1.0.8에서 1.0.9로 격리 업데이트하며 자료·초안·설정 보존을 검사한다.
+기존 1.0.8 asset은 불변이다. 현재는 후보이며 전체 gate·공개 게시 완료가 아니다.
+
 ## 1.0.8 배포 마감 · 2026-11-11
 
 웹과 Mac ARM·Intel·Windows 설치본은 `03d666e58b6bd6a597ae64a1fc74d3ea85655d20`에서 배포 완료.

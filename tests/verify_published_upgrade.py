@@ -21,7 +21,10 @@ SOURCES = {'1.0.0': 'c61f6a84e82d0ec81d102ca4e4947536eae853aa',
            '1.0.2': 'd66c40c5cff97ce734bb323edea67d0c16f722e4',
            '1.0.4': '2976cde847676d1af2c13162deccb11ea4c0b66d',
            '1.0.5': '816705288a3c5abcc66e4903e48905290a5f00bc',
-           '1.0.7': 'c5e87ee15a365e8fc24e8f8e805807b1c8be5402'}
+           '1.0.7': 'c5e87ee15a365e8fc24e8f8e805807b1c8be5402',
+           '1.0.8': '03d666e58b6bd6a597ae64a1fc74d3ea85655d20'}
+# Prior public releases were retired by the owner; retain immutable identities.
+PUBLISHED_SOURCES = {'1.0.8': SOURCES['1.0.8']}
 
 
 def asset_record(receipt, version, target):
@@ -124,9 +127,9 @@ def main():
     temp_root = upgrade_temp_root()
     print(f'Published upgrade temporary root: {temp_root}', flush=True)
     published = json.loads(PUBLISHED_FIXTURES.read_text(encoding='utf-8'))
-    if published.keys() != SOURCES.keys():
+    if published.keys() != PUBLISHED_SOURCES.keys():
         raise ValueError('Published upgrade fixture versions differ from the required matrix')
-    for previous in SOURCES:
+    for previous in PUBLISHED_SOURCES:
         free = shutil.disk_usage(temp_root).free
         print(f'Published upgrade {previous}: free {free / 1024**3:.2f} GiB; required 26 GiB', flush=True)
         if free < 26 * 1024**3:

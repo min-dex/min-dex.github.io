@@ -15,7 +15,9 @@ try:
    page.evaluate('''()=>{
     document.querySelector('#presenterOutputRoot')?.remove();
     window.testRoot=document.createElement('main');testRoot.id='presenterOutputRoot';testRoot.className='presenter-output-root no-chromakey';document.body.append(testRoot);
-    window.makeVideo=(role='',playback={})=>({id:'video-'+role,elementType:'video',type:'video',layout:'media',presenterRole:role,videoSrc:'/tests/fixtures/praise-background.webm',playback:{muted:true,...playback}});
+    // Ten CFR frames have an exact 1s end. The short MediaRecorder background
+    // fixture has a fractional duration beyond its last timestamp on GStreamer.
+    window.makeVideo=(role='',playback={})=>({id:'video-'+role,elementType:'video',type:'video',layout:'media',presenterRole:role,videoSrc:'/tests/fixtures/video-end-cfr.webm',playback:{muted:true,...playback}});
     window.makePayload=(role='',playback={})=>({serviceId:'offline-video',serviceType:'youth',chromakey:false,index:0,slides:[makeVideo(role,playback),{id:'after',elementType:'title_person',type:'title-assignee',layout:'lower_bar_text',title:'다음 순서',text:'다음 순서'}]});
     for(const slide of [makeVideo('waiting_loop'),makeVideo('ready'),makeVideo('',{loop:true}),makeVideo('',{autoAdvanceOnEnd:false}),{...makeVideo(),live:true}])if(presenterSlideShouldAutoAdvanceOnEnd(slide))throw Error('excluded video advances');
     if(!presenterSlideShouldAutoAdvanceOnEnd(makeVideo())||!presenterSlideShouldAutoAdvanceOnEnd(makeVideo('intro')))throw Error('ordinary/intro missing');

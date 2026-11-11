@@ -67,7 +67,7 @@ class PublishedUpgradeIdentity(unittest.TestCase):
  def test_required_published_upgrade_fixture_records_are_complete(self):
   import verify_published_upgrade as upgrade
   fixtures=json.loads(upgrade.PUBLISHED_FIXTURES.read_text())
-  self.assertEqual(fixtures.keys(),upgrade.SOURCES.keys())
+  self.assertEqual(fixtures.keys(),upgrade.PUBLISHED_SOURCES.keys())
   for version,receipt in fixtures.items():
    for target in ('mac-arm64','mac-x64','win-x64'):
     self.assertGreater(upgrade.asset_record(receipt,version,target)['bytes'],1000000)
@@ -86,7 +86,7 @@ class PublishedUpgradeIdentity(unittest.TestCase):
  def test_failed_old_install_acceptance_stops_before_candidate_install(self):
   import io, types, verify_published_upgrade as upgrade
   with tempfile.TemporaryDirectory() as folder:
-   root=pathlib.Path(folder);candidate=root/'Mindex-1.0.8-win-x64.exe';candidate.write_bytes(b'candidate')
+   root=pathlib.Path(folder);candidate=root/'Mindex-1.0.9-win-x64.exe';candidate.write_bytes(b'candidate')
    payload=b'published fixture';row={'file':'Mindex-1.0.0-win-x64.exe','id':1,'bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}
    receipt={'version':'1.0.0','channel':'internal','sourceCommit':upgrade.SOURCES['1.0.0'],'assets':[row]}
    calls=[]
@@ -102,8 +102,8 @@ class PublishedUpgradeIdentity(unittest.TestCase):
     self.assertEqual(url.get_header('Accept'),'application/octet-stream')
     return io.BytesIO(payload)
    manifest=root/'manifest.json'
-   manifest.write_text(json.dumps({version:receipt for version in upgrade.SOURCES}))
-   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade,'PUBLISHED_FIXTURES',manifest),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.8']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
+   manifest.write_text(json.dumps({'1.0.0':receipt}))
+   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade,'PUBLISHED_FIXTURES',manifest),patch.object(upgrade,'PUBLISHED_SOURCES',{'1.0.0':upgrade.SOURCES['1.0.0']}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.9']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
     with self.assertRaisesRegex(RuntimeError,'synthetic seed failure'):upgrade.main()
    self.assertEqual(len(calls),2)
    self.assertFalse(any(str(candidate) in args for args in calls))
