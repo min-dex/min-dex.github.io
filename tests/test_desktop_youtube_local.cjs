@@ -31,7 +31,9 @@ async function main() {
           if (socket.destroyed) { receiver.destroy(); return; }
           receiver.on('error',()=>socket.destroy());
           socket.on('error',()=>receiver.destroy());
-          socket.on('close',()=>receiver.destroy());
+          // A normal TLS EOF already ends the pipe after pending writes.
+          // Destroy only an interrupted connection so the final RTMP packets drain.
+          socket.on('close',()=>{ if (!socket.readableEnded) receiver.destroy(); });
           let previous = Buffer.alloc(0);
           socket.on('data',data=>{
             if(matchingKey) return;
