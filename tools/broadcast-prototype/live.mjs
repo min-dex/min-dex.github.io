@@ -35,6 +35,6 @@ export function followPresenter({render,clear,status,onAccepted=()=>{},channelFa
  channel.onmessage=e=>accept(e.data);
  const relay=e=>{if(e.source!==onWindow.opener||!e.source)return;if(!['https://min-dex.github.io',location.origin].includes(e.origin))return;if(e.data?.type==='mindex-broadcast-passive')accept(e.data.message);};
  onWindow.addEventListener('message',relay);
- status('다음 송출 상태 대기 · 같은 주소의 민덱스 또는 읽기 전용 연결 도구');
+ status('다음 송출 상태 대기 · 같은 주소의 Mindex 또는 읽기 전용 연결 도구');
  return {accept,stop(){stopped=true;version++;pending=null;channel.close();onWindow.removeEventListener('message',relay);clear();status('실시간 따라오기 해제');}};
 }

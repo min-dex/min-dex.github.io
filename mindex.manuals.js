@@ -3,7 +3,7 @@ window.MINDEX_MANUALS = Object.freeze([
     "id": "operations",
     "title": "예배 매뉴얼",
     "eyebrow": "예배와 방송",
-    "summary": "예배 이해·부서별 순서부터 현장 준비와 민덱스 사용법까지",
+    "summary": "예배 이해·부서별 순서부터 현장 준비와 Mindex 사용법까지",
     "notice": "부서별 기본 순서를 참고하되, 실제 진행은 그 주의 확정 순서지와 현장 공지를 우선한다. 미확인 내용은 확인 필요로 남긴다.",
     "sections": [
       {
@@ -432,9 +432,9 @@ window.MINDEX_MANUALS = Object.freeze([
       {
         "title": "예배 전후 화면",
         "items": [
-          "예배 전후에는 MINDEX의 대기 화면 또는 대기 영상을 사용한다.",
+          "예배 전후에는 Mindex의 대기 화면 또는 대기 영상을 사용한다.",
           "송출 시작 전에 프레젠터에서 대기 영상과 음향 재생을 확인한다.",
-          "예배 슬라이드는 MINDEX에서 준비하고 프레젠터로 송출한다.",
+          "예배 슬라이드는 Mindex에서 준비하고 프레젠터로 송출한다.",
           "크로마키(#00FF00) 화면이 송출되지 않도록 실제 출력과 A/V 믹서의 [PREVIEW]를 확인한다.",
           "교내 송출은 3층·1층 텔레비전으로 한다.",
           "녹화와 외부 송출은 OBS Studio를 사용한다.",
@@ -506,10 +506,10 @@ window.MINDEX_MANUALS = Object.freeze([
           "본문, 인용 구절, 가사, 담당자 이름을 주보와 대조한다.",
           "현장 변경은 해당 예배에서 수정한 뒤 저장한다."
         ],
-        "category": "민덱스 사용법"
+        "category": "Mindex 사용법"
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "저장과 다른 기기에서 이어 쓰기",
         "items": [
           "입력한 제목·담당자·본문·가사·폼·자료 순서를 확인하고 저장 완료를 확인한다.",
@@ -518,7 +518,7 @@ window.MINDEX_MANUALS = Object.freeze([
         ]
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "송출과 화면 조작",
         "items": [
           "송출 화면 아래 조작부에서 송출 시작·종료와 전체 화면을 관리한다. 화면 감지·화면 선택·항상 위 설정도 이곳에서 확인한다.",
@@ -529,7 +529,7 @@ window.MINDEX_MANUALS = Object.freeze([
         ]
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "음악 관리와 페이드아웃 정지",
         "items": [
           "상단 음표 아이콘 「음악 관리」에서 현재 음악을 재생·일시정지·정지한다. 다른 화면으로 이동해도 현재 음악을 제어한다.",
@@ -539,7 +539,7 @@ window.MINDEX_MANUALS = Object.freeze([
         ]
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "음원·가사·타이밍 저장 방식",
         "items": [
           "일반 특송 등은 「직접 추가: 음원」으로 음원과 직접 입력한 가사를 해당 예배에 저장한다. 새 찬양 DB 곡을 만들지 않는다.",
@@ -549,7 +549,7 @@ window.MINDEX_MANUALS = Object.freeze([
         ]
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "사진·타이밍 편집",
         "items": [
           "해당 「직접 추가: 음원」 항목 상단의 「사진·타이밍 편집」을 누르면 사진 편집 영역으로 바로 이동한다. 창을 여는 것만으로 저장되지는 않는다.",
@@ -561,7 +561,7 @@ window.MINDEX_MANUALS = Object.freeze([
         ]
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "미디어 재생과 자동 넘김",
         "items": [
           "자동 재생: 해당 화면을 송출하면 미디어가 시작되는 동작이다. 대기 영상은 기본 무음·반복, 시작 영상과 일반 영상은 기본 소리 있음·반복 없음이며 개별 설정이 우선한다.",
@@ -573,7 +573,7 @@ window.MINDEX_MANUALS = Object.freeze([
         ]
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "접속 기기와 기기 이름",
         "items": [
           "오른쪽 위 맥박 모양 「접속 현황」을 열고 「접속명」에 본당 송출 PC처럼 이름을 정한다. 입력칸 밖을 클릭하면 반영된다.",
@@ -582,7 +582,7 @@ window.MINDEX_MANUALS = Object.freeze([
         ]
       },
       {
-        "category": "민덱스 사용법",
+        "category": "Mindex 사용법",
         "title": "저장·재생·송출 문제 확인",
         "items": [
           "저장 실패 시 입력 내용을 지우거나 예배를 새로 만들기 전에 연결 상태와 오류 안내를 확인한다. 결과가 불확실하면 같은 저장을 재시도하고 완료 여부를 확인한다.",

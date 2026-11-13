@@ -729,8 +729,8 @@
     }
     if(doc.source?.department==="children")await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("어린이부 로고를 불러오지 못했습니다."));image.src=new URL(childrenLogoPath,document.baseURI).href;});
     const background=backgroundFor(doc);
-    if(backgroundKey(doc.settings?.theme)==="auto"&&!background)throw new Error("날짜·부서에 맞는 배경이 없습니다. 민덱스 배경에 등록하거나 직접 선택해 주세요.");
-    if(doc.settings?.theme&&!background&&!["paper","ink"].includes(doc.settings.theme))throw new Error("이 기기에 선택한 배경이 없습니다. 민덱스 배경 목록에 등록해 주세요.");
+    if(backgroundKey(doc.settings?.theme)==="auto"&&!background)throw new Error("날짜·부서에 맞는 배경이 없습니다. Mindex 배경에 등록하거나 직접 선택해 주세요.");
+    if(doc.settings?.theme&&!background&&!["paper","ink"].includes(doc.settings.theme))throw new Error("이 기기에 선택한 배경이 없습니다. Mindex 배경 목록에 등록해 주세요.");
     if(background)await new Promise((resolve,reject)=>{
       const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("선택한 배경을 불러오지 못했습니다. 배경 목록을 확인해 주세요."));
       image.src=new URL(background.url,document.baseURI).href;

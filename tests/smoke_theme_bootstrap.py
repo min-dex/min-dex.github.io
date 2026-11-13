@@ -53,7 +53,7 @@ def main():
                         brand = page.locator('.mindex-boot')
                         assert brand.is_visible() != output
                         if not output:
-                            assert brand.get_attribute('aria-label') == 'MINDEX 시작 중'
+                            assert brand.get_attribute('aria-label') == 'Mindex 시작 중'
                             assert page.locator('.mindex-boot-wordmark').text_content() == 'MINDEX'
                             box = page.locator('.mindex-boot-cross').bounding_box()
                             assert abs(box['x'] + box['width']/2 - 400) < 1

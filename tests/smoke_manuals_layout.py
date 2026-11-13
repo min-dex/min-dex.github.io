@@ -29,7 +29,7 @@ try:
               check(sections.every((section,index)=>section.id && links[index].getAttribute('href')===`#${section.id}`),'manual index targets');
               check(sections.every(section=>section.querySelector('.manual-section-head') && section.querySelector('.manual-section-content')),'manual section hierarchy');
               const categories=[...refs.detailPane.querySelectorAll('.manual-category-title')].map(e=>e.textContent);
-              check(JSON.stringify(categories)===JSON.stringify(['예배 이해·부서별 순서','준비·진행·마무리','민덱스 사용법']),'manual category order');
+              check(JSON.stringify(categories)===JSON.stringify(['예배 이해·부서별 순서','준비·진행·마무리','Mindex 사용법']),'manual category order');
               const find=title=>sections.find(s=>s.querySelector('h4').textContent===title);
               const expected={
                 "어린이부 예배": [
@@ -106,6 +106,7 @@ try:
                             link.click()
                         else:
                             link.focus()
+                            link.evaluate('(el)=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>{if(document.activeElement!==el)throw Error("source link lost focus");resolve()})))')
                             page.keyboard.press('Enter')
                         page.wait_for_function("([id,url])=>state.module==='manuals' && location.href===url && document.activeElement===document.querySelector(id+' h4')", arg=[target,before['url']])
                         result = page.evaluate("""id=>{
@@ -155,6 +156,7 @@ try:
                             link.click()
                         else:
                             link.focus()
+                            link.evaluate('(el)=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>{if(document.activeElement!==el)throw Error("source link lost focus");resolve()})))')
                             page.keyboard.press('Enter')
                     popup = opened.value
                     popup.wait_for_load_state()

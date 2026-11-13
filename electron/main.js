@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, screen, Menu, session } = require("electron");
+const { app, BrowserWindow, ipcMain, screen, Menu, session, dialog } = require("electron");
 const path = require("node:path");
 const testIsolation = require("./test-isolation").configureTestIsolation({ app, session }, require("../package.json"));
 globalThis.__mindexTestIsolation = testIsolation;
@@ -9,6 +9,11 @@ let mainWindow = null;
 let presenterWindow = null;
 let updateController = null;
 let mainWindowEnsureTimer = null;
+const closeGuard = require("./output-close-guard")({
+  app, dialog,
+  getWindow: () => mainWindow,
+  isActive: () => Boolean(presenterWindow && !presenterWindow.isDestroyed()) || require("./youtube-window").isActive(),
+});
 
 function updatesEnabled() {
   let build;
@@ -64,6 +69,7 @@ function createMainWindow() {
     },
   });
 
+  closeGuard.bind(mainWindow);
   bindMainWindowReloadShortcut(mainWindow);
   mainWindow.once("ready-to-show", () => mainWindow.show());
   mainWindow.webContents.once("did-finish-load", () => {

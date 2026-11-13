@@ -1,3 +1,12 @@
+## 접속 방식 표시 · 2026-11-13
+
+새 heartbeat의 기존 browser 필드에 `앱 · Mindex` 또는 `웹 · Safari`처럼 접속
+방식을 함께 기록한다. 앱 판정은 native preload의 isDesktop 값이며 User-Agent의
+Chrome 표기로 앱을 추측하지 않는다. 구버전 기록은 `접속 방식 미확인`으로 표시한다.
+기존 browser 30자 제한, reporter token/프로필 묶음, 출력 heartbeat, RPC·권한은
+유지한다. 이 접속의 제목과 빈 목록 문구도 앱/웹 양쪽에 맞춰 쓴다.
+사용자가 저장한 접속명은 변경하지 않는다.
+
 # Read-only operations panel
 
 ## Presence controls and name-save feedback · 2026-11-09

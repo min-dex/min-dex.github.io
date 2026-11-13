@@ -21,7 +21,8 @@
   try { name = window.MINDEX_SERVER_STORAGE?.getItem("local","mindex.monitor.name") || ""; } catch {}
   const ua = navigator.userAgent;
   const os = /Windows/.test(ua) ? "Windows" : /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : /Mac/.test(ua) ? "macOS" : "Other";
-  const browser = /Whale\//.test(ua) ? "Whale" : /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser";
+  const browserName = /Whale\//.test(ua) ? "Whale" : /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser";
+  const browser = window.mindexElectron?.isDesktop === true ? "앱 · Mindex" : `웹 · ${browserName}`;
   const panel = document.createElement("dialog");
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" type="button" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
@@ -32,7 +33,7 @@
     <p data-code-status role="status"></p><div data-outputs></div></section>
     <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" type="button" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
     <p class="monitor-message" role="status"></p><div data-devices></div></section>
-    <section class="monitor-section"><h3>이 브라우저</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC" aria-describedby="monitorNameStatus"><button class="btn secondary" type="button" data-name-retry hidden>다시 저장</button></div><p id="monitorNameStatus" data-name-status role="status"></p><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section></div>`;
+    <section class="monitor-section"><h3>이 접속</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC" aria-describedby="monitorNameStatus"><button class="btn secondary" type="button" data-name-retry hidden>다시 저장</button></div><p id="monitorNameStatus" data-name-status role="status"></p><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section></div>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
   $("#monitorName").value = name || `${os} ${browser}`;
@@ -89,7 +90,7 @@
     const status = document.createElement("span"); status.className = "monitor-health";
     status.textContent = data.output === true ? "송출 중" : "송출 안 함"; row.append(status);
     const identity = document.createElement("p"); identity.className = "monitor-environment";
-    identity.textContent = local ? "이 브라우저" : `${data.os || ""} · ${data.browser || ""}`;
+    identity.textContent = `${local ? "이 접속 · " : ""}${data.os || ""} · ${/^(앱|웹) · /.test(data.browser || "") ? data.browser : `접속 방식 미확인 · ${data.browser || ""}`}`;
     row.append(identity);
     const seen = document.createElement("p"); seen.className = "monitor-environment";
     const at = timestamp(lastSeen);
@@ -106,7 +107,7 @@
     const rows = remoteVerified ? remoteRows.filter(row => !isStale(row)) : [];
     $("[data-count]").textContent = remoteVerified ? `${rows.length}개 접속` : "";
     renderRows($("[data-devices]"), rows);
-    if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "접속 상태를 확인하지 못했습니다." : "현재 접속 중인 브라우저가 없습니다.";
+    if (!rows.length) $("[data-devices]").textContent = !remoteVerified ? "접속 상태를 확인하지 못했습니다." : "현재 접속이 없습니다.";
   }
   async function rpc(name, args) {
     if (!state.client?.rpc) throw Error("원격 조회에 필요한 DB 클라이언트가 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.");

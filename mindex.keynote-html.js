@@ -317,7 +317,7 @@ async function validatePresenterKeynoteFolder(files, sourceSha256) {
     if (!name || byName.has(name) || file.size > 50 * 1024 * 1024) throw Error('폴더를 확인해 주세요. 개별 재생 파일은 50MB 이하로 준비해 주세요.');
     byName.set(name, file);total += file.size;
   }
-  if (files.length > 5001 || total > 500 * 1024 * 1024 || !byName.has('manifest.json')) throw Error('민덱스에서 준비한 Keynote 재생 폴더를 선택해 주세요.');
+  if (files.length > 5001 || total > 500 * 1024 * 1024 || !byName.has('manifest.json')) throw Error('Mindex에서 준비한 Keynote 재생 폴더를 선택해 주세요.');
   const manifestFile = byName.get('manifest.json');
   if (manifestFile.size > 2 * 1024 * 1024) throw Error('Keynote 재생 정보가 너무 큽니다.');
   const manifestBytes = new Uint8Array(await manifestFile.arrayBuffer()), manifest = JSON.parse(new TextDecoder().decode(manifestBytes));

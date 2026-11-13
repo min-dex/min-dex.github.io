@@ -6,7 +6,7 @@ export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=docu
  const status=text=>$('captureStatus').textContent=text;
  function controls(){for(const id of ['capturePermission','captureRefresh','captureVideo','captureAudio','captureConnect'])$(id).disabled=busy||!!stream;$('captureDisconnect').disabled=!stream&&!busy;}
  async function refresh(){
-  if(!navigator.mediaDevices?.enumerateDevices){status(desktop?'이 앱에서 장치 목록을 열 수 없습니다. 시스템의 카메라·마이크 설정을 확인해 주세요.':'장치 입력은 민덱스 설치 앱에서 열어 주세요.');return;}
+  if(!navigator.mediaDevices?.enumerateDevices){status(desktop?'이 앱에서 장치 목록을 열 수 없습니다. 시스템의 카메라·마이크 설정을 확인해 주세요.':'장치 입력은 Mindex 설치 앱에서 열어 주세요.');return;}
   try{
    const devices=await navigator.mediaDevices.enumerateDevices();
    for(const [id,kind] of [['captureVideo','videoinput'],['captureAudio','audioinput']]){
@@ -26,7 +26,7 @@ export function mountCaptureInput({policy,onStart,onReady,onStop,video,root=docu
  $('capturePermission').onclick=async()=>{
   if(busy||stream)return;busy=true;controls();const own=++epoch;
   try{const permission=await navigator.mediaDevices.getUserMedia({video:true,audio:true});permission.getTracks().forEach(t=>t.stop());if(own===epoch&&!disposed)await refresh();}
-  catch{if(own===epoch)status(desktop?'카메라·마이크 권한을 허용하지 못했습니다. 시스템 설정에서 민덱스 권한을 확인해 주세요.':'카메라·마이크 권한을 허용하지 못했습니다. 브라우저 권한을 확인해 주세요.');}
+  catch{if(own===epoch)status(desktop?'카메라·마이크 권한을 허용하지 못했습니다. 시스템 설정에서 Mindex 권한을 확인해 주세요.':'카메라·마이크 권한을 허용하지 못했습니다. 브라우저 권한을 확인해 주세요.');}
   finally{if(own===epoch){busy=false;controls();}}
  };
  $('captureRefresh').onclick=refresh;

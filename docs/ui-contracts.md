@@ -1,3 +1,22 @@
+## Shell polish · 2026-11-13
+
+- User-facing product names, document/window titles, installation messages and
+  manual prose use `Mindex`. BI wordmarks remain `MINDEX`; internal identifiers,
+  storage keys and user-entered names are unchanged.
+- Expanded right panel and topbar actions share one grid boundary. The separator
+  runs the full 50px header height and joins the panel separator without a gap.
+  Header action slots retain 40px controls and existing icon/spacing tokens.
+- BGM embedding review: existing two prayer audio files total 135,975,049 bytes
+  (129.7 MiB). No per-BGM hard limit is configured. A 50–100 MB addition is
+  a size-budget proposal, not an accepted maximum or new embedded audio. MP3
+  128 kbps requires about 57.6 MB/hour; bundled additions require a desktop
+  update and increase download/extracted sizes. Existing URLs remain unchanged.
+- Closing the installed controller or quitting the app while presenter output or
+  YouTube output is active asks for confirmation, defaulting to continue. Cancel
+  prevents downstream output teardown. Unsaved-input cancellation rearms this
+  guard. Browser controller close/reload uses the browser-native unload warning
+  while output is active; browsers control that warning's text/availability.
+
 # Mindex UI Contracts
 
 Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so layout work does not require rediscovering the same app-shell rules.

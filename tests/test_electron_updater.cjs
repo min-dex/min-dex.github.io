@@ -55,7 +55,7 @@ test('main-process IPC accepts controller only and blocks install while presente
  const electron={app,BrowserWindow:Window,ipcMain:{handle:(k,h)=>handlers[k]=h},
   screen:{getAllDisplays:()=>[display],getPrimaryDisplay:()=>display},Menu:{getApplicationMenu:()=>null,buildFromTemplate:items=>({items}),setApplicationMenu:menu=>{applicationMenu=menu;}}};
  const broadcast = Object.assign(()=>{}, {isActive:()=>broadcastActive});
- const context={require:name=>name==='./youtube-window'?broadcast:name==='./test-isolation'?require('../electron/test-isolation'):name==='../mindex-build.json'?{channel:'release'}:name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
+ const context={require:name=>name==='./output-close-guard'?require('../electron/output-close-guard'):name==='./youtube-window'?broadcast:name==='./test-isolation'?require('../electron/test-isolation'):name==='../mindex-build.json'?{channel:'release'}:name==='../package.json'?{mindexTestBuild:testBuild}:name==='electron'?electron:name==='electron-updater'?{autoUpdater:updater}:name==='./updater'?{createUpdateController}:name==='./keynote-importer'?{}:require(name),
   process:{platform:'darwin',env:{}},__dirname:path.resolve(__dirname,'../electron'),console,setTimeout:()=>0,setInterval:()=>0,clearInterval(){},clearTimeout(){}};
  vm.runInNewContext(fs.readFileSync(path.resolve(__dirname,'../electron/main.js'),'utf8'),context);
  await new Promise(r=>setImmediate(r));

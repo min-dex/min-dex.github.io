@@ -8,7 +8,7 @@ const entry = path.join(app.getAppPath(),'tools/broadcast-prototype/index.html')
 const expected = pathToFileURL(entry).href;
 let panel, owner, encoder;
 function cancel() { owner?.abort(); owner = null; encoder = null; }
-app.on('before-quit',cancel);
+app.on('before-quit',event => { if (!event.defaultPrevented) cancel(); });
 ipcMain.handle('mindex:youtube',async (event,action,value) => {
   if (!panel || event.sender !== panel.webContents || event.senderFrame !== panel.webContents.mainFrame || event.senderFrame.url !== expected)
     throw Error('방송 창에서만 사용할 수 있습니다.');

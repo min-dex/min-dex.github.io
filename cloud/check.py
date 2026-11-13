@@ -8,6 +8,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
+    "test_output_close_guard.cjs",
     "test_youtube_profile.cjs",
     "test_broadcast_capture.mjs",
     "test_product_identity.cjs",
@@ -104,6 +105,7 @@ NODE_TESTS = (
     "test_worship_read_parallel.cjs",
 )
 CSS_NODE_TESTS = (
+    "test_output_close_guard.cjs",
     "test_single_song.cjs",'test_app_runtime.cjs', 'test_ui_icons.cjs',
                   'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
@@ -242,6 +244,7 @@ SMOKES = (
     "smoke_form_label_spacing.py",
     "smoke_monitor_session.py",
     "smoke_monitor.py",
+    "smoke_shell_session.py",
     "smoke_monitor_isolation.py",
     "smoke_version_row_alignment.py",
     "smoke_lyric_parentheses.py",

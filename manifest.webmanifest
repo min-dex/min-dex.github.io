@@ -1,6 +1,6 @@
 {
-  "name": "MINDEX",
-  "short_name": "MINDEX",
+  "name": "Mindex",
+  "short_name": "Mindex",
   "description": "Ministry index for praise, scripture, and service preparation.",
   "start_url": "./",
   "scope": "./",

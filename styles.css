@@ -507,7 +507,7 @@ h1, h2, h3, p { margin: 0; }
   grid-row: 1;
   height: 100%;
   align-items: center;
-  grid-template-columns: var(--sidebar-reference-w) minmax(0, 1fr) var(--topbar-compact-w);
+  grid-template-columns: var(--shell-left-w) minmax(0, 1fr) max(var(--shell-right-w), var(--topbar-compact-w));
   gap: 0;
   border-bottom: 0;
   background: var(--ui-surface-panel);
@@ -517,9 +517,9 @@ h1, h2, h3, p { margin: 0; }
 .topbar .topbar-module-strip,
 .topbar .primary-switcher,
 .topbar .topbar-actions { position: relative; z-index: 1; }
-body.right-sidebar-open { --shell-right-w: var(--right-sidebar-w); }
-body[data-module="presenter"] { --shell-right-w: var(--right-sidebar-w); }
-body[data-module="presenter"].right-sidebar-open { --shell-right-w: var(--right-sidebar-w); }
+body.right-sidebar-open { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); }
+body[data-module="presenter"] { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); }
+body[data-module="presenter"].right-sidebar-open { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); }
 .primary-switcher {
   position: relative;
   display: flex;
@@ -780,12 +780,13 @@ body[data-module="backgrounds"] .sidebar-list-head,
   flex: 0 0 auto;
 }
 .topbar-actions {
+  box-shadow: inset 1px 0 var(--shell-separator);
   position: relative;
   display: flex;
   align-items: center;
   align-self: center;
   justify-content: end;
-  height: var(--topbar-btn-size);
+  height: 100%;
   gap: 0;
   grid-column: 2;
   justify-self: stretch;

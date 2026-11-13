@@ -43,7 +43,7 @@ function bindElectronDesktopEvents() {
       if (update.manualInstall && !installing) showToast("설치 파일 다운로드를 시작했습니다.");
       const result = await (installing ? desktop.installUpdate() : desktop.downloadUpdate());
       showFailure(result);
-      if (result?.installerOpened) showToast('설치 화면을 열었습니다. 민덱스를 종료한 뒤 설치를 마쳐 주세요.');
+      if (result?.installerOpened) showToast('설치 화면을 열었습니다. Mindex를 종료한 뒤 설치를 마쳐 주세요.');
     } catch { showFailure(); }
     finally {
       promptPending = false;

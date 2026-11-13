@@ -650,7 +650,7 @@ def main() -> int:
             page.wait_for_function("() => typeof refs !== 'undefined' && typeof state !== 'undefined'", timeout=10000)
 
             pass_("document-title", page.title())
-            if page.title() != "MINDEX":
+            if page.title() != "Mindex":
                 fail("document-title-uppercase", page.title())
             else:
                 pass_("document-title-uppercase")

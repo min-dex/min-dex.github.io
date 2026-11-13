@@ -2105,7 +2105,7 @@ function isPresenterOutputRoute() {
 
 function presenterOutputDocumentTitle(payload = {}) {
   const title = String(payload?.serviceTitle || "").split("·")[0].trim();
-  return title || "MINDEX";
+  return title || "Mindex";
 }
 
 function syncPresenterOutputDocumentTitle(payload = {}) {
@@ -2230,7 +2230,7 @@ function setupPresenterStartupFullscreen() {
 }
 
 function initPresenterOutputCore() {
-  document.title = "MINDEX";
+  document.title = "Mindex";
   document.documentElement.classList.add("presenter-output-document");
   document.body.className = "presenter-output-body";
   document.body.innerHTML = `

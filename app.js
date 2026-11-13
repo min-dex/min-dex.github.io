@@ -1544,6 +1544,11 @@ function bindStaticEvents() {
   });
 
   window.addEventListener("beforeunload", (event) => {
+    if (!window.mindexElectron?.isDesktop && isPresenterOutputWindowOpen()) {
+      event.preventDefault();
+      event.returnValue = "";
+      return;
+    }
     // Presenter changes are persisted through its own save flow. A browser-native
     // prompt here is both misleading and unable to trigger that save operation.
     if (state.module === "presenter") return;
@@ -15904,7 +15909,7 @@ function renderLoadingStatus() {
   const el = refs.bootStatus;
   if (!el || !document.body.classList.contains("ui-booting")) return;
   const items = currentLoadingStatusItems();
-  el.setAttribute("aria-label", items.length ? `${items.join(", ")} 처리 중` : "MINDEX 시작 중");
+  el.setAttribute("aria-label", items.length ? `${items.join(", ")} 처리 중` : "Mindex 시작 중");
 }
 
 function clearSearchCaches(options = {}) {

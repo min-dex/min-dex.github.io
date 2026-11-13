@@ -105,7 +105,7 @@ async function file(file){
 function render(now,schedule=true){if(disposed)return;frame++;if(!paused)ticks++;ctx.fillStyle='#121a24';ctx.fillRect(0,0,1280,720);
  if(mode!=='slide'){
   if((source==='file'||source==='capture')&&video.readyState>=2&&video.videoWidth>0){const s=Math.min(1280/video.videoWidth,720/video.videoHeight);ctx.drawImage(video,(1280-video.videoWidth*s)/2,(720-video.videoHeight*s)/2,video.videoWidth*s,video.videoHeight*s);}
-  else if(!desktop){const g=ctx.createLinearGradient(0,0,1280,720);g.addColorStop(0,'#193c4c');g.addColorStop(1,'#795442');ctx.fillStyle=g;ctx.fillRect(0,0,1280,720);ctx.fillStyle='#e8b778';ctx.beginPath();ctx.arc(170+(ticks*3)%940,250,65,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='24px sans-serif';ctx.fillText('MINDEX · TEST INPUT',48,55);}
+  else if(!desktop){const g=ctx.createLinearGradient(0,0,1280,720);g.addColorStop(0,'#193c4c');g.addColorStop(1,'#795442');ctx.fillStyle=g;ctx.fillRect(0,0,1280,720);ctx.fillStyle='#e8b778';ctx.beginPath();ctx.arc(170+(ticks*3)%940,250,65,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='24px sans-serif';ctx.fillText('Mindex · TEST INPUT',48,55);}
  }
  const policy=outputPolicy.read();
  if(blackScreen||sourceBlack){ctx.fillStyle='#000';ctx.fillRect(0,0,1280,720);drawBroadcast(broadcastCtx,canvas,policy);}
@@ -149,7 +149,7 @@ $('slideFile').onchange=async e=>{
   if(packet.frames.some(f=>!f||(!f.unsupported&&(!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(f.png)||f.png.length>2_000_000))))throw Error('image');
   exclusions.clear();importedFrames=packet.frames;for(const [i,entry] of importedFrames.entries()){const option=document.createElement('option');option.value=i;option.textContent=`${i+1}. ${String(entry.title||'자막').slice(0,120)}`;$('slideList').append(option);}
   $('slideList').disabled=false;await selectImported(0);
- }catch{if(request===frameGeneration)$('slideStatus').textContent='민덱스 합성용 슬라이드 파일을 선택해 주세요.';}
+ }catch{if(request===frameGeneration)$('slideStatus').textContent='Mindex 합성용 슬라이드 파일을 선택해 주세요.';}
 };
 
 $('follow').onclick=()=>{
