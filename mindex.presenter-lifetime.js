@@ -103,3 +103,18 @@ function notifyNativePresenterFrameReady() {
   };
   requestAnimationFrame(ready);
 }
+
+// Keep controller unload prompts with output lifecycle ownership.
+function handleControllerBeforeUnload(event) {
+  if (!window.mindexElectron?.isDesktop && isPresenterOutputWindowOpen()) {
+    event.preventDefault();
+    event.returnValue = "";
+    return;
+  }
+  // Presenter changes are persisted through its own save flow. A browser-native
+  // prompt here is both misleading and unable to trigger that save operation.
+  if (state.module === "presenter") return;
+  if (!hasDirtyChanges({ reconcile: true })) return;
+  event.preventDefault();
+  event.returnValue = "";
+}

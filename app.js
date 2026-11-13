@@ -1543,19 +1543,7 @@ function bindStaticEvents() {
     handleHorizontalNavigationKeydown(event);
   });
 
-  window.addEventListener("beforeunload", (event) => {
-    if (!window.mindexElectron?.isDesktop && isPresenterOutputWindowOpen()) {
-      event.preventDefault();
-      event.returnValue = "";
-      return;
-    }
-    // Presenter changes are persisted through its own save flow. A browser-native
-    // prompt here is both misleading and unable to trigger that save operation.
-    if (state.module === "presenter") return;
-    if (!hasDirtyChanges({ reconcile: true })) return;
-    event.preventDefault();
-    event.returnValue = "";
-  });
+  window.addEventListener("beforeunload", handleControllerBeforeUnload);
 }
 
 function bindDetailInteractionRoot(root, options = {}) {

@@ -32,3 +32,16 @@ test('unsaved input cancelling unload restores the output guard for the next clo
   x.window.webContents.emit('will-prevent-unload');x.setChoice(0);
   assert.equal(x.emit(x.window,'close').defaultPrevented,true);assert.equal(x.prompts,2);
 });
+test('shared controller unload handler preserves web output and existing unsaved draft rules',()=>{
+  const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
+  const source=fs.readFileSync(path.join(__dirname,'../mindex.presenter-lifetime.js'),'utf8');
+  let output=false,dirty=false;
+  const context={window:{},state:{module:'praise'},isPresenterOutputWindowOpen:()=>output,hasDirtyChanges:()=>dirty};
+  vm.runInNewContext(source.slice(source.indexOf('function handleControllerBeforeUnload(')),context);
+  const call=()=>{const e={defaultPrevented:false,preventDefault(){this.defaultPrevented=true;}};context.handleControllerBeforeUnload(e);return e;};
+  assert.equal(call().defaultPrevented,false);
+  output=true;context.state.module='presenter';assert.equal(call().defaultPrevented,true);
+  context.window.mindexElectron={isDesktop:true};assert.equal(call().defaultPrevented,false);
+  context.state.module='praise';dirty=true;assert.equal(call().defaultPrevented,true);
+  dirty=false;assert.equal(call().defaultPrevented,false);
+});

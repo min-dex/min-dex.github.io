@@ -4948,7 +4948,10 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 }
 .module-switcher-tab svg { width: 16px; height: 16px; stroke-width: var(--ui-icon-stroke); }
 .topbar-leading .primary-switcher { grid-column: 2; min-width: 0; }
-.topbar-actions { grid-column: 3; }
+.topbar-actions {
+  grid-column: 3;
+  box-shadow: inset 1px 0 var(--shell-separator);
+}
 .nav-sidebar {
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
