@@ -23,6 +23,9 @@ try:
        return {heading:r.height,input:v.height,top:r.top-b.top,gap:v.top-r.bottom};
       }''')
       print(engine,theme,width,report,flush=True)
+     for button in page.locator('#buttons .btn').all():
+      css=button.evaluate('(e)=>{const s=getComputedStyle(e);return [s.fontSize,s.fontWeight,s.gap,s.paddingLeft,s.borderTopLeftRadius]}')
+      assert css==['12px','600','5px','10px','5px'],css
      for button in page.locator('#buttons button:not(:disabled)').all():
       page.mouse.move(1,1);page.wait_for_timeout(180)
       before=button.evaluate('(e)=>{let s=getComputedStyle(e);return [s.backgroundColor,s.color,s.boxShadow]}')

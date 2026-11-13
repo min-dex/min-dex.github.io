@@ -268,3 +268,11 @@ same accessible name and tooltip for YouTube broadcast and update checking.
 Web tab icons use the same approved Dawn PNG artwork as the native icon. Main and Remote reference assets/favicon-dawn.png so browsers refresh the tab icon after the earlier SVG path.
 
 Safari fallback ICO and Apple touch icons also use dedicated Dawn paths (assets/favicon-dawn.ico and assets/apple-touch-icon-dawn.png), preserving the approved artwork byte-for-byte. Changing only query parameters is insufficient for browsers that retain icon associations by path.
+
+## Whole-app button audit · 2026-11-13
+
+Generic `.btn` text controls use 12px/600, 10px horizontal inset and 5px
+icon gap with the shared 5px radius. The former 12px/500 and 15px/10px
+insets/gap were stale defaults. Keep explicit 40px topbar, 35px ordinary,
+30px dense and 28px compact targets. Output artwork, 50/70px Remote targets,
+media transport and document controls retain their role-specific geometry.
