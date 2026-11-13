@@ -181,3 +181,18 @@ The packaged acceptance opens the installed app's broadcast window and exercises
 the real dialog IPC with synthetic cancel and MP4 destination results. It
 checks that cancel never contacts the local receiver and that the completed
 recording has the same encoded packet hashes as the local RTMPS stream.
+
+### 2026-11-13 설치 검사 정리 보완
+
+ba4df4f1의 Windows TEST 및 교회용 설치본은 모두 기존 RTMPS 종료·동일 패킷·
+음성 차단/복귀 검사를 통과했다. 교회용 보존 검사도 seed/upgrade 해시를
+출력했으나, 미저장 가상 편집창을 닫는 정리 단계 이후 진행되지 않아 해당
+실행 43377489937을 취소했다. 공개 1.0.8 업데이트 보존과 Intel gate는 이
+시도에서 완료되지 않았으며 취소를 성공으로 취급하지 않는다.
+
+후속 테스트는 오류를 정리 전에 기록하고, 격리/소유 임시 프로필 확인 후
+가상 창만 강제 종료한다. 저장된 fixture는 다음 restart 검사까지 유지한다.
+RTMPS 테스트의 마지막 OS 종료 확인도 격리 정리 단계에서만 응답한다.
+제품 종료 보호, 원래 검사·기한·실패 exit는 변경하지 않는다.
+로컬 1.0.8 격리 프로필에서 seed/upgrade/restart와 자료 해시 보존·정리 종료를
+확인했으며, 후보 설치본에 대한 전체 동일 SHA 검사는 별도로 다시 수행한다.

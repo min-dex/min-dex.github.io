@@ -195,10 +195,21 @@ async function main(){
   assert.deepEqual(restored.items,draft.value.items);assert(restored.dirty);
   for(const [scope,rows]of Object.entries(beforeRestore))for(const [key,row]of Object.entries(rows))assert.deepEqual(record.rows[scope][key],row);
   console.log(JSON.stringify({phase,source:sha,version,profile:native.profile,appId:'kr.mindex.app.test',networkBlocked:true,restoredByApp:true,retiredLegacyCopies,bundledAudio,waitingAndFriday,previewCacheContract,preciseAudio,hashes:record.hashes,valueHashes:Object.fromEntries(Object.entries(data.values).map(([k,v])=>[k,hash(v)]))}));
+ }catch(error){
+  console.error('Isolated upgrade assertion failed before cleanup:',error);
+  throw error;
  }finally{
-  // Test teardown discards only the recovered synthetic editor, not persisted records.
-  for(const page of app.windows())await page.close({runBeforeUnload:false});
+  // Preservation assertions above intentionally leave a recovered dirty editor.
+  // Destroy only this test app's windows so native beforeunload cannot wait for
+  // human input. Persisted fixture records remain available for the restart test.
+  await app.evaluate(({app,BrowserWindow},token)=>{
+   const path=process.getBuiltinModule('node:path'),fs=process.getBuiltinModule('node:fs'),os=process.getBuiltinModule('node:os');
+   const expected=path.join(fs.realpathSync(os.tmpdir()),'mindex-isolated-upgrade-'+token,'userData');
+   if(!globalThis.__mindexTestIsolation?.networkBlocked||app.getPath('userData')!==expected)throw Error('Requires owned isolated upgrade cleanup');
+   for(const window of BrowserWindow.getAllWindows())window.destroy();
+  },record.token);
   await app.close();
+  console.log('PASS isolated upgrade window cleanup: '+phase);
  }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
