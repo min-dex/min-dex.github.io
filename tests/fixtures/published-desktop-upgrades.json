@@ -1,26 +1,26 @@
 {
-  "1.0.8": {
-    "version": "1.0.8",
+  "1.0.9": {
+    "version": "1.0.9",
     "channel": "internal",
-    "sourceCommit": "03d666e58b6bd6a597ae64a1fc74d3ea85655d20",
+    "sourceCommit": "d28903793cffa3b65be7c27231091061839ef855",
     "assets": [
       {
-        "file": "Mindex-1.0.8-mac-arm64.dmg",
-        "bytes": 1633392579,
-        "sha256": "cec3193a4de08280d1a47b920d6e2453d99860a154da81bd490748ce9aac136b",
-        "id": 733801122
+        "file": "Mindex-1.0.9-mac-arm64.dmg",
+        "bytes": 1633401586,
+        "sha256": "fedb1cffc68d9e3fbb9f1782b5ddba4ed31f5f9076cc1cdc63fe013875f643f0",
+        "id": 742836387
       },
       {
-        "file": "Mindex-1.0.8-mac-x64.dmg",
-        "bytes": 1643351613,
-        "sha256": "9ab2058ffd40cda2b252563fb7cfe15cedeb7910cf962eb77bda5459e3cb503b",
-        "id": 733801128
+        "file": "Mindex-1.0.9-mac-x64.dmg",
+        "bytes": 1643355624,
+        "sha256": "62445cd0aa0b2f93577a62c9393d6df116789193729ca9022318fcfaf8b3c598",
+        "id": 742836398
       },
       {
-        "file": "Mindex-1.0.8-win-x64.exe",
-        "bytes": 1612458098,
-        "sha256": "0a2a7576e6cefd241b93507b0f631190e5bdb971a350841f3d6e9406b95706f1",
-        "id": 733801127
+        "file": "Mindex-1.0.9-win-x64.exe",
+        "bytes": 1612495959,
+        "sha256": "1c53b3fbc52f4ceaefecb582c83d41bc2002b0961409981b9d0915a77cbedbad",
+        "id": 742836383
       }
     ]
   }

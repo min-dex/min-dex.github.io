@@ -103,7 +103,7 @@ class PublishedUpgradeIdentity(unittest.TestCase):
     return io.BytesIO(payload)
    manifest=root/'manifest.json'
    manifest.write_text(json.dumps({'1.0.0':receipt}))
-   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade,'PUBLISHED_FIXTURES',manifest),patch.object(upgrade,'PUBLISHED_SOURCES',{'1.0.0':upgrade.SOURCES['1.0.0']}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.9']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
+   with patch.dict(os.environ,{'GITHUB_ACTIONS':'true','RUNNER_TEMP':folder,'MINDEX_QA_GITHUB_TOKEN':'fixture'}),patch.object(upgrade,'PUBLISHED_FIXTURES',manifest),patch.object(upgrade,'PUBLISHED_SOURCES',{'1.0.0':upgrade.SOURCES['1.0.0']}),patch.object(upgrade.sys,'platform','win32'),patch.object(upgrade.tempfile,'gettempdir',return_value=folder),patch.object(upgrade.sys,'argv',['verify',str(candidate),'win-x64','b'*40,'1.0.10']),patch.object(upgrade.urllib.request,'urlopen',read),patch.object(upgrade.shutil,'disk_usage',return_value=types.SimpleNamespace(free=100*1024**3)),patch.object(upgrade.subprocess,'run',run):
     with self.assertRaisesRegex(RuntimeError,'synthetic seed failure'):upgrade.main()
    self.assertEqual(len(calls),2)
    self.assertFalse(any(str(candidate) in args for args in calls))

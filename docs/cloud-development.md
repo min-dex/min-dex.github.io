@@ -393,3 +393,12 @@ CI bootstraps only cloud scripts before exact-SHA reuse; non-reusable candidates
 hydrate the complete tested tree. CI timing metadata is archived separately after
 checks/Pages, with unchanged required gates. Neither timing nor sparse checkout
 proves a speed improvement until measured in a subsequent actual run.
+
+## Published fixture retirement · 2026-11-13
+
+The owner approved permanent removal of public church-v1.0.8 and its five
+release assets after verified 1.0.9 delivery. Historical source identities and
+source tags remain. Future upgrade verification uses published 1.0.9
+(d2890379) and its pinned asset IDs, bytes and SHA-256. Do not depend on
+retired 1.0.8 download URLs or remove historical acceptance receipts. This
+fixture update prepares the next candidate; it does not republish immutable 1.0.9.
