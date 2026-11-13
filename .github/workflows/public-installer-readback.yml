@@ -1,0 +1,39 @@
+name: Published 1.0.9 whole-file readback
+on:
+  push:
+    branches: [codex/public-109-readback]
+    paths: [.github/workflows/public-installer-readback.yml]
+permissions: {}
+jobs:
+  download:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [mac-arm64.dmg, mac-x64.dmg, win-x64.exe]
+    steps:
+      - name: Download every public byte and verify pinned size and SHA256
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          python3 -u - <<'PY'
+          import hashlib,json,os,time,urllib.request
+          expected={
+            'mac-arm64.dmg':(1633401586,'fedb1cffc68d9e3fbb9f1782b5ddba4ed31f5f9076cc1cdc63fe013875f643f0'),
+            'mac-x64.dmg':(1643355624,'62445cd0aa0b2f93577a62c9393d6df116789193729ca9022318fcfaf8b3c598'),
+            'win-x64.exe':(1612495959,'1c53b3fbc52f4ceaefecb582c83d41bc2002b0961409981b9d0915a77cbedbad'),
+          }
+          target=os.environ['TARGET'];size,want=expected[target]
+          name='Mindex-1.0.9-'+target
+          url='https://github.com/min-dex/min-dex.github.io/releases/download/church-v1.0.9/'+name
+          digest=hashlib.sha256();count=0;started=time.monotonic()
+          with urllib.request.urlopen(url,timeout=120) as stream:
+            assert stream.status==200
+            if stream.headers.get('Content-Length'): assert int(stream.headers['Content-Length'])==size
+            while chunk:=stream.read(1024*1024):
+              count+=len(chunk);assert count<=size;digest.update(chunk)
+          assert count==size,(count,size)
+          assert digest.hexdigest()==want,(digest.hexdigest(),want)
+          print(json.dumps({'file':name,'bytes':count,'sha256':digest.hexdigest(),'wholeFileRead':True,'sourceCommit':'d28903793cffa3b65be7c27231091061839ef855','releaseId':443967904,'elapsedSeconds':round(time.monotonic()-started,3)}))
+          PY
