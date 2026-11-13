@@ -1,4 +1,5 @@
 import {mountYoutube} from './youtube.mjs';
+import {createFrameCadence} from './frame-cadence.mjs';
 import {mountHallOutput} from './hall-output.mjs';
 import {mountCaptureInput} from './capture-input.mjs';
 import {createCaptionTransition} from './caption-transition.mjs';
@@ -102,7 +103,10 @@ async function file(file){
   $('notice').textContent=webm?'이 파일을 재생할 수 없습니다. MP4 파일을 선택해 주세요.':'이 영상을 재생할 수 없습니다. 다른 영상 파일을 선택해 주세요.';
  }finally{clearTimeout(timeout);clearTimeout(conversionTimeout);if(mediaLoad===load)mediaLoad=null;}
 }
-function render(now,schedule=true){if(disposed)return;frame++;if(!paused)ticks++;ctx.fillStyle='#121a24';ctx.fillRect(0,0,1280,720);
+const frameDue=createFrameCadence(30);
+function render(now,schedule=true){if(disposed)return;
+ if(desktop&&schedule&&!frameDue(now)){raf=requestAnimationFrame(render);return;}
+ frame++;if(!paused)ticks++;ctx.fillStyle='#121a24';ctx.fillRect(0,0,1280,720);
  if(mode!=='slide'){
   if((source==='file'||source==='capture')&&video.readyState>=2&&video.videoWidth>0){const s=Math.min(1280/video.videoWidth,720/video.videoHeight);ctx.drawImage(video,(1280-video.videoWidth*s)/2,(720-video.videoHeight*s)/2,video.videoWidth*s,video.videoHeight*s);}
   else if(!desktop){const g=ctx.createLinearGradient(0,0,1280,720);g.addColorStop(0,'#193c4c');g.addColorStop(1,'#795442');ctx.fillStyle=g;ctx.fillRect(0,0,1280,720);ctx.fillStyle='#e8b778';ctx.beginPath();ctx.arc(170+(ticks*3)%940,250,65,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='24px sans-serif';ctx.fillText('Mindex · TEST INPUT',48,55);}

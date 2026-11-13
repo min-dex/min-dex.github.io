@@ -11,6 +11,7 @@ NODE_TESTS = (
     "test_output_close_guard.cjs",
     "test_youtube_profile.cjs",
     "test_broadcast_capture.mjs",
+    "test_broadcast_frame_cadence.mjs",
     "test_product_identity.cjs",
     "test_internal_updater.cjs",
     "test_desktop_update_ui.cjs",
