@@ -260,6 +260,25 @@ async function main() {
     assert.equal(publishes,2);
     console.log('PASS receiver disconnect releases controls without automatic publication');
     console.log('PASS desktop toolbar, key entry, authenticated TLS receiver, caption + tone → slate + silence → restored, CH8 retained, clean stop');
-  }finally{if(app)await app.close();peer?.destroy();server?.close();sink?.kill('SIGKILL');fs.rmSync(tmp,{recursive:true,force:true});}
+  }catch(error){
+    console.error('Isolated RTMPS assertion failed before cleanup:',error);
+    throw error;
+  }finally{
+    try {
+      if(app) {
+        // Cleanup must not wait for a human at the output-close confirmation if
+        // an assertion failed while the isolated stream was still active.
+        // Only the final OS dialog response is supplied; failure still propagates.
+        await app.evaluate(({dialog})=>{
+          if(!globalThis.__mindexTestIsolation?.networkBlocked) throw Error('Requires isolated cleanup');
+          dialog.showMessageBoxSync=()=>1;
+        });
+        await app.close();
+      }
+    }finally{
+      peer?.destroy();server?.close();sink?.kill('SIGKILL');
+      fs.rmSync(tmp,{recursive:true,force:true});
+    }
+  }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});
