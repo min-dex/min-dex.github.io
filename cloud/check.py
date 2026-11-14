@@ -79,6 +79,7 @@ NODE_TESTS = (
     "test_keynote_auto_import.mjs",
     "test_app_runtime.cjs",
     "test_mp3_alignment.cjs",
+    "test_precise_initial_play.cjs",
     "test_runtime_boundaries.cjs",
     "test_presenter_return.cjs",
     "test_output_fullscreen_close.cjs",

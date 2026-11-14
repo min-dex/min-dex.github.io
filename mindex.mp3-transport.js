@@ -434,6 +434,9 @@
         audio.addEventListener("loadedmetadata", done);
         audio.addEventListener("error", fail);
       });
+      // Metadata may reveal a short clip; it does not need Web Audio.
+      if (token !== playSerial) throw abortError();
+      if (Number.isFinite(native("duration")) && native("duration") < 600) return nativePlay();
       await resume;
       const pending = prepare();
       if (pending) {
@@ -456,7 +459,7 @@
       if (enabled) prepare();
     });
     audio.addEventListener("emptied", () => {
-      if (source !== audio.getAttribute("src")) reset();
+      if (source && source !== audio.getAttribute("src")) reset();
     });
     audio.addEventListener("volumechange", () => backend?.volume());
     Object.defineProperty(audio, "mindexPreciseAudio", {
