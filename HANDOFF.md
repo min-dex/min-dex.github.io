@@ -1,3 +1,13 @@
+## 준비 후보 · 2026-11-19 인용 구절 송출 위치·알림창·업데이트 진행률
+
+브랜치 `claude/ui-citation-toast-update-20261119`(기준 공개 main `d2890379`)의 별도 후보다. 운영 DB/예배/설정/사용자 입력 변경 없음.
+1. 송출 중 인용 구절에 실시간 말씀을 추가해도 현재 절 위치 유지(같은 책·장 추가 시 슬라이드 id가 바뀌어 요소 첫 슬라이드로 돌아가던 문제). `mindex.presenter-controller.js`.
+2. 알림창이 오른쪽 패널의 열·너비를 따름(패널 없는 모듈은 기존 크기). `styles.css`.
+3. 업데이트 다운로드 중 진행률(%)을 버튼 옆에 계속 표시. `mindex.desktop-ui.js`, `index.html`, `styles.css`.
+검사: 새 `smoke_citation_live_position`·`smoke_toast_right_panel`·`smoke_update_progress`(CI 등록 완료), `test_desktop_update_ui.cjs` 1건 추가, 인용 구절·원격·업데이트 관련 기존 검사와 `test_cloud_check`·`test_check_scope`·`test_app_runtime` 통과.
+원본 main에서도 같은 방식으로 실패하는 기존 검사: `smoke_citation_scroll`, `smoke_citation_sidebar`, `smoke_live_controller_stability`, `smoke_reload_selection`, `smoke_toast_readability`(이 후보와 무관, 로컬 환경 기준).
+남은 것: 공유 릴리스 대기열 등록, 필수 gate 전체, `?v=` 캐시 키·런타임/버전 파일 재생성(공동 배치에서 한 번), Pages·공개 확인. 아직 푸시·배포하지 않았다.
+
 ## 준비 후보 · 2026-11-13 접속 방식·쉘·종료 확인
 
 Root `codex/session-shell-polish`는 공개 main03d666e5 기반의 별도 후보다.

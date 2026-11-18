@@ -14,7 +14,21 @@ function bindElectronDesktopEvents() {
     };
     showToast(messages[result?.reason] || "업데이트를 진행하지 못했습니다. 다시 확인해 주세요.", "error");
   };
+  // The download percentage stays on the toolbar button for the whole download.
+  const renderProgress = update => {
+    const button = document.getElementById("desktopUpdateBtn");
+    if (!button) return;
+    const downloading = update?.status === "downloading";
+    const percent = Math.max(0, Math.min(100, Math.round(Number(update?.percent) || 0)));
+    const label = button.querySelector?.(".desktop-update-progress");
+    if (label) { label.textContent = downloading ? `${percent}%` : ""; label.hidden = !downloading; }
+    button.classList?.toggle("is-downloading", downloading);
+    const text = downloading ? `업데이트 다운로드 중 ${percent}%` : "업데이트 확인";
+    button.setAttribute?.("aria-label", text);
+    button.setAttribute?.("title", text);
+  };
   const handleState = async update => {
+    renderProgress(update);
     if (!update || promptPending) return;
     if (update.status === "error") { showToast(update.message, "error"); return; }
     if (!["available", "downloaded"].includes(update.status)) return;

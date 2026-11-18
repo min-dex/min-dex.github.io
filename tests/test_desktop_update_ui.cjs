@@ -84,3 +84,27 @@ test('manual check distinguishes matching web, pending web changes and unverifie
   assert(f.messages.some(m=>m.includes(webSync==='matched'?'모두 최신':webSync==='different'?'다른 변경':'확인하지 못')));
  }
 });
+
+test('download percentage stays on the toolbar button until the download ends',async()=>{
+ const label={hidden:true,textContent:''};
+ const attrs={};
+ const f=fixture({status:'idle',version:''});
+ const button=f.buttons.desktopUpdateBtn;
+ button.querySelector=selector=>selector==='.desktop-update-progress'?label:null;
+ const flags=new Set();button.classList={toggle:(name,on)=>on?flags.add(name):flags.delete(name)};
+ button.setAttribute=(name,value)=>{attrs[name]=value;};
+ const emit=status=>f.bridge.event(status);
+ await tick();// initial state read finishes first
+ emit({status:'downloading',version:'1.2.3',percent:0});await tick();
+ assert.equal(label.textContent,'0%');assert.equal(label.hidden,false);assert(flags.has('is-downloading'));
+ assert.equal(attrs['aria-label'],'업데이트 다운로드 중 0%');
+ emit({status:'downloading',version:'1.2.3',percent:37.6});await tick();
+ assert.equal(label.textContent,'38%');assert.equal(attrs.title,'업데이트 다운로드 중 38%');
+ emit({status:'downloading',version:'1.2.3',percent:250});await tick();
+ assert.equal(label.textContent,'100%');
+ f.live(true);emit({status:'downloading',version:'1.2.3',percent:55,presenterOpen:true});await tick();
+ assert.equal(label.textContent,'55%','progress must still update while a prompt is pending or output is open');
+ emit({status:'downloaded',version:'1.2.3',presenterOpen:true});await tick();
+ assert.equal(label.textContent,'');assert.equal(label.hidden,true);assert(!flags.has('is-downloading'));
+ assert.equal(attrs['aria-label'],'업데이트 확인');
+});
