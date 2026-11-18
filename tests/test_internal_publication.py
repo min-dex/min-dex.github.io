@@ -86,7 +86,7 @@ class PublishedUpgradeIdentity(unittest.TestCase):
  def test_failed_old_install_acceptance_stops_before_candidate_install(self):
   import io, types, verify_published_upgrade as upgrade
   with tempfile.TemporaryDirectory() as folder:
-   root=pathlib.Path(folder);candidate=root/'Mindex-1.0.9-win-x64.exe';candidate.write_bytes(b'candidate')
+   root=pathlib.Path(folder);candidate=root/'Mindex-1.0.10-win-x64.exe';candidate.write_bytes(b'candidate')
    payload=b'published fixture';row={'file':'Mindex-1.0.0-win-x64.exe','id':1,'bytes':len(payload),'sha256':hashlib.sha256(payload).hexdigest()}
    receipt={'version':'1.0.0','channel':'internal','sourceCommit':upgrade.SOURCES['1.0.0'],'assets':[row]}
    calls=[]

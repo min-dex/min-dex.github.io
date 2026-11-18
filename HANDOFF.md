@@ -1,12 +1,10 @@
-## 준비 후보 · 2026-11-19 인용 구절 송출 위치·알림창·업데이트 진행률
+## 1.0.10 통합 준비 후보 · 2026-11-19
 
-브랜치 `claude/ui-citation-toast-update-20261119`(기준 공개 main `d2890379`)의 별도 후보다. 운영 DB/예배/설정/사용자 입력 변경 없음.
-1. 송출 중 인용 구절에 실시간 말씀을 추가해도 현재 절 위치 유지(같은 책·장 추가 시 슬라이드 id가 바뀌어 요소 첫 슬라이드로 돌아가던 문제). `mindex.presenter-controller.js`.
-2. 알림창이 오른쪽 패널의 열·너비를 따름(패널 없는 모듈은 기존 크기). `styles.css`.
-3. 업데이트 다운로드 중 진행률(%)을 버튼 옆에 계속 표시. `mindex.desktop-ui.js`, `index.html`, `styles.css`.
-검사: 새 `smoke_citation_live_position`·`smoke_toast_right_panel`·`smoke_update_progress`(CI 등록 완료), `test_desktop_update_ui.cjs` 1건 추가, 인용 구절·원격·업데이트 관련 기존 검사와 `test_cloud_check`·`test_check_scope`·`test_app_runtime` 통과.
-원본 main에서도 같은 방식으로 실패하는 기존 검사: `smoke_citation_scroll`, `smoke_citation_sidebar`, `smoke_live_controller_stability`, `smoke_reload_selection`, `smoke_toast_readability`(이 후보와 무관, 로컬 환경 기준).
-남은 것: 공유 릴리스 대기열 등록, 필수 gate 전체, `?v=` 캐시 키·런타임/버전 파일 재생성(공동 배치에서 한 번), Pages·공개 확인. 아직 푸시·배포하지 않았다.
+브랜치 `claude/mindex-1010-candidate`(기준 공개 main·1.0.9 `d2890379`). 운영 DB/예배/설정/사용자 입력 변경 없음, 비공개 소스 이관·게시 경로·권한·refs 변경 없음.
+포함(원 커밋): `9fc5f5e92` MP3 첫 재생이 대기 중 재생을 취소하지 않도록 보완(`mindex.mp3-transport.js`) · `168266d6c` 공개 1.0.9 기준 업그레이드 시험 자료 · `87416cab3` 공개 설치 파일 전체 다운로드 확인 CI · `487a3bb4e` 송출 중 인용 구절 실시간 말씀 추가 시 현재 절 유지, 알림창을 오른쪽 패널 열·너비에 맞춤, 업데이트 다운로드 진행률(%) 상시 표시.
+버전 파일을 1.0.10(`20261119-internal-1010`)으로 맞췄다: `package.json`·`internal-release.json`·`mindex-release.json`·`index.html` 두 상수·`app.runtime.json`·`product-release.json`. `app.js`는 바뀌지 않아 `app.runtime.js`는 그대로다(소스 해시 일치, `test_app_runtime.cjs` 통과).
+검사(로컬): 새 smoke 3개(CI 등록 완료)·`test_desktop_update_ui`·`test_precise_initial_play`·`test_app_runtime`·`test_cloud_check`·`test_check_scope`와 인용·원격·업데이트·프리즈 관련 기존 smoke 통과. Node 테스트 189건 중 실패 33건은 원본 main과 같은 기존 건(이 후보로 새로 생긴 실패 0). `test_internal_publication.py` 9건 오류와 `smoke_citation_scroll/sidebar`, `smoke_live_controller_stability`, `smoke_reload_selection`, `smoke_toast_readability`도 원본에서 동일하게 실패한다.
+남은 것: 공유 릴리스 대기열 등록, 필수 branch gate 전체와 main 반복, Mac·Windows 패키지 검사, 공개 Pages·설치 파일 확인. 아직 푸시·배포하지 않았고 실제 방송실 장비·Windows PC 검증도 별도다.
 
 ## 준비 후보 · 2026-11-13 접속 방식·쉘·종료 확인
 

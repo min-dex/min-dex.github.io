@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261111-internal-109",
+  "version": "20261119-internal-1010",
   "options": {
     "compress": false,
     "mangle": {
