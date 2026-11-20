@@ -1,4 +1,7 @@
 """The toolbar update button shows the download percentage the whole time it downloads."""
+import tempfile
+from pathlib import Path
+
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 BRIDGE = '''
@@ -38,7 +41,8 @@ def main():
                     assert m['label'] == f'업데이트 다운로드 중 {text}', m
                     assert m['width'] > idle['width'], (idle, m)
                     if width == 1440 and percent == 42.4:
-                        page.screenshot(path='/private/tmp/mindex-update-progress.png', clip={'x': 0, 'y': 0, 'width': 1440, 'height': 120})
+                        screenshot = Path(tempfile.gettempdir()) / 'mindex-update-progress.png'
+                        page.screenshot(path=str(screenshot), clip={'x': 0, 'y': 0, 'width': 1440, 'height': 120})
                 page.evaluate('window.__emitUpdate({status:"downloaded", version:"9.9.9", presenterOpen:true})')
                 page.wait_for_timeout(100)
                 done = page.evaluate(measure)

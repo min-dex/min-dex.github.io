@@ -3,7 +3,7 @@ from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 MEASURE = '''async (module) => {
   // Exercise a real transition even when restored UI state already selected Presenter.
-  if (module === 'presenter' && document.body.dataset.module === 'presenter') await switchModule('praise');
+  if (module === 'presenter' && state.module === 'presenter') await switchModule('praise');
   await switchModule(module);
   await new Promise((resolve, reject) => {
     let frames = 0;
@@ -34,6 +34,7 @@ def main():
             browser = launch_chromium(p)
             for width in (1440, 1100, 960):
                 page = browser.new_page(viewport={'width': width, 'height': 800})
+                page.add_init_script("sessionStorage.setItem('mindex.ui.module', 'presenter')")
                 page.route('**/*supabase*/**', lambda route: route.abort())
                 page.goto(url, wait_until='domcontentloaded')
                 page.wait_for_function("typeof showToast==='function' && !document.body.classList.contains('ui-booting')")
