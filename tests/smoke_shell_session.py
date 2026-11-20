@@ -30,13 +30,16 @@ def main():
                         page.wait_for_function('presence.length>0')
                         label=page.evaluate('presence[0].browser')
                         assert label == '앱 · Mindex' if desktop else label.startswith('웹 · ')
+                        page.evaluate("""async () => {
+                          if (state.module !== 'presenter') await switchModule('presenter');
+                          applyRightSidebarVisibility(true);
+                        }""")
                         for width in [1120,1440,1920]:
                             for theme in ['light','dark']:
                                 page.set_viewport_size({'width':width,'height':960})
                                 page.evaluate('''theme=>{
                                   document.body.dataset.theme=theme;
-                                  document.body.classList.add('right-sidebar-open');
-                                  document.querySelector('.right-sidebar').hidden=false;
+                                  applyRightSidebarVisibility(true);
                                 }''',theme)
                                 page.wait_for_timeout(150)
                                 geometry=page.evaluate('''()=>{

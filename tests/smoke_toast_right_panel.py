@@ -5,6 +5,7 @@ MEASURE = '''async (module) => {
   // Exercise a real transition even when restored UI state already selected Presenter.
   if (module === 'presenter' && state.module === 'presenter') await switchModule('praise');
   await switchModule(module);
+  applyRightSidebarVisibility(module === 'presenter');
   await new Promise((resolve, reject) => {
     let frames = 0;
     const ready = () => {
