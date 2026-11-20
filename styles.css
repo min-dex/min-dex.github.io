@@ -819,17 +819,7 @@ body[data-module="backgrounds"] .sidebar-list-head,
 :is(.topbar-actions > .icon-btn, .topbar-actions > #globalPlaybackControls > .icon-btn) > * { position: relative; }
 .topbar-actions > .btn span { display: none; }
 /* Update download: the percentage sits beside the icon until the download ends. */
-.topbar-actions > #desktopUpdateBtn.is-downloading {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: auto;
-  min-width: var(--topbar-btn-size);
-  flex: 0 0 auto;
-  padding-inline: 6px;
-  color: var(--accent);
-}
+.topbar-actions > #desktopUpdateBtn.is-downloading { display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: auto; min-width: var(--topbar-btn-size); flex: 0 0 auto; padding-inline: 6px; color: var(--accent); }
 .topbar-actions > #desktopUpdateBtn.is-downloading::before { width: calc(100% - 4px); }
 .desktop-update-progress { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
 .desktop-update-progress[hidden] { display: none; }
@@ -3170,27 +3160,9 @@ body[data-module="praise"] .song-count-badge {
   to { transform: rotate(360deg); }
 }
 .toast-region { position: fixed; right: var(--s4); bottom: var(--s4); z-index: 20; display: grid; gap: var(--s2); width: min(360px, calc(100vw - 32px)); }
-/* With a right panel open (presenter always has one) notifications take that panel's
-   column and width instead of floating over the board at a different size. */
-body:is(.right-sidebar-open, [data-module="presenter"]) .toast-region {
-  right: 0;
-  width: var(--shell-right-w);
-  box-sizing: border-box;
-  padding-inline: var(--s3);
-}
-.toast {
-  --toast-tone: var(--info);
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  border: 1px solid var(--line-soft);
-  border-left: 3px solid var(--toast-tone);
-  border-radius: var(--r);
-  background: var(--ui-surface-panel);
-  color: var(--ink-2);
-  box-shadow: var(--shadow-soft);
-  padding: var(--s3);
-}
+/* Open right panels own the notification column instead of covering the board. */
+body:is(.right-sidebar-open, [data-module="presenter"]) .toast-region { right: 0; width: var(--shell-right-w); box-sizing: border-box; padding-inline: var(--s3); }
+.toast { --toast-tone: var(--info); display: flex; align-items: flex-start; gap: 8px; border: 1px solid var(--line-soft); border-left: 3px solid var(--toast-tone); border-radius: var(--r); background: var(--ui-surface-panel); color: var(--ink-2); box-shadow: var(--shadow-soft); padding: var(--s3); }
 .toast[hidden] { display: none; }
 .toast.info { --toast-tone: var(--info); }
 .toast.success { --toast-tone: var(--success); }

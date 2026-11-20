@@ -2,8 +2,20 @@
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 MEASURE = '''async (module) => {
+  // Exercise a real transition even when restored UI state already selected Presenter.
+  if (module === 'presenter' && document.body.dataset.module === 'presenter') await switchModule('praise');
   await switchModule(module);
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve, reject) => {
+    let frames = 0;
+    const ready = () => {
+      const width = document.querySelector('.right-sidebar').getBoundingClientRect().width;
+      const open = document.body.classList.contains('right-sidebar-open');
+      if (module === 'presenter' ? open && width > 200 : !open) return resolve();
+      if (++frames > 120) return reject(new Error(`right panel did not settle for ${module}`));
+      requestAnimationFrame(ready);
+    };
+    ready();
+  });
   showToast('송출 중인 화면을 갱신했어요.', 'info');
   const region = document.getElementById('toastRegion').getBoundingClientRect();
   const panel = document.querySelector('.right-sidebar').getBoundingClientRect();

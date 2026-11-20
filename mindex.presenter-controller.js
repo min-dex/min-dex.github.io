@@ -1237,16 +1237,12 @@ function firstPresenterNavigableIndex(slides = []) {
 }
 
 function lastPresenterNavigableIndex(slides = []) {
-  for (let index = slides.length - 1; index >= 0; index -= 1) {
+  for (let index = slides.length - 1; index >= 0; index -= 1)
     if (presenterSlideIsNavigable(slides[index])) return index;
-  }
   return Math.max(slides.length - 1, 0);
 }
 
-function clampPresenterIndex(index, count) {
-  if (!count) return 0;
-  return Math.min(Math.max(Number(index) || 0, 0), count - 1);
-}
+function clampPresenterIndex(index, count) { return count ? Math.min(Math.max(Number(index) || 0, 0), count - 1) : 0; }
 
 function presenterSlideAnchor(slide = null) {
   if (!slide) return null;
@@ -1261,30 +1257,19 @@ function presenterSlideAnchor(slide = null) {
     scripturePending: Boolean(slide.scripturePending),
     title: String(slide.title || slide.elementTitle || slide.marker || "").trim(),
     hidden: presenterSlideIsHidden(slide),
-    // Scripture slide ids embed the combined reference title, so adding a reference
-    // to the same book/chapter renames every slide. The verse stays stable.
-    book: String(slide.referenceBook || "").trim(),
-    verse: Number(slide.scriptureVerse) || 0,
-    verseEnd: Number(slide.scriptureVerseEnd) || 0,
-    chapter: Number.parseInt(String(slide.referenceRange || ""), 10) || 0,
+    // Scripture ids change with the combined title; verse coordinates stay stable.
+    book: String(slide.referenceBook || "").trim(), verse: Number(slide.scriptureVerse) || 0, verseEnd: Number(slide.scriptureVerseEnd) || 0, chapter: Number.parseInt(String(slide.referenceRange || ""), 10) || 0,
   };
 }
 
 function presenterSlideTypeMatchesAnchor(slide, anchor) {
   const slideType = String(slide?.type || "").trim();
   const anchorType = String(anchor?.type || "").trim();
-  if (slideType === anchorType) return true;
-  return (
-    (anchorType === "scripture-pending" && slideType === "scripture")
-    || (anchorType === "scripture" && slideType === "scripture-pending")
-  );
+  return slideType === anchorType || (anchorType === "scripture-pending" && slideType === "scripture")
+    || (anchorType === "scripture" && slideType === "scripture-pending");
 }
 
-function presenterSlideContextMatchesAnchor(slide, anchor) {
-  const anchorContext = String(anchor?.scriptureContext || "").trim();
-  if (!anchorContext) return true;
-  return String(slide?.scriptureContext || "").trim() === anchorContext;
-}
+function presenterSlideContextMatchesAnchor(slide, anchor) { const context = String(anchor?.scriptureContext || "").trim(); return !context || String(slide?.scriptureContext || "").trim() === context; }
 
 function presenterSlideIndexForAnchor(slides = [], anchor = null, fallbackIndex = 0) {
   if (!Array.isArray(slides) || !slides.length) return 0;
@@ -1294,19 +1279,13 @@ function presenterSlideIndexForAnchor(slides = [], anchor = null, fallbackIndex 
     if (exactIndex >= 0) return exactIndex;
   }
   if (anchor.groupKey && anchor.book && anchor.verse) {
-    const sameVerse = slides
-      .map((slide, index) => ({ slide, index }))
-      .filter(({ slide }) => presenterSlideElementGroupKey(slide) === anchor.groupKey
-        && presenterSlideTypeMatchesAnchor(slide, anchor)
-        && presenterSlideContextMatchesAnchor(slide, anchor)
-        && !slide?.hiddenInPresentation
-        && String(slide.referenceBook || "").trim() === anchor.book
-        && (Number(slide.scriptureVerse) || 0) === anchor.verse
-        && (Number(slide.scriptureVerseEnd) || 0) === anchor.verseEnd);
-    const sameChapter = sameVerse.find(({ slide }) =>
-      !anchor.chapter || (Number.parseInt(String(slide.referenceRange || ""), 10) || 0) === anchor.chapter);
-    const match = sameChapter || sameVerse[0];
-    if (match) return match.index;
+    const matchesVerse = (slide) => presenterSlideElementGroupKey(slide) === anchor.groupKey && presenterSlideTypeMatchesAnchor(slide, anchor)
+      && presenterSlideContextMatchesAnchor(slide, anchor) && !slide?.hiddenInPresentation && String(slide.referenceBook || "").trim() === anchor.book
+      && (Number(slide.scriptureVerse) || 0) === anchor.verse && (Number(slide.scriptureVerseEnd) || 0) === anchor.verseEnd;
+    const sameChapter = slides.findIndex((slide) => matchesVerse(slide) && (!anchor.chapter || (Number.parseInt(String(slide.referenceRange || ""), 10) || 0) === anchor.chapter));
+    if (sameChapter >= 0) return sameChapter;
+    const sameVerse = slides.findIndex(matchesVerse);
+    if (sameVerse >= 0) return sameVerse;
   }
   if (anchor.groupKey) {
     const sameTypeIndex = slides.findIndex((slide) =>
