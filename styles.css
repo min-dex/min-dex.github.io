@@ -367,7 +367,7 @@
   --tab-active-bg: var(--bg);
   --tab-hover-bg: var(--ui-surface-field);
   --right-sidebar-w: var(--rail-w);
-  --shell-right-w: 0px;
+  --shell-right-w: 0px; --topbar-right-w: var(--topbar-compact-w);
   --sidebar-reference-w: 260px;
   --rail-w: var(--sidebar-reference-w); --topbar-h: 50px; --sidebar-row-h: 40px; --sidebar-sub-row-h: 35px; --sidebar-pad-x: 18px; --topbar-edge-x: 12px;
   --sidebar-item-x: var(--s2); --sidebar-item-end: var(--s2); --sidebar-item-pad-x: 10px; --sidebar-icon-gap: var(--s2);
@@ -507,7 +507,7 @@ h1, h2, h3, p { margin: 0; }
   grid-row: 1;
   height: 100%;
   align-items: center;
-  grid-template-columns: var(--shell-left-w) minmax(0, 1fr) max(var(--shell-right-w), var(--topbar-compact-w));
+  grid-template-columns: var(--shell-left-w) minmax(0, 1fr) var(--topbar-right-w);
   gap: 0;
   border-bottom: 0;
   background: var(--ui-surface-panel);
@@ -517,9 +517,9 @@ h1, h2, h3, p { margin: 0; }
 .topbar .topbar-module-strip,
 .topbar .primary-switcher,
 .topbar .topbar-actions { position: relative; z-index: 1; }
-body.right-sidebar-open { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); }
-body[data-module="presenter"] { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); }
-body[data-module="presenter"].right-sidebar-open { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); }
+body.right-sidebar-open { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); --topbar-right-w: var(--shell-right-w); }
+body[data-module="presenter"] { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); --topbar-right-w: var(--shell-right-w); }
+body[data-module="presenter"].right-sidebar-open { --shell-right-w: max(var(--right-sidebar-w), var(--topbar-compact-w)); --topbar-right-w: var(--shell-right-w); }
 .primary-switcher {
   position: relative;
   display: flex;
