@@ -164,7 +164,7 @@ async function main(){
    const restored=JSON.parse(actual[Object.keys(values)[0]]);
    if(restored.value.items[0].raw_body!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
    return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:restored.value.items[0].raw_body,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};
-  },{seed:phase==='seed',retiredTheme:phase==='upgrade',legacyCopies});
+  },{seed:phase==='seed',retiredTheme,legacyCopies});
   assert.equal(data.identity.length,64);
   if(phase==='seed'){
    record={...record,profile:native.profile,data,hashes:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)]))};
