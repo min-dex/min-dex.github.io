@@ -5879,3 +5879,10 @@ levels retain horizontal scrolling.
 유지한다. 독립 송출 창의 16:9 tool stage는 transform 기준점 대신 viewport inset과
 auto margin으로 중앙 정렬한다. 따라서 비-16:9 창에서도 섬네일과 같은 전체 무대를
 보이고 위·아래 letterbox가 균등하며, 확대·하단 잘림이 생기지 않는다.
+
+## 2026-11-21 Browser broadcast resolution
+
+User approved Full HD browser output and capture requests to match desktop.
+Both canvases use 1920×1080; capture requests ideal 1920×1080/30fps. Preserve
+logical drawing coordinates, imported slides, caption layout and desktop-only
+streaming/recording capabilities. See youtube-desktop-candidate.md.

@@ -1,0 +1,44 @@
+"""Full HD composition without a desktop bridge, devices or external services."""
+import os
+os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
+from smoke_app import launch_chromium, start_local_app_server, sync_playwright
+
+
+def main():
+    server, url = start_local_app_server()
+    url = url.rsplit("/", 1)[0]
+    try:
+        with sync_playwright() as p:
+            for engine in ('chromium', 'webkit'):
+                browser = launch_chromium(p) if engine == 'chromium' else p.webkit.launch()
+                try:
+                    page = browser.new_page(viewport={'width': 1320, 'height': 1000})
+                    page.set_default_timeout(15000)
+                    errors = []
+                    page.on('pageerror', lambda error: errors.append(str(error)))
+                    page.route('**/*', lambda route: route.continue_() if route.request.url.startswith(url.rstrip('/')) else route.abort())
+                    page.goto(url.rstrip('/') + '/tools/broadcast-prototype/index.html')
+                    page.wait_for_function('window.broadcastPrototype')
+                    assert page.evaluate('typeof window.youtubeOutput') == 'undefined'
+                    assert page.locator('#broadcast').evaluate('(c)=>[c.width,c.height]') == [1920, 1080]
+                    page.get_by_text('수동 자막 및 화면 설정', exact=True).click()
+                    page.locator('#text').fill('1080p browser caption')
+                    page.locator('#apply').click()
+                    page.wait_for_function('''() => {
+                        const c=document.querySelector('#broadcast');
+                        const d=c.getContext('2d').getImageData(0,850,1920,230).data;
+                        for(let i=0;i<d.length;i+=4)if(d[i]>220&&d[i+1]>220&&d[i+2]>220)return true;
+                        return false;
+                    }''')
+                    assert page.locator('#ytStart').is_disabled()
+                    assert not errors, errors
+                    print(f'PASS {engine}: browser 1080p canvas, scaled caption, no desktop bridge')
+                finally:
+                    browser.close()
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+if __name__ == '__main__':
+    main()

@@ -12,7 +12,7 @@ const desktop=Boolean(window.youtubeOutput);
 for(const control of document.querySelectorAll('[data-demo-only]')) control.hidden=desktop;
 const canvas=$('program'),ctx=canvas.getContext('2d',{alpha:false});
 const broadcast=$('broadcast'),broadcastCtx=broadcast.getContext('2d',{alpha:false}),outputPolicy=createOutputPolicy(),exclusions=new Map();
-const outputWidth=desktop?1920:1280,outputHeight=desktop?1080:720,outputScale=outputWidth/1280;
+const outputWidth=1920,outputHeight=1080,outputScale=outputWidth/1280;
 for(const c of [canvas,broadcast]){c.width=outputWidth;c.height=outputHeight;c.getContext('2d').scale(outputScale,outputScale);}
 let routeKey='sample:0',audioContext=null,audioBuses=null,hallAudio=null,broadcastAudio=null;
 function paintRoute(){const policy=outputPolicy.read();audioBuses?.apply(policy);captureInput?.applyPolicy();if(!policy.broadcast)drawBroadcast(broadcastCtx,canvas,policy);$('routeStatus').textContent=`${policy.broadcast?'유튜브 송출 허용':policy.reason} · 본당 화면 유지 · 유튜브 음성 ${policy.broadcast?'허용 경로':'차단 경로'}`;$('excludeBroadcast').setAttribute('aria-pressed',String(policy.manual));$('excludeBroadcast').textContent=policy.manual?'수동 제외 해제':'방송 제외';}

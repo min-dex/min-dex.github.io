@@ -7,8 +7,8 @@ class Track extends EventTarget {readyState='live';stop(){this.readyState='ended
 const makeStream=()=>{const track=new Track();return {track,getTracks:()=>[track],getAudioTracks:()=>[]};};
 globalThis.window={youtubeOutput:{}};
 globalThis.Option=class {constructor(label,value){this.value=value;}};
-let pending;
-Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaDevices:{enumerateDevices:async()=>[],getUserMedia:()=>pending.promise}}});
+let pending,constraints;
+Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaDevices:{enumerateDevices:async()=>[],getUserMedia:options=>{constraints=options;return pending.promise;}}}});
 const elements=new Map();
 const root={getElementById(id){if(!elements.has(id))elements.set(id,{value:'',options:[],replaceChildren(...options){this.options=options;},add(option){this.options.push(option);}});return elements.get(id);}};
 let playing,ready=0,stops=0;
@@ -32,6 +32,19 @@ try {
  assert.equal(ready,1);old.track.end();assert.equal(capture.active(),true);
  stream.track.end();assert.equal(capture.active(),false);assert.equal(root.getElementById('captureDisconnect').disabled,true);
 } finally {capture.dispose();}
+// Both browser and desktop request Full HD without requiring device support.
+for(const desktop of [false,true]){
+ globalThis.window=desktop?{youtubeOutput:{}}:{};
+ const input=mountCaptureInput({root,video,policy:()=>({broadcast:true}),onStart(){},onReady(){},onStop(){}});
+ await Promise.resolve();await Promise.resolve();
+ try{
+  const run=connect();
+  assert.deepEqual(constraints.video,{deviceId:{exact:'fixture'},width:{ideal:1920},height:{ideal:1080},frameRate:{ideal:30}});
+  assert.equal(constraints.audio,false);
+  pending.resolve(makeStream());playing.resolve();await run;
+  assert(input.active());
+ }finally{input.dispose();}
+}
 // Exclusion mutes the broadcast bus only; restoring cannot override another block.
 const policy=createOutputPolicy();
 const gain=()=>({gain:{value:0,setValueAtTime(v){this.value=v;},cancelScheduledValues(){}},disconnect(){}});

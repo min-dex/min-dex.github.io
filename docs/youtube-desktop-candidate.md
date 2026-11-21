@@ -155,7 +155,7 @@ Electron 메인 프로세스는 방송 창의 최상위 로컬 문서만 받아�
 
 설치 앱 캡처 입력은 1920×1080/30fps를 요청하고 합성 캔버스도 1920×1080을 사용한다.
 장치가 낮은 해상도를 반환하면 실제 디테일은 늘어나지 않는다. 기존 720p 슬라이드 가져오기와
-독립 브라우저 데모의 좌표·기본 해상도는 유지한다.
+독립 브라우저 데모의 1280×720 논리 좌표는 유지하되, 출력과 캡처 요청은 아래 2026-11-21 계약을 따른다.
 
 송출은 H.264 libx264 veryfast, CFR 30fps, CBR 14,000 Kbps, GOP 60프레임(2초),
 AAC 128 Kbps/48 kHz/stereo다. 비트레이트는 5,000~30,000 Kbps 정수로 바꿀 수 있고
@@ -196,3 +196,13 @@ RTMPS 테스트의 마지막 OS 종료 확인도 격리 정리 단계에서만 �
 제품 종료 보호, 원래 검사·기한·실패 exit는 변경하지 않는다.
 로컬 1.0.8 격리 프로필에서 seed/upgrade/restart와 자료 해시 보존·정리 종료를
 확인했으며, 후보 설치본에 대한 전체 동일 SHA 검사는 별도로 다시 수행한다.
+
+## 2026-11-21 Browser Full HD parity
+
+Browser and desktop broadcast canvases both use 1920×1080 pixels. Both capture
+paths request ideal 1920×1080 at 30fps; device fallback remains permitted.
+The 1280×720 drawing coordinates and imported-slide contract remain unchanged,
+with 1.5× canvas scaling preserving caption layout. Browser-only rendering does
+not gain the desktop RTMPS bridge. Bitrate, recording and desktop encoding are
+unchanged. `smoke_broadcast_resolution.py` checks both engines without a desktop
+bridge; `test_broadcast_capture.mjs` checks both capture request paths.

@@ -112,6 +112,7 @@ CSS_NODE_TESTS = (
     "test_single_song.cjs",'test_app_runtime.cjs', 'test_ui_icons.cjs',
                   'test_remote_theme.cjs', 'test_bulletin.cjs')
 SMOKES = (
+    "smoke_broadcast_resolution.py",
     "smoke_audio_presence.py",
     "smoke_praise_groups.py",
     "smoke_single_song.py",
