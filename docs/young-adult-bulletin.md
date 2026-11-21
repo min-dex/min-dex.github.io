@@ -699,3 +699,25 @@ H2 15pt, 본문 12.5pt, 보조 10pt. 광고 괄호는 짝이 맞는 경우만 80
 청소년부 장소는1층 베데스다홀이다. 기존 등록 로고·개별 작성 문구는 유지한다.
 서버 공통 양식의 색·로고·문구 변경 및 사용자 앱 업데이트는 배포 후 별도 CAS로
 확인하며 시안 파일 생성만으로 실제 적용 완료라 하지 않는다.
+
+### Children monthly theme hierarchy · 2026-11-22 follow-up
+
+Swiss children renders the first monthly-theme line as H2 (15pt/700),
+then a 2.5mm gap and remaining lines as body (12.5pt/500, 6.25mm leading).
+The authored field stays intact. This follow-up is outside frozen 1.0.17.
+November church schedules use the user-approved print monthly field, not the
+calendar's mixed department-event list. The 2026-11-08 original supplies the
+three November rows; operational saves must preserve concurrent weekly edits.
+
+All Swiss department staff blocks share two 61.75mm columns with a 5mm gutter.
+Roles are 10pt/500 in a 20mm box, names 10pt/700 after a 2.5mm gap.
+Rows use a 7.5mm minimum pitch (wrapped rows grow together); divider-to-text
+gap is 5mm. Prefix and suffix roles are normalized for display only, preserving
+the original authored staff value. No roles or people are invented.
+
+For Tov, a leading 주일학교장 occupies the first left cell with an empty right
+cell. Remaining staff retain their authored order in subsequent two-column rows.
+
+All Swiss department calendars use 12.5pt dates/event names and 10pt time
+qualifiers (including 토 제외). Order labels and assignees use 10pt; the central
+content remains 12.5pt. These are shared renderer rules, not PDF-only styling.

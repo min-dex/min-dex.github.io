@@ -495,10 +495,10 @@
       if(paren){const stack=[],pairs=[];chars.forEach((c,i)=>{if('（('.includes(c.text))stack.push(i);else if('）)'.includes(c.text)&&stack.length){const start=stack.at(-1);if((chars[start].text==='('&&c.text===')')||(chars[start].text==='（'&&c.text==='）')){stack.pop();pairs.push([start,i]);}}});for(let i=0;i<chars.length;i++)if(pairs.some(([a,b])=>i>=a&&i<=b))chars[i].size=size*.8;}
       return chars;
     }
-    function text(g,id,t,x,y,w=128.5,size=12.5,align='left',weight=500,paren=false,max=210){
+    function text(g,id,t,x,y,w=128.5,size=12.5,align='left',weight=500,paren=false,max=210,exactBaseline=false){
       if(!t)return 0;
       const leading=size===10||size===8?5:size===12.5?6.25:size*1.2/MM;
-      const h=writeStyled(g,runs(String(t),size,paren).map(r=>({...r,weight:r.weight===700?700:weight})),{x,y,w,h:Math.max(0,max-y),size,leading:leading*MM,weight,align,color:'#171717',family:'MindexBulletin'},issues,id);
+      const h=writeStyled(g,runs(String(t),size,paren).map(r=>({...r,weight:r.weight===700?700:weight})),{x,y,w,h:Math.max(0,max-y),baselineY:exactBaseline?y+size/MM:undefined,size,leading:leading*MM,weight,align,color:'#171717',family:'MindexBulletin'},issues,id);
       return Math.max(leading,h);
     }
     function heading(page,id,t,x,y,right='',rightId=''){
@@ -534,18 +534,23 @@
     const events=group(0,'events');
     for(const line of value('eventsText').split('\n').filter(Boolean)){
       const split=line.includes('|')?line.split('|'):line.split(/\s{2,}/),a=split.shift(),b=split.join(' ');
-      const h=Math.max(text(events,'events',a,10,y,b?63:128.5,10),b?text(events,'events',b,75.5,y,63,10,'right'):0);y+=h+2.5;
+      const timeAt=a.search(/\s+(?=(?:오전|오후|새벽|저녁|낮|평일|매일|\d{1,2}:))/),date=timeAt<0?a:a.slice(0,timeAt),time=timeAt<0?'':a.slice(timeAt);
+      const left=writeStyled(events,[...runs(date,12.5),...runs(time&&textWidth(date,12.5,500)+textWidth(time,10,500)>(b?63:128.5)?'\n'+time.trim():time,10)],{x:10,y,w:b?63:128.5,h:210-y,size:12.5,leading:6.25*MM,weight:500,align:'left',color:'#171717',family:'MindexBulletin'},issues,'events');
+      const h=Math.max(6.25,left,b?text(events,'events',b,75.5,y,63,12.5,'right'):0);y+=h+2.5;
     }
     const eventsEnd=y-2.5;
-    const newsStart=y+10;let ny=heading(0,'newsTitle',departmentName(department)+' 소식',10,newsStart);
+    const newsStart=y+5;let ny=heading(0,'newsTitle',departmentName(department)+' 소식',10,newsStart);
     const welcome=group(0,'welcome');ny+=text(welcome,'welcome',value('welcome'),10,ny,128.5,12.5,'left',500,true)+5;
     const news=group(0,'news');for(const line of value('news').split('\n').filter(Boolean)){
       const detail=/^\s*[-–]/.test(line),number=line.match(/^\s*([①-⑳]|\d+[.)])\s*/);if(number){const label=svg('g');news.append(label);text(label,'news',number[1],10,ny,8,12.5);label.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}ny+=text(news,'news',number?line.slice(number[0].length):line,detail||number?18:10,ny,detail||number?120.5:128.5,detail?10:12.5,'left',500,true)+(detail?1.25:2.5);
     }
     ny+=2.5;const notices=group(0,'notices');ny+=text(notices,'notices',value('notices'),10,ny,128.5,12.5,'left',500,true);
-    const staff=group(0,'staff'),people=value('staff').split(/\n|\s*·\s*/).filter(Boolean),staffRows=Math.ceil(people.length/2),staffY=180-(staffRows?staffRows*6.25+3.75:0);
+    const staff=group(0,'staff'),roles='주일학교장|담당\\s*교역자|위임목사|담임목사|부회장|회장|총무|서기|회계|부장';
+    const people=value('staff').split(/\n|\s*·\s*/).filter(p=>p.trim()).map(p=>{const first=p.match(new RegExp('^('+roles+')\\s+(.+)$')),last=p.match(new RegExp('^(.+?)\\s+('+roles+')$'));return first?{role:first[1],name:first[2]}:last?{role:last[2],name:last[1]}:{role:'',name:p};});
+    if(department==='youth'&&people[0]?.role==='주일학교장')people.splice(1,0,{role:'',name:''});
+    const staffRows=Math.ceil(people.length/2),rowHeights=Array.from({length:staffRows},(_,i)=>Math.max(7.5,...people.slice(i*2,i*2+2).map(p=>Math.max(wrap(p.role,20,10,500).length,wrap(p.name,p.role?39.25:61.75,10,700).length)*5+2.5))),staffY=185-(staffRows?rowHeights.reduce((a,b)=>a+b,0)+5:0);
     rule(staff,10,staffY);
-    people.forEach((p,i)=>{const x=10+(i%2)*69.25,yy=staffY+3.75+Math.floor(i/2)*6.25,m=p.match(/^(담당\s*교역자|위임목사|담임목사|부회장|회장|총무|서기|회계|부장)\s+(.+)$/);if(m){text(staff,'staff',m[1],x,yy,20,10);text(staff,'staff',m[2],x+22.5,yy,36.75,10,'left',700);}else text(staff,'staff',p,x,yy,59.25,10);});
+    let staffTop=staffY+5;rowHeights.forEach((height,row)=>{people.slice(row*2,row*2+2).forEach((p,col)=>{const x=10+col*66.75,g=svg('g',{'data-staff-row':row,'data-staff-column':col});staff.append(g);if(p.role)text(g,'staff',p.role,x,staffTop,20,10,'left',500,false,210,true);text(g,'staff',p.name,x+(p.role?22.5:0),staffTop,p.role?39.25:61.75,10,'left',700,false,210,true);});staffTop+=height;});
     const extra=(staffY-ny-10)/2;
     if(extra<0)issues.add('news');else for(const id of ['newsTitle','welcome','news','notices'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);
     if(eventsEnd>newsStart)issues.add('events');
@@ -555,7 +560,7 @@
     for(const r of rows){
       const creed=['사도신경','신앙고백'].includes(r.label),label=creed?'신앙고백':r.label;
       const content=creed?'사도신경':r.content,person=(r.label==='광고'?value('announcer')||r.person:r.person||'').replace(/다같이/g,'다 같이');
-      const cells=[{t:label,x:10,w:22.5,size:12.5},{t:content,x:35,w:76,size:12.5},{t:person,x:113.5,w:25,size:10,align:'right'}];
+      const cells=[{t:label,x:10,w:22.5,size:10},{t:content,x:35,w:76,size:12.5},{t:person,x:113.5,w:25,size:10,align:'right'}];
       const counts=cells.map(c=>wrap(c.t||'',c.w,c.size,500).length),h=Math.max(...counts,1)*6.25+2.5;
       cells.forEach((c,i)=>text(order,'order',c.t,c.x,y+1.25+(Math.max(...counts,1)-counts[i])*6.25/2,c.w,c.size,c.align||'left',r.label==='설교'&&i===1?700:500,false,y+h));
       y+=h;rule(order,10,y);
@@ -571,7 +576,9 @@
     }
     if(department==='children'){
       let yy=heading(1,'monthlyThemeTitle','이달의 주제',158.5,25,month('curriculumMonth'),'themeMonth');
-      const themeEnd=yy+text(group(1,'monthlyTheme'),'monthlyTheme',value('monthlyTheme'),158.5,yy,128.5,15,'left',700,false,100);
+      const theme=value('monthlyTheme').split('\n'),themeGroup=group(1,'monthlyTheme');
+      let themeEnd=yy+text(themeGroup,'monthlyTheme',theme.shift(),158.5,yy,128.5,15,'left',700,false,100);
+      if(theme.length)themeEnd+=2.5+text(themeGroup,'monthlyTheme',theme.join('\n'),158.5,themeEnd+2.5,128.5,12.5,'left',500,false,100);
       yy=heading(1,'memoryTitle','새길 말씀',158.5,themeEnd+10,value('memoryReference'),'memoryReference');
       const memoryEnd=yy+text(group(1,'memoryVerse'),'memoryVerse',value('memoryVerse'),158.5,yy,128.5,12.5,'left',500,false,160);
       const reading=value('readingPlan').split('\n').filter(Boolean),count=Math.ceil(reading.length/2),rh=count*6.25,ry=185-rh;
