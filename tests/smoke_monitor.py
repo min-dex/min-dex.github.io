@@ -29,7 +29,7 @@ def main():
                         if(name==='mindex_remote_outputs')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224'},{id:'s2',title:'대기 예배',device:'교육관 PC · 송출 대기',position:'송출 대기'}]}});
                         if(name==='mindex_remote_admin_login')return Promise.resolve({data:{ok:true,token:'fixture-only'}});
                         if(name==='mindex_remote_admin')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224',code:'0123'}]}});
-                        if(monitorMode==='pending')return new Promise(resolve=>window.monitorRelease=resolve);
+                        if(monitorMode==='pending')return new Promise(resolve=>(window.monitorReleases ||= []).push(resolve));
                         if(monitorMode==='missing')return Promise.resolve({error:{code:'PGRST202'}});
                         const data=name==='mindex_monitor_register'?'a'.repeat(64):name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_presence'?[{
                           id:'remote',last_seen:new Date(Date.now()-(monitorMode==='stale'?190000:0)).toISOString(),status:{name:'<img src=x onerror=alert(1)>',os:'Windows',browser:'Whale',version:'test',module:'praise',serviceId:'editing',outputServiceId:'output',output:true,slide:3,count:3,events:[{kind:'save_ok',at:new Date().toISOString()}]}
@@ -96,10 +96,10 @@ def main():
                     # Busy reads and failed name saves retain actionable feedback without touching output.
                     page.evaluate("monitorMode='pending'")
                     page.locator('[data-refresh]').click()
-                    page.wait_for_function("typeof monitorRelease==='function'")
+                    page.wait_for_function("monitorReleases?.length>0")
                     assert page.locator('[data-refresh]').is_disabled()
                     assert page.locator('[data-refresh]').get_attribute('aria-busy')=='true'
-                    page.evaluate("monitorMode='ok';monitorRelease({data:[],error:null})")
+                    page.evaluate("monitorMode='ok';monitorReleases.splice(0).forEach(resolve=>resolve({data:[],error:null}))")
                     page.wait_for_function("!document.querySelector('[data-refresh]').disabled")
                     page.evaluate("""()=>{
                       window.nameWrites=[];window.nameFail=true;
