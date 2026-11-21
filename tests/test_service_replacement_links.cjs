@@ -82,3 +82,7 @@ const dawnAssets=fs.readdirSync('assets/presenter').filter(name=>/^dawn-free-pra
 assert.deepEqual(dawnAssets.sort(),['dawn-free-prayer-9778d2abaf3d.mp3','dawn-free-prayer-9b788b6e16dd.mp3'].sort());
 assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3')).digest('hex'),'9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150','Published attachments remain byte-identical');
 assert.equal(fs.statSync('assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3').size,92675129);
+
+const mr=fs.readFileSync('assets/presenter/dawn-bgm-5efc56784907.mp3');
+assert.equal(mr.length,68302166);
+assert.equal(require('node:crypto').createHash('sha256').update(mr).digest('hex'),'5efc567849076646805a5d2b02589c3da1c0797c4b4aa5160675fa9f42e3711d');

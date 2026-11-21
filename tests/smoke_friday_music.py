@@ -125,6 +125,57 @@ try:
  check(a.src.includes('dawn-free-prayer-9778d2abaf3d.mp3')&&state.serviceMusic.playing,'navigation interrupted dawn');
  runServiceMusicAction('stop',binding);check(a.paused&&a.currentTime===0,'dawn stop failed');clearServiceMusicSyncTimer();return 'PASS dawn explicit playback/owner/navigation/stop';
 }"""),flush=True)
+            print(engine,page.evaluate("""async()=>{
+ const check=(v,m)=>{if(!v)throw Error(m)},m=document.getElementById('music-test'),a=state.serviceMusic.audio;
+ const dawn={id:'dawn-fixture',type_id:'holy_week_dawn'};
+ const render=()=>{m.innerHTML=renderServiceMusicPlayer({bgmService:dawn});refreshIcons(m);return m.querySelector('[data-service-music-player]').dataset};
+ const before=JSON.stringify({src:a.src,time:a.currentTime,serial:state.serviceMusic.playSerial});
+ let binding=render();
+ check(binding.serviceMusicSource===DAWN_BGM.source,'BGM MR preset missing');
+ check(m.querySelector('.svc-music-name').textContent.trim()==='BGM','BGM label changed');
+ check(!m.textContent.includes('예배 전')&&!m.textContent.includes('예배 후'),'before/after labels');
+ check(!m.querySelector('.svc-music-player--inline'),'BGM became element player');
+ check(before===JSON.stringify({src:a.src,time:a.currentTime,serial:state.serviceMusic.playSerial}),'BGM render mutated audio');
+ check(!renderServiceMusicPlayer({bgmService:{id:'other',type_id:'friday'}}).includes(DAWN_BGM.source),'MR preset leaked to Friday');
+ check(renderServicePresenterControlsUnscoped(dawn,[]).includes(DAWN_BGM.source),'toolbar did not receive dawn preset');
+ // A bound MR preset must not stop an active free-prayer track.
+ a.paused=false;state.serviceMusic.playing=true;
+ await runServiceMusicAction('toggle',binding);check(a.src!==DAWN_BGM.source&&!a.paused,'BGM interrupted AR');
+ a.paused=true;state.serviceMusic.playing=false;
+ await runServiceMusicAction('toggle',binding);
+ check(a.src===DAWN_BGM.source&&state.serviceMusic.playing&&state.serviceMusic.ownerServiceId===dawn.id,'BGM explicit play');
+ binding=render();updateServiceMusicTransportControls();
+ check(m.querySelector('.svc-music-toggle').getAttribute('aria-pressed')==='true','BGM active state');
+ check(!m.querySelector('.svc-music-toggle').textContent.trim(),'compact BGM gained inline caption');
+ check(m.querySelector('[data-service-music-action="repeat"]'),'BGM repeat unavailable');
+ runServiceMusicAction('repeat',binding);check(a.loop,'BGM repeat failed');
+ setServiceMusicVolume(2,binding);check(a.volume===0.4,'BGM volume failed');
+ renderServiceMusicPlayer({bgmService:{...dawn,id:'different'}});check(!a.paused&&state.serviceMusic.ownerServiceId===dawn.id,'navigation changed MR');
+ await runServiceMusicAction('toggle',binding);check(a.paused,'BGM pause failed');
+ await runServiceMusicAction('toggle',binding);updateServiceMusicTransportControls();
+ check(!m.querySelector('.svc-music-toggle').textContent.trim(),'BGM resume gained caption');
+ // Global pause/resume must preserve the dawn toolbar ownership.
+ for(const action of ['toggle','toggle']) {
+   handleGlobalPlaybackAction({target:{closest(selector){return selector==='[data-global-playback-action]'?{dataset:{globalPlaybackAction:action}}:null}}});
+   await Promise.resolve();await Promise.resolve();
+ }
+ check(state.serviceMusic.ownerServiceId===dawn.id&&!a.paused,'global resume lost BGM owner');
+ runServiceMusicAction('stop',binding);
+ loadServiceMusicFile(new File(['synthetic'], 'custom-bgm.mp3',{type:'audio/mpeg'}));
+ const custom=state.serviceMusic.sourceKey;binding=render();
+ check(custom.startsWith('blob:')&&!binding.serviceMusicSource&&m.innerHTML.includes('custom-bgm.mp3'),'custom BGM overridden');
+ check(a.paused,'file selection autoplay');
+ await runServiceMusicAction('toggle',binding);check(state.serviceMusic.sourceKey===custom,'custom BGM play replaced');
+ runServiceMusicAction('stop',binding);clearServiceMusicSyncTimer();
+ URL.revokeObjectURL(custom);
+ return 'PASS existing dawn BGM preset, toolbar, AR isolation, no autoplay, custom override, repeat/volume/navigation';
+}"""),flush=True)
+            page.evaluate("""async()=>{
+ const audio=new Audio(DAWN_BGM.source);audio.muted=true;
+ await new Promise((resolve,reject)=>{const t=setTimeout(()=>reject(Error('MR metadata timeout')),15000);audio.onloadedmetadata=()=>{clearTimeout(t);resolve()};audio.onerror=()=>{clearTimeout(t);reject(Error('MR decode failed'))}});
+ if(Math.abs(audio.duration-1707.4903958333334)>0.1)throw Error('MR duration');
+ await audio.play();audio.pause();audio.removeAttribute('src');audio.load();
+}""")
             page.locator('#music-test').screenshot(path='/tmp/mindex-prayer-controls-'+engine+'.png')
             browser.close()
 finally:

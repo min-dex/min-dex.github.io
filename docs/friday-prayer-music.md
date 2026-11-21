@@ -25,6 +25,23 @@
   starts playback. No fade, music data or worship-record changes are included.
 - Offline Chromium/WebKit coverage: `tests/smoke_global_playback.py`.
 
+## Dawn BGM (2026-11-21 candidate)
+
+- The existing presenter toolbar **BGM** player offers the seven-song MR-only
+  preset for dawn services (including service-type aliases). It keeps the label
+  BGM; the selected-file tooltip reads 새벽기도 배경음악. No before/after labels.
+- The default is a render-only binding. Explicit play selects it in the existing
+  shared player; opening or navigating a service never starts or replaces audio.
+  Active playback cannot be interrupted by an inactive preset. Existing custom
+  BGM file selection takes priority and shared volume/repeat controls are retained.
+- This is separate from the AR2 + MR1 free-prayer element. Other service types
+  receive no new preset. Operational data and authored attachments are untouched.
+- Asset: `assets/presenter/dawn-bgm-5efc56784907.mp3`, 68,302,166 bytes,
+  SHA-256 `5efc567849076646805a5d2b02589c3da1c0797c4b4aa5160675fa9f42e3711d`,
+  48 kHz stereo / 320 kbps, decoded 1707.4903958333334 seconds. Byte-identical to
+  the approved MR-only download; no further encoding or edits.
+- Local candidate only; publication requires the coordinated exact-SHA gate.
+
 ## Audio
 
 - Current dawn default candidate (2026-11-21, user-approved AR twice + MR once):

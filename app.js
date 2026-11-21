@@ -25929,7 +25929,7 @@ function renderServicePresenterControlsUnscoped(service, slides = [], active = f
           <div class="svc-presenter-toolbar-end">
             ${serviceSupportsBulletin(service) ? `<button class="svc-output-action" type="button" data-service-bulletin-action="open" data-service-id="${escapeAttr(service.id)}"><i data-lucide="newspaper"></i><span>주보</span></button>` : ""}
             <span class="svc-presenter-toolbar-utilities" aria-label="송출 보조 도구">
-              ${renderServiceMusicPlayer()}
+              ${renderServiceMusicPlayer({ bgmService: service })}
               ${renderPresenterHelpControl()}
             </span>
           </div>
@@ -29829,21 +29829,29 @@ function serviceMusicSourceIsSlotOwned(source = state.serviceMusic.sourceKey) {
   return Boolean(source) && Object.values(SERVICE_SLOT_MUSIC).some(config => config.source === source);
 }
 
+const DAWN_BGM = Object.freeze({ source: "./assets/presenter/dawn-bgm-5efc56784907.mp3", label: "새벽기도 배경음악" });
+
 function renderServiceMusicPlayer(options = {}) {
+  const inline = Boolean(options.source);
+  const typeId = options.bgmService?.type_id || options.bgmService?.service_type_id;
+  const dawn = (WORSHIP_SERVICE_TYPE_ALIASES[typeId] || typeId) === "holy-week-dawn";
+  const currentSource = state.serviceMusic.sourceKey;
+  const customMusic = currentSource && !serviceMusicSourceIsSlotOwned(currentSource) && currentSource !== DAWN_BGM.source;
+  // A preset is only a binding: rendering must never load, replace or start audio.
+  if (!inline && dawn && !customMusic) options = { ...options, ...DAWN_BGM, serviceId: options.bgmService.id, repeatAllowed: true };
   const slotOwned = !options.source && serviceMusicSourceIsSlotOwned();
   const music = slotOwned ? { ...state.serviceMusic, sourceKey: "", sourceLabel: "", objectUrl: "", fileName: "", playing: false, pending: false } : state.serviceMusic;
   const context = slotOwned ? {} : currentPresenterAudioContext();
   const activeLabel = music.sourceLabel && music.sourceKey ? music.sourceLabel : "";
-  const fileLabel = activeLabel || context.label || music.fileName;
+  const fileLabel = options.label || activeLabel || context.label || music.fileName;
   const hasSource = Boolean(options.source || music.sourceKey || context.source || music.objectUrl);
-  const inline = Boolean(options.source);
   const attached = Boolean(options.elementId);
   const binding = attached
     ? `data-input-audio-controls data-source="${escapeAttr(options.source)}" data-label="${escapeAttr(options.label)}" data-service-id="${escapeAttr(options.serviceId)}" data-element-id="${escapeAttr(options.elementId)}" data-timed="${Boolean(options.timed)}"`
     : `data-service-music-player data-service-music-service-id="${escapeAttr(options.serviceId || "")}" data-service-music-source="${escapeAttr(options.source || "")}" data-service-music-label="${escapeAttr(options.label || "")}" data-service-music-repeat-allowed="${options.repeatAllowed !== false}"`;
   const toggle = attached ? 'onclick="void runPresenterInputAudioAction(this)"' : 'data-service-music-action="toggle"';
   const stop = attached ? 'data-input-audio-stop onclick="void runPresenterInputAudioAction(this)"' : 'data-service-music-action="stop"';
-  const active = attached ? globalThis.MindexSongTiming?.ownsTransport(options.source, options.serviceId, options.elementId) : !inline || options.source === music.sourceKey && options.serviceId === music.ownerServiceId;
+  const active = attached ? globalThis.MindexSongTiming?.ownsTransport(options.source, options.serviceId, options.elementId) : !options.source || options.source === music.sourceKey && options.serviceId === music.ownerServiceId;
   const pending = active && music.pending;
   const playing = active && !pending && music.playing;
   const key = pending ? "loading" : playing ? "playing" : "idle";
@@ -29934,7 +29942,7 @@ function updateServiceMusicTransportControls() {
     const toggle = root.querySelector('[data-service-music-action="toggle"]');
     if (toggle) {
       if (toggle.dataset.playbackState !== key) {
-        toggle.innerHTML = `<i data-lucide="${pending ? "loader-circle" : playing ? "pause" : "play"}"></i>${source ? pending ? "준비 중" : playing ? "일시정지" : "재생" : ""}`;
+        toggle.innerHTML = `<i data-lucide="${pending ? "loader-circle" : playing ? "pause" : "play"}"></i>${root.classList.contains("svc-music-player--inline") ? pending ? "준비 중" : playing ? "일시정지" : "재생" : ""}`;
         toggle.dataset.playbackState = key;
         refreshIcons(toggle);
       }
@@ -29974,7 +29982,7 @@ function handleGlobalPlaybackAction(event) {
   }
   if (!["toggle", "stop"].includes(action)) return;
   const music = state.serviceMusic;
-  const binding = serviceMusicSourceIsSlotOwned() ? {
+  const binding = serviceMusicSourceIsSlotOwned() || music.sourceKey === DAWN_BGM.source ? {
     serviceMusicSource: music.sourceKey,
     serviceMusicServiceId: music.ownerServiceId,
     serviceMusicLabel: music.sourceLabel,

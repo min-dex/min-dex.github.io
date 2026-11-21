@@ -1,3 +1,11 @@
+## Dawn MR through existing BGM ·2026-11-21 candidate
+
+Use the existing toolbar BGM player for the approved MR-only seven-song preset.
+Keep AR2 + MR1 as the separate free-prayer default; do not use 예배 전/후 labels
+inside Mindex. Render-only defaults never auto-play or replace a chosen custom
+file or active audio. Preserve the shared engine, volume and repeat controls.
+Asset identity and validation contract: `friday-prayer-music.md`.
+
 ## Dawn AR2 + MR1 default ·2026-11-21 candidate
 
 The owner approved the edited seven-song AR set twice followed by the seven-song
