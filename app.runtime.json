@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261121-browser-broadcast-1080",
+  "version": "20261122-internal-1014",
   "options": {
     "compress": false,
     "mangle": {
