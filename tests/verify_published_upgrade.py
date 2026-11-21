@@ -25,9 +25,10 @@ SOURCES = {'1.0.0': 'c61f6a84e82d0ec81d102ca4e4947536eae853aa',
            '1.0.8': '03d666e58b6bd6a597ae64a1fc74d3ea85655d20',
            '1.0.9': 'd28903793cffa3b65be7c27231091061839ef855',
            '1.0.13': '82f2aa6bbc98323c50c1531d9af044089f3b7a44',
-           '1.0.14': '0eae20b2fb20f22f664fe56c4dee19730ca0aa93'}
+           '1.0.14': '0eae20b2fb20f22f664fe56c4dee19730ca0aa93',
+           '1.0.16': 'daec157954a2989dfe9832dfb61f43a6482aaef7'}
 # Prior public releases were retired by the owner; retain immutable identities.
-PUBLISHED_SOURCES = {v: SOURCES[v] for v in ('1.0.9', '1.0.13', '1.0.14')}
+PUBLISHED_SOURCES = {v: SOURCES[v] for v in ('1.0.9', '1.0.13', '1.0.14', '1.0.16')}
 
 
 def asset_record(receipt, version, target):
