@@ -955,12 +955,14 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const headerDbContext = options.showHead && inputContexts.length === 1 ? inputContexts[0] : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext), headerDbLink: Boolean(headerDbContext) });
   const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
+  const structureActions = context ? renderPresenterBoardStructureActions(serviceId, context) : "";
   const itemIndexAttr = context ? ` data-service-item-index="${escapeAttr(String(context.index))}"` : "";
   const elementIdAttr = context?.item?.id ? ` data-service-element-id="${escapeAttr(context.item.id)}"` : "";
   const hidden = context?.item
     ? serviceItemPresentationHidden(context.item)
     : subgroup.slides.length > 0 && subgroup.slides.every(({ slide }) => presenterSlideIsHidden(slide));
-  const showHead = hidden || Boolean(options.showHead && (visibleLabel || visibleTitle || warnings.length || headerActions));
+  const showHead = hidden || Boolean(options.showHead
+    && (visibleLabel || visibleTitle || warnings.length || headerActions || structureActions));
   return `
     <div class="svc-board-subgroup${active ? " active" : ""}${showHead ? "" : " collapsed-head"}"${itemIndexAttr}${elementIdAttr}>
       ${showHead ? `
@@ -979,12 +981,40 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
           </button>
           ${headerDbContext ? renderServiceItemLinkControl(headerDbContext.item, headerDbContext.index) : ""}
           ${headerActions}
+          ${structureActions}
         </header>` : ""}
       ${inputControls}
       ${renderServiceSlotMusic(context)}
       <div class="svc-board-grid">
         ${renderPresenterBoardSlideBlocks(slides, activeIndex, serviceId, subgroup.scriptureColorStarts)}
       </div>
+    </div>`;
+}
+
+function renderPresenterBoardStructureActions(serviceId, context) {
+  const actionContext = presenterSectionItemActionContext(context.service, context.index);
+  const indexes = (actionContext?.sectionItems || [])
+    .map((item) => Number(item._origIndex))
+    .filter(Number.isInteger);
+  const position = indexes.indexOf(context.index);
+  if (position < 0) return "";
+  const moveUp = position > 0
+    ? `<button class="icon-btn" type="button" data-presenter-inline-item-action="up"
+        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
+        aria-label="엘리멘트 위로 이동" title="위로 이동"><i data-lucide="arrow-up"></i></button>`
+    : "";
+  const moveDown = position < indexes.length - 1
+    ? `<button class="icon-btn" type="button" data-presenter-inline-item-action="down"
+        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
+        aria-label="엘리멘트 아래로 이동" title="아래로 이동"><i data-lucide="arrow-down"></i></button>`
+    : "";
+  return `
+    <div class="svc-board-inline-structure-actions" role="group" aria-label="엘리멘트 관리">
+      ${moveUp}
+      ${moveDown}
+      <button class="icon-btn danger" type="button" data-presenter-inline-item-action="delete"
+        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
+        aria-label="엘리멘트 삭제" title="엘리멘트 삭제"><i data-lucide="trash-2"></i></button>
     </div>`;
 }
 

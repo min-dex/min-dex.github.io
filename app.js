@@ -1772,22 +1772,14 @@ function handleServiceOutlineSlideEvent(event) {
 
 function handleDetailContextMenu(event) {
   const presenterThumb = event.target.closest(".svc-slide-thumb[data-presenter-index][data-service-id]");
-  const sectionEditButton = event.target.closest("[data-presenter-section-edit]");
-  if (!presenterThumb && !sectionEditButton) return;
+  if (!presenterThumb) return;
   event.preventDefault();
-  if (sectionEditButton) {
-    requestPresenterSectionEditor(sectionEditButton.dataset.serviceId || state.selectedServiceId, {
-      sectionKey: sectionEditButton.dataset.presenterSectionEdit,
-    });
-    return;
-  }
   const serviceId = presenterThumb.dataset.serviceId;
   const index = Number(presenterThumb.dataset.presenterIndex);
   if (!serviceId || !Number.isFinite(index)) return;
   selectPresenterBoardSlide(serviceId, index, {
     elementKey: presenterThumb.dataset.presenterElementKey || presenterSlideElementKey(serviceId, index),
   });
-  requestPresenterSectionEditorForSlide(serviceId, index);
 }
 
 function handlePresenterBoardPointerDown(event) {
@@ -9121,6 +9113,19 @@ function handlePresenterDetailClick(event) {
     return true;
   }
 
+  const presenterInlineItemAction = event.target.closest("[data-presenter-inline-item-action]");
+  if (presenterInlineItemAction) {
+    runPresenterSectionItemAction(
+      presenterInlineItemAction.dataset.presenterInlineItemAction,
+      Number(presenterInlineItemAction.dataset.serviceItemIndex),
+      {
+        serviceId: presenterInlineItemAction.dataset.serviceId || state.selectedServiceId,
+        inline: true,
+      },
+    );
+    return true;
+  }
+
   const presenterSectionAdd = event.target.closest("[data-presenter-section-add]");
   if (presenterSectionAdd) {
     runPresenterSectionItemAction("add", -1);
@@ -12882,12 +12887,14 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
   updateSaveState();
 }
 
-function runPresenterSectionItemAction(action, index) {
+function runPresenterSectionItemAction(action, index, options = {}) {
   const editor = state.presenterSectionEditor;
-  const serviceId = editor?.serviceId || state.selectedServiceId;
+  const serviceId = options.serviceId || editor?.serviceId || state.selectedServiceId;
   if (!serviceId) return;
   const service = state.services.find((svc) => svc.id === serviceId);
-  const context = presenterSectionEditorContext(service);
+  const context = options.inline
+    ? presenterSectionItemActionContext(service, index)
+    : presenterSectionEditorContext(service);
   if (!context) return;
   const items = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
   const beforeMove = ["up","down"].includes(action) ? serviceEditSnapshot(items, serviceMoveFields) : null;
@@ -12965,6 +12972,25 @@ function runPresenterSectionItemAction(action, index) {
   renderCurrentServiceModuleDetail();
   renderServiceList();
   updateSaveState();
+}
+
+function presenterSectionItemActionContext(service, itemIndex) {
+  if (!service || !Number.isInteger(itemIndex)) return null;
+  const items = servicePrepEditorItems(service.id);
+  const rawItems = getServiceItems(service.id);
+  const target = items.find((item) => Number(item._origIndex) === itemIndex) || null;
+  if (!target) return null;
+  const groupKey = presenterSectionEditorGroupKey(target);
+  const sectionItems = items.filter((item) => presenterSectionEditorMatches(item, groupKey, target));
+  if (!sectionItems.length) return null;
+  return {
+    service,
+    rawItems,
+    items,
+    groupKey,
+    sectionItems,
+    sectionTitle: presenterSectionEditorTitle(sectionItems),
+  };
 }
 
 function confirmPresenterSectionItemDeletion(item = {}, service = null) {

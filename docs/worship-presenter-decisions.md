@@ -18,6 +18,19 @@ No worship record, order, timing or authored attachment is rewritten. Audio
 identity, encoding compensation and verification boundaries are documented in
 `friday-prayer-music.md`. Local candidate is not a publication receipt.
 
+## Controller-owned element management · 2026-11-21
+
+- 슬라이드 우클릭으로 열리던 전체 섹션 편집 팝업은 사용자 경로에서 제거한다.
+  우클릭은 현재 엘리멘트를 선택할 뿐 별도 편집창을 열지 않는다.
+- 현재 예배에서 자주 쓰는 엘리멘트 순서 이동과 삭제는 컨트롤러의 해당
+  엘리멘트 제목 줄에 작은 아이콘으로 둔다. 이동할 수 없는 방향은 표시하지 않아
+  단일 엘리멘트에는 삭제만 보인다.
+- 삭제는 기존 확인 문구와 template suppression을 그대로 사용한다. 현재 예배의
+  엘리멘트만 제외하며 기본 양식, 찬양·성경 DB, 다른 엘리멘트를 변경하지 않는다.
+- 섹션명·엘리멘트 타입·전체 내용 편집을 한꺼번에 노출하던 팝업 UI는 더 이상
+  컨트롤러의 편집 경로가 아니다. 기존 입력·개별 저장·송출 및 atomic full-save
+  계약은 유지한다.
+
 ## Dawn prayer r2 default asset ·2026-11-06
 
 User approved the six-point (7ms total) pop-corrected r2 MP3 for the shared dawn
