@@ -39,8 +39,9 @@ def main():
                     }''')
                     page.evaluate("window.dispatchEvent(new Event('online'))")
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
-                    assert page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_ping').args.p_status.browser") in {'Chrome', 'Safari'}
-                    assert page.get_by_label('접속명',exact=True).input_value() in {'macOS · Chrome', 'macOS · Safari'}
+                    local_status = page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_ping').args.p_status")
+                    assert local_status['browser'] in {'Chrome', 'Safari'}
+                    assert page.get_by_label('접속명',exact=True).input_value() == f"{local_status['os']} · {local_status['browser']}"
                     assert not page.locator('.monitor-panel').is_visible()
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
