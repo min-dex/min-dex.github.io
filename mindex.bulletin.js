@@ -641,9 +641,10 @@
             const person=personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person);
             const widths=[25,f.w-55,25],texts=[row.label,row.content,person];
             if(widths[1]<15){check.add(f.id);break;}
-            const leading=simple?f.size*(doc.settings.lineHeight||1.55):snap(f.size*1.3),count=Math.max(...texts.map((t,i)=>wrap(t,widths[i],f.size,i===1?700:500).length));
+            const weights=texts.map((_,i)=>simple?(i===0||row.label==="설교"?700:500):i===1?700:500);
+            const leading=simple?f.size*(doc.settings.lineHeight||1.55):snap(f.size*1.3),counts=texts.map((t,i)=>wrap(t,widths[i],f.size,weights[i],f.family).length),count=Math.max(...counts);
             const h=Math.max(simple?10:7.5,count*leading/MM+(simple?(doc.settings.orderPadding??3):2.5));
-            texts.forEach((text,i)=>writeText(group,text,{...box,x:f.x+[0,27.5,f.w-25][i],y,w:widths[i],h,leading,weight:simple?(i===0||row.label==="설교"?700:500):i===1?700:500,align:i===2?"right":"left",color:simple?(i===2?muted:"#272C29"):i===1?"#222E29":muted},check,f.id));
+            texts.forEach((text,i)=>writeText(group,text,{...box,x:f.x+[0,27.5,f.w-25][i],y,baselineY:Math.ceil((y*MM+f.size)/TOKENS.baseline)*TOKENS.baseline/MM+(count-counts[i])*leading/MM/2,w:widths[i],h,leading,weight:weights[i],align:i===2?"right":"left",color:simple?(i===2?muted:"#272C29"):i===1?"#222E29":muted},check,f.id));
             if(simple)group.append(svg("line",{x1:f.x,y1:y+h,x2:f.x+f.w,y2:y+h,stroke:line,"stroke-width":.15}));
             y+=h;if(y>f.y+f.h+.01)check.add(f.id);
           }
@@ -768,7 +769,7 @@
     const leading=box.leading||snap(size*1.2,TOKENS.baseline);
     const lines=wrap(text,box.w,size,weight,family);
     if(lines.some(line=>textWidth(line,size,weight,family)>box.w+.01))issues.add(id);
-    const first=Math.ceil((box.y*MM+size)/TOKENS.baseline)*TOKENS.baseline/MM;
+    const first=Number.isFinite(box.baselineY)?box.baselineY:Math.ceil((box.y*MM+size)/TOKENS.baseline)*TOKENS.baseline/MM;
     const end=first+(lines.length-1)*leading/MM;
     if (end+size*.25/MM>box.y+box.h+.01) issues.add(id);
     const anchor=box.align==="right" ? "end" : box.align==="center" ? "middle" : "start";
@@ -800,7 +801,7 @@
     }
     flush();
     const leading=box.leading||snap(chars.reduce((max,c)=>Math.max(max,c.size),size)*1.2);
-    const first=Math.ceil((box.y*MM+Math.max(size,...(lines[0]||[]).map(c=>c.size)))/TOKENS.baseline)*TOKENS.baseline/MM;
+    const first=Number.isFinite(box.baselineY)?box.baselineY:Math.ceil((box.y*MM+Math.max(size,...(lines[0]||[]).map(c=>c.size)))/TOKENS.baseline)*TOKENS.baseline/MM;
     let bottom=box.y;
     lines.forEach((chars,i)=>{
       if(measure(chars)>box.w+.01)issues.add(id);
@@ -1099,25 +1100,26 @@
           const list=orderRowsForDisplay(doc.source).map(row=>({...row,person:personText(row.label==="광고"?fieldValue(doc,"announcer"):row.person)})),inner=f.w-60;
           if(inner<10){frameIssues.add(f.id);root.append(group);continue;}
           const leading=snap(f.size*1.2)/MM;
-          const counts=list.map(row=>Math.max(wrap(row.label,30,f.size).length,wrap(row.content,inner,f.size,700).length,wrap(row.person,30,f.size).length));
+          const cellCounts=list.map(row=>[wrap(row.label,30,f.size,f.weight,f.family).length,wrap(row.content,inner,f.size,700,f.family).length,wrap(row.person,30,f.size,f.weight,f.family).length]);
+          const counts=cellCounts.map(cells=>Math.max(...cells));
           const rowLeading=list.map(row=>["찬양","찬송"].includes(row.label)&&row.content.includes("\n")?Math.max(leading,25/MM):leading);
           const used=counts.reduce((sum,n,i)=>sum+n*rowLeading[i],0),gap=list.length>1?Math.max(2.5,(f.h-2.5-used)/(list.length-1)):0;
           let y=f.y;
           list.forEach((row,i)=>{
             const height=counts[i]*rowLeading[i],base={...f,y,h:height+2.5,leading:rowLeading[i]*MM};
-            const centered=y+Math.max(0,(counts[i]-1)*rowLeading[i]/2);
+            const baseline=cell=>Math.ceil((y*MM+f.size)/TOKENS.baseline)*TOKENS.baseline/MM+(counts[i]-cellCounts[i][cell])*rowLeading[i]/2;
             const printLabel=row.label==="봉헌찬양"?"봉헌":row.label;
             const letters=printLabel.replace(/\s/g,"");
-            if(letters.length>1&&letters.length<=5) [...letters].forEach((letter,j)=>writeText(group,letter,{...base,y:centered,x:f.x+j*27.5/(letters.length-1),w:6},frameIssues,f.id));
-            else writeText(group,row.label,{...base,y:centered,w:30},frameIssues,f.id);
+            if(letters.length>1&&letters.length<=5) [...letters].forEach((letter,j)=>writeText(group,letter,{...base,baselineY:baseline(0),x:f.x+j*27.5/(letters.length-1),w:6},frameIssues,f.id));
+            else writeText(group,row.label,{...base,baselineY:baseline(0),w:30},frameIssues,f.id);
             const songRuns=row.content.split("\n").flatMap((text,i)=>{
               const hymn=["찬양","찬송"].includes(row.label)?text.match(/^(\d+) (.+)$/):null;
               return hymn?[{text:(i?"\n":"")+hymn[1],size:Math.max(7.5,f.size-2.5),weight:500},{text:" "+hymn[2],weight:700}]:[{text:(i?"\n":"")+text,weight:700}];
             });
-            writeStyled(group,songRuns,{...base,x:f.x+30,w:inner,align:"center",weight:700},frameIssues,f.id);
+            writeStyled(group,songRuns,{...base,baselineY:baseline(1),x:f.x+30,w:inner,align:"center",weight:700},frameIssues,f.id);
             const personLetters=Array.from(row.person.replace(/\s/g,""));
-            if(!/\s/.test(row.person)&&personLetters.length>1&&personLetters.length<=6)personLetters.forEach((letter,j)=>writeText(group,letter,{...base,y:centered,x:f.x+f.w-30+j*25/(personLetters.length-1),w:5,align:"right"},frameIssues,f.id));
-            else writeText(group,row.person,{...base,y:centered,x:f.x+f.w-30,w:30,align:"right"},frameIssues,f.id);
+            if(!/\s/.test(row.person)&&personLetters.length>1&&personLetters.length<=6)personLetters.forEach((letter,j)=>writeText(group,letter,{...base,baselineY:baseline(2),x:f.x+f.w-30+j*25/(personLetters.length-1),w:5,align:"right"},frameIssues,f.id));
+            else writeText(group,row.person,{...base,baselineY:baseline(2),x:f.x+f.w-30,w:30,align:"right"},frameIssues,f.id);
             y+=height+(i<list.length-1?gap:0);
           });
           if(y>f.y+f.h+.01)frameIssues.add(f.id);
