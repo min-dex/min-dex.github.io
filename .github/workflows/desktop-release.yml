@@ -248,7 +248,7 @@ jobs:
         with:
           name: mindex-${{ matrix.platform }}-${{ inputs.publish_release && 'signed' || 'test' }}
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
           compression-level: 0
           path: |
             dist/*.dmg
@@ -325,7 +325,7 @@ jobs:
         with:
           name: mindex-${{ matrix.platform }}-internal
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
           compression-level: 0
           path: |
             dist/internal/*.dmg
@@ -362,7 +362,7 @@ jobs:
         with:
           name: mindex-${{ matrix.platform }}-${{ inputs.publish_release && 'signed' || 'test' }}
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
           compression-level: 0
           path: |
             dist/*.dmg
