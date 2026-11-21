@@ -314,7 +314,7 @@ async function validatePresenterKeynoteFolder(files, sourceSha256) {
   const module = await keynoteHtmlRuntime(), byName = new Map();let total = 0;
   for (const file of files) {
     const parts = file.webkitRelativePath.split('/');parts.shift();const name = parts.join('/');
-    if (!name || byName.has(name) || file.size > 50 * 1024 * 1024) throw Error('폴더를 확인해 주세요. 개별 재생 파일은 50MB 이하로 준비해 주세요.');
+    if (!name || byName.has(name) || file.size > module.keynoteHtmlResourceLimit(name)) throw Error('폴더를 확인해 주세요. 영상은 300MB, 그 외 재생 파일은 50MB 이하여야 합니다.');
     byName.set(name, file);total += file.size;
   }
   if (files.length > 5001 || total > 500 * 1024 * 1024 || !byName.has('manifest.json')) throw Error('Mindex에서 준비한 Keynote 재생 폴더를 선택해 주세요.');

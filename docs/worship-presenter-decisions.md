@@ -4940,6 +4940,18 @@ individual resources currently must fit the 50 MiB Storage upload limit.
 
 ### Chrome Keynote automatic preparation ·2026-10-31
 
+설치 앱의 `file://` 문서는 도우미의 공개 웹 Origin으로 인정하지 않는다.
+Mac 설치 앱은 패키지의 정확한 index 파일을 연 기본 컨트롤러 프레임에서만
+전용 IPC를 통해 고정 IPv4 loopback 도우미에 요청한다. URL·메서드·헤더·크기와
+시간 제한을 검사하고, 연결 승인·세션·원본/내보내기 해시 검증은 그대로 유지한다.
+`Origin:null`, 임의 주소, 승인 POST 및 도우미 종료 요청은 허용하지 않는다.
+브라우저 경로와 원본·작성 내용·저장 경로는 변경하지 않는다.
+한글 NFC/NFD 리소스 이름은 문자·결합문자·숫자와 기존 안전 구분자만 허용한다.
+점으로 시작하는 경로·상위 이동·인코딩 우회·링크는 계속 차단한다. 새 준비 시 영상(MP4/MOV)은
+300MiB까지, 나머지 리소스는 50MiB까지 허용하며 전체 500MiB 제한은 유지한다.
+큰 리소스는 4MiB 범위로 전송하고 전체 해시를 재검증한다. 도우미는 파일 변경 시
+해시 검증을 다시 수행하며, 원본이나 내장 영상을 재인코딩하지 않는다.
+
 Keynote's normal controller flow is file selection, preparation, then the usual
 slide/output controls. The chooser discloses public original storage before
 selection. It has no second confirmation for Keynote. A valid tab-local helper

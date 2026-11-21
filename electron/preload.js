@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld("mindexElectron", {
   downloadUpdate: () => ipcRenderer.invoke("mindex:download-update"),
   installUpdate: () => ipcRenderer.invoke("mindex:install-update"),
   importKeynoteDeck: (payload) => ipcRenderer.invoke("mindex:import-keynote-deck", payload),
+  keynoteBridgeRequest: (payload) => ipcRenderer.invoke('mindex:keynote-bridge-request',payload),
   filePathForFile: (file) => webUtils.getPathForFile(file),
   getUpdateState: () => ipcRenderer.invoke("mindex:get-update-state"),
   onUpdateState: (callback) => {

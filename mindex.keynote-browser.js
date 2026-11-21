@@ -6,7 +6,17 @@ let presenterKeynoteBridgePairing = null;
 async function presenterKeynoteBridgeRequest(path, options = {}, timeout = 10000) {
   const controller = new AbortController(), timer = setTimeout(() => controller.abort(), timeout);
   try {
-    const response = await fetch(PRESENTER_KEYNOTE_BRIDGE + path, {
+    const native=globalThis.window?.mindexElectron;
+    let response;
+    if(native?.isDesktop&&native.keynoteBridgeRequest){
+      const body=options.body instanceof Blob?new Uint8Array(await options.body.arrayBuffer()):options.body;
+      const result=await native.keynoteBridgeRequest({path,method:options.method||'GET',body,timeout,
+        headers:{...(presenterKeynoteBridgeSession?{Authorization:'Bearer '+presenterKeynoteBridgeSession}:{}),...options.headers}});
+      if(!result?.ok)throw Error(result?.reason==='unsupported-platform'?'Keynote가 설치된 Mac에서 준비해 주세요.':'Keynote 도우미 연결을 확인해 주세요. 원본은 보존됩니다.');
+      const bytes=new Uint8Array(result.body);
+      response={status:result.status,ok:result.status>=200&&result.status<300,
+        json:async()=>JSON.parse(new TextDecoder().decode(bytes)),arrayBuffer:async()=>bytes.buffer};
+    }else response = await fetch(PRESENTER_KEYNOTE_BRIDGE + path, {
       ...options, credentials: 'omit', cache: 'no-store', redirect: 'error',
       headers: { ...(presenterKeynoteBridgeSession ? { Authorization: 'Bearer ' + presenterKeynoteBridgeSession } : {}), ...options.headers },
       signal: controller.signal,
@@ -78,17 +88,26 @@ async function preparePresenterKeynoteBrowserFile(file, unchanged = () => true) 
   if (manifestFile.size > 2 * 1024 * 1024) throw Error('Keynote 재생 정보가 너무 큽니다.');
   const files = [], entries = Object.entries(manifest.files);let cursor = 0;
   const preparedFile = (bytes, name) => {
-    const result = new File([bytes], name.split('/').pop());
+    const result = new File(Array.isArray(bytes)?bytes:[bytes], name.split('/').pop());
     Object.defineProperty(result, 'webkitRelativePath', { value: 'playback/' + name });return result;
   };
   await Promise.all([0, 1, 2].map(async () => {
     while (cursor < entries.length) {
       const [name, expected] = entries[cursor++];
       if (!unchanged()) throw Error('예배나 입력이 변경됐습니다. 기존 작업을 보존했습니다.');
-      if (expected.size > 50 * 1024 * 1024) throw Error('개별 재생 자료가 너무 큽니다.');
-      const bytes = await presenterKeynoteBridgeRequest('/jobs/' + converted.id + '/' + name);
-      if (bytes.byteLength !== expected.size || await presenterPptxDigest(bytes) !== expected.sha256) throw Error('재생 자료가 누락되거나 변경됐습니다.');
-      files.push(preparedFile(bytes, name));
+      if (expected.size > module.keynoteHtmlResourceLimit(name)) throw Error('개별 재생 자료가 너무 큽니다.');
+      const chunks=[],step=module.KEYNOTE_HTML_RESOURCE_CHUNK;
+      if(expected.size>step*2){
+        for(let offset=0;offset<expected.size;offset+=step){
+          if(!unchanged())throw Error('예배나 입력이 변경됐습니다. 기존 작업을 보존했습니다.');
+          const end=Math.min(expected.size,offset+step)-1;
+          const bytes=await presenterKeynoteBridgeRequest('/jobs/'+converted.id+'/'+name,{headers:{Range:`bytes=${offset}-${end}`}});
+          if(bytes.byteLength!==end-offset+1)throw Error('재생 자료가 누락되거나 변경됐습니다.');chunks.push(bytes);
+        }
+      }else chunks.push(await presenterKeynoteBridgeRequest('/jobs/'+converted.id+'/'+name));
+      const file=preparedFile(chunks,name);
+      if(file.size!==expected.size||await presenterPptxDigest(await file.arrayBuffer())!==expected.sha256)throw Error('재생 자료가 누락되거나 변경됐습니다.');
+      files.push(file);
     }
   }));
   if (!unchanged()) throw Error('예배나 입력이 변경됐습니다. 기존 작업을 보존했습니다.');

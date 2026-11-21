@@ -119,3 +119,27 @@ Release journal `43939a06cd0b4518b6e3b8f5f8c96ca0`, FIFO `d67584b2ea2845a0a5ad41
 발견했다. 기존 후보는 변경하지 않고 별도 수정 후보에서 기존 생성기로 갱신했다.
 추가분은 보수적인 토큰 검사가 요구한 Equal 아이콘 하나이며 원본 Lucide는 유지한다.
 새 후보는 동일 release journal/FIFO에서 전체 웹·설치 gate를 다시 확인한다.
+
+
+## K01 설치 앱 Keynote 연결 후보
+
+`codex/native-keynote-connection`, `/tmp/mindex-keynote-connection`, journal
+`49356d1fd65340e1be9f51ba0fe470bf`. 현재 설치 앱의 file Origin은 도우미에서
+403이고 공개 웹 Origin은 200임을 재현했다. 기본 패키지 index를 연 컨트롤러
+프레임만 고정 loopback에 전용 IPC로 요청한다. null Origin 허용이나 승인 우회는 없다.
+
+실제 비공개 복사본을 Keynote15.4로 내보내 13장·21효과·250파일을 검증했다.
+NFD 한글 영상명과 265MiB 내장 영상이 기존 준비 경로에서 거부되는 문제도 수정했다.
+새 준비의 영상300MiB·기타50MiB와 전체500MiB 제한, 4MiB 범위 전송을 사용한다.
+기존 저장된 manifest의 전체500MiB 재생 경계는 유지한다. 실제 영상67청크/전체SHA,
+원본SHA, 영상·음성5523프레임/184.2841초 전체 decode PASS. 공개 업로드·예배 저장0.
+실제 원문·export·영상은 이 공개 저장소에 넣지 않는다.
+
+Node36개, Chromium/WebKit 실제 승인·준비·재시도·폴더복구·취소·입력 보호,
+숨긴 격리 설치 앱의 280MiB 합성 IPC, runtime/icon·패키지 파일·CI scope 검사 PASS.
+3OS 실제 packaged IPC/부창/이동한 컨트롤러 거부 검사를 Desktop workflow에 등록했다.
+사용자 Mac의 기존 도우미는 코드/manifest만 갱신했고 실행 파일·시작 설정은 유지했다.
+전송/자식 변환 없음 확인 뒤 idle restart, 공개 Origin200/null403 유지 PASS.
+사용자 실행 Mindex·작성 중인 내용·원본은 재시작/수정하지 않았다.
+설치 앱 수정은 1.0.14 동결에 추가하지 않고 다음1.0.15 후보로 보존한다.
+컴포넌트 scoped 결과는 최종 combined SHA의 필수 web/native gate·게시를 대신하지 않는다.

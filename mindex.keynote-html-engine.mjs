@@ -1,4 +1,6 @@
 export const KEYNOTE_HTML_RUNTIME_SHA256 = '17c0c938caa49d5c70bd83bd5b84f57381faa51602932ca733aa965055026d91';
+export const KEYNOTE_HTML_RESOURCE_CHUNK = 4 * 1024 * 1024;
+export const keynoteHtmlResourceLimit = name => (/\.(mp4|mov)$/i.test(name) ? 300 : 50) * 1024 * 1024;
 // Private exported deck code runs only in an opaque sandbox, never in the app realm.
 const HASH = /^[a-f0-9]{64}$/;
 export function normalizeKeynoteHtml(value, original) {
@@ -22,7 +24,7 @@ export function validateKeynoteHtmlManifest(manifest, descriptor) {
   if (!files.length || files.length > 5000) throw Error('Keynote 재생 파일 수를 확인해 주세요.');
   let bytes = 0;
   for (const [name, entry] of files) {
-    if ((name !== 'index.html' && !name.startsWith('assets/')) || !/^[a-zA-Z0-9_./@-]+$/.test(name) || name.startsWith('/') || name.split('/').some(x => !x || x.startsWith('.'))
+    if ((name !== 'index.html' && !name.startsWith('assets/')) || !/^[\p{L}\p{M}\p{N}_./@-]+$/u.test(name) || name.startsWith('/') || name.split('/').some(x => !x || x.startsWith('.'))
       || !HASH.test(entry.sha256 || '') || !Number.isSafeInteger(entry.size) || entry.size < 0 || entry.size > 500 * 1024 * 1024) throw Error('Keynote 재생 파일 정보를 확인해 주세요.');
     bytes += entry.size;
   }

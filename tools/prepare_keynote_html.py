@@ -1,5 +1,5 @@
 """Prepare an Apple HTML export's immutable manifest; never opens or edits Keynote."""
-import argparse, hashlib, json, pathlib, re
+import argparse, hashlib, json, pathlib, re, unicodedata
 
 def prepare(source, exported):
     if source.suffix.lower() != '.key' or not source.is_file():
@@ -25,9 +25,11 @@ def prepare(source, exported):
         if not item.is_file() or item.name == 'manifest.json' or item.name.startswith('.'):
             continue
         name = item.relative_to(exported).as_posix()
-        if (name != 'index.html' and not name.startswith('assets/')) or not re.fullmatch(r'[a-zA-Z0-9_./@-]+', name):
+        if (name != 'index.html' and not name.startswith('assets/')) or any(c not in '_./@-' and unicodedata.category(c)[0] not in 'LMN' for c in name) or any(not p or p.startswith('.') for p in name.split('/')):
             raise ValueError('Unsupported exported path: ' + name)
         data = item.read_bytes()
+        if len(data) > (300 if item.suffix.lower() in ('.mp4', '.mov') else 50) * 1024 * 1024:
+            raise ValueError('Exported resource exceeds supported limit.')
         files[name] = {'size': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
     if len(files) > 5000 or sum(x['size'] for x in files.values()) > 500 * 1024 * 1024:
         raise ValueError('Export exceeds supported limits.')
