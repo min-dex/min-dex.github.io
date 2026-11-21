@@ -53,6 +53,10 @@ try:
    page.evaluate('editor.reload()')
    page.wait_for_function("documents.get('youth').revision===4&&document.querySelector('[data-bulletin-field=scriptureNote]')?.value==='연결 본문에 대한 노트'")
    assert page.evaluate("documents.get('youth').fields.welcome===''&&documents.get('youth').fields.reflection===''&&documents.get('youth').months['2026-11']==='직접 쓴 월 일정'")
+   page.evaluate("""()=>{window.printCalls=0;const descriptor=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'contentWindow');Object.defineProperty(HTMLIFrameElement.prototype,'contentWindow',{get(){const w=descriptor.get.call(this);if(w)w.print=()=>{printCalls++;w.dispatchEvent(new w.Event('afterprint'))};return w}})}""")
+   page.locator('[data-bulletin-print]').click()
+   page.wait_for_function('printCalls===1')
+   assert page.evaluate("document.querySelector('iframe').contentDocument.querySelectorAll('[data-bulletin-design=swiss-youth]').length===2")
    page.evaluate(r'''()=>{
     const B=MindexBulletin;
     for(const department of ['young-adult','children','youth']){
