@@ -4936,7 +4936,8 @@ uploads stop before storing an incomplete replacement. The verified Apple15.4
 runtime is hash pinned; unsupported versions fail before upload/execution.
 Prepared playback runs inside Mindex web and desktop without Keynote at playback
 time. Total export limit is 500 MiB, at most 5,000 resources and 300 slides;
-individual resources currently must fit the 50 MiB Storage upload limit.
+individual Storage objects must fit the 50 MiB upload limit. New large MP4/MOV
+resources use the versioned split-media transport described below.
 
 ### Chrome Keynote automatic preparation ·2026-10-31
 
@@ -4945,12 +4946,19 @@ Mac 설치 앱은 패키지의 정확한 index 파일을 연 기본 컨트롤러
 전용 IPC를 통해 고정 IPv4 loopback 도우미에 요청한다. URL·메서드·헤더·크기와
 시간 제한을 검사하고, 연결 승인·세션·원본/내보내기 해시 검증은 그대로 유지한다.
 `Origin:null`, 임의 주소, 승인 POST 및 도우미 종료 요청은 허용하지 않는다.
-브라우저 경로와 원본·작성 내용·저장 경로는 변경하지 않는다.
+브라우저도 기존 승인·해시 검증을 사용하며 원본·작성 내용과 atomic 저장 계약은 유지한다.
 한글 NFC/NFD 리소스 이름은 문자·결합문자·숫자와 기존 안전 구분자만 허용한다.
 점으로 시작하는 경로·상위 이동·인코딩 우회·링크는 계속 차단한다. 새 준비 시 영상(MP4/MOV)은
 300MiB까지, 나머지 리소스는 50MiB까지 허용하며 전체 500MiB 제한은 유지한다.
 큰 리소스는 4MiB 범위로 전송하고 전체 해시를 재검증한다. 도우미는 파일 변경 시
 해시 검증을 다시 수행하며, 원본이나 내장 영상을 재인코딩하지 않는다.
+50MiB를 넘는 영상의 재생 사본은 16MiB 이하 객체로 저장한다. 각 조각과 전체
+영상의 크기·SHA-256을 검증하고 opaque 재생 프레임 안에서 연속 버퍼로 재조립한다.
+분할 사본은 `apple-keynote-html-parts-v1` 형식으로 구분하여 구형 앱이 일반 HTML
+재생 자료로 오인하지 않게 한다. 기존 `apple-keynote-html-v1` 자료는 그대로 읽는다.
+manifest의 원래 영상 크기·해시와 원본 KEY 정보는 유지하며, 조각 경로·크기·해시는
+해당 파일의 `parts`에 둔다. Blob 주소는 프레임 수명 동안만 사용하고 복구 위치에는
+원래 영상 주소를 기록한다. 큰 영상 검증이 끝나기 전에 엔진이나 준비 완료를 시작하지 않는다.
 
 Keynote's normal controller flow is file selection, preparation, then the usual
 slide/output controls. The chooser discloses public original storage before

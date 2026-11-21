@@ -1,10 +1,35 @@
 export const KEYNOTE_HTML_RUNTIME_SHA256 = '17c0c938caa49d5c70bd83bd5b84f57381faa51602932ca733aa965055026d91';
 export const KEYNOTE_HTML_RESOURCE_CHUNK = 4 * 1024 * 1024;
+export const KEYNOTE_STORAGE_PART_BYTES = 16 * 1024 * 1024;
+export const KEYNOTE_PARTS_FORMAT = 'apple-keynote-html-parts-v1';
+export async function keynoteStoragePlan(manifest, byName, manifestBytes, digest) {
+  const next = structuredClone(manifest), files = new Map(byName);let changed = false, index = 0;
+  for (const [name, entry] of Object.entries(next.files)) {
+    const file = byName.get(name);
+    if (file.size <= 50 * 1024 * 1024) { index++;continue; }
+    if (!/\.(mp4|mov)$/i.test(name) || file.size > keynoteHtmlResourceLimit(name)) throw Error('Keynote 영상 크기를 확인해 주세요.');
+    const parts = [];
+    for (let start = 0; start < file.size; start += KEYNOTE_STORAGE_PART_BYTES) {
+      const blob = file.slice(start, Math.min(file.size, start + KEYNOTE_STORAGE_PART_BYTES));
+      const path = `assets/mindex-parts/${index}/part-${parts.length + 1}.bin`;
+      if (files.has(path)) throw Error('Keynote 분할 자료 경로가 겹칩니다.');
+      parts.push({ path, size: blob.size, sha256: await digest(await blob.arrayBuffer()) });files.set(path, blob);
+    }
+    entry.parts = parts;files.delete(name);changed = true;index++;
+  }
+  if (!changed) return { manifest, byName, manifestBytes };
+  next.format = KEYNOTE_PARTS_FORMAT;
+  validateKeynoteHtmlManifest(next, next);
+  const bytes = new TextEncoder().encode(JSON.stringify(next));
+  if (bytes.byteLength > 2 * 1024 * 1024) throw Error('Keynote 재생 정보가 너무 큽니다.');
+  files.set('manifest.json', new Blob([bytes], { type: 'application/json' }));
+  return { manifest: next, byName: files, manifestBytes: bytes };
+}
 export const keynoteHtmlResourceLimit = name => (/\.(mp4|mov)$/i.test(name) ? 300 : 50) * 1024 * 1024;
 // Private exported deck code runs only in an opaque sandbox, never in the app realm.
 const HASH = /^[a-f0-9]{64}$/;
 export function normalizeKeynoteHtml(value, original) {
-  if (!value || value.format !== 'apple-keynote-html-v1' || !HASH.test(value.sha256 || '')
+  if (!value || !['apple-keynote-html-v1', KEYNOTE_PARTS_FORMAT].includes(value.format) || !HASH.test(value.sha256 || '')
     || !HASH.test(value.sourceSha256 || '') || value.sourceSha256 !== original?.sha256
     || !Number.isSafeInteger(value.pages) || value.pages < 1 || value.pages > 300) return null;
   let url;
@@ -17,17 +42,29 @@ export function normalizeKeynoteHtml(value, original) {
   return { format: value.format, url: url.href, sha256: value.sha256, sourceSha256: value.sourceSha256, pages: value.pages, ...(poster ? { poster } : {}) };
 }
 export function validateKeynoteHtmlManifest(manifest, descriptor) {
-  if (!manifest || manifest.format !== descriptor.format || manifest.sourceSha256 !== descriptor.sourceSha256
+  if (!manifest || !['apple-keynote-html-v1', KEYNOTE_PARTS_FORMAT].includes(manifest.format) || manifest.format !== descriptor.format || manifest.sourceSha256 !== descriptor.sourceSha256
     || manifest.pages !== descriptor.pages || !Array.isArray(manifest.slides) || manifest.slides.length !== manifest.pages
     || !manifest.files || typeof manifest.files !== 'object' || Array.isArray(manifest.files)) throw Error('Keynote 재생 자료가 원본과 일치하지 않습니다.');
   const files = Object.entries(manifest.files);
   if (!files.length || files.length > 5000) throw Error('Keynote 재생 파일 수를 확인해 주세요.');
-  let bytes = 0;
+  let bytes = 0;const partPaths = new Set();
   for (const [name, entry] of files) {
     if ((name !== 'index.html' && !name.startsWith('assets/')) || !/^[\p{L}\p{M}\p{N}_./@-]+$/u.test(name) || name.startsWith('/') || name.split('/').some(x => !x || x.startsWith('.'))
       || !HASH.test(entry.sha256 || '') || !Number.isSafeInteger(entry.size) || entry.size < 0 || entry.size > 500 * 1024 * 1024) throw Error('Keynote 재생 파일 정보를 확인해 주세요.');
     bytes += entry.size;
+    if (entry.parts !== undefined) {
+      if (!/\.(mp4|mov)$/i.test(name) || entry.size <= 50 * 1024 * 1024 || entry.size > keynoteHtmlResourceLimit(name)
+        || !Array.isArray(entry.parts) || !entry.parts.length || entry.parts.length > 32) throw Error('Keynote 분할 영상 정보를 확인해 주세요.');
+      let size = 0;
+      for (const part of entry.parts) {
+        if (!/^assets\/mindex-parts\/\d+\/part-\d+\.bin$/.test(part.path || '') || manifest.files[part.path] || partPaths.has(part.path)
+          || !Number.isSafeInteger(part.size) || part.size < 1 || part.size > KEYNOTE_STORAGE_PART_BYTES || !HASH.test(part.sha256 || '')) throw Error('Keynote 분할 영상 정보를 확인해 주세요.');
+        partPaths.add(part.path);size += part.size;
+      }
+      if (size !== entry.size) throw Error('Keynote 분할 영상 크기를 확인해 주세요.');
+    }
   }
+  if (Boolean(partPaths.size) !== (manifest.format === KEYNOTE_PARTS_FORMAT)) throw Error('Keynote 분할 영상 형식을 확인해 주세요.');
   if (bytes > 500 * 1024 * 1024 || !manifest.files['assets/player/main.js'] || !manifest.files['assets/header.json']) throw Error('Keynote 재생 자료 크기를 확인해 주세요.');
   let lastScene = 0;
   for (const slide of manifest.slides) {
@@ -49,7 +86,8 @@ export function patchKeynoteHtmlPlayer(source) {
     // original-width ceiling when the output viewport is larger than the deck.
     .replace(nativeSizeCap, '')
     .replace('url:Q,cMapUrl:_C', 'url:new URL(Q,document.baseURI).href,cMapUrl:new URL(_C,document.baseURI).href')
-    .replace('workerSrc="./assets/player/pdfjs/pdf.worker.min.js"', 'workerSrc=new URL("./assets/player/pdfjs/pdf.worker.min.js",document.baseURI).href');
+    .replace('workerSrc="./assets/player/pdfjs/pdf.worker.min.js"', 'workerSrc=new URL("./assets/player/pdfjs/pdf.worker.min.js",document.baseURI).href')
+    .replace('UC.delegate.setPlaybackReadyHandler((function(){', 'UC.delegate.setPlaybackReadyHandler((async function(){if(window.__mindexKeynoteMediaReady&&!await window.__mindexKeynoteMediaReady)return;');
 }
 export function keynoteCheckpoint(value, scenes) {
   if (!value || !Number.isSafeInteger(value.scene) || value.scene < 0 || value.scene >= scenes
@@ -57,13 +95,69 @@ export function keynoteCheckpoint(value, scenes) {
   if (!Number.isSafeInteger(value.nextScene) || value.nextScene < -1 || value.nextScene >= scenes || !Number.isSafeInteger(value.slide) || value.slide < 0 || value.slide >= 300) return null;
   return { scene: value.scene, phase: value.phase, playing: Boolean(value.playing), nextScene: value.nextScene, slide: value.slide, atEnd: Boolean(value.atEnd && value.scene === scenes - 1 && value.nextScene === -1), terminalTransition: Boolean(value.terminalTransition && value.scene === scenes - 1 && value.nextScene === -1), media: Array.isArray(value.media) ? value.media.slice(0, 100).filter(x => x && typeof x.src === 'string' && x.src.length < 4096 && Number.isFinite(x.time) && x.time >= 0 && x.time < 7 * 86400).map(x => ({ src: x.src, time: x.time, paused: Boolean(x.paused), resume: Boolean(x.resume ?? !x.paused) })) : [] };
 }
-export function keynoteFrameDocument({ baseUrl, player, token, bridge }) {
+export function keynoteFrameDocument({ baseUrl, player, token, bridge, mediaFiles = [] }) {
   const base = new URL('.', baseUrl);
   if (!['http:', 'https:'].includes(base.protocol) || base.username || base.password || !/^[a-f0-9-]{36}$/.test(token)) throw Error('Keynote 재생 주소를 확인해 주세요.');
   const escape = x => x.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;');
   const safeScript = x => x.replace(/<\/script/gi, '<\\/script');
   const policy = `default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' blob: ${base.href}; style-src 'unsafe-inline' ${base.href}; img-src data: blob: ${base.href}; media-src blob: ${base.href}; connect-src ${base.href}; worker-src blob: ${base.href}; font-src data: ${base.href}; base-uri ${base.href}; form-action 'none'`;
-  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${escape(policy)}"><base href="${escape(base.href)}"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;width:100%;height:100%;background:black;overflow:hidden}</style></head><body id="body" bgcolor="black"><div id="stageArea"><div id="stage" class="stage"></div><div id="hyperlinkPlane" class="stage"></div></div><div id="slideshowNavigator"></div><div id="slideNumberControl"></div><div id="slideNumberDisplay"></div><div id="helpPlacard"></div><div id="waitingIndicator"><div id="waitingSpinner"></div></div><script>${safeScript(`(${bridge.toString()})(${JSON.stringify(token)});`)}</script><script>${safeScript(player)}</script></body></html>`;
+  const media = mediaFiles.length ? `window.__mindexKeynoteMediaReady=(${keynoteMediaPartsBootstrap.toString()})(${JSON.stringify(mediaFiles)},${JSON.stringify(base.href)},${JSON.stringify(token)});` : '';
+  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${escape(policy)}"><base href="${escape(base.href)}"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;width:100%;height:100%;background:black;overflow:hidden}</style></head><body id="body" bgcolor="black"><div id="stageArea"><div id="stage" class="stage"></div><div id="hyperlinkPlane" class="stage"></div></div><div id="slideshowNavigator"></div><div id="slideNumberControl"></div><div id="slideNumberDisplay"></div><div id="helpPlacard"></div><div id="waitingIndicator"><div id="waitingSpinner"></div></div><script>${safeScript(`(${bridge.toString()})(${JSON.stringify(token)});${media}`)}</script><script>${safeScript(player)}</script></body></html>`;
+}
+
+// Runs in the opaque playback frame. Only verified bounded parts become media URLs.
+export async function keynoteMediaPartsBootstrap(files, baseUrl, token) {
+  window.__mindexKeynoteMediaPrepared = false;
+  const controller = new AbortController(), urls = new Map(), originals = new Map();
+  const cleanup = () => { controller.abort();for (const url of urls.values()) URL.revokeObjectURL(url);urls.clear(); };
+  addEventListener('pagehide', cleanup, { once: true });
+  const timer = setTimeout(() => controller.abort(), 300000);
+  const hash = async bytes => [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(x => x.toString(16).padStart(2, '0')).join('');
+  try {
+    const base = new URL(baseUrl);let total = 0;
+    for (const file of files) {
+      if (!Number.isSafeInteger(file.size) || file.size < 1 || file.size > 300 * 1024 * 1024 || !Array.isArray(file.parts) || file.parts.length > 32) throw Error('Invalid media');
+      total += file.size;if (total > 500 * 1024 * 1024) throw Error('Invalid media total');
+      const buffer = new Uint8Array(file.size);let size = 0;
+      for (const part of file.parts) {
+        if (!/^assets\/mindex-parts\/\d+\/part-\d+\.bin$/.test(part.path || '') || !Number.isSafeInteger(part.size) || part.size < 1 || part.size > 16 * 1024 * 1024) throw Error('Invalid part');
+        const url = new URL(part.path, base);
+        if (url.origin !== base.origin || !url.pathname.startsWith(base.pathname)) throw Error('Invalid part URL');
+        const pending = setTimeout(() => controller.abort(), 30000);
+        let bytes;
+        try {
+          const response = await fetch(url.href, { credentials: 'omit', redirect: 'error', signal: controller.signal });
+          if (!response.ok || Number(response.headers.get('content-length')) > part.size || !response.body) throw Error('Missing part');
+          const reader = response.body.getReader(), pieces = [];let length = 0;
+          for (;;) { const { done, value } = await reader.read();if (done) break;length += value.byteLength;if (length > part.size) { await reader.cancel();throw Error('Oversize part'); }pieces.push(value); }
+          if (length !== part.size) throw Error('Truncated part');
+          bytes = new Uint8Array(length);let offset = 0;for (const piece of pieces) { bytes.set(piece, offset);offset += piece.byteLength; }
+        } finally { clearTimeout(pending); }
+        if (await hash(bytes) !== part.sha256) throw Error('Changed part');
+        if (size + bytes.byteLength > file.size) throw Error('Oversize media');
+        buffer.set(bytes, size);size += bytes.byteLength;
+      }
+      if (size !== file.size) throw Error('Missing media');
+      if (await hash(buffer) !== file.sha256) throw Error('Changed media');
+      const blob = new Blob([buffer], { type: /\.mov$/i.test(file.path) ? 'video/quicktime' : 'video/mp4' });
+      const canonical = new URL(file.path, base).href, url = URL.createObjectURL(blob);
+      urls.set(canonical, url);originals.set(url, canonical);
+    }
+    const resolve = value => { try { return urls.get(new URL(value, base).href) || value; } catch { return value; } };
+    const setAttribute = Element.prototype.setAttribute;
+    Element.prototype.setAttribute = function(name, value) {
+      return setAttribute.call(this, name, String(name).toLowerCase() === 'src' && (this instanceof HTMLMediaElement || this instanceof HTMLSourceElement) ? resolve(value) : value);
+    };
+    for (const prototype of [HTMLMediaElement.prototype, HTMLSourceElement.prototype]) {
+      const descriptor = Object.getOwnPropertyDescriptor(prototype, 'src');
+      Object.defineProperty(prototype, 'src', { ...descriptor, set(value) { descriptor.set.call(this, resolve(value)); } });
+    }
+    window.__mindexKeynoteOriginalMediaSource = value => originals.get(value) || value;
+    window.__mindexKeynoteMediaPrepared = true;
+    return true;
+  } catch {
+    cleanup();parent.postMessage({ type: 'mindex-keynote-html', token, kind: 'error', phase: 'media-preparation', message: 'Keynote 포함 영상 준비에 실패했습니다. 원본은 보존됩니다.' }, '*');return false;
+  } finally { clearTimeout(timer); }
 }
 
 // Serialized into the opaque frame; deliberately contains no app globals.
@@ -73,6 +167,7 @@ export function keynoteHtmlFrameBridge(token) {
   let currentRequest = '', restored = null, lastMessage = '', version = 0;
   const receipts = new Map(), media = new Set(), resumeIntent = new Set();
   let activationButton = null, activationPending = false;
+  const sourceOf = track => window.__mindexKeynoteOriginalMediaSource?.(track.currentSrc || track.src) || track.currentSrc || track.src;
   function requireActivation() {
     if (activationButton || disposed) return;
     activationButton = document.createElement('button');activationButton.dataset.keynoteActivate = '';activationButton.textContent = '영상·음원 재생 허용';
@@ -90,7 +185,7 @@ export function keynoteHtmlFrameBridge(token) {
   HTMLMediaElement.prototype.pause = function () { resumeIntent.delete(this);return pause.call(this); };
   HTMLMediaElement.prototype.play = function () {
     if (!media.has(this)) { media.add(this);this.addEventListener('ended', () => resumeIntent.delete(this)); }
-    if (!restored || !held || restored.media?.some(saved => saved.src === (this.currentSrc || this.src) && (saved.resume ?? !saved.paused))) resumeIntent.add(this);
+    if (!restored || !held || restored.media?.some(saved => saved.src === sourceOf(this) && (saved.resume ?? !saved.paused))) resumeIntent.add(this);
     if (held || disposed) { pause.call(this);return Promise.resolve(); }
     const epoch = recoveryEpoch;
     return play.call(this).catch(error => { if (epoch !== recoveryEpoch || disposed) return;if (error.name === 'NotAllowedError') requireActivation();
@@ -110,7 +205,7 @@ export function keynoteHtmlFrameBridge(token) {
     return { scene: e.currentSceneIndex, phase: final ? 'final' : 'initial', playing: mediaPlaying, slide: e.currentSlideIndex >= 0 ? e.currentSlideIndex : e.scriptManager.slideIndexFromSceneIndex(e.currentSceneIndex),
       nextScene: e.nextSceneIndex, atEnd: Boolean(restored?.atEnd) || (final && e.nextSceneIndex === -1),
       terminalTransition: Boolean(restored?.terminalTransition) || (final && e.nextSceneIndex === -1 && effects.length > 0 && effects.every(effect => effect.type === 'transition')),
-      media: tracks().filter(m => m.currentSrc || m.src).map(m => ({ src: m.currentSrc || m.src, time: Number(m.currentTime) || 0, paused: m.paused, resume: resumeIntent.has(m) && !m.ended })) };
+      media: tracks().filter(m => m.currentSrc || m.src).map(m => ({ src: sourceOf(m), time: Number(m.currentTime) || 0, paused: m.paused, resume: resumeIntent.has(m) && !m.ended })) };
   }
   async function settled(epoch = recoveryEpoch) {
     let elapsed = 0, last = Date.now();
@@ -140,7 +235,7 @@ export function keynoteHtmlFrameBridge(token) {
     for (const saved of value.media || []) {
       let track;
       do {
-        const matching = tracks().filter(m => (m.currentSrc || m.src) === saved.src);
+        const matching = tracks().filter(m => sourceOf(m) === saved.src);
         track = matching.find(m => m.isConnected) || matching[matching.length - 1];
 
         if (track || (saved.paused && !saved.resume)) break;
@@ -231,10 +326,11 @@ export function keynoteHtmlFrameBridge(token) {
   }, { capture: true, passive: false });
   const timer = setInterval(() => {
     if (disposed) return;
+    if (window.__mindexKeynoteMediaReady && !window.__mindexKeynoteMediaPrepared) return;
     const e = engine();
     if (!ready && e?.script?.numScenes && e.currentSceneIndex >= 0) {
       ready = true;
-      const first = checkpoint() || { scene: e.currentSceneIndex, phase: 'initial', nextScene: e.nextSceneIndex, slide: e.scriptManager.slideIndexFromSceneIndex(e.currentSceneIndex), atEnd: false, media: tracks().map(m => ({ src: m.currentSrc || m.src, time: Number(m.currentTime) || 0, paused: m.paused, resume: resumeIntent.has(m) && !m.ended })) };
+      const first = checkpoint() || { scene: e.currentSceneIndex, phase: 'initial', nextScene: e.nextSceneIndex, slide: e.scriptManager.slideIndexFromSceneIndex(e.currentSceneIndex), atEnd: false, media: tracks().map(m => ({ src: sourceOf(m), time: Number(m.currentTime) || 0, paused: m.paused, resume: resumeIntent.has(m) && !m.ended })) };
       report('ready', { scenes: e.script.numScenes, pages: e.script.slideList.length, checkpoint: first });
     }
     if (!ready) return;

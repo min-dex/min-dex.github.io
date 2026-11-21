@@ -228,7 +228,7 @@ function normalizeServiceAsset(value) {
       size: original.size, sha256: original.sha256 };
   }
   const keynote = value.keynoteHtml;
-  if (normalized.original?.format === 'key' && keynote?.format === 'apple-keynote-html-v1'
+  if (normalized.original?.format === 'key' && ['apple-keynote-html-v1', 'apple-keynote-html-parts-v1'].includes(keynote?.format)
     && keynote.sourceSha256 === normalized.original.sha256 && /^[a-f0-9]{64}$/.test(keynote.sha256 || '')
     && Number.isSafeInteger(keynote.pages) && keynote.pages > 0 && keynote.pages <= 300
     && typeof keynote.url === 'string' && /^https?:\/\//.test(keynote.url)) {

@@ -1064,7 +1064,8 @@ the existing native record revision CAS; no lifecycle guard is bypassed.
 ## Keynote original plus playback sidecar ·2026-10-25
 
 A preserved `asset.original.format=key` may add `asset.keynoteHtml` with
-`format=apple-keynote-html-v1`, immutable manifest `url`/`sha256`, matching
+`format=apple-keynote-html-v1` (or `apple-keynote-html-parts-v1` for new large
+media), immutable manifest `url`/`sha256`, matching
 `sourceSha256`, `pages`, and an optional same-package `poster` thumbnail. The
 original URL/name/size/hash and item identity remain unchanged. The manifest owns
 its relative files and cumulative scene counts; no new row/schema is required.
@@ -1081,6 +1082,14 @@ services. Its pairing tokens are tab-memory state, not service memo, shared
 server storage or permanent browser credentials. Original upload and sidecar
 attachment use the existing acknowledged atomic element saves. A second-stage
 failure preserves the original and follows normal pending-save reconciliation.
+
+The split-media manifest retains each canonical resource's original `size` and
+`sha256`, with an ordered `parts` list of immutable relative path/size/SHA-256
+records. Each Storage object is at most 16MiB for split videos; ordinary objects
+retain their 50MiB limit. The frame verifies every part and the full media before
+playback. Transient Blob URLs are not saved as source or checkpoint identity.
+Legacy sidecars and their existing size limits remain readable. No schema,
+permission, source-file replacement or authored-content rewrite is introduced.
 
 
 ## Praise classification owner · 2026-10-28 candidate
