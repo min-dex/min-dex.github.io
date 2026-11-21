@@ -100,9 +100,11 @@ class PagesGate(unittest.TestCase):
             git('init')
             (root / 'index.html').write_text('tested commit')
             excluded = ['tests/fixture.json', 'cloud/check.py', '.github/workflows/test.yml',
-                        'tools/build.js', 'migrations/schema.sql', 'electron/main.js']
+                        'tools/build.js', 'tools/broadcast-prototype/private.json',
+                        'tools/broadcast-prototype/nested/index.html', 'migrations/schema.sql', 'electron/main.js']
             retained = ['assets/tests/image.webp', 'assets/video.mp4', 'vendor/LICENSE',
-                        'data/runtime.json', 'docs/manual.md', '.nojekyll', 'app.js']
+                        'data/runtime.json', 'docs/manual.md', '.nojekyll', 'app.js'] + [
+                        'tools/broadcast-prototype/' + name for name in stager.PUBLIC_BROADCAST_FILES]
             for name in excluded + retained:
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)

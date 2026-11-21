@@ -206,3 +206,8 @@ with 1.5× canvas scaling preserving caption layout. Browser-only rendering does
 not gain the desktop RTMPS bridge. Bitrate, recording and desktop encoding are
 unchanged. `smoke_broadcast_resolution.py` checks both engines without a desktop
 bridge; `test_broadcast_capture.mjs` checks both capture request paths.
+
+The standalone browser preview is published at `tools/broadcast-prototype/`.
+Pages staging includes only its reviewed static file allowlist; other tools,
+Electron code and untracked files remain excluded. The main application's
+desktop-only broadcast launcher is unchanged.

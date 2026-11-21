@@ -8,7 +8,19 @@ import tempfile
 DEVELOPMENT_DIRECTORIES = frozenset({'.github', 'cloud', 'tests', 'tools', 'migrations', 'electron'})
 
 
+# Reviewed standalone broadcast preview only; never publish all development tools.
+PUBLIC_BROADCAST_FILES = frozenset({
+    'index.html', 'prototype.mjs', 'prototype.css', 'capture-input.mjs',
+    'frame-cadence.mjs', 'caption-transition.mjs', 'output-routing.mjs',
+    'live.mjs', 'youtube.mjs', 'blocked-slate.png',
+    'hall-output.html', 'hall-output.mjs', 'hall-window.js',
+})
+
+
 def is_public_path(path):
+    if len(path.parts) == 3 and path.parts[:2] == ('tools', 'broadcast-prototype'):
+        return path.name in PUBLIC_BROADCAST_FILES
+
     return not (path.parts and path.parts[0] in DEVELOPMENT_DIRECTORIES)
 
 

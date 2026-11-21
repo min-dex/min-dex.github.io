@@ -1,10 +1,14 @@
 """Full HD composition without a desktop bridge, devices or external services."""
 import os
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
+import smoke_app
+from pathlib import Path
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 
 def main():
+    if os.environ.get('MINDEX_BROADCAST_TEST_ROOT'):
+        smoke_app.APP_DIR = Path(os.environ['MINDEX_BROADCAST_TEST_ROOT'])
     server, url = start_local_app_server()
     url = url.rsplit("/", 1)[0]
     try:
