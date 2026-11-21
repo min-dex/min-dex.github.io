@@ -4459,13 +4459,6 @@ function renderPresenterImageSlide(slide, options = {}) {
   return `<img class="presenter-image${referenceClass}" src="${escapeAttr(source)}" alt="" decoding="${decoding}" loading="${loading}" fetchpriority="${fetchPriority}" draggable="false" />`;
 }
 
-function presenterOrderDisplayLabel(value = "") {
-  const label = String(value || "");
-  // Hide sequence numbers only in output headings, never in stored labels/content.
-  return label.replace(/^([가-힣A-Za-z][가-힣A-Za-z ]*?)\s*(?:\d+|[①-⑳㉑-㉟㊱-㊿])(?:\s*[·–~-]\s*(?:\d+|[①-⑳㉑-㉟㊱-㊿]))*\s*$/u,
-    (_, name) => name.trim());
-}
-
 function renderPresenterReadingAssigneeTab(slide) {
   const assignee = isPresenterScriptureReadingSource(slide)
     ? cleanPresenterAssignee(slide.scriptureReadingAssignee)

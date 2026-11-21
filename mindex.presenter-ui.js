@@ -1,3 +1,39 @@
+function serviceOutlineSlideTarget(serviceOutlineItem) {
+  const serviceId = serviceOutlineItem?.dataset?.serviceOutlineService || state.selectedServiceId;
+  const rawItemIndex = Number(serviceOutlineItem?.dataset?.serviceOutlineItemIndex);
+  const rawItemId = String(serviceOutlineItem?.dataset?.serviceOutlineItemId || "").trim();
+  const slideValue = String(serviceOutlineItem?.dataset?.serviceOutlineSlide || "").trim();
+  const slides = presenterSlidesForService(serviceId);
+  const resolved = resolveServiceOutlineItem(serviceId, rawItemIndex, rawItemId);
+  const currentItem = resolved?.item || null;
+  const itemIndex = resolved?.index ?? rawItemIndex;
+  let slideIndex = -1;
+  if (currentItem) {
+    const datasetSlideIndex = slideValue ? Number(slideValue) : -1;
+    // The outline already owns the exact first slide. Rebuilding the complete
+    // item-to-slide index on every click made long services feel unresponsive.
+    if (Number.isFinite(datasetSlideIndex)
+      && presenterSlideBelongsToItem(slides[datasetSlideIndex], currentItem)) {
+      slideIndex = datasetSlideIndex;
+    } else {
+      const slideIndexByItemId = buildPresenterSlideItemIndexMap(slides);
+      slideIndex = firstPresenterSlideIndexForServiceItem(currentItem, slides, slideIndexByItemId);
+    }
+  } else if (slideValue) {
+    slideIndex = Number(slideValue);
+  }
+  if (!Number.isFinite(slideIndex) || slideIndex < 0 || !serviceId) return null;
+  if (slideIndex >= slides.length) slideIndex = Math.max(slides.length - 1, 0);
+  return { itemIndex, serviceId, slideIndex };
+}
+
+function presenterOrderDisplayLabel(value = "") {
+  const label = String(value || "");
+  // Hide sequence numbers only in output headings, never in stored labels/content.
+  return label.replace(/^([가-힣A-Za-z][가-힣A-Za-z ]*?)\s*(?:\d+|[①-⑳㉑-㉟㊱-㊿])(?:\s*[·–~-]\s*(?:\d+|[①-⑳㉑-㉟㊱-㊿]))*\s*$/u,
+    (_, name) => name.trim());
+}
+
 function focusPresenterPreparationTarget(serviceId, target = {}) {
   if (!serviceId || !target) return;
   requestAnimationFrame(() => {
