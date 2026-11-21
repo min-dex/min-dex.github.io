@@ -23,5 +23,30 @@
         "id": 742836383
       }
     ]
+  },
+  "1.0.13": {
+    "version": "1.0.13",
+    "channel": "internal",
+    "sourceCommit": "82f2aa6bbc98323c50c1531d9af044089f3b7a44",
+    "assets": [
+      {
+        "file": "Mindex-1.0.13-mac-arm64.dmg",
+        "bytes": 1794296799,
+        "sha256": "545698ed73ff928297e2ef4c5adc966c7577147e9c30c009c8782cac5c8f9292",
+        "id": 775970829
+      },
+      {
+        "file": "Mindex-1.0.13-mac-x64.dmg",
+        "bytes": 1804303200,
+        "sha256": "3f949221fa82fa6a1a015455b11caf736bfe3d58d40df0e8005cf08b9cd97c06",
+        "id": 775970822
+      },
+      {
+        "file": "Mindex-1.0.13-win-x64.exe",
+        "bytes": 1772664022,
+        "sha256": "a8ddbe09b81d6f6a0c67b04da1f99c91a76cdc9d1c41a632a8c16b964acc2bba",
+        "id": 775970831
+      }
+    ]
   }
 }
