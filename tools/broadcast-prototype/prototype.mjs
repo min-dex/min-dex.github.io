@@ -20,9 +20,10 @@ function routeSlide(key,value=false){const wasExcluded=outputPolicy.read().exclu
 $('excludeBroadcast').onclick=()=>{outputPolicy.setManual(!outputPolicy.read().manual);paintRoute();};
 $('excludeSlide').onchange=()=>{exclusions.set(routeKey,$('excludeSlide').checked);outputPolicy.setExcluded($('excludeSlide').checked);paintRoute();};
 const layer=document.createElement('canvas');layer.width=outputWidth;layer.height=outputHeight;
-const ink=layer.getContext('2d'),captionTransition=createCaptionTransition({width:outputWidth,height:outputHeight});
+// Caption layers are read back for alpha transitions; use readback-oriented contexts.
+const ink=layer.getContext('2d',{willReadFrequently:true}),captionTransition=createCaptionTransition({width:outputWidth,height:outputHeight});
 const hallLayer=document.createElement('canvas');hallLayer.width=outputWidth;hallLayer.height=outputHeight;
-const hallInk=hallLayer.getContext('2d'),hallTransition=createCaptionTransition({width:outputWidth,height:outputHeight});
+const hallInk=hallLayer.getContext('2d',{willReadFrequently:true}),hallTransition=createCaptionTransition({width:outputWidth,height:outputHeight});
 ink.scale(outputScale,outputScale);hallInk.scale(outputScale,outputScale);
 let lyrics=null;
 const emptyCaption=document.createElement('canvas');emptyCaption.width=outputWidth;emptyCaption.height=outputHeight;
