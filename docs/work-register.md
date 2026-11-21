@@ -94,7 +94,7 @@ U01의 공유 배포는 완료됐다. U02는 저장 개선 담당의 운영 TEST
 ## B01 주보 서버 공통 양식 · 2026-11-21
 
 상태는 로컬 검증 완료·공개 및 설치 앱 배포 대기다. 별도 branch
-`codex/bulletin-live-template`, worktree `/tmp/mindex-bulletin-live-template`에서
+`codex/native-bulletin-live-template`, worktree `/tmp/mindex-bulletin-live-template`에서
 토브 설교 요점 통합, 세 부서의 입력칸 이름/표시 서버 설정, 공통 레이아웃의 안전한
 자동 반영을 준비했다. 주간 필드 값·명시적 빈 값·개별 조정 속성을 보존한다.
 편집/저장/인쇄/송출 중에는 미루며 기존 content-committed와 15초 조회를 쓴다.
@@ -111,6 +111,6 @@ Chromium/WebKit 각 세 부서에서 공통 양식 저장, 표시/숨김/다시 
 최종 합친 SHA의 필수 GitHub gate와 최초 설치 업데이트·운영 반영 검증은 별도다.
 운영 주보·예배 쓰기 또는 DB/schema 변경은 수행하지 않았다.
 
-Release journal `43939a06cd0b4518b6e3b8f5f8c96ca0`은 준비 단계다.
+Release journal `43939a06cd0b4518b6e3b8f5f8c96ca0`, FIFO `d67584b2ea2845a0a5ad413978f08cac`에서 1.0.12 최종 후보를 검증한다.
 서버 설정만으로 바꿀 수 있는 범위와 최초 클라이언트 업데이트 경계는
 [주보 계약](young-adult-bulletin.md)의 서버 공통 양식 항목을 따른다.
