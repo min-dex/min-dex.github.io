@@ -17,7 +17,7 @@ def main():
                 browser = launch_chromium(p) if engine == 'chromium' else p.webkit.launch()
                 try:
                     page = browser.new_page(viewport={'width': 1320, 'height': 1000})
-                    page.add_init_script("""() => {
+                    page.add_init_script("""(() => {
                         window.captionTrace=[];
                         for(const name of ['fillRect','fillText']){
                             const original=CanvasRenderingContext2D.prototype[name];
@@ -29,7 +29,7 @@ def main():
                                 return original.apply(this,args);
                             };
                         }
-                    }""")
+                    })();""")
                     page.set_default_timeout(15000)
                     errors = []
                     page.on('pageerror', lambda error: errors.append(str(error)))
