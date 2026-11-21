@@ -324,7 +324,6 @@
     STORAGE: {
       url: "mindex.supabase.url",
       key: "mindex.supabase.anonKey",
-      theme: "mindex.theme",
       presenterThumbScale: "mindex.ui.presenterThumbScale",
       module: "mindex.ui.module",
       listScroll: "mindex.ui.listScroll",

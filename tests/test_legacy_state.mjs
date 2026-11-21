@@ -13,21 +13,22 @@ const rpc=async(name,args)=>{
 const stores=Object.fromEntries(['device','session','shared'].map(scope=>[scope,createServerState({rpc,token:'test',scope})]));
 await Promise.all(Object.values(stores).map(s=>s.load()));
 const project='fixture';
+assert.equal(legacyStateDestination('local','mindex.theme',project),null);
 assert.equal(legacyStateDestination('local','mindex.ui.presenterThumbScale',project),'device');
 assert.equal(legacyStateDestination('session','mindex.ui.presenterThumbScale',project),'session');
 for(const key of ['mindex.supabase.anonKey','mindex.server.identity:fixture','mindex.monitor.deviceReporter','mindex.bible.chapter.v3.x','mindex.atomic.pending.v1:service'])assert.equal(legacyStateDestination('local',key,project),null);
 assert.equal(legacyStateDestination('session','mindex.atomic.pending.v2:["other","s"]',project),null);
-const entries=[{scope:'local',key:'mindex.theme',value:'dark'},
+const entries=[{scope:'local',key:'mindex.music.fadeStop',value:'dark'},
  {scope:'local',key:'mindex.worshipRecoverySnapshot.latest.v1.s',value:'private'},
  {scope:'session',key:'mindex.ui.module',value:'service'}];
 assert.equal((await migrateLegacyState({entries,project,legacyProject:'other',stores})).retained.length,3);assert.equal(writes,0);
-await stores.shared.setItem('mindex.theme','light');await stores.session.removeItem('mindex.ui.module');
+await stores.shared.setItem('mindex.music.fadeStop','light');await stores.session.removeItem('mindex.ui.module');
 let result=await migrateLegacyState({entries,project,legacyProject:project,stores});
 assert.equal(result.confirmed.length,1);assert.equal(result.retained.length,0);assert.equal(result.archived.length,2);
 for(const entry of result.archived)assert.ok(JSON.parse(stores.device.getItem(entry.archiveKey)).sourceHash);
 const archiveWrites=writes,archiveReads=reads;const repeated=await migrateLegacyState({entries,project,legacyProject:project,stores});assert.equal(writes,archiveWrites,'repeat migration cannot duplicate backups');assert.equal(reads,archiveReads,'already loaded archives must not repeatedly reload the entire device state');
 assert.equal(repeated.retirable.length,3,'exact duplicates and verified server archives both permit retirement');
-assert.equal(stores.shared.getItem('mindex.theme'),'light');assert.equal(stores.session.getItem('mindex.ui.module'),null);
+assert.equal(stores.shared.getItem('mindex.music.fadeStop'),'light');assert.equal(stores.session.getItem('mindex.ui.module'),null);
 const source=new Map(entries.map(e=>[e.key,e.value]));const access=()=>({getItem:key=>source.get(key),removeItem:key=>source.delete(key)});
 source.set(entries[1].key,'newer edit');assert.deepEqual(retireConfirmedLegacyState(result,access),[entries[0].key,entries[2].key]);
 source.set(entries[1].key,'private');assert.deepEqual(retireConfirmedLegacyState(repeated,access),[entries[1].key]);

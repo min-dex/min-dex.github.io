@@ -156,7 +156,7 @@ def main():
                       const draft=JSON.parse(MINDEX_SERVER_STORAGE.getItem('local',key));draft.value.body='Legacy draft';
                       await MINDEX_SERVER_STORAGE.setItem('local','mindex.editor.draft.v1:scripture:fixture',JSON.stringify(draft));
                     }""")
-                    page.evaluate("async()=>{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','recovery');await persistServerValue('local','mindex.theme','dark')}")
+                    page.evaluate("async()=>{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','recovery')}")
                     assert page.evaluate("localStorage.getItem('mindex.worshipRecoverySnapshot.latest.v1.fixture')") is None
                     control['offline']=True
                     error=page.evaluate("async()=>{try{await persistServerValue('local','mindex.worshipRecoverySnapshot.latest.v1.fixture','newer');return ''}catch(e){return e.message}}")
@@ -238,7 +238,6 @@ def main():
                     other.add_init_script("window.open=()=>null;Element.prototype.requestFullscreen=()=>Promise.reject(Error('blocked fixture'));")
                     second=other.new_page();second.goto(url+'?mindexSmokeRaw=1',wait_until='domcontentloaded')
                     second.wait_for_function('!!window.MINDEX_SERVER_STORAGE && typeof safeStorageGet === "function" && !document.body.classList.contains("ui-booting")');assert second.evaluate(INIT)
-                    assert second.evaluate("safeStorageGet('local','mindex.theme')")=='dark'
                     assert second.evaluate("safeStorageGet('local','mindex.worshipRecoverySnapshot.latest.v1.fixture')")==''
                     # Controller slide size level is a per-profile value even against the same project/server.
                     page.evaluate("async()=>{setPresenterThumbLevel('2');await MINDEX_SERVER_STORAGE.flush()}")

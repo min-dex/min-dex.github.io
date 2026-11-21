@@ -29,7 +29,10 @@ def main():
                         }''')
                         page.wait_for_function('presence.length>0')
                         label=page.evaluate('presence[0].browser')
-                        assert label == '앱 · Mindex' if desktop else label.startswith('웹 · ')
+                        assert label == 'Mindex App' if desktop else label in {'Chrome','Safari'}
+                        reported_os = page.evaluate('presence[0].os')
+                        expected_name = f'{reported_os} · {"Mindex App" if desktop else label}'
+                        assert page.get_by_label('접속명',exact=True).input_value() == expected_name
                         page.evaluate("""async () => {
                           if (state.module !== 'presenter') await switchModule('presenter');
                           applyRightSidebarVisibility(true);
@@ -41,11 +44,21 @@ def main():
                                   document.body.dataset.theme=theme;
                                   applyRightSidebarVisibility(true);
                                 }''',theme)
-                                page.wait_for_timeout(150)
+                                page.wait_for_function('''()=>{
+                                  const b=s=>document.querySelector(s).getBoundingClientRect();
+                                  const a=b('.topbar-actions'),r=b('.right-sidebar'),t=b('.topbar'),l=b('.nav-sidebar'),n=b('.primary-switcher');
+                                  return [Math.abs(a.x-r.x),Math.abs(n.x-l.right),Math.abs(a.height-t.height),Math.abs(r.width-l.width),Math.abs(a.width-l.width)].every(v=>v<1);
+                                }''')
                                 geometry=page.evaluate('''()=>{
                                   const b=s=>document.querySelector(s).getBoundingClientRect();
                                   const a=b('.topbar-actions'),r=b('.right-sidebar'),t=b('.topbar'),l=b('.nav-sidebar'),n=b('.primary-switcher');
-                                  return {right:Math.abs(a.x-r.x),left:Math.abs(n.x-l.right),strokeHeight:Math.abs(a.height-t.height)};
+                                  return {
+                                    right:Math.abs(a.x-r.x),
+                                    left:Math.abs(n.x-l.right),
+                                    strokeHeight:Math.abs(a.height-t.height),
+                                    panelWidth:Math.abs(r.width-l.width),
+                                    actionWidth:Math.abs(a.width-l.width),
+                                  };
                                 }''')
                                 assert all(v<1 for v in geometry.values()),geometry
                         page.close()

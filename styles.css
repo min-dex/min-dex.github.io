@@ -390,7 +390,7 @@
   --sidebar-icon-size: var(--ui-icon-size);
   --rail-motion: 120ms cubic-bezier(.2, 0, .2, 1);
   --module-tab-w: 180px;
-  --topbar-compact-w: calc((var(--topbar-btn-size) * var(--topbar-action-slot-count)) + (var(--topbar-action-inset) * 2) + 50px);
+  --topbar-compact-w: var(--sidebar-reference-w);
   --shell-open-right-w: var(--topbar-compact-w); --topbar-right-w: var(--topbar-compact-w);
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-presenter: "Mindex Presenter", "Freesentation", sans-serif;

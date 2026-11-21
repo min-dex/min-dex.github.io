@@ -96,10 +96,8 @@
     add('tovPointTitle',1,23,168,111,9,15,'label:예배 포인트','text','left',800);
     add('worshipPoint',1,23,181,111,14,11.5,'field:worshipPoint');
     add('notesTitle',1,160,12,119,11,22.5,'label:말씀 노트','text','left',800);
-    add('tovScriptureTitle',1,165,33,51,8,12.5,'label:성경 본문','text','left',800);
-    add('tovOutlineTitle',1,224,33,50,8,12.5,'label:말씀 이해','text','left',800);
-    add('scriptureNote',1,165,44,51,112,11.5,'field:scriptureNote');
-    add('outline',1,224,44,50,112,11.5,'field:outline');
+    add('tovOutlineTitle',1,165,33,109,8,12.5,'label:설교 요점','text','left',800);
+    add('outline',1,165,44,109,112,11.5,'field:outline');
     add('tovReflectionTitle',1,165,168,111,9,15,'label:내게 주신 말씀 / 내가 받은 은혜','text','left',800);
     add('reflection',1,165,181,111,14,11.5,'field:reflection');
     const displayTitles=new Set(['tovTitle','eventsTitle','newsTitle','orderTitle','notesTitle','tovPointTitle','tovReflectionTitle']);
@@ -131,7 +129,6 @@
       add('rect',{x:160,y:30,width:119,height:130,fill:'none',stroke:p.line,'stroke-width':.3});
       rect(160.15,30.15,118.7,11.5,p.soft);
       line(160,42,279,42);
-      line(219.5,30,219.5,160);
       for(const x of [18,160]){
         rect(x,164,120,36,p.soft,4);
         line(x+5,179,x+115,179);
@@ -190,12 +187,15 @@
     let y=f.y;
     group.append(a.svg('line',{x1:f.x,y1:y,x2:f.x+f.w,y2:y,stroke:palette.accent,'stroke-width':.5}));
     for(const row of rows){
-      const n=Math.max(a.wrap(row.label,25,a.tov?Math.max(7.5,f.size-1):f.size,a.tov?700:500).length,a.wrap(row.content,inner,f.size,700).length,a.wrap(row.person,28,Math.max(7.5,f.size-2.5)).length);
+      const labelSize=Math.max(7.5,f.size-1),personSize=Math.max(7.5,f.size-2.5);
+      const counts=[a.wrap(row.label,25,labelSize,a.tov?700:f.weight,f.family).length,a.wrap(row.content,inner,f.size,700,f.family).length,a.wrap(row.person,28,personSize,f.weight,f.family).length];
+      const n=Math.max(...counts);
       const leading=a.tov?13:15,h=n*leading/a.MM+(a.tov?3.25:4),base={...f,y:y+(a.tov?1.25:1.5),h:h-(a.tov?1.5:2),leading,color:palette.ink};
-      const center=base.y+(n-1)*leading/a.MM/2;
-      a.text(group,row.label,{...base,y:center,w:25,size:Math.max(7.5,f.size-1),...(a.tov?{weight:700}:{})},issues,f.id);
-      a.text(group,row.content,{...base,x:f.x+27.5,w:inner,align:'center',weight:700,...(a.tov&&['성경봉독','설교'].includes(row.label)?{color:palette.accent}:{})},issues,f.id);
-      a.text(group,row.person,{...base,y:center,x:f.x+f.w-28,w:28,size:Math.max(7.5,f.size-2.5),align:'right',...(a.tov?{color:palette.muted}:{})},issues,f.id);
+      // Share the row's baseline even when font sizes or line counts differ.
+      const baseline=index=>y+h/2+f.size*.35/a.MM-(counts[index]-1)*leading/a.MM/2;
+      a.text(group,row.label,{...base,baselineY:baseline(0),w:25,size:labelSize,...(a.tov?{weight:700}:{})},issues,f.id);
+      a.text(group,row.content,{...base,baselineY:baseline(1),x:f.x+27.5,w:inner,align:'center',weight:700,...(a.tov&&['성경봉독','설교'].includes(row.label)?{color:palette.accent}:{})},issues,f.id);
+      a.text(group,row.person,{...base,baselineY:baseline(2),x:f.x+f.w-28,w:28,size:personSize,align:'right',...(a.tov?{color:palette.muted}:{})},issues,f.id);
       y+=h;group.append(a.svg('line',{x1:f.x,y1:y,x2:f.x+f.w,y2:y,stroke:palette.line,'stroke-width':.25}));
       if(y>f.y+f.h+.01)issues.add(f.id);
     }

@@ -106,15 +106,15 @@ def main() -> int:
     else:
         fail("presenter-outline-click-requires-doubleclick-output")
 
-    citation_start = app_source.find("async function appendPresenterCitationReference(input)")
+    citation_start = app_source.find("async function appendPresenterCitationReference(")
     citation_end = app_source.find("function presenterSlideMatchesScriptureReference", citation_start)
     citation_body = app_source[citation_start:citation_end] if citation_start >= 0 and citation_end > citation_start else ""
     # 2026-09-18: `추가 즉시 송출` (autoOutput) jumps output to the first added verse
     # without forcing a controller scroll; off only adds/saves.
     if (
-        "if (autoOutput && state.selectedServiceId === serviceId)" in citation_body
+        "if (autoOutput && outputStillCurrent && state.selectedServiceId === serviceId)" in citation_body
         and "const shouldOpenOutput = !presenterControllerIsLive(serviceId)" in citation_body
-        and "runPresenterAction(\"jump\", serviceId, { index: targetIndex, scroll: false })" in citation_body
+        and "runPresenterAction(\"jump\", serviceId, { index: targetIndex, scroll: false, scrollOutline: false })" in citation_body
         and "if (shouldOpenOutput) await openPresenterOutput(serviceId)" in citation_body
     ):
         pass_("presenter-citation-auto-output-toggle")
@@ -641,7 +641,7 @@ def main() -> int:
                     and "opacity" in right_sidebar_toggle_state["before"]["sidebarTransition"]
                     and right_sidebar_toggle_state["before"]["sidebarBorderLeft"] == "0px"
                     and right_sidebar_toggle_state["before"]["sidebarTop"] >= right_sidebar_toggle_state["before"]["topbarBottom"]
-                    and right_sidebar_toggle_state["before"]["sidePanelWidth"] == right_sidebar_toggle_state["before"]["leftSidebarWidth"] + right_sidebar_toggle_state["before"]["rightRailWidth"]
+                    and right_sidebar_toggle_state["before"]["sidePanelWidth"] == right_sidebar_toggle_state["before"]["leftSidebarWidth"]
                     and right_sidebar_toggle_state["before"]["sidebarWidth"] == right_sidebar_toggle_state["before"]["sidePanelWidth"]
                     and right_sidebar_toggle_state["before"]["topbarActionsWidth"] == right_sidebar_toggle_state["before"]["topbarActionColumnWidth"]
                     and float(right_sidebar_toggle_state["before"]["saveOpacity"]) > 0
@@ -831,7 +831,7 @@ def main() -> int:
                     "groupedLabels": ["Verse 1 A", "Verse 1 B"],
                     "groupedLyrics": ["1행\n2행\n3행\n4행", "5행\n6행\n7행\n8행"],
                     "specialHymnOrder": ["preset-title", "sv1", "sc", "sv2", "sc", "preset-blank:instrumental", "sv4", "sc"],
-                    "specialHymnLabels": ["T", "1절", "Chorus", "2절", "Chorus", "Instrumental", "마지막 절", "Chorus"],
+                    "specialHymnLabels": ["T", "Verse 1", "Chorus", "Verse 2", "Chorus", "Instrumental", "Last Verse", "Chorus"],
                     "specialHymnWithoutChorusWarnings": [],
                 }:
                     pass_("presenter-ccm-repeats-chorus", json.dumps(ccm_form_order_state, ensure_ascii=False))
@@ -876,7 +876,9 @@ def main() -> int:
                 )
                 if praise_exact_title_priority_state == {
                     "withHymn": "__smoke_dup_hymn__",
-                    "withoutHymn": "__smoke_dup_ccm_only__",
+                    # Legacy children tags are read as CCM; equal exact-title
+                    # matches therefore retain stable catalog order.
+                    "withoutHymn": "__smoke_dup_children_only__",
                 }:
                     pass_("presenter-praise-exact-title-priority", json.dumps(praise_exact_title_priority_state, ensure_ascii=False))
                 else:

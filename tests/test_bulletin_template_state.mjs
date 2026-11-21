@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {readTemplate,writeTemplate} from '../mindex.bulletin-template-store.mjs';
+const rows=new Map(),requests=new Map(),calls=[];
+let lose=false;
+const client={rpc:async(name,args)=>{
+ calls.push(structuredClone(args));
+ if(name==='mindex_state_read_v1')return {data:[...rows.values()]};
+ const prior=rows.get(args.p_key);
+ if(requests.has(args.p_request_id))return {data:requests.get(args.p_request_id)};
+ if((prior?.revision||'0')!==args.p_revision)return {error:Error('STATE_REVISION_CONFLICT')};
+ const row={key:args.p_key,value:args.p_value,revision:String(BigInt(args.p_revision)+1n),requestId:args.p_request_id};
+ rows.set(row.key,row);requests.set(args.p_request_id,row);
+ if(lose){lose=false;throw Error('Response lost');}
+ return {data:row};
+}};
+const key='youth-tov',value={department:'youth',title:'청소년부 공통 양식',effective_from:'2026-11-01',layout:{design:'youth-tov'},common:{}};
+assert.equal(await readTemplate(client,key),null);
+assert.equal((await writeTemplate(client,key,value,0)).revision,1);
+assert.equal((await readTemplate(client,key)).revision,1);
+await assert.rejects(writeTemplate(client,key,{...value,title:'동시 수정'},0),/다른 곳/);
+lose=true;
+await assert.rejects(writeTemplate(client,key,{...value,title:'보관된 수정'},1),/lost/);
+const request=calls.at(-1).p_request_id;
+const confirmed=await writeTemplate(client,key,{...value,title:'보관된 수정'},1);
+assert.equal(confirmed.revision,2);
+assert.equal(calls.at(-1).p_request_id,request);
+lose=true;
+await assert.rejects(writeTemplate(client,key,{...value,title:'재조회 복구'},2),/lost/);
+assert.equal((await readTemplate(client,key)).revision,3);
+assert.equal((await writeTemplate(client,key,{...value,title:'새 수정'},3)).revision,4);
+assert.equal(calls.every(x=>x.p_scope==='shared'),true);
+console.log('PASS shared youth template CAS, stale edit rejection, lost-response retry and independent readback');

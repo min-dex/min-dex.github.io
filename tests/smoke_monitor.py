@@ -29,7 +29,7 @@ def main():
                         if(name==='mindex_remote_outputs')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224'},{id:'s2',title:'대기 예배',device:'교육관 PC · 송출 대기',position:'송출 대기'}]}});
                         if(name==='mindex_remote_admin_login')return Promise.resolve({data:{ok:true,token:'fixture-only'}});
                         if(name==='mindex_remote_admin')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224',code:'0123'}]}});
-                        if(monitorMode==='pending')return new Promise(resolve=>window.monitorRelease=resolve);
+                        if(monitorMode==='pending')return new Promise(resolve=>(window.monitorReleases ||= []).push(resolve));
                         if(monitorMode==='missing')return Promise.resolve({error:{code:'PGRST202'}});
                         const data=name==='mindex_monitor_register'?'a'.repeat(64):name==='mindex_monitor_login'?(args.p_password==='test-secret'?'admin-token':null):name==='mindex_monitor_presence'?[{
                           id:'remote',last_seen:new Date(Date.now()-(monitorMode==='stale'?190000:0)).toISOString(),status:{name:'<img src=x onerror=alert(1)>',os:'Windows',browser:'Whale',version:'test',module:'praise',serviceId:'editing',outputServiceId:'output',output:true,slide:3,count:3,events:[{kind:'save_ok',at:new Date().toISOString()}]}
@@ -39,7 +39,9 @@ def main():
                     }''')
                     page.evaluate("window.dispatchEvent(new Event('online'))")
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
-                    assert page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_ping').args.p_status.browser.startsWith('웹 · ')")
+                    local_status = page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_ping').args.p_status")
+                    assert local_status['browser'] in {'Chrome', 'Safari'}
+                    assert page.get_by_label('접속명',exact=True).input_value() == f"{local_status['os']} · {local_status['browser']}"
                     assert not page.locator('.monitor-panel').is_visible()
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
@@ -71,7 +73,8 @@ def main():
                     assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_login')")
                     assert page.locator('[data-devices] img').count() == 0
                     assert page.locator('.monitor-facts, [data-event-filter], [data-device-filter]').count() == 0
-                    assert '접속 방식 미확인 · Whale' in page.locator('[data-devices]').inner_text()
+                    assert 'Windows · Whale' in page.locator('[data-devices]').inner_text()
+                    assert '접속 방식 미확인' not in page.locator('[data-devices]').inner_text()
                     assert '송출 중' in page.locator('[data-devices]').inner_text()
                     page.evaluate("monitorMode='stale'")
                     page.locator('[data-refresh]').click()
@@ -93,10 +96,10 @@ def main():
                     # Busy reads and failed name saves retain actionable feedback without touching output.
                     page.evaluate("monitorMode='pending'")
                     page.locator('[data-refresh]').click()
-                    page.wait_for_function("typeof monitorRelease==='function'")
+                    page.wait_for_function("monitorReleases?.length>0")
                     assert page.locator('[data-refresh]').is_disabled()
                     assert page.locator('[data-refresh]').get_attribute('aria-busy')=='true'
-                    page.evaluate("monitorMode='ok';monitorRelease({data:[],error:null})")
+                    page.evaluate("monitorMode='ok';monitorReleases.splice(0).forEach(resolve=>resolve({data:[],error:null}))")
                     page.wait_for_function("!document.querySelector('[data-refresh]').disabled")
                     page.evaluate("""()=>{
                       window.nameWrites=[];window.nameFail=true;

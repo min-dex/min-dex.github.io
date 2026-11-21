@@ -5870,3 +5870,12 @@ levels retain horizontal scrolling.
 요소의 모든 슬라이드 id(전체 성구 제목 포함)가 바뀌므로, 위치 복원은 id가 맞지 않을 때 같은 요소·같은
 책·절(·장) 슬라이드를 먼저 찾고 그다음에야 같은 종류의 첫 슬라이드로 돌아간다. 새 구절로 이동하는 동작은
 기존 "즉시 송출" 설정이 그대로 결정한다. 검사: `tests/smoke_citation_live_position.py`.
+
+## 좌우 패널·송출 무대 정렬 일치 ·2026-11-21
+
+데스크톱 우측 패널과 상단 action column은 좌측 패널과 같은 260px을 쓴다.
+버튼 여섯 개는 40px slot과 동일한 양쪽 inset 안에 배치하며 별도 50px 보정이나
+중간 viewport 전용 300/324px 확장을 두지 않는다. 980px 이하의 기존 세로 reflow는
+유지한다. 독립 송출 창의 16:9 tool stage는 transform 기준점 대신 viewport inset과
+auto margin으로 중앙 정렬한다. 따라서 비-16:9 창에서도 섬네일과 같은 전체 무대를
+보이고 위·아래 letterbox가 균등하며, 확대·하단 잘림이 생기지 않는다.

@@ -17,7 +17,7 @@
     if(!state.config.url||!recordId)return;
     const m={id:createUuid(),project:state.config.url,kind,recordId};remember(m.id);
     if(kind==='song')globalThis.MindexPresenterFreshness?.notify(recordId);
-    if(kind==='setlist-archive'){pending.set(identity(m),m);schedule();}
+    if(kind==='setlist-archive'||kind==='bulletin-template'){pending.set(identity(m),m);schedule();}
     try{channel?.postMessage(m);}catch{}
     connectDepartmentRealtime();
     try{void departmentTabSync?.remote?.send({type:'broadcast',event:'content-committed',payload:m}).catch(()=>{});}catch{}

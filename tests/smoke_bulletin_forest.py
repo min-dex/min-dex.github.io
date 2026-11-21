@@ -37,6 +37,45 @@ try:
      document.getElementById('proof').replaceChildren(...r.pages);cases.push(mode);
     }
     if(JSON.stringify(doc)!==before)throw Error('render mutated authored values');
+    for(const design of ['simple','editorial','ink','panels','children']){
+     const aligned={...B.normalizeSnapshot({settings:{design},fields:{}}),source:{...source,order:[
+      {id:'wrapped',label:'긴 순서 항목 이름 표시',content:'첫째 줄\n둘째 줄\n셋째 줄',person:'담당 교사\n보조 교사'}
+     ]}};
+     const f=aligned.frames.find(f=>f.id==='order'),before=JSON.stringify(aligned);
+     for(const mode of ['preview','print']){
+      const r=B.renderPages(aligned,mode),g=r.pages[1].querySelector('[data-frame-id=order]');
+      const texts=[...g.querySelectorAll(':scope > text')];
+      const cells=[texts.filter(t=>+t.getAttribute('x')===f.x),texts.filter(t=>+t.getAttribute('x')>f.x&&t.getAttribute('text-anchor')!=='end'),texts.filter(t=>t.getAttribute('text-anchor')==='end')];
+      const centres=cells.map(cell=>{const ys=cell.map(t=>+t.getAttribute('y'));if(!ys.length)throw Error('missing row cell '+design);return (Math.min(...ys)+Math.max(...ys))/2});
+      if(Math.max(...centres)-Math.min(...centres)>.001)throw Error('unequal column centres '+design+' '+centres);
+      if(r.issues.has('order'))throw Error('aligned order overflow '+design);
+     }
+     if(JSON.stringify(aligned)!==before)throw Error('alignment changed content '+design);
+    }
+    // Unequal font sizes and wrapped cells must share a visual row centre.
+    for(const design of ['children-forest','youth-tov']){
+     const aligned={...B.normalizeSnapshot({settings:{design},fields:{}}),source:{...source,order:[
+      {id:'single',label:'설교',content:'말씀 제목',person:'담당 교사'},
+      {id:'wrapped',label:'대표기도',content:'첫째 줄\n둘째 줄\n셋째 줄',person:'첫 담당\n둘째 담당'},
+      {id:'long',label:'긴 순서 항목 이름을 두 줄로 표시',content:'본문',person:'담당 교사 이름을 여러 줄로 표시'}
+     ]}};
+     const original=JSON.stringify(aligned);
+     for(const mode of ['preview','print']){
+      const r=B.renderPages(aligned,mode),g=r.pages[1].querySelector('[data-frame-id=order]');
+      if(r.issues.has('order'))throw Error('aligned rows overflow '+design);
+      const rules=[...g.querySelectorAll('line')].map(l=>+l.getAttribute('y1'));
+      for(let i=1;i<rules.length;i++){
+       const cells=[...g.querySelectorAll('text')].filter(t=>+t.getAttribute('y')>rules[i-1]&&+t.getAttribute('y')<rules[i]);
+       const centres=['start','middle','end'].map(anchor=>{
+        const ys=cells.filter(t=>t.getAttribute('text-anchor')===anchor).map(t=>+t.getAttribute('y'));
+        if(!ys.length)throw Error('missing aligned cell '+design);
+        return (Math.min(...ys)+Math.max(...ys))/2;
+       });
+       if(Math.max(...centres)-Math.min(...centres)>.001)throw Error('row baselines disagree '+design+' '+centres);
+      }
+     }
+     if(JSON.stringify(aligned)!==original)throw Error('alignment mutated content');
+    }
     const target={};B.applyStored(target,{revision:3,...B.storedValue(doc)});
     if(target.settings.design!=='children-forest'||JSON.stringify(target.fields)!==JSON.stringify(doc.fields))throw Error('forest persistence lost data');
     const old={...B.normalizeSnapshot({fields,settings:{design:'children',theme:''}}),source};

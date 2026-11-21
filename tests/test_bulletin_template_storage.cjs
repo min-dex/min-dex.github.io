@@ -3,7 +3,7 @@ const app=fs.readFileSync('app.js','utf8');
 const code=app.slice(app.indexOf('async function loadBulletinTemplate('),app.indexOf('function mountServiceBulletinWorkbench('));
 let response,calls=[];
 const query=new Proxy({}, {get:(_,method)=>(...args)=>{calls.push([method,...args]);return method==='maybeSingle'?Promise.resolve(response):query;}});
-const ctx=vm.createContext({state:{client:{from(table){calls.push(['from',table]);return query;}}}});vm.runInContext(code,ctx);
+const ctx=vm.createContext({window:{MINDEX_CONTENT_LIVE:{publish:(...args)=>calls.push(['publish',...args])}},departmentInputError:(error,action)=>Error(action+' 저장소 저장 실패: '+error.message),state:{client:{from(table){calls.push(['from',table]);return query;}}}});vm.runInContext(code,ctx);
 (async()=>{
  response={data:null,error:null};assert.equal(await ctx.loadBulletinTemplate('young-adult-2027'),null);
  assert.deepEqual(calls.find(c=>c[0]==='from'),['from','mindex_bulletin_templates']);

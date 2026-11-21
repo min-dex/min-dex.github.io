@@ -47,3 +47,39 @@ for(const verticalAlign of ['top','middle','bottom']){
 assert.equal(B.normalizeSnapshot({frames:[{id:'newsTitle',verticalAlign:'url(evil)'}]}).frames.find(f=>f.id==='newsTitle').verticalAlign,undefined);
 assert.equal(B.normalizeSnapshot().frames.find(f=>f.id==='newsTitle').verticalAlign,undefined);
 console.log('PASS frame vertical alignment enum, issue/template roundtrip and unchanged default');
+
+// Live templates change presentation without changing authored weekly values.
+{
+ const source={id:'live-youth',department:'youth',date:'2026-11-22',order:[]};
+ const doc={...B.normalizeSnapshot({fields:{outline:'**내가 쓴 설교 요점**',welcome:'직접 쓴 환영'},settings:{design:'youth-tov'}}),source};
+ const initial={template_key:'youth-tov',revision:1,...B.templateValue(doc)};
+ assert.equal(initial.department,'youth');
+ assert(B.followTemplate(doc,initial));
+ doc.frames.find(f=>f.id==='outline').x=170;
+ const next=plain(initial);next.revision=2;
+ next.layout.frames.find(f=>f.id==='outline').size=15;
+ next.layout.frames.find(f=>f.id==='outline').x=180;
+ next.layout.editorFields={outline:{label:'말씀 정리',visible:false},unknown:{label:'discard'}};
+ next.common.welcome='서버 공통 환영';
+ const before=JSON.stringify(doc.fields);
+ assert(B.followTemplate(doc,next));
+ assert.equal(JSON.stringify(doc.fields),before);
+ assert.equal(doc.frames.find(f=>f.id==='outline').x,170);
+ assert.equal(doc.frames.find(f=>f.id==='outline').size,15);
+ assert.equal(doc.settings.editorFields.outline.label,'말씀 정리');
+ assert.equal(doc.settings.editorFields.outline.visible,false);
+ assert.equal(Object.hasOwn(doc.settings.editorFields,'unknown'),false);
+ assert.equal(B.fieldValue(doc,'welcome'),'직접 쓴 환영');
+ const row={revision:4,...B.storedValue(doc)},loaded={source};
+ B.applyStored(loaded,row);
+ assert.equal(loaded.settings.editorFields.outline.label,'말씀 정리');
+ assert.equal(loaded.fields.outline,'**내가 쓴 설교 요점**');
+ assert.equal(loaded.settings.templateBaseline.frames.find(f=>f.id==='outline').x,180);
+ assert.equal(B.followTemplate(doc,next),false);
+ const old={...doc,source:{...source,date:'2026-10-25'}};
+ assert.equal(B.followTemplate(old,{...next,revision:3}),false);
+}
+console.log('PASS live template metadata, three-way layout merge, typed text preservation, dated boundaries and persistence');
+
+assert.equal(B.normalizeSnapshot({settings:{design:'youth-tov',appearance:{labels:{tovOutlineTitle:'말씀 이해'}}}}).settings.appearance.labels.tovOutlineTitle,'설교 요점');
+assert.equal(B.normalizeSnapshot({settings:{design:'youth-tov',appearance:{labels:{tovOutlineTitle:'직접 쓴 제목'}}}}).settings.appearance.labels.tovOutlineTitle,'직접 쓴 제목');
