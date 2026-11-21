@@ -10,9 +10,10 @@
   const logoPath="assets/bulletin/ria-mark.webp";
   const inkLogoPath="assets/bulletin/ria-mark-ink.svg";
   const childrenLogoPath="assets/bulletin/children-mark-2026-11.png";
-  const assets = [logoPath,inkLogoPath];
+  const swissLogoPath="assets/bulletin/ria-mark-orange.svg";
+  const assets = [logoPath,inkLogoPath,swissLogoPath];
   const fields = {scriptureNote:"성경 본문 노트",worshipPoint:"예배 포인트",nextPrayer:"다음번 기도",reflection:"내게 주신 말씀 / 내가 받은 은혜",coverTitle:"표지 제목",brand:"공동체 이름",eventsText:"교회 일정 (주보용)",issue:"호수", church:"교회명", news:"부서 소식", welcome:"환영 문구", notices:"상시 안내", staff:"섬김이 명단",
-    motto:"공동체 표어", verse:"표어 성구", website:"웹사이트", address:"주소", meeting:"예배 시간·장소", outline:"설교 요점", leader:"인도자", announcer:"광고 담당", sermonReference:"요약 본문·쪽수", outlineTitle:"요약 표제",monthlyTheme:"이달의 주제",memoryVerse:"새길 말씀",memoryReference:"새길 말씀 출처",readingPlan:"잠잠성경 읽기표"};
+    motto:"표어", verse:"주제 말씀", website:"웹사이트", address:"주소", meeting:"예배 시간·장소", outline:"설교 요점", leader:"인도자", announcer:"광고 담당", sermonReference:"요약 본문·쪽수", outlineTitle:"요약 표제",monthlyTheme:"이달의 주제",memoryVerse:"새길 말씀",memoryReference:"새길 말씀 출처",readingPlan:"잠잠성경 읽기표"};
   const frameLabels={tovStaffTitle:"임원진 제목",tovArtwork:"표지 그림",tovTitle:"토브 표지 제목",tovTag:"표지 표어",tovChurch:"표지 교회명",tovPointTitle:"예배 포인트 제목",tovScriptureTitle:"성경 본문 제목",tovOutlineTitle:"말씀 이해 제목",tovReflectionTitle:"받은 은혜 제목",forestLogo:"어린이부 로고",forestArt:"작은 숲 그림",coverTheme:"표지 주제",cross:"십자가",brand:"공동체 이름",eventsMonth:"일정 월",prayersMonth:"위원표 월",insideChurch:"안쪽 교회명",insideBrand:"안쪽 공동체명",eventsTitle:"교회 일정 제목",events:"교회 일정",newsTitle:"부서 소식 제목",monthlyThemeTitle:"이달의 주제 제목",themeMonth:"주제 월",memoryTitle:"새길 말씀 제목",readingTitle:"잠잠성경 제목",readingHelp:"읽기 안내",readingFooter:"확인 안내",liturgical:"교회력 명칭",
     orderTitle:"예배 순서 제목",order:"예배 순서",leader:"인도자",prayersTitle:"예배 위원 제목",prayers:"예배 위원",
     sermon:"설교 제목·본문",notesTitle:"설교 노트 제목",notes:"노트 줄"};
@@ -445,7 +446,7 @@
   // Shared print rules; legacy layouts remain readable and keep their authored data.
   const swissDesign = design => /^swiss-(young-adult|children|youth)$/.test(design || '');
   const swissDepartment = design => design.slice(6);
-  const swissAccent = department => ({'young-adult':'#24594C',youth:'#574579',children:'#B65C24'}[department] || '#24594C');
+  const swissAccent = department => ({'young-adult':'#B65C24',youth:'#574579',children:'#155436'}[department] || '#24594C');
   function swissFrames(design) {
     const d=swissDepartment(design),frames=[];
     const add=(id,page,x,y,w,h,size,binding,type='text',align='left')=>frames.push({id,page,x,y,w,h,size,binding,type,align,weight:/Title$/.test(id)?700:500,family:'MindexBulletin'});
@@ -519,12 +520,14 @@
     text(group(0,'issue'),'issue',[dateLabel(doc.source.date),value('issue')?`제${value('issue')}호`:''].filter(Boolean).join(' · '),158.5,25,65,10);
     text(group(0,'liturgical'),'liturgical',doc.source.liturgical,226,25,61,10,'right');
     const brand=group(0,'brand'),asset=doc.settings.appearance?.assets?.logo;
-    if(asset)brand.append(svg('image',{x:193.5,y:65,width:58.5,height:35,href:new URL(asset,document.baseURI).href,preserveAspectRatio:'xMidYMid meet'}));
-    else if(department==='children')brand.append(svg('image',{x:183.5,y:60,width:78.5,height:45,href:new URL(childrenLogoPath,document.baseURI).href,preserveAspectRatio:'xMidYMid meet'}));
-    else {const name=Object.hasOwn(doc.fields,'brand')?value('brand'):department==='youth'?'토브\n청소년부':'RIA\n청년부';text(brand,'brand',name,158.5,62.5,128.5,40,'center',700,false,102.5);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}
-    text(group(0,'motto'),'motto',value('motto'),158.5,107.5,128.5,12.5,'center',500,false,135);
-    if(department==='children')text(group(0,'coverTitle'),'coverTitle',value('coverTitle'),158.5,135,128.5,15,'center',700,false,147.5);
-    text(group(0,'verse'),'verse',value('verse'),158.5,150,128.5,12.5,'left',500,false,182.5);
+    const logo=asset||(department==='children'?childrenLogoPath:department==='young-adult'?swissLogoPath:'');
+    if(logo){const w=department==='children'?60:56.25;brand.append(svg('image',{x:222.75-w/2,y:62.5,width:w,height:40,href:new URL(logo,document.baseURI).href,preserveAspectRatio:'xMidYMax meet'}));}
+    else {text(brand,'brand','토브',158.5,75,128.5,40,'center',700);text(brand,'brand','청소년부',158.5,90,128.5,20,'center',700);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));brand.setAttribute('transform','translate(222.75 102.5) scale(1.5) translate(-222.75 -102.5)');}
+    text(group(0,'motto'),'motto',value('motto'),158.5,112.5,128.5,12.5,'center',500,false,140);
+    const verse=group(0,'verse'),copy=value('verse').trim(),citation=copy.match(/(?:\n\s*[—–-]?\s*|\s*[（(])((?:[가-힣]+)\s*\d+\s*:\s*[\d–—:a-z,\s-]+)[)）]?$/);
+    const body=citation?copy.slice(0,citation.index).trim():copy;
+    const end=150+text(verse,'verse',body,158.5,150,100,12.5,'left',500,false,180);
+    if(citation){const ref=citation[1].trim().replace(/^창\s/,'창세기 ');text(verse,'verse',ref,158.5,end+2.5,128.5,10,'right',500,false,187.5);}
     // Back page uses measured content and distributes only the remaining space.
     let y=heading(0,'eventsTitle','교회 일정',10,25,month('eventsMonth'),'eventsMonth');
     const events=group(0,'events');
@@ -1017,7 +1020,7 @@
     welcome:"토브 청소년부에 오신 여러분을 환영하고 축복합니다 :)",
     motto:"토브 청소년부는\n사랑과 진리의 공동체입니다",
     verse:"하나님이 지으신 그 모든 것을 보시니\n보시기에 심히 좋았더라 (창 1:31a)",
-    meeting:"주일 오전 11시"
+    meeting:"주일 오전 11시 · 1층 베데스다홀"
   });
   function rawFieldValue(doc,key) {
     if(key==="brand"&&!Object.hasOwn(doc.fields,key)&&!Object.hasOwn(doc.inherited?.common||{},key))return doc.source?.department==="youth"?departmentName("youth"):"RIA\n청년부";
@@ -1037,7 +1040,6 @@
     if(Object.hasOwn(doc.source?.commonOverrides||{},key))return doc.source.commonOverrides[key];
     if(["news","welcome","notices","leader","announcer","outline","sermonReference","outlineTitle","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"].includes(key)&&doc.source?.[key])return doc.source[key];
     if(key==="eventsText"){
-      if(swissDesign(doc.settings?.design)&&doc.source?.eventsMonth==="2026-11"&&doc.source?.eventsOrigin==="교회력 일정"&&!doc.sourceSnapshot)return "1일 (주일) – 20일 (금) 오후 8:00 (토 제외) | 2026 다니엘기도회\n6일 (금) 오후 8:00 | 온세대 월삭예배\n15일 (주일) 오전 10:50 | 온세대 찬양예배";
       return doc.source?.events||"";
     }
     if(Object.hasOwn(doc.source?.common||{},key))return doc.source.common[key];
@@ -1422,7 +1424,7 @@
   }
   function applySourceSnapshot(source,value) {
     const saved=normalizeSourceSnapshot(value);
-    if(!saved||saved.serviceId!==source.id||saved.date!==source.date)return source;
+    if(!saved||saved.serviceId!==source.id||saved.date!==source.date||source.date>="2026-11-22")return source;
     const result={...source,...clone(saved.weekly)};
     // Older snapshots kept the order row but missed titles on native praise links.
     result.order = result.order.map(row => !row.content && source.linkedPraiseTitles?.[row.id]
@@ -1508,7 +1510,7 @@
     const controller=new AbortController(),signal=controller.signal;
     let doc,mode="content",selected="news",loading=false,assetLoaded=false,error="",serial=0,saveError="",printError="",printing=false,issues=new Set();
     const documents=options.documents||new Map(),disclosureState=new Map();
-    let templateRow=null,templateError="",templateSession=null,templateDraft=null;
+    let templateRow=null,templateError="",sourceRefreshError="",templateSession=null,templateDraft=null;
     const templateDrafts=new Map(),templateKey=()=>templateKeyFor(templateSession?.weekly||doc);
     const on=(target,event,fn)=>target.addEventListener(event,fn,{signal});
     host.innerHTML=`<section class="bulletin-workbench" aria-label="주보 편집">
@@ -1677,7 +1679,7 @@
 
       const text=error||saveError||printError||(loading?"저장된 예배 자료를 불러오는 중…":!assetLoaded?"글꼴과 이미지를 준비하는 중…":
         issues.size?`영역 넘침·겹침: ${[...issues].map(frameLabel).join(", ")}`:"");
-      q(".bulletin-status").textContent=[text,`${templateSession?"공통 양식 편집":"이번 주 편집"} · ${doc?.saving?"저장 중…":doc?.dirty?"수정 중":doc?.revision?"저장됨":"저장 전"}`,templateSession?"":templateError,doc?.backupUnavailable?"서버 초안 보관 실패":doc?.backupPending?"서버 초안 보관 중":""].filter(Boolean).join(" · ");
+      q(".bulletin-status").textContent=[text,`${templateSession?"공통 양식 편집":"이번 주 편집"} · ${doc?.saving?"저장 중…":doc?.dirty?"수정 중":doc?.revision?"저장됨":"저장 전"}`,templateSession?"":templateError,sourceRefreshError,doc?.backupUnavailable?"서버 초안 보관 실패":doc?.backupPending?"서버 초안 보관 중":""].filter(Boolean).join(" · ");
       q(".bulletin-status").hidden=!q(".bulletin-status").textContent;
       q(".bulletin-status").dataset.state=error||saveError||printError||doc?.backupUnavailable?"error":issues.size?"warning":loading||!assetLoaded?"loading":"saved";
       q("[data-bulletin-print]").disabled=printing||loading||!assetLoaded||!!error||!doc?.source?.order.length||issues.size>0;
@@ -1772,7 +1774,7 @@
       endDrag();
       q(".bulletin-canvas").replaceChildren();
       issues=new Set();
-      const request=++serial;loading=true;assetLoaded=false;error="";saveError="";printError="";drag=null;
+      const request=++serial;loading=true;assetLoaded=false;error="";saveError="";printError="";sourceRefreshError="";drag=null;
       if(!documents.has(id)){
         const fresh=restore(options.scope,id);fresh.id=id;
         if(fresh.hasLocal)fresh.localDraft=snapshot(fresh);
@@ -2027,6 +2029,7 @@
     const remoteBlocked=()=>signal.aborted||!root.isConnected||!doc||loading||printing||printSession||drag||doc.dirty||doc.saving||!!doc.saveError||!!error
       ||root.contains(document.activeElement)&&document.activeElement.matches("input,textarea,select,[contenteditable]")||options.remoteBlocked?.();
     async function refreshRemote(kind,id){
+      if(kind==="worship"&&id===doc?.id||kind==="calendar"||kind==="praise")return refreshSourceRemote();
       if(kind==="bulletin-template"&&!templateSession)return refreshTemplateRemote(id);
       if(remoteBusy||remoteBlocked())return false;
       const isTemplate=!!templateSession;
@@ -2074,7 +2077,20 @@
       }catch(e){if(doc===target){templateError=e.message;status();}return false;}
       finally{remoteBusy=false;}
     }
-    const refreshTemplate=()=>void refreshTemplateRemote();
+    async function refreshSourceRemote(){
+      if(templateSession||remoteBusy||remoteBlocked()||document.hidden||doc.source?.date<"2026-11-22")return false;
+      const target=doc,request=serial,edit=interactionRevision,before=JSON.stringify(snapshot(target));remoteBusy=true;
+      try{
+        const source=await options.loadSource(target.id,target.settings);
+        if(remoteBlocked()||doc!==target||request!==serial||edit!==interactionRevision||JSON.stringify(snapshot(target))!==before)return false;
+        const signature=s=>JSON.stringify({...s,loadedAt:undefined});
+        const changed=signature(source)!==signature(target.source);sourceRefreshError="";
+        if(changed){const positions=[".bulletin-canvas",".bulletin-inspector"].map(s=>[s,q(s).scrollTop,q(s).scrollLeft]);target.source=source;properties();preview();for(const [s,top,left] of positions){q(s).scrollTop=top;q(s).scrollLeft=left;}}
+        status();return true;
+      }catch(e){if(doc===target){sourceRefreshError="연동 자료 갱신 실패 · "+e.message;status();}return false;}
+      finally{remoteBusy=false;}
+    }
+    const refreshTemplate=()=>void refreshTemplateRemote().then(()=>refreshSourceRemote());
     const templateTimer=setInterval(refreshTemplate,15000);
     on(window,"focus",refreshTemplate);on(window,"online",refreshTemplate);
     on(document,"visibilitychange",refreshTemplate);
@@ -2095,7 +2111,7 @@
         remember();Object.assign(target,normalizeSnapshot(draft.value));persist();properties();preview();status();return true;
       }catch(e){saveError=e.message;status();return false;}
     }
-    return {canApplyUpdate:()=>!remoteBusy&&!remoteBlocked()&&![...templateDrafts.values()].some(d=>d.dirty||d.saving||d.saveError),matchesDraft:draft=>!!doc&&draft?.schema===1&&draftSignature(draft.value)===draftSignature(doc),destroy, refreshRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
+    return {canApplyUpdate:()=>!remoteBusy&&!remoteBlocked()&&![...templateDrafts.values()].some(d=>d.dirty||d.saving||d.saveError),matchesDraft:draft=>!!doc&&draft?.schema===1&&draftSignature(draft.value)===draftSignature(doc),destroy, refreshRemote, refreshSourceRemote, remoteIdentity,handoffIdentity,restoreHandoff, reload(){return load(q("[data-bulletin-service]").value);}};
   }
   // Saved-ID catalogue owns no worship state or document DOM. Callers supply
   // their client/project identity, paginated reader and presentation callbacks.
