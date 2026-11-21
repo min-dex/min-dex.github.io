@@ -1,0 +1,73 @@
+"""Shared department print grid, source links, exact metrics and preservation. Offline only."""
+import os,json
+from pathlib import Path
+from urllib.parse import urlsplit
+os.environ['MINDEX_SMOKE_OFFLINE']='1'
+from smoke_app import start_local_app_server,sync_playwright,launch_chromium
+server,url=start_local_app_server()
+try:
+ with sync_playwright() as p:
+  for engine in ('chromium','webkit'):
+   browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
+   page=browser.new_page(viewport={'width':1500,'height':1100})
+   page.route('**/*',lambda r:r.continue_() if r.request.method=='GET' and urlsplit(r.request.url).netloc==urlsplit(url).netloc else r.abort())
+   page.route('**/swiss-fixture.html',lambda r:r.fulfill(content_type='text/html',body='<meta charset="utf-8"><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.bulletin.css"><script src="/mindex.inline-text.js"></script><script src="/mindex.bulletin-forest.js"></script><script src="/mindex.bulletin.js"></script><div id="host"></div>'))
+   page.goto(url.rsplit('/',1)[0]+'/swiss-fixture.html')
+   results=page.evaluate(r'''async()=>{
+    const B=MindexBulletin;await B.readyAssets();window.samples={};const results=[];
+    for(const department of ['young-adult','children','youth']){
+     const source=B.resolveSource({service:{id:department,service_type_id:department,service_date:'2026-11-22'},calendar:[{date:'2026-11-22',young_adult_prayer:'청년 담당',children_prayer:'어린이 담당',youth_prayer:'학생 담당'}],sections:[{id:'p',section_key:'prayer',title:'대표기도',sort_order:1},{id:'s',section_key:'sermon',title:'설교',sort_order:2},{id:'a',section_key:'announcements',title:'광고',sort_order:3}],elements:[{id:'p1',section_id:'p',title:'대표기도',person:'원래 담당',element_type:'title_person'},{id:'s1',section_id:'s',title:'말씀을 따라',person:'교역자',element_type:'title',source_ref:{slotKey:'sermon.title'}},{id:'a1',section_id:'a',body:'① **함께** 모입니다.\n - 일시: 주일 (오후)',element_type:'body',person:'광고 담당'}]});
+     if(!source.order.find(r=>r.label==='대표기도').person.includes(department==='youth'?'학생':department==='children'?'어린이':'청년'))throw Error('Wrong department prayer');
+     source.scripture='요한복음 1:1–5';source.events='1일 (주일) 오후 8:00 | 기도회\n6일 (금) 오후 8:00 | 월삭예배';
+     const doc={...B.normalizeSnapshot({settings:{design:'swiss-'+department,theme:''},fields:{outline:'1. 첫 번째 대지\n2. 두 번째 대지\n3. 세 번째 대지',monthlyTheme:'함께 나누어요',memoryVerse:'서로 사랑하라',memoryReference:'요한복음 13:34',reflection:'',worshipPoint:'함께 예배해요',staff:'회장 학생 하나 · 서기 학생 둘'}}),source};
+     window.samples[department]=doc;const before=JSON.stringify(doc),r=B.renderPages(doc,'print');
+     if(r.issues.size)throw Error(department+' issues '+[...r.issues]);
+     if(JSON.stringify(doc)!==before)throw Error('Renderer changed source');
+     const restored={};B.applyStored(restored,{revision:1,...B.storedValue(doc)});
+     if(JSON.stringify(restored.fields)!==JSON.stringify(doc.fields)||restored.settings.design!==doc.settings.design)throw Error('Persistence lost data');
+     const widths=r.pages.flatMap(p=>[...p.querySelectorAll('[data-swiss-bar]')].map(e=>+e.getAttribute('width')));if(widths.length!==6||widths.some(w=>w!==128.5))throw Error('Bars');
+     const fonts=r.pages.flatMap(p=>[...p.querySelectorAll('tspan')].map(e=>Math.round(+e.getAttribute('font-size')*72/25.4*10)/10));if(fonts.some(n=>![8,10,12.5,15,20,40].includes(n)))throw Error('Font token '+fonts);
+     const text=r.pages.map(p=>p.textContent).join(' ');for(const part of ['말씀을 따라','함께','광고 담당'])if(!text.includes(part))throw Error('Missing linked '+part);
+     if(department==='children')for(const part of ['이달의 주제','새길 말씀','잠잠성경','잠언'])if(!text.includes(part))throw Error('Child section missing '+part);
+     if(department==='youth')for(const part of ['받은 은혜','예배 포인트','다음번 기도'])if(!text.includes(part))throw Error('Youth section missing '+part);
+     results.push({department,issues:[...r.issues]});
+    }
+    for(const n of [2,3,4]){const d=structuredClone(samples['young-adult']);d.fields.outline=Array.from({length:n},(_,i)=>`${i+1}. 설교 대지`).join('\n');const r=B.renderPages(d,'print');if(r.issues.size)throw Error('Outline overflow '+n);const counts=[...r.pages[1].querySelectorAll('[data-outline-item]')].map(g=>g.querySelectorAll('[data-swiss-rule]').length);if(new Set(counts).size!==1||counts[0]<1)throw Error('Unequal writing lines');results.push({points:n,lines:counts});}
+    const long=structuredClone(samples.children);long.fields.news='많은 내용 '.repeat(500);if(!B.renderPages(long,'print').issues.has('news'))throw Error('Overflow not blocked');
+    return results;
+   }''')
+   page.evaluate(r'''()=>{
+    const B=MindexBulletin,cache=new Map();window.MINDEX_SERVER_STORAGE={ready:true,getItem:(_,k)=>cache.get(k),keys:()=>[...cache.keys()],setItem:async(_,k,v)=>cache.set(k,v),queue:(_,k,v)=>{cache.set(k,v);return true}};
+    window.documents=new Map();window.saved=[];window.templateRows={};
+    const original={...B.normalizeSnapshot({settings:{design:'youth-tov'},fields:{news:'직접 쓴 광고',outline:'1. 첫 대지\n2. 둘째 대지',reflection:'',welcome:''},months:{'2026-11':'직접 쓴 월 일정'}}),source:structuredClone(samples.youth.source)};
+    window.row={revision:3,...B.storedValue(original)};window.preserved=JSON.stringify(row.content);
+    window.editor=B.mount(document.querySelector('#host'),{serviceId:'youth',scope:'swiss-fixture',documents,services:[{id:'youth',label:'청소년부'}],loadSource:async()=>structuredClone(samples.youth.source),loadDraft:async()=>structuredClone(row),saveDraft:async(id,value,revision)=>{if(id!=='youth'||revision!==row.revision)throw Error('CAS mismatch');saved.push(value);return row={revision:revision+1,...structuredClone(value)};}});
+   }''')
+   page.wait_for_function("documents.get('youth')?.dbLoaded&&document.querySelector('[data-bulletin-use-swiss]')")
+   page.locator('[data-bulletin-use-swiss]').click()
+   page.wait_for_function("document.querySelectorAll('[data-bulletin-design=swiss-youth]').length===2&&document.querySelector('[data-bulletin-print]').disabled===false")
+   assert page.evaluate("JSON.stringify(MindexBulletin.storedValue(documents.get('youth')).content)===preserved")
+   page.locator('[data-bulletin-field=scriptureNote]').fill('연결 본문에 대한 노트')
+   page.locator('[data-bulletin-save]').click()
+   page.wait_for_function('saved.length===1')
+   page.evaluate('editor.reload()')
+   page.wait_for_function("documents.get('youth').revision===4&&document.querySelector('[data-bulletin-field=scriptureNote]')?.value==='연결 본문에 대한 노트'")
+   assert page.evaluate("documents.get('youth').fields.welcome===''&&documents.get('youth').fields.reflection===''&&documents.get('youth').months['2026-11']==='직접 쓴 월 일정'")
+   page.evaluate(r'''()=>{
+    const B=MindexBulletin;
+    for(const department of ['young-adult','children','youth']){
+     const d=structuredClone(samples[department]);const content=d=>{const v=B.storedValue(d).content;return JSON.stringify([v.fields,v.months,v.sourceSnapshot,v.inherited])};const before=content(d);
+     const row={template_key:B.TEMPLATE_KEYS[department],revision:1,...B.templateValue(d)};
+     B.applyTemplate(d,row,{common:false});if(content(d)!==before)throw Error('Template changed weekly content');
+     for(const other of ['young-adult','children','youth'].filter(x=>x!==department)){let rejected=false;try{B.normalizeTemplate({...row,layout:{...row.layout,design:'swiss-'+other}})}catch{rejected=true}if(!rejected)throw Error('Cross-department layout accepted');}
+    }
+   }''')
+   page.evaluate('editor.destroy()')
+   out=Path('output/bulletin-swiss');out.mkdir(parents=True,exist_ok=True)
+   (out/(engine+'-results.json')).write_text(json.dumps(results,ensure_ascii=False,indent=2))
+   for department in ('young-adult','children','youth'):
+    page.evaluate('''d=>{const host=document.getElementById('host');host.replaceChildren(...MindexBulletin.renderPages(samples[d],'print').pages);host.style.cssText='background:white;width:1123px';host.querySelectorAll('svg').forEach(e=>e.style.cssText='display:block;width:1123px;height:794px')}''',department)
+    page.locator('#host').screenshot(path=str(out/(engine+'-'+department+'.png')))
+   print(engine,results)
+   browser.close()
+finally:server.shutdown()

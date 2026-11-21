@@ -123,6 +123,7 @@
   function reusableContent(date,month,history=[],department="young-adult") {
     const common=profileForDate(date,department),commonOverrides={};
     let events=department==="young-adult"?archiveMonthlyEvents.filter(row=>row.date<=date&&row.date.slice(0,7)===month).at(-1)?.events:undefined;
+
     let eventsOrigin=events!==undefined?"실주보 월간 일정":"교회력 일정";
     const rows=history.filter(row=>row.date<=date).slice().sort((a,b)=>a.date.localeCompare(b.date)||String(a.id||"").localeCompare(String(b.id||"")));
     for(const row of rows) {
@@ -386,7 +387,7 @@
         continue;
       }
       let person=clean(el.person);
-      if (label.replace(/\s/g,"")==="대표기도"||(department==="children"&&label.replace(/\s/g,"")==="봉헌기도")) person=clean(today[department==="children"?"children_prayer":"young_adult_prayer"])||person;
+      if (label.replace(/\s/g,"")==="대표기도"||(department==="children"&&label.replace(/\s/g,"")==="봉헌기도")) person=clean(today[department==="children"?"children_prayer":department==="youth"?"youth_prayer":"young_adult_prayer"])||person;
       if(compactOrder&&!person&&["사도신경","찬양","찬송","기도","성경봉독","결단찬양","결단기도","봉헌찬양","봉헌","파송찬양"].includes(label))person="다같이";
       if (content===label||(compactOrder&&["title_person","title_assignee"].includes(type)&&content===person)) content="";
       const summaryOnly = source.orderSummaryOnly[el.id];
@@ -423,7 +424,7 @@
     }
     if(department==="children"){
       source.curriculumMonth=date.slice(0,7);
-      source.monthlyTheme=({"2026-09":"문화\n빛의 자녀다운 생활\n우리는 세상의 빛","2026-10":"사회질서\n사회질서를 지켜요\n말씀에 따라 사회의 규범을 지켜요"})[date.slice(0,7)]||"";
+      source.monthlyTheme=({"2026-09":"문화\n빛의 자녀다운 생활\n우리는 세상의 빛","2026-10":"사회질서\n사회질서를 지켜요\n말씀에 따라 사회의 규범을 지켜요","2026-11":"섬김\n가진 것을 먼저 나누어요\n예수님을 본받아 섬겨요"})[date.slice(0,7)]||"";
       for(const row of history.filter(r=>r.date<=date&&r.date.slice(0,7)===date.slice(0,7)).sort((a,b)=>a.date.localeCompare(b.date)))if(typeof row.content?.fields?.monthlyTheme==="string")source.monthlyTheme=row.content.fields.monthlyTheme;
       source.memoryVerse=date==="2026-10-04"?"너희가 이방인 중에서 행실을 선하게 가져\n너희를 악행한다고 비방하는 자들로 하여금\n너희 선한 일을 보고 오시는 날에\n하나님께 영광을 돌리게 하려 함이라":"";
       source.memoryReference=date==="2026-10-04"?"베드로전서 2:12":"";
@@ -441,7 +442,152 @@
     return source;
   }
 
+  // Shared print rules; legacy layouts remain readable and keep their authored data.
+  const swissDesign = design => /^swiss-(young-adult|children|youth)$/.test(design || '');
+  const swissDepartment = design => design.slice(6);
+  const swissAccent = department => ({'young-adult':'#24594C',youth:'#574579',children:'#B65C24'}[department] || '#24594C');
+  function swissFrames(design) {
+    const d=swissDepartment(design),frames=[];
+    const add=(id,page,x,y,w,h,size,binding,type='text',align='left')=>frames.push({id,page,x,y,w,h,size,binding,type,align,weight:/Title$/.test(id)?700:500,family:'MindexBulletin'});
+    add('website',0,10,15,128.5,5,10,'field:website');
+    add('eventsTitle',0,10,25,85,10,20,'label:교회 일정');add('eventsMonth',0,100,25,38.5,10,10,'month:eventsMonth','text','right');
+    add('events',0,10,38,128.5,25,10,'field:eventsText','events');
+    add('newsTitle',0,10,72.5,128.5,10,20,'label:'+departmentName(d)+' 소식');
+    add('welcome',0,10,87.5,128.5,15,12.5,'field:welcome');add('news',0,10,107.5,128.5,35,12.5,'field:news','list');
+    add('notices',0,10,147.5,128.5,20,12.5,'field:notices','list');add('staff',0,10,170,128.5,15,10,'field:staff','staff');
+    add('address',0,10,190,128.5,5,10,'field:address');add('church',0,158.5,15,128.5,5,10,'field:church','text','right');
+    add('issue',0,158.5,25,65,5,10,'issue');add('liturgical',0,226,25,61,5,10,'source:liturgical','text','right');
+    add('brand',0,158.5,65,128.5,35,40,'field:brand','text','center');add('motto',0,158.5,105,128.5,22.5,12.5,'field:motto','text','center');
+    add('verse',0,158.5,150,128.5,32.5,12.5,'field:verse');add('meeting',0,158.5,190,128.5,5,10,'field:meeting','text','right');
+    add('orderTitle',1,10,25,85,10,20,'label:예배 순서');add('leader',1,100,25,38.5,10,10,'leader','text','right');
+    add('order',1,10,38,128.5,d==='youth'?112:140,12.5,'source:order','order');add('insideChurch',1,10,190,128.5,5,10,'field:church');
+    add('insideBrand',1,158.5,15,128.5,5,10,'label:'+departmentName(d),'text','right');
+    if(d==='children'){
+      add('coverTitle',0,158.5,135,128.5,12.5,15,'field:coverTitle');
+      add('monthlyThemeTitle',1,158.5,25,80,10,20,'label:이달의 주제');add('themeMonth',1,248.5,25,38.5,10,10,'month:curriculumMonth','text','right');
+      add('monthlyTheme',1,158.5,38,128.5,27.5,15,'field:monthlyTheme');
+      add('memoryTitle',1,158.5,80,80,10,20,'label:새길 말씀');add('memoryReference',1,243.5,80,43.5,10,10,'field:memoryReference','text','right');
+      add('memoryVerse',1,158.5,93,128.5,30,12.5,'field:memoryVerse');
+      add('readingTitle',1,158.5,145,128.5,10,20,'label:잠잠성경');add('readingPlan',1,158.5,158,128.5,27,10,'field:readingPlan','reading');
+    }else{
+      add('notesTitle',1,158.5,25,128.5,10,20,'label:설교 노트');add('sermon',1,158.5,38,128.5,12.5,15,'sermon');
+      add('outline',1,158.5,50,128.5,d==='youth'?65:85,12.5,'field:outline','outline');
+      if(d==='youth'){
+        add('scriptureNote',1,158.5,50,128.5,20,12.5,'field:scriptureNote');
+        add('reflection',1,158.5,135,128.5,50,12.5,'field:reflection');
+        add('worshipPoint',1,10,165,128.5,20,12.5,'field:worshipPoint');add('nextPrayer',1,10,152.5,128.5,7.5,10,'field:nextPrayer');
+      }else{
+        add('prayersTitle',1,158.5,150,85,10,20,'label:예배 위원');add('prayersMonth',1,248.5,150,38.5,10,10,'month:rosterMonth','text','right');add('prayers',1,158.5,163,128.5,22,12.5,'source:prayers','prayers');
+      }
+    }
+    return frames;
+  }
+  function renderSwiss(doc,mode,selected) {
+    const department=swissDepartment(doc.settings.design),accent=doc.settings.appearance?.palette?.accent||swissAccent(department),issues=new Set(),pages=[];
+    const value=k=>String(fieldValue(doc,k)||'');
+    const month=k=>{const [y,m]=(doc.source?.[k]||'').split('-');return y&&m?`${y}년 ${+m}월`:'';};
+    const groups=new Map();
+    const rule=(g,x,y,w=128.5)=>g.append(svg('rect',{x,y,width:w,height:.2,fill:'#808080','data-swiss-rule':'true'}));
+    function group(page,id){const g=svg('g',{'data-frame-id':id});pages[page].append(g);groups.set(id,g);return g;}
+    function runs(text,size,paren=false){
+      const chars=window.MindexInlineText.runs(text).flatMap(r=>Array.from(r.text).map(t=>({text:t,size,weight:r.bold?700:500})));
+      if(paren){const stack=[],pairs=[];chars.forEach((c,i)=>{if('（('.includes(c.text))stack.push(i);else if('）)'.includes(c.text)&&stack.length){const start=stack.at(-1);if((chars[start].text==='('&&c.text===')')||(chars[start].text==='（'&&c.text==='）')){stack.pop();pairs.push([start,i]);}}});for(let i=0;i<chars.length;i++)if(pairs.some(([a,b])=>i>=a&&i<=b))chars[i].size=size*.8;}
+      return chars;
+    }
+    function text(g,id,t,x,y,w=128.5,size=12.5,align='left',weight=500,paren=false,max=210){
+      if(!t)return 0;
+      const leading=size===10||size===8?5:size===12.5?6.25:size*1.2/MM;
+      const h=writeStyled(g,runs(String(t),size,paren).map(r=>({...r,weight:r.weight===700?700:weight})),{x,y,w,h:Math.max(0,max-y),size,leading:leading*MM,weight,align,color:'#171717',family:'MindexBulletin'},issues,id);
+      return Math.max(leading,h);
+    }
+    function heading(page,id,t,x,y,right='',rightId=''){
+      const g=group(page,id);text(g,id,t,x,y,right?85:128.5,20,'left',700);
+      if(right){const r=group(page,rightId||id+'Meta');text(r,rightId||id,right,x+85,y+2.5,43.5,10,'right');}
+      return y+13;
+    }
+    for(let page=0;page<2;page++){
+      const root=svg('svg',{viewBox:'0 0 297 210',width:'297mm',height:'210mm','data-bulletin-design':doc.settings.design,role:'img','aria-label':page?'안쪽':'겉면'});
+      root.append(svg('rect',{width:297,height:210,fill:'#FFFFFF'}));pages.push(root);
+      for(const x of [10,158.5]){
+        if(page===0||x===158.5)root.append(svg('rect',{x,y:10,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
+        if(page===0||x===10)root.append(svg('rect',{x,y:198.75,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
+      }
+    }
+    for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),10,190,'left'],[1,'insideBrand',departmentName(department),158.5,15,'right']]){
+      const g=group(page,id);text(g,id,t,x,y,128.5,10,align);g.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));
+    }
+    text(group(0,'issue'),'issue',[dateLabel(doc.source.date),value('issue')?`제${value('issue')}호`:''].filter(Boolean).join(' · '),158.5,25,65,10);
+    text(group(0,'liturgical'),'liturgical',doc.source.liturgical,226,25,61,10,'right');
+    const brand=group(0,'brand'),asset=doc.settings.appearance?.assets?.logo;
+    if(asset)brand.append(svg('image',{x:193.5,y:65,width:58.5,height:35,href:new URL(asset,document.baseURI).href,preserveAspectRatio:'xMidYMid meet'}));
+    else if(department==='children')brand.append(svg('image',{x:183.5,y:60,width:78.5,height:45,href:new URL(childrenLogoPath,document.baseURI).href,preserveAspectRatio:'xMidYMid meet'}));
+    else {const name=Object.hasOwn(doc.fields,'brand')?value('brand'):department==='youth'?'토브\n청소년부':'RIA\n청년부';text(brand,'brand',name,158.5,62.5,128.5,40,'center',700,false,102.5);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}
+    text(group(0,'motto'),'motto',value('motto'),158.5,107.5,128.5,12.5,'center',500,false,135);
+    if(department==='children')text(group(0,'coverTitle'),'coverTitle',value('coverTitle'),158.5,135,128.5,15,'center',700,false,147.5);
+    text(group(0,'verse'),'verse',value('verse'),158.5,150,128.5,12.5,'left',500,false,182.5);
+    // Back page uses measured content and distributes only the remaining space.
+    let y=heading(0,'eventsTitle','교회 일정',10,25,month('eventsMonth'),'eventsMonth');
+    const events=group(0,'events');
+    for(const line of value('eventsText').split('\n').filter(Boolean)){
+      const split=line.includes('|')?line.split('|'):line.split(/\s{2,}/),a=split.shift(),b=split.join(' ');
+      const h=Math.max(text(events,'events',a,10,y,b?63:128.5,10),b?text(events,'events',b,75.5,y,63,10,'right'):0);y+=h+2.5;
+    }
+    const eventsEnd=y-2.5;
+    const newsStart=y+10;let ny=heading(0,'newsTitle',departmentName(department)+' 소식',10,newsStart);
+    const welcome=group(0,'welcome');ny+=text(welcome,'welcome',value('welcome'),10,ny,128.5,12.5,'left',500,true)+5;
+    const news=group(0,'news');for(const line of value('news').split('\n').filter(Boolean)){
+      const detail=/^\s*[-–]/.test(line),number=line.match(/^\s*([①-⑳]|\d+[.)])\s*/);if(number){const label=svg('g');news.append(label);text(label,'news',number[1],10,ny,8,12.5);label.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}ny+=text(news,'news',number?line.slice(number[0].length):line,detail||number?18:10,ny,detail||number?120.5:128.5,detail?10:12.5,'left',500,true)+(detail?1.25:2.5);
+    }
+    ny+=2.5;const notices=group(0,'notices');ny+=text(notices,'notices',value('notices'),10,ny,128.5,12.5,'left',500,true);
+    const staff=group(0,'staff'),people=value('staff').split(/\n|\s*·\s*/).filter(Boolean),staffRows=Math.ceil(people.length/2),staffY=180-(staffRows?staffRows*6.25+3.75:0);
+    rule(staff,10,staffY);
+    people.forEach((p,i)=>{const x=10+(i%2)*69.25,yy=staffY+3.75+Math.floor(i/2)*6.25,m=p.match(/^(담당\s*교역자|위임목사|담임목사|부회장|회장|총무|서기|회계|부장)\s+(.+)$/);if(m){text(staff,'staff',m[1],x,yy,20,10);text(staff,'staff',m[2],x+22.5,yy,36.75,10,'left',700);}else text(staff,'staff',p,x,yy,59.25,10);});
+    const extra=(staffY-ny-10)/2;
+    if(extra<0)issues.add('news');else for(const id of ['newsTitle','welcome','news','notices'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);
+    if(eventsEnd>newsStart)issues.add('events');
+    // Linked worship rows: no fabricated post-praise prayer, no liturgical body.
+    y=heading(1,'orderTitle','예배 순서',10,25,value('leader'),'leader');const order=group(1,'order');
+    const rows=orderRowsForDisplay(doc.source).filter(r=>r.id!=='bulletin-communal-prayer');
+    for(const r of rows){
+      const creed=['사도신경','신앙고백'].includes(r.label),label=creed?'신앙고백':r.label;
+      const content=creed?'사도신경':r.content,person=(r.label==='광고'?value('announcer')||r.person:r.person||'').replace(/다같이/g,'다 같이');
+      const cells=[{t:label,x:10,w:22.5,size:12.5},{t:content,x:35,w:76,size:12.5},{t:person,x:113.5,w:25,size:10,align:'right'}];
+      const counts=cells.map(c=>wrap(c.t||'',c.w,c.size,500).length),h=Math.max(...counts,1)*6.25+2.5;
+      cells.forEach((c,i)=>text(order,'order',c.t,c.x,y+1.25+(Math.max(...counts,1)-counts[i])*6.25/2,c.w,c.size,c.align||'left',r.label==='설교'&&i===1?700:500,false,y+h));
+      y+=h;rule(order,10,y);
+    }
+    if(y>(department==='youth'?148:185))issues.add('order');
+    const lines=(g,x,top,bottom,w=128.5)=>{for(let yy=top+10;yy<=bottom+.001;yy+=10)rule(g,x,yy,w);};
+    function outline(top,bottom){
+      const g=group(1,'outline'),items=value('outline').split('\n').filter(l=>l.trim());
+      if(!items.length){lines(g,158.5,top,bottom);return;}
+      const heights=items.map(t=>Math.max(6.25,wrap(window.MindexInlineText.plain(t),128.5,12.5,500).length*6.25)),space=(bottom-top-heights.reduce((a,b)=>a+b,0)-(items.length-1)*2.5)/items.length;
+      if(space<10)issues.add('outline');
+      let yy=top;items.forEach((t,i)=>{const row=svg('g',{'data-outline-item':i+1,'data-writing-height':space});g.append(row);text(row,'outline',t,158.5,yy,128.5,12.5,'left',500,false,yy+heights[i]+1);lines(row,158.5,yy+heights[i],yy+heights[i]+space);yy+=heights[i]+space+2.5;});
+    }
+    if(department==='children'){
+      let yy=heading(1,'monthlyThemeTitle','이달의 주제',158.5,25,month('curriculumMonth'),'themeMonth');text(group(1,'monthlyTheme'),'monthlyTheme',value('monthlyTheme'),158.5,yy,128.5,15,'left',700,false,67.5);
+      yy=heading(1,'memoryTitle','새길 말씀',158.5,80,value('memoryReference'),'memoryReference');text(group(1,'memoryVerse'),'memoryVerse',value('memoryVerse'),158.5,yy,128.5,12.5,'left',500,false,132.5);
+      const reading=value('readingPlan').split('\n').filter(Boolean),count=Math.ceil(reading.length/2),rh=count*6.25,ry=185-rh;
+      heading(1,'readingTitle','잠잠성경',158.5,ry-13);if(ry-13<142.5)issues.add('readingPlan');const g=group(1,'readingPlan');reading.forEach((t,i)=>text(g,'readingPlan','□ '+t,158.5+(i>=count?66.75:0),ry+(i%count)*6.25,61.75,10,'left',500,false,ry+(i%count)*6.25+6.25));
+    }else{
+      heading(1,'notesTitle','설교 노트',158.5,25);const g=group(1,'sermon');text(g,'sermon',doc.source.sermon,158.5,38,78.5,15,'left',700,false,50);text(g,'sermon',Object.hasOwn(doc.fields,'sermonReference')?value('sermonReference'):doc.source.scripture,242,39,45,10,'right',500,false,50);
+      if(department==='youth'){
+        let start=50;if(value('scriptureNote')){start+=text(group(1,'scriptureNote'),'scriptureNote',value('scriptureNote'),158.5,start,128.5,12.5,'left',500,false,75)+5;}
+        outline(start,117.5);heading(1,'reflectionTitle','받은 은혜',158.5,132.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,145.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,145.5,185);
+        const next=Object.hasOwn(doc.fields,'nextPrayer')?value('nextPrayer'):doc.source.prayers?.find(r=>r.next)?.person||'';text(group(1,'nextPrayer'),'nextPrayer',next?(/^다음번 기도/.test(next)?next:'다음번 기도 · '+next):'',10,152.5,128.5,10);
+        heading(1,'pointTitle','예배 포인트',10,165);text(group(1,'worshipPoint'),'worshipPoint',value('worshipPoint'),10,178,128.5,12.5,'left',500,false,185);
+      }else{
+        outline(50,135);const prayers=doc.source.prayers||[],count=Math.ceil(prayers.length/2),py=185-count*7.5;
+        heading(1,'prayersTitle','예배 위원',158.5,py-13,month('rosterMonth'),'prayersMonth');const g=group(1,'prayers');prayers.forEach((r,i)=>{const x=158.5+(i>=count?69.25:0),yy=py+(i%count)*7.5,sub=svg('g');g.append(sub);text(sub,'prayers',shortDate(r.date),x,yy,29,12.5);text(sub,'prayers',r.person==='미정'?'—':r.person,x+30,yy,29.25,12.5,'right');if(r.date.slice(0,7)!==doc.source.rosterMonth)sub.querySelectorAll('text').forEach(e=>e.setAttribute('fill','#808080'));});
+      }
+    }
+    if(mode==='layout')for(const f of doc.frames){const g=groups.get(f.id);if(!g)continue;g.append(svg('rect',{x:f.x,y:f.y,width:f.w,height:f.h,fill:'transparent',stroke:f.id===selected?accent:'none','data-frame-hit':f.id}));}
+    return {pages,issues};
+  }
+
   function defaultFrames(design) {
+    if(swissDesign(design))return swissFrames(design);
     if(design==="simple")return simpleFrames();
     if(design==="children")return childrenFrames();
     if(design==="children-forest")return window.MindexBulletinForest.frames();
@@ -719,6 +865,7 @@
     return fontReady;
   }
   async function readyBackground(doc) {
+    if(swissDesign(doc.settings?.design)){await readyAssets();const src=doc.settings.appearance?.assets?.logo||(swissDepartment(doc.settings.design)==="children"?childrenLogoPath:"");if(src)await new Promise((resolve,reject)=>{const im=new Image();im.onload=resolve;im.onerror=()=>reject(new Error("주보 로고를 불러오지 못했습니다."));im.src=new URL(src,document.baseURI).href;});return;}
     await readyAssets();
     if(doc.settings?.design==="youth-tov")await readyPaperlogy();
     if(!["children-forest","youth-tov"].includes(doc.settings?.design)&&doc.settings?.appearance)await Promise.all(Object.values(appearanceFor(doc).assets).filter(Boolean).map(src=>new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=()=>reject(new Error("주보 이미지를 불러오지 못했습니다."));image.src=new URL(src,document.baseURI).href;})));
@@ -881,13 +1028,16 @@
       const value=doc.inherited.common[key];
       // Legacy youth snapshots stored empty generated common copy. Authored fields
       // above still win, including an explicit empty field.
-      if(value!==""||doc.settings?.design!=="youth-tov"||!Object.hasOwn(tovCopy,key))return value;
+      if(value!==""||!["youth-tov","swiss-youth"].includes(doc.settings?.design)||!Object.hasOwn(tovCopy,key))return value;
     }
     if(Object.hasOwn(doc.source?.commonOverrides||{},key))return doc.source.commonOverrides[key];
     if(["news","welcome","notices","leader","announcer","outline","sermonReference","outlineTitle","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"].includes(key)&&doc.source?.[key])return doc.source[key];
-    if(key==="eventsText")return doc.source?.events||"";
+    if(key==="eventsText"){
+      if(swissDesign(doc.settings?.design)&&doc.source?.eventsMonth==="2026-11"&&doc.source?.eventsOrigin==="교회력 일정"&&!doc.sourceSnapshot)return "1일 (주일) – 20일 (금) 오후 8:00 (토 제외) | 2026 다니엘기도회\n6일 (금) 오후 8:00 | 온세대 월삭예배\n15일 (주일) 오전 10:50 | 온세대 찬양예배";
+      return doc.source?.events||"";
+    }
     if(Object.hasOwn(doc.source?.common||{},key))return doc.source.common[key];
-    if(doc.settings?.design==="youth-tov"&&Object.hasOwn(tovCopy,key))return tovCopy[key];
+    if(["youth-tov","swiss-youth"].includes(doc.settings?.design)&&Object.hasOwn(tovCopy,key))return tovCopy[key];
     if(key==="issue")return doc.source?.department==="children"||doc.source?.department==="youth"?"":archiveIssues[doc.source?.date]||"";
     return doc.profile?.[key]??"";
   }
@@ -935,6 +1085,7 @@
     return bottom-f.y;
   }
   function appearanceDefaults(doc) {
+    if(swissDesign(doc.settings?.design))return {frames:swissFrames(doc.settings.design),palette:{paper:"#FFFFFF",cover:"#FFFFFF",ink:"#171717",accent:swissAccent(swissDepartment(doc.settings.design)),soft:"#FFFFFF",peach:"#FFFFFF",line:"#808080",muted:"#808080"},assets:{logo:"",artwork:""}};
     if(doc.settings?.design==="children-forest")return undefined;
     if(doc.settings?.design==="youth-tov"){const {tovFrames,tovPalette,tovArtwork}=window.MindexBulletinForest;return {frames:tovFrames(),palette:tovPalette,assets:{logo:"",artwork:tovArtwork}};}
     const simple=doc.settings?.design==="simple",modern=simple||doc.settings?.design==="editorial";
@@ -999,6 +1150,7 @@
     return result;
   }
   function renderPages(doc,mode,selected) {
+    if(swissDesign(doc.settings?.design))return renderSwiss(doc,mode,selected);
     if(doc.settings?.design==="simple")doc=simpleFlow(doc);
     const result=alignFrameContents(doc,renderAppearance(doc,renderPageContent(doc,mode,selected)));
     // Advertising frames must not cover other populated copy on the same page.
@@ -1173,7 +1325,7 @@
     if(typeof value.settings?.theme==="string")settings.theme=value.settings.theme;
     settings.compactOrder=value.settings?.compactOrder!==false;
     settings.archiveReference=value.settings?.archiveReference!==false;
-    if(["auto","ink","panels","editorial","simple","children","children-forest","youth-tov"].includes(value.settings?.design))settings.design=value.settings.design;
+    if(swissDesign(value.settings?.design)||["auto","ink","panels","editorial","simple","children","children-forest","youth-tov"].includes(value.settings?.design))settings.design=value.settings.design;
     for(const [key,min,max] of [["lineHeight",1.2,1.9],["itemGap",1,8],["orderPadding",1,5]])if(Number.isFinite(value.settings?.[key])&&value.settings[key]>=min&&value.settings[key]<=max)settings[key]=value.settings[key];
     if(Object.values(TEMPLATE_KEYS).includes(value.settings?.templateKey)){settings.templateKey=value.settings.templateKey;settings.templateRevision=Number(value.settings.templateRevision)||0;}
     if(isRecord(value.settings?.appearance))settings.appearance=appearanceFor({settings:value.settings});
@@ -1287,7 +1439,8 @@
   function normalizeTemplate(row) {
     if(!row||row.template_key!==TEMPLATE_KEYS[row.department]||!Number.isInteger(row.revision)||row.revision<1||!isRecord(row.layout)||!isRecord(row.common))throw new Error("공통 양식 저장 데이터를 확인해 주세요.");
     const normalized=normalizeSnapshot({fields:row.common,settings:{...row.layout,theme:row.layout.background},frames:row.layout.frames});
-    if(row.department==="children"&&!["children","children-forest"].includes(normalized.settings.design)||row.department==="young-adult"&&["children","children-forest","youth-tov"].includes(normalized.settings.design)||row.department==="youth"&&!["youth-tov","simple"].includes(normalized.settings.design))throw new Error("부서 공통 양식의 지면을 확인해 주세요.");
+    if(swissDesign(normalized.settings.design)&&swissDepartment(normalized.settings.design)!==row.department)throw new Error("부서 공통 양식의 지면을 확인해 주세요.");
+    if(row.department==="children"&&!["children","children-forest","swiss-children"].includes(normalized.settings.design)||row.department==="young-adult"&&["children","children-forest","youth-tov"].includes(normalized.settings.design)||row.department==="youth"&&!["youth-tov","simple","swiss-youth"].includes(normalized.settings.design))throw new Error("부서 공통 양식의 지면을 확인해 주세요.");
     return {...row,layout:{...row.layout,...normalized.settings,design:normalized.settings.design||"simple",frames:normalized.frames},common:Object.fromEntries(profileKeys.filter(k=>typeof row.common[k]==="string").map(k=>[k,row.common[k]]))};
   }
   function applyTemplate(doc,row,{common=true}={}) {
@@ -1564,16 +1717,16 @@
       if(sections.length&&p.dataset.documentId&&p.dataset.sectionsReady==="true")disclosureState.set(p.dataset.documentId,{...disclosureState.get(p.dataset.documentId),...Object.fromEntries(sections.map(el=>[el.dataset.bulletinSection,el.open]))});
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
-        const child=doc.source?.department==="children",tov=doc.settings.design==="youth-tov";
+        const child=doc.source?.department==="children",tov=["youth-tov","swiss-youth"].includes(doc.settings.design);
         const field=key=>doc.settings.editorFields?.[key]?.visible===false?"":`<label ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(doc.settings.editorFields?.[key]?.label||(tov&&key==="staff"?"섬김이 · 임원진":fields[key]))}</span>${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
           `${["news","outline","notices","welcome"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" ${key==="news"?'data-announcement-numbered aria-describedby="bulletin-news-help"':''} rows="1">${escape(fieldValue(doc,key))}</textarea>`}${key==="news"?'<small id="bulletin-news-help" class="bulletin-input-help">Enter 다음 번호 · Shift+Enter 이어 쓰기</small>':''}</label>`;
-        const modern=["editorial","simple"].includes(doc.settings.design);
+        const modern=swissDesign(doc.settings.design)||["editorial","simple"].includes(doc.settings.design);
         if(templateSession){
           p.innerHTML=`<section class="bulletin-property-section"><h3>${escape(templateTitle(doc))} · 문구</h3><p class="bulletin-help">새 주보에 사용할 문구입니다.</p>${profileKeys.map(field).join("")}</section>`;
           fitInputs();return;
         }
-        p.innerHTML=`${child&&doc.settings.design!=="children-forest"?'<button type="button" data-bulletin-use-forest title="작성한 내용은 유지하고 배치만 바꿉니다.">작은 숲 양식 적용</button>':""}${options.loadTemplate&&TEMPLATE_KEYS[doc.source?.department]?child?'<button type="button" data-bulletin-template-apply title="작성한 문구는 유지하고 양식만 가져옵니다.">최신 공통 양식 가져오기</button>':`<div class="bulletin-connected"><strong>${escape(templateTitle(doc))}</strong><button type="button" data-bulletin-template-apply title="작성한 문구는 유지하고 양식만 가져옵니다.">최신 공통 양식 가져오기</button></div>`:""}${doc.source?.department==="youth"&&!tov?'<button type="button" data-bulletin-use-tov title="작성한 내용은 유지하고 배치만 바꿉니다.">토브 양식 적용</button>':""}${!child&&doc.source?.department!=="youth"&&doc.settings.design!=="simple"?'<button type="button" data-bulletin-use-simple title="내용은 유지하고 배치만 바꿉니다.">새 청년부 양식 적용</button>':""}${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section" aria-label="이번 주 내용">${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label>`:""}${(child?[...(doc.settings.design==="children-forest"?["coverTitle"]:[]),"news","memoryVerse","memoryReference","readingPlan","leader","issue"]:tov?["news","leader","outline","nextPrayer","worshipPoint","reflection","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"weekly"])||""}><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+        p.innerHTML=`${!swissDesign(doc.settings.design)?'<button type="button" data-bulletin-use-swiss title="문구와 연결 자료를 유지하고 공통 그리드를 적용합니다.">공통 그리드 양식 적용</button>':""}${child&&doc.settings.design!=="children-forest"?'<button type="button" data-bulletin-use-forest title="작성한 내용은 유지하고 배치만 바꿉니다.">작은 숲 양식 적용</button>':""}${options.loadTemplate&&TEMPLATE_KEYS[doc.source?.department]?child?'<button type="button" data-bulletin-template-apply title="작성한 문구는 유지하고 양식만 가져옵니다.">최신 공통 양식 가져오기</button>':`<div class="bulletin-connected"><strong>${escape(templateTitle(doc))}</strong><button type="button" data-bulletin-template-apply title="작성한 문구는 유지하고 양식만 가져옵니다.">최신 공통 양식 가져오기</button></div>`:""}${doc.source?.department==="youth"&&!tov?'<button type="button" data-bulletin-use-tov title="작성한 내용은 유지하고 배치만 바꿉니다.">토브 양식 적용</button>':""}${!child&&doc.source?.department!=="youth"&&doc.settings.design!=="simple"?'<button type="button" data-bulletin-use-simple title="내용은 유지하고 배치만 바꿉니다.">새 청년부 양식 적용</button>':""}${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section" aria-label="이번 주 내용">${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label>`:""}${(child?[...(["children-forest","swiss-children"].includes(doc.settings.design)?["coverTitle"]:[]),"news","memoryVerse","memoryReference","readingPlan","leader","issue"]:tov?["news","leader",...(swissDesign(doc.settings.design)?["scriptureNote"]:[]),"outline","nextPrayer","worshipPoint","reflection","issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"weekly"])||""}><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
           ${modern?`<details class="bulletin-property-section" data-bulletin-section="greetings" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"greetings"])||""}><summary>환영 문구 · 정기 안내</summary><p class="bulletin-help">${doc.settings.templateKey?"이번 주에만 적용됩니다.":"새 주보에도 이어지는 문구입니다."}</p>${field("welcome")}${field("notices")}</details>`:""}
           <details class="bulletin-property-section" data-bulletin-section="monthly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"monthly"])||""}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">일정 변경은 같은 달의 새 주보에도 적용됩니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
           <label>교회 일정<input type="month" data-bulletin-setting="eventsMonth" value="${escape(doc.settings.eventsMonth||doc.source?.eventsMonth||"")}"></label>
@@ -1583,7 +1736,7 @@
       } else {
         const editableFrames=doc.frames;
         const f=editableFrames.find(f=>f.id===selected)||editableFrames[0];selected=f.id;
-        p.innerHTML=`${templateSession?'<h3>'+escape(templateTitle(doc))+'</h3><p class="bulletin-help">새 주보에 사용할 양식입니다.</p><button type="button" data-bulletin-template-reload>공통 저장본 다시 불러오기</button>':""}${doc.settings.design==="simple"?`<div class="bulletin-number-grid">${[["lineHeight","줄간격",1.55,1.2,1.9,.05],["itemGap","광고 항목 간격 (mm)",3.5,1,8,.5],["orderPadding","예배 행 여백 (mm)",3,1,5,.5]].map(([k,label,fallback,min,max,step])=>`<label>${label}<input type="number" data-bulletin-setting="${k}" value="${doc.settings[k]??fallback}" min="${min}" max="${max}" step="${step}"></label>`).join("")}</div>`:""}<button type="button" data-bulletin-reset-layout title="문구는 유지하고 기본 배치로 되돌립니다.">배치 초기화</button><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><label>지면<select data-bulletin-setting="design">${(doc.source?.department==="children"?[["children-forest","어린이부 · 작은 숲"],["children","어린이부 · 기존 양식"]]:doc.source?.department==="youth"?[["youth-tov","청소년부 · 토브"],["simple","청소년부 · 기본 양식"]]:[["simple","청년부 · 담백한 양식"],["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>편집 영역<select data-bulletin-frame>${editableFrames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
+        p.innerHTML=`${templateSession?'<h3>'+escape(templateTitle(doc))+'</h3><p class="bulletin-help">새 주보에 사용할 양식입니다.</p><button type="button" data-bulletin-template-reload>공통 저장본 다시 불러오기</button>':""}${doc.settings.design==="simple"?`<div class="bulletin-number-grid">${[["lineHeight","줄간격",1.55,1.2,1.9,.05],["itemGap","광고 항목 간격 (mm)",3.5,1,8,.5],["orderPadding","예배 행 여백 (mm)",3,1,5,.5]].map(([k,label,fallback,min,max,step])=>`<label>${label}<input type="number" data-bulletin-setting="${k}" value="${doc.settings[k]??fallback}" min="${min}" max="${max}" step="${step}"></label>`).join("")}</div>`:""}<button type="button" data-bulletin-reset-layout title="문구는 유지하고 기본 배치로 되돌립니다.">배치 초기화</button><label>배경<select data-bulletin-setting="theme"><option value="auto" ${backgroundKey(doc.settings.theme)==="auto"?"selected":""}>자동 · 날짜/부서</option><option value="" ${doc.settings.theme===""?"selected":""}>배경 없음</option>${(doc.backgrounds||[]).map(({key})=>`<option value="${escape(key)}" ${backgroundKey(doc.settings.theme)===key?"selected":""}>${escape(key)}</option>`).join("")}${doc.settings.theme&&doc.settings.theme!=="auto"&&!(doc.backgrounds||[]).some(b=>b.key===backgroundKey(doc.settings.theme))?`<option value="${escape(doc.settings.theme)}" selected>기존 초안: ${escape(backgroundKey(doc.settings.theme))}</option>`:""}</select></label><label><input type="checkbox" data-bulletin-setting="compactOrder" ${doc.settings.compactOrder?"checked":""}> 인쇄용 순서로 간추리기</label><label>지면<select data-bulletin-setting="design"><option value="swiss-${doc.source?.department||'young-adult'}" ${swissDesign(doc.settings.design)?'selected':''}>공통 그리드 · ${departmentName(doc.source?.department)}</option>${(doc.source?.department==="children"?[["children-forest","어린이부 · 작은 숲"],["children","어린이부 · 기존 양식"]]:doc.source?.department==="youth"?[["youth-tov","청소년부 · 토브"],["simple","청소년부 · 기본 양식"]]:[["simple","청년부 · 담백한 양식"],["editorial","2026년 10월"],["auto","기존 자동 양식"],["ink","연속 지면 · 검정 로고"],["panels","분리 지면 · 물결 로고"]]).map(([value,label])=>`<option value="${value}" ${(doc.settings.design||"auto")===value?"selected":""}>${label}</option>`).join("")}</select></label>${doc.source?.department==="children"?"":`<label>설교 요점 배치<select data-bulletin-setting="outlineColumns"><option value="1" ${(doc.settings.outlineColumns||doc.source?.outlineColumns||1)===1?"selected":""}>한 열</option><option value="2" ${(doc.settings.outlineColumns||doc.source?.outlineColumns)===2?"selected":""}>두 열</option></select></label>`}<label>편집 영역<select data-bulletin-frame>${editableFrames.map(f=>`<option value="${f.id}" ${f.id===selected?"selected":""}>${escape(frameLabel(f.id))} · ${f.page?"안쪽":"겉면"}</option>`).join("")}</select></label>
           <label><input type="checkbox" data-bulletin-hidden ${f.hidden||(["children-forest","youth-tov"].includes(doc.settings.design)&&appearanceFor(doc).visible[f.id]===false)?"":"checked"}> 출력에 표시</label><div class="bulletin-number-grid">`+
           [["x","가로 위치"],["y","세로 위치"],["w","너비"],["h","높이"]].map(([key,label])=>`<label>${label} (mm)<input type="number" step="2.5" data-bulletin-dimension="${key}" ${isFlowFrame(doc,f.id)&&["y","h"].includes(key)?'readonly title="내용에 따라 자동 계산"':""} value="${isFlowFrame(doc,f.id)?Number(simpleFlow(doc).frames.find(item=>item.id===f.id)[key].toFixed(2)):f[key]}"></label>`).join("")+`</div>
           <label>글자 크기 (pt)<select data-bulletin-dimension="size">${[...new Set([...TOKENS.fontSizes,f.size])].sort((a,b)=>a-b).map(n=>`<option ${f.size===n?"selected":""}>${n}</option>`).join("")}</select></label>
@@ -1593,8 +1746,13 @@
           <details class="bulletin-property-section" data-bulletin-section="layout-help" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"layout-help"])||""}><summary>편집 도움말</summary><p class="bulletin-help">드래그로 이동하고 모서리로 크기를 조절합니다. 방향키는 2.5mm씩 이동합니다.</p><p class="bulletin-help">광고·안내·일정·섬김이는 내용에 맞춰 자동 배치됩니다.</p><p class="bulletin-help">순서 간추리기는 준비·마침·교제·보조 성구와 고백 전문을 생략하고 같은 순서를 묶습니다.</p>${templateSession?'<p class="bulletin-help">광고·설교는 예시입니다. 11월부터 새 주보에 적용되며, 저장된 주보는 유지됩니다.</p>':""}</details>`;
       }
       if(mode==="layout"){
-        const background=p.querySelector('[data-bulletin-setting="theme"]')?.closest('label');if(background)background.hidden=["children-forest","youth-tov"].includes(doc.settings.design);
+        if(swissDesign(doc.settings.design)){
+          p.insertAdjacentHTML("afterbegin",'<p class="bulletin-help">공통 그리드 · 좌우 10mm · 제목 20/15pt · 본문 12.5pt · 보조 10pt. 각 부서 내용에 따라 공간을 자동 배분합니다.</p>');
+          p.querySelectorAll('[data-bulletin-dimension],[data-bulletin-family],[data-bulletin-align],[data-bulletin-hidden],[data-bulletin-setting="outlineColumns"]').forEach(el=>{el.disabled=true;el.closest('label').hidden=true;});
+        }
+        const background=p.querySelector('[data-bulletin-setting="theme"]')?.closest('label');if(background)background.hidden=swissDesign(doc.settings.design)||["children-forest","youth-tov"].includes(doc.settings.design);
         p.insertAdjacentHTML("beforeend",window.MindexBulletinForest.controls(doc,selected,escape,appearanceDefaults(doc)));
+        if(swissDesign(doc.settings.design))p.querySelectorAll('[data-bulletin-design-color]:not([data-bulletin-design-color="accent"]),[data-bulletin-design-label],[data-bulletin-design-image="artwork"],[data-bulletin-design-image-reset="artwork"]').forEach(el=>{(el.closest('label')||el).hidden=true;});
         const key=doc.frames.find(f=>f.id===selected)?.binding?.split(":")[1];
         const selectedField=Object.hasOwn(fields,key)?key:"outline";
         p.insertAdjacentHTML("beforeend",`<details class="bulletin-property-section" data-bulletin-section="editor-fields"><summary>입력칸 설정</summary><label>입력칸<select data-bulletin-editor-key>${Object.entries(fields).filter(([key])=>key!=="scriptureNote").map(([key,label])=>`<option value="${key}" ${key===selectedField?"selected":""}>${escape(label)}</option>`).join("")}</select></label><label>입력칸 이름<input data-bulletin-editor-label maxlength="80" value="${escape(doc.settings.editorFields?.[selectedField]?.label||fields[selectedField])}"></label><label><input type="checkbox" data-bulletin-editor-visible ${doc.settings.editorFields?.[selectedField]?.visible!==false?"checked":""}> 입력칸 표시</label></details>`);
@@ -1640,6 +1798,7 @@
         }
         const source=await options.loadSource(id,target.settings);if(request!==serial||signal.aborted)return;
         target.source=applySourceSnapshot(source,target.sourceSnapshot);
+        if(!target.settings.design&&source.date>="2026-11-22"&&!target.revision&&!target.hasLocal){target.settings.design="swiss-"+source.department;target.frames=defaultFrames(target.settings.design);}
         if(source.department==="children"&&!target.settings.design&&!target.revision&&!target.hasLocal){target.settings.design="children-forest";target.frames=defaultFrames("children-forest");}
         if(source.department==="youth"&&!target.settings.design&&!target.revision&&!target.hasLocal){target.settings.design="youth-tov";target.frames=defaultFrames("youth-tov");}
         if(!target.settings.design&&source.date>="2026-10-01"&&!target.revision&&!target.hasLocal){target.settings.design="simple";target.frames=defaultFrames("simple");}
@@ -1667,6 +1826,7 @@
       if(sourceState!==JSON.stringify([doc.settings,doc.sourceSnapshot])){if(templateSession)void designImages(doc);else void load(q("[data-bulletin-service]").value);}
     }
     function setDimension(f,key,value){
+      if(swissDesign(doc.settings.design))return;
       if(isFlowFrame(doc,f.id)&&["y","h"].includes(key))return;
       if(key==="weight"){if([400,500,700,800].includes(value))f.weight=value;return;}
       if(key==="size"){if(TOKENS.fontSizes.includes(value))f.size=value;return;}
@@ -1727,7 +1887,7 @@
         }
         const key=t.dataset.bulletinSetting;if(!["theme","design","compactOrder","archiveReference","outlineColumns"].includes(key)&&!validMonth(t.value)){t.value=doc.settings[key]||doc.source?.[key]||"";return;}
         remember();doc.settings[key]=["compactOrder","archiveReference"].includes(key)?t.checked:key==="outlineColumns"?Number(t.value):t.value;
-        if(key==="design"){doc.frames=defaultFrames(t.value);if(t.value==="youth-tov")delete doc.settings.appearance;}
+        if(key==="design"){doc.frames=defaultFrames(t.value);if(t.value==="youth-tov"||swissDesign(t.value))delete doc.settings.appearance;}
         if(["compactOrder","archiveReference"].includes(key))doc.sourceSnapshot=null;
         if(templateSession){persist();properties();preview();return;}
         persist();
@@ -1764,6 +1924,7 @@
           row=normalizeTemplate(row);remember();applyTemplate(doc,row,{common:false});persist();templateError="";assetLoaded=false;return readyBackground(doc).then(()=>{if(doc===target)assetLoaded=true;});
         }).catch(e=>{if(doc===target)saveError=e.message;}).finally(()=>{if(!signal.aborted){loading=false;properties();preview();status();}});return;
       }
+      if(b.hasAttribute("data-bulletin-use-swiss")){remember();doc.settings.design="swiss-"+doc.source.department;doc.frames=defaultFrames(doc.settings.design);delete doc.settings.appearance;persist();properties();void designImages();return;}
       if(b.hasAttribute("data-bulletin-use-forest")){remember();doc.settings.design="children-forest";doc.frames=defaultFrames("children-forest");assetLoaded=false;persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();}).catch(e=>{error=e.message;status();});return;}
       if(b.hasAttribute("data-bulletin-use-tov")&&doc.source?.department==="youth"){remember();doc.settings.design="youth-tov";delete doc.settings.appearance;doc.frames=defaultFrames("youth-tov");persist();properties();void designImages();return;}
       if(b.hasAttribute("data-bulletin-use-simple")){remember();doc.settings.design="simple";doc.frames=defaultFrames("simple");persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();});return;}
@@ -1792,6 +1953,7 @@
     on(root,"pointerdown",event=>{
       const hit=event.target.closest("[data-frame-hit],[data-resize]");if(loading||!doc?.dbLoaded||!hit||mode!=="layout"||event.button!==0)return;
       event.preventDefault();selected=hit.dataset.frameHit||hit.dataset.resize;
+      if(swissDesign(doc.settings.design)){properties();preview();return;}
       const f=doc.frames.find(f=>f.id===selected),rect=hit.closest("svg").getBoundingClientRect();
       drag={before:snapshot(doc),frame:clone(f),clientX:event.clientX,clientY:event.clientY,scale:297/rect.width,resize:!!hit.dataset.resize};
       properties();preview();q(".bulletin-canvas").focus();

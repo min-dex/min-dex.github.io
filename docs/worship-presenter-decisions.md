@@ -5886,3 +5886,11 @@ User approved Full HD browser output and capture requests to match desktop.
 Both canvases use 1920×1080; capture requests ideal 1920×1080/30fps. Preserve
 logical drawing coordinates, imported slides, caption layout and desktop-only
 streaming/recording capabilities. See youtube-desktop-candidate.md.
+
+## 부서 공통 주보 지면 ·2026-11-22
+
+청년부 검토 시안의 A4 반접지 그리드·Freesentation·20/15/12.5/10pt 위계를
+세 부서에 공유하고 포인트 색만 구분한다. 어린이부 교육 섹션과 청소년부
+노트/은혜/예배 포인트를 보존한다. 기존 주보 내용·빈 값·예배 원본을 덮지
+않으며 공통 양식은 기존 부서별 CAS 저장으로 적용한다. 세부 수치·연동·
+과거 양식 보존과 검증은 `young-adult-bulletin.md`의 2026-11-22 계약을 따른다.
