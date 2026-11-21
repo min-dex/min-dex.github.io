@@ -79,6 +79,7 @@ NODE_TESTS = (
     "test_keynote_browser_client.mjs",
     "test_keynote_desktop_bridge.cjs",
     "test_keynote_auto_import.mjs",
+    "test_artifact_cleanup_policy.cjs",
     "test_app_runtime.cjs",
     "test_mp3_alignment.cjs",
     "test_precise_initial_play.cjs",
