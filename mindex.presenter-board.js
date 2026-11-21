@@ -942,7 +942,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const summary = preparation && context ? serviceItemSummaryDisplayParts(context.item, context.service) : null;
   const display = summary ? { label: summary.meta, title: summary.title } : presenterBoardSubgroupDisplay(serviceId, subgroup);
   const { label: visibleLabel, title } = display;
-  const visibleTitle = preparation && !context ? "" : presenterVisibleTitle(visibleLabel, title);
+  const visibleTitle = preparation && !context ? "" : presenterVisibleTitle(visibleLabel, title, context);
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
   const warnings = presenterWarningsForCurrentInputs(subgroup.slides, inputContexts);
@@ -1263,10 +1263,17 @@ function renderPresenterWarnings(warnings = []) {
   }</span>`;
 }
 
-function presenterVisibleTitle(label, title) {
+function presenterVisibleTitle(label, title, context = null) {
   const cleanTitle = String(title || "").trim();
-  // Titles stay in the model; the header just does not print the label twice.
-  return compactSearchValue(cleanTitle) === compactSearchValue(label) ? "" : cleanTitle;
+  const compactTitle = compactSearchValue(cleanTitle);
+  // Titles stay in the model and on the output slide. The controller header
+  // only removes information already expressed by its own row or parent section.
+  if (compactTitle === compactSearchValue(label)) return "";
+  const item = context?.item || null;
+  const sectionTitle = item
+    ? serviceCanonicalSectionTitle(item._worshipSectionKey || item.section_key || "")
+    : "";
+  return sectionTitle && compactTitle === compactSearchValue(sectionTitle) ? "" : cleanTitle;
 }
 
 // Controller-only grouping: preserve slide objects, indexes and output order.
