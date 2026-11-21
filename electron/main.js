@@ -4,6 +4,9 @@ const testIsolation = require("./test-isolation").configureTestIsolation({ app, 
 globalThis.__mindexTestIsolation = testIsolation;
 const { createUpdateController } = require("./updater");
 const { importKeynoteDeck } = require("./keynote-importer");
+const { pathToFileURL } = require('node:url');
+const keynoteBridge = require('./keynote-bridge').createKeynoteBridge({isController:event=>isControllerRequest(event)
+  && event.senderFrame.url.split(/[?#]/)[0]===pathToFileURL(indexPath()).href});
 
 let mainWindow = null;
 let presenterWindow = null;
@@ -324,6 +327,12 @@ ipcMain.handle("mindex:import-keynote-deck", async (event, payload = {}) => {
     outputDir,
     repoRoot: payload.repoRoot || appRoot(),
   });
+});
+
+ipcMain.handle('mindex:keynote-bridge-request',async(event,payload)=>{
+  if(process.platform!=='darwin')return {ok:false,reason:'unsupported-platform'};
+  try{return await keynoteBridge(event,payload);}
+  catch{return {ok:false,reason:'helper-unavailable'};}
 });
 
 app.whenReady().then(() => {

@@ -77,6 +77,14 @@ python3 cloud/release_queue.py report --release "$MINDEX_RELEASE_ID"
 
 ## GitHub 단계는 자동 artifact로 보존한다
 
+큰 설치 시험본·내부 설치본·서명 설치본·Pages CI artifact는 공개 Release의
+설치 파일과 별개인 복제본이다. 이 큰 복제본의 보관 기간은 1일이며, 일일 정리는
+명시된 이름의 100MiB 이상 artifact 중 workflow가 완료되고 갱신 후 10분이 지난
+것만 삭제한다. 실행 중·대기 중인 workflow와 작은 timing/upgrade 영수증은
+보존한다. 상태 조회나 삭제가 실패하면 정리를 실패로 종료한다. GitHub Release
+파일·소스·실행 기록 자체는 이 정리 대상이 아니다. 해당 정책은 합성 자료로
+실제 workflow 스크립트를 실행하는 `test_artifact_cleanup_policy.cjs`로 검증한다.
+
 `timing` job이 scope·네 shard·Pages의 종료 후 성공/실패 경로 모두에서 현재
 attempt의 job/step 시작·끝·상태를 수집한다. 읽기 권한만 사용하고 로그·환경·토큰은
 수집하지 않는다. `release-timing-<run>-<attempt>` artifact를 14일 보존한다.

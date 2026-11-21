@@ -326,7 +326,10 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
   const audioAsset = normalizeServiceAudioAsset(childrenAudio ? null : memo.audioAsset);
   const entries = (context.timingEntries || []).filter(({ slide }) =>
     (slide.songTimingElementId || slide.progressionParentId || slide.elementId) === context.item.id);
-  const timingAudio = globalThis.MindexSongTiming?.audioFor(entries, context.item.id);
+  // A freshly changed input mode can be rendered once with slides from the
+  // previous projection. Never let a former DB-audio profile leak back into a
+  // lyrics row while that projection is being refreshed.
+  const timingAudio = childrenAudio ? globalThis.MindexSongTiming?.audioFor(entries, context.item.id) : null;
   const source = String(audioAsset.url || timingAudio?.url || "").trim();
   if (Boolean(source) !== Boolean(options.manager)) return "";
   const label = (audioAsset.url ? audioAsset.name : timingAudio?.name) || "연결된 음원";
@@ -334,9 +337,9 @@ function renderPresenterBoardItemAudioControls(serviceId, context = {}, options 
     <div class="svc-board-subgroup-audio${source ? " has-audio svc-audio-manager" : ""}${childrenAudio ? " svc-children-audio" : ""}" aria-label="${escapeAttr(`${context.item.label || "찬양"} 음원 관리`)}">
       ${source ? `
         ${renderPresenterInputAudioControls(source, label, serviceId, context.item.id, entries.some(({slide}) => slide.syncTimeline?.localTiming))}` : ""}
-      ${childrenAudio ? globalThis.MindexSongTiming?.statusMarkup(context, entries) || (source ? '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : "") : ""}
+      ${childrenAudio && source ? globalThis.MindexSongTiming?.statusMarkup(context, entries) || '<span class="svc-children-audio-hint">송출 중 제목에서 <kbd>P</kbd> 재생</span>' : ""}
       <div class="svc-board-subgroup-audio-actions">
-        ${!source && servicePraiseInputMode(context.item) === "children_audio" ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}">버전 음원·타이밍</button>` : ""}
+        ${!source && childrenAudio ? `<button class="btn secondary" type="button" data-song-timing-open data-service-id="${escapeAttr(serviceId)}" data-element-id="${escapeAttr(context.item.id)}" aria-label="등록된 음원이 없습니다. 버전 음원·타이밍 열기">음원 추가</button>` : ""}
         ${source ? globalThis.MindexSongTiming?.controls(serviceId, entries, { audioSource: source }) || "" : ""}
         ${audioAsset.url ? `<button class="icon-btn" type="button" data-service-item-audio-clear
             data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${context.index}"
@@ -396,4 +399,17 @@ function takePreparedServiceAudio(source) {
   previous?.removeAttribute?.("src");
   previous?.load?.();
   return prepared;
+}
+
+// Controller warnings follow the selected input media mode.
+const PRESENTER_VERSION_AUDIO_WARNINGS = new Set([
+  "버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요.",
+  "버전 음원의 자동 넘김 시각을 확인하세요.",
+  "버전 음원이 현재 가사·송폼과 다릅니다. 음원 설정을 확인하세요.",
+]);
+
+function presenterWarningsForCurrentInputs(entries = [], inputContexts = []) {
+  const acceptsVersionAudio = inputContexts.some(({ item }) => servicePraiseInputMode(item) === "children_audio");
+  return presenterWarningsForEntries(entries)
+    .filter(warning => acceptsVersionAudio || !PRESENTER_VERSION_AUDIO_WARNINGS.has(warning));
 }

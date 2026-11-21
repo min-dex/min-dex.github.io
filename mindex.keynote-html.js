@@ -216,6 +216,7 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       } else if (message.kind === 'activated') {
         session.mediaBlocked = false;session.host.style.pointerEvents = 'none';session.frame.blur();document.body.tabIndex = -1;document.body.focus({ preventScroll: true });delete root.dataset.pptxError;metadata({ checkpoint: message.checkpoint, error: '' });
       } else if (message.kind === 'error' || message.kind === 'media-blocked') {
+        if (message.phase === 'media-preparation') clearTimeout(session.timeout);
         if (message.id && session.obsolete.has(message.id)) return;
         if (message.id === session.inFlight) { session.inFlight = null;session.uncertain = true;if (message.id === session.selectionId) session.selecting = false; }
         if (message.kind === 'media-blocked') { session.mediaBlocked = true;session.host.style.pointerEvents = 'auto'; }
@@ -224,11 +225,12 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
       }
     };
     addEventListener('message', session.onMessage);
-    session.timeout = setTimeout(() => {
+    const preparationTimeout = () => {
       if (!active() || session.ready) return;
       root.dataset.pptxError = 'Keynote 재생 연결이 지연됩니다. 자료 연결을 확인해 주세요.';
       metadata({ error: root.dataset.pptxError });
-    }, 30000);
+    };
+    session.timeout = setTimeout(preparationTimeout, 30000);
     session.watchdog = setInterval(() => {
       if (active() && session.inFlight && Date.now() - session.sentAt > 35000) {
         metadata({ error: '효과 응답을 확인하지 못했습니다. 재연결로 현재 위치를 확인해 주세요.', checkpoint: session.checkpoint });
@@ -239,7 +241,9 @@ function renderPresenterKeynoteHtmlOutput(root, payload) {
     void loadPresenterKeynoteHtml(slide.asset.keynoteHtml, slide.asset.original).then(({ player, module, manifest }) => {
       if (!active()) return;
       session.module = module;session.manifest = manifest;
-      frame.srcdoc = module.keynoteFrameDocument({ baseUrl: slide.asset.keynoteHtml.url, player, token: session.token, bridge: module.keynoteHtmlFrameBridge });
+      const mediaFiles = Object.entries(manifest.files).filter(([, entry]) => entry.parts).map(([path, entry]) => ({ path, ...entry }));
+      if (mediaFiles.length) { clearTimeout(session.timeout);session.timeout = setTimeout(preparationTimeout, 320000); }
+      frame.srcdoc = module.keynoteFrameDocument({ baseUrl: slide.asset.keynoteHtml.url, player, token: session.token, bridge: module.keynoteHtmlFrameBridge, mediaFiles });
     }).catch(error => { if (active()) { root.dataset.pptxError = error.message;metadata({ error: error.message }); } });
   }
   const session = root._keynoteHtml;session.payload = payload;
@@ -314,7 +318,7 @@ async function validatePresenterKeynoteFolder(files, sourceSha256) {
   const module = await keynoteHtmlRuntime(), byName = new Map();let total = 0;
   for (const file of files) {
     const parts = file.webkitRelativePath.split('/');parts.shift();const name = parts.join('/');
-    if (!name || byName.has(name) || file.size > 50 * 1024 * 1024) throw Error('폴더를 확인해 주세요. 개별 재생 파일은 50MB 이하로 준비해 주세요.');
+    if (!name || byName.has(name) || file.size > module.keynoteHtmlResourceLimit(name)) throw Error('폴더를 확인해 주세요. 영상은 300MB, 그 외 재생 파일은 50MB 이하여야 합니다.');
     byName.set(name, file);total += file.size;
   }
   if (files.length > 5001 || total > 500 * 1024 * 1024 || !byName.has('manifest.json')) throw Error('Mindex에서 준비한 Keynote 재생 폴더를 선택해 주세요.');
@@ -350,7 +354,8 @@ async function importPresenterKeynoteHtml(input, options = {}) {
   const uploaded = [];let saveAttempted = false;
   const bucket = client.storage.from(PRESENTER_MEDIA_STORAGE_BUCKET);
   try {
-    const { module, byName, manifestBytes, manifest } = await validatePresenterKeynoteFolder(files, original.sha256);
+    const prepared = await validatePresenterKeynoteFolder(files, original.sha256), { module } = prepared;
+    const { byName, manifestBytes, manifest } = await module.keynoteStoragePlan(prepared.manifest, prepared.byName, prepared.manifestBytes, presenterPptxDigest);
     const prefix = `services/${String(serviceId).replace(/[^a-zA-Z0-9_-]/g,'')}/keynote/${crypto.randomUUID()}/`;
     const url = bucket.getPublicUrl(prefix + 'manifest.json')?.data?.publicUrl;
     const descriptor = module.normalizeKeynoteHtml({ format: manifest.format, sourceSha256: manifest.sourceSha256, pages: manifest.pages, url, poster: new URL(manifest.slides?.[0]?.thumbnail || 'invalid', url).href, sha256: await presenterPptxDigest(manifestBytes) }, original);

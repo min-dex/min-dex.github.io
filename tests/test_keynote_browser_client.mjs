@@ -63,3 +63,56 @@ test('native permission failure shows an actionable message without native detai
   vm.runInContext(fs.readFileSync(new URL('../mindex.keynote-browser.js',import.meta.url),'utf8'),ctx);
   await assert.rejects(vm.runInContext("presenterKeynoteBridgeRequest('/convert')",ctx),error=>error.message.includes('자동화 연결')&&!error.message.includes('private native'));
 });
+
+test('desktop helper transport uses protected IPC and keeps HTTP error handling and selected bytes',async()=>{
+  const calls=[];const ctx=context({Blob,window:{mindexElectron:{isDesktop:true,keynoteBridgeRequest:async payload=>{
+    calls.push(payload);return {ok:true,status:payload.path==='/health'?200:422,body:new TextEncoder().encode(JSON.stringify(payload.path==='/health'?{protocol:'mindex-keynote-bridge-v1'}:{code:'automation-permission'}))};
+  }}},fetch:()=>{throw Error('Desktop must not use file-origin fetch');}});
+  vm.runInContext(fs.readFileSync(new URL('../mindex.keynote-browser.js',import.meta.url),'utf8'),ctx);
+  assert.equal((await vm.runInContext("presenterKeynoteBridgeRequest('/health')",ctx)).protocol,'mindex-keynote-bridge-v1');
+  ctx.source=new File([bytes],'selected.key');
+  await assert.rejects(vm.runInContext("presenterKeynoteBridgeRequest('/convert',{method:'POST',body:source})",ctx),/자동화 연결/);
+  assert.deepEqual(Buffer.from(calls[1].body),Buffer.from(bytes));assert.equal(calls[1].method,'POST');
+});
+
+test('desktop conversion returns verified playback files and aborts changed input without an HTTP fallback',async()=>{
+  for(const mode of ['success','edit','corruption']){
+    let unchanged=true;const ctx=context({Blob,file:new File([bytes],'selected.key'),unchanged:()=>unchanged,
+      window:{mindexElectron:{isDesktop:true,keynoteBridgeRequest:async payload=>{
+        assert.equal(payload.headers.Authorization,'Bearer '+'a'.repeat(64));
+        if(payload.path==='/convert'){
+          assert.deepEqual(Buffer.from(payload.body),Buffer.from(bytes));
+          return {ok:true,status:200,body:new TextEncoder().encode(JSON.stringify({id:'00000000-0000-4000-8000-000000000000',manifest}))};
+        }
+        if(mode==='edit')unchanged=false;
+        const name=payload.path.split('/jobs/00000000-0000-4000-8000-000000000000/')[1];
+        return {ok:true,status:200,body:mode==='corruption'?new Uint8Array([0]):resources[name]};
+      }}},fetch:()=>{throw Error('File-origin HTTP fallback is forbidden');}});
+    vm.runInContext(fs.readFileSync(new URL('../mindex.keynote-browser.js',import.meta.url),'utf8'),ctx);
+    vm.runInContext("presenterKeynoteBridgeSession='a'.repeat(64)",ctx);
+    if(mode==='success'){
+      const files=await vm.runInContext('preparePresenterKeynoteBrowserFile(file,unchanged)',ctx);
+      assert.equal(files.length,4);assert.equal(JSON.parse(await files.find(f=>f.name==='manifest.json').text()).sourceSha256,sourceHash);
+    }else await assert.rejects(vm.runInContext('preparePresenterKeynoteBrowserFile(file,unchanged)',ctx));
+  }
+});
+test('large Korean video transfers in bounded chunks; wrong ranges and edits stop preparation',async()=>{
+ const name='assets/섬김.mp4'.normalize('NFD'),media=new Uint8Array(8*1024*1024+7).fill(17);
+ const large={...manifest,files:{...manifest.files,[name]:{size:media.length,sha256:await hash(media)}}};
+ for(const mode of ['success','wrong-range','edit']){
+  let unchanged=true;const ranges=[];
+  const ctx=context({Blob,file:new File([bytes],'selected.key'),unchanged:()=>unchanged,window:{mindexElectron:{isDesktop:true,keynoteBridgeRequest:async p=>{
+   if(p.path==='/convert')return {ok:true,status:200,body:new TextEncoder().encode(JSON.stringify({id:'00000000-0000-4000-8000-000000000000',manifest:large}))};
+   const resource=p.path.split('/jobs/00000000-0000-4000-8000-000000000000/')[1];
+   if(resource!==name)return {ok:true,status:200,body:resources[resource]};
+   const m=p.headers.Range.match(/^bytes=(\d+)-(\d+)$/),start=+m[1],end=+m[2];ranges.push([start,end]);assert(end-start+1<=4*1024*1024);
+   if(mode==='edit')unchanged=false;
+   return {ok:true,status:206,body:mode==='wrong-range'?new Uint8Array(1):media.slice(start,end+1)};
+  }}},fetch:()=>{throw Error('Unexpected HTTP');}});
+  vm.runInContext(fs.readFileSync(new URL('../mindex.keynote-browser.js',import.meta.url),'utf8'),ctx);vm.runInContext("presenterKeynoteBridgeSession='a'.repeat(64)",ctx);
+  if(mode==='success'){
+   const files=await vm.runInContext('preparePresenterKeynoteBrowserFile(file,unchanged)',ctx),video=files.find(f=>f.name.endsWith('.mp4'));
+   assert.equal(video.size,media.length);assert.equal(await hash(await video.arrayBuffer()),large.files[name].sha256);assert.equal(ranges.length,3);
+  }else await assert.rejects(vm.runInContext('preparePresenterKeynoteBrowserFile(file,unchanged)',ctx));
+ }
+});

@@ -33,6 +33,7 @@ on:
       - tests/test_desktop_youtube_local.cjs
       - tests/test_desktop_upgrade.cjs
       - tests/test_bulletin_desktop_live.cjs
+      - tests/test_desktop_keynote_bridge.cjs
       - tests/verify_published_upgrade.py
       - tests/fixtures/published-desktop-upgrades.json
       - tests/cleanup_desktop_ci.py
@@ -247,7 +248,7 @@ jobs:
         with:
           name: mindex-${{ matrix.platform }}-${{ inputs.publish_release && 'signed' || 'test' }}
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
           compression-level: 0
           path: |
             dist/*.dmg
@@ -292,6 +293,7 @@ jobs:
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" "$version"
           node tests/test_bulletin_desktop_live.cjs "$exe" "$GITHUB_SHA" "$version"
+          node tests/test_desktop_keynote_bridge.cjs "$exe" "$GITHUB_SHA" "$version"
           python tests/cleanup_desktop_ci.py internal
       - name: Verify preservation from published versions
         if: ${{ !inputs.publish_release }}
@@ -323,7 +325,7 @@ jobs:
         with:
           name: mindex-${{ matrix.platform }}-internal
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 1
           compression-level: 0
           path: |
             dist/internal/*.dmg
@@ -360,7 +362,7 @@ jobs:
         with:
           name: mindex-${{ matrix.platform }}-${{ inputs.publish_release && 'signed' || 'test' }}
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 1
           compression-level: 0
           path: |
             dist/*.dmg
@@ -438,6 +440,7 @@ jobs:
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" "$version"
           node tests/test_bulletin_desktop_live.cjs "$exe" "$GITHUB_SHA" "$version"
+          node tests/test_desktop_keynote_bridge.cjs "$exe" "$GITHUB_SHA" "$version"
           python tests/cleanup_desktop_ci.py intel-internal
       - name: Verify Intel preservation from published versions
         shell: bash

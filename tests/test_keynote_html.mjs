@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeKeynoteHtml, validateKeynoteHtmlManifest, patchKeynoteHtmlPlayer, keynoteCheckpoint, keynoteFrameDocument, keynoteHtmlFrameBridge, attachKeynoteHtmlToMemo, assertKnownKeynoteHtmlRuntime, KEYNOTE_HTML_RUNTIME_SHA256 } from '../mindex.keynote-html-engine.mjs';
+import { normalizeKeynoteHtml, validateKeynoteHtmlManifest, patchKeynoteHtmlPlayer, keynoteCheckpoint, keynoteFrameDocument, keynoteHtmlFrameBridge, attachKeynoteHtmlToMemo, assertKnownKeynoteHtmlRuntime, KEYNOTE_HTML_RUNTIME_SHA256, keynoteHtmlResourceLimit } from '../mindex.keynote-html-engine.mjs';
 const hash='a'.repeat(64), original={sha256:hash};
 const descriptor={format:'apple-keynote-html-v1',url:'https://media.example/deck/manifest.json',sha256:hash,sourceSha256:hash,pages:1};
 const file={sha256:hash,size:10};
@@ -15,6 +15,18 @@ test('manifest bounds files, resource paths and scene continuity',()=>{
   const m=manifest();m.files[path]=file;assert.throws(()=>validateKeynoteHtmlManifest(m,descriptor));
  }
  const m=manifest();m.slides[0].sceneStart=1;assert.throws(()=>validateKeynoteHtmlManifest(m,descriptor));
+});
+test('Korean NFC/NFD media names and bounded large videos preserve strict path and size validation',()=>{
+ const m=manifest();
+ for(const name of ['assets/섬김.mp4','assets/섬김.mp4'.normalize('NFD')])m.files[name]={...file,size:265*1024*1024};
+ assert.throws(()=>validateKeynoteHtmlManifest(m,descriptor),'combined resources still cap at 500MiB');
+ delete m.files['assets/섬김.mp4'];assert.doesNotThrow(()=>validateKeynoteHtmlManifest(m,descriptor));
+ assert.equal(keynoteHtmlResourceLimit('assets/섬김.mp4'),300*1024*1024);
+ assert.equal(keynoteHtmlResourceLimit('assets/main.js'),50*1024*1024);
+ m.files['assets/섬김.mp4'.normalize('NFD')].size=301*1024*1024;assert.doesNotThrow(()=>validateKeynoteHtmlManifest(m,descriptor),'existing stored playback bounds remain unchanged');
+ for(const name of ['assets/%2e%2e/main.js','assets/한글/../main.js','assets/한글\\main.js','assets/한글?query.mp4','assets/한글#fragment.mp4','assets/\u202eevil.mp4']){
+  const bad=manifest();bad.files[name]=file;assert.throws(()=>validateKeynoteHtmlManifest(bad,descriptor));
+ }
 });
 test('bridge patches only a recognized export and preserves original input string',()=>{
  const cap='UC.isFullscreen||A>this.showWidth&&(A=this.showWidth);';

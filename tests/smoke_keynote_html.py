@@ -24,7 +24,7 @@ try:
     page.wait_for_function('typeof renderPresenterKeynoteHtmlOutput==="function" && !document.body.classList.contains("ui-booting")')
     page.evaluate('''async({player,saved})=>{
      const module=await keynoteHtmlRuntime();window.fixtureModule=module;window.fixturePlayer=player;window.check=(v,m)=>{if(!v)throw Error(m)};window.renders=0;
-     loadPresenterKeynoteHtml=async()=>({module,player,manifest:{scenes:3,slides:[{thumbnail:'one.jpeg'},{thumbnail:'two.jpeg'}]}});
+     loadPresenterKeynoteHtml=async()=>({module,player,manifest:{files:{},scenes:3,slides:[{thumbnail:'one.jpeg'},{thumbnail:'two.jpeg'}]}});
      const original={format:'key',name:'source.key',url:new URL('/source.key',location.href).href,size:100,sha256:'a'.repeat(64)};
      const sidecar={format:'apple-keynote-html-v1',url:new URL('/deck/manifest.json',location.href).href,sha256:'b'.repeat(64),sourceSha256:original.sha256,pages:2,poster:new URL('/deck/one.jpeg',location.href).href};
      window.keySlide={id:'key-slide',elementId:'key-item',type:'file',elementType:'file',layout:'media',asset:normalizeServiceAsset({kind:'file',name:'source.key',url:original.url,original,keynoteHtml:sidecar})};
@@ -75,14 +75,14 @@ try:
     handlePresenterKeynoteHtmlAction({target:{closest:()=>button},preventDefault(){}});check(JSON.stringify(state.presenter.pptxProgress)===before,'other item controlled current deck');
     state.presenter.safetyBlank=true;check(!requestPresenterKeynoteHtmlMedia(state.presenter,'play'),'hidden output started sound');state.presenter.safetyBlank=false;
     releasePresenterKeynoteHtmlOutput(root);window.loadAttempts=0;
-    loadPresenterKeynoteHtml=async()=>{loadAttempts++;if(loadAttempts===1)throw Error('temporary fetch failure');return {module:fixtureModule,player:fixturePlayer,manifest:{scenes:3,slides:[{thumbnail:'one.jpeg'},{thumbnail:'two.jpeg'}]}}};
+    loadPresenterKeynoteHtml=async()=>{loadAttempts++;if(loadAttempts===1)throw Error('temporary fetch failure');return {module:fixtureModule,player:fixturePlayer,manifest:{files:{},scenes:3,slides:[{thumbnail:'one.jpeg'},{thumbnail:'two.jpeg'}]}}};
     renderPresenterOutput(payload);
    }''')
    page.wait_for_function('!!root.dataset.pptxError');page.evaluate('adoptPresenterKeynoteHtmlMetadata(root._keynoteHtmlMetadata);requestPresenterKeynoteHtmlMedia(state.presenter,"status");publishPresenterState()')
    page.wait_for_function('root._keynoteHtml?.initialized&&root._keynoteHtmlMetadata?.id===state.presenter.pptxProgress.command?.id');assert page.evaluate('loadAttempts')==2
    page.evaluate('''()=>{
     adoptPresenterKeynoteHtmlMetadata(root._keynoteHtmlMetadata);releasePresenterKeynoteHtmlOutput(root);state.presenter.pptxProgress=null;payload.pptxProgress=null;
-    loadPresenterKeynoteHtml=()=>new Promise(resolve=>window.finishColdLoad=()=>resolve({module:fixtureModule,player:fixturePlayer,manifest:{scenes:3,slides:[{thumbnail:'one.jpeg'},{thumbnail:'two.jpeg'}]}}));
+    loadPresenterKeynoteHtml=()=>new Promise(resolve=>window.finishColdLoad=()=>resolve({module:fixtureModule,player:fixturePlayer,manifest:{files:{},scenes:3,slides:[{thumbnail:'one.jpeg'},{thumbnail:'two.jpeg'}]}}));
     renderPresenterOutput(payload);root._onKeynoteAcknowledgement=()=>queueMicrotask(()=>adoptPresenterKeynoteHtmlMetadata(root._keynoteHtmlMetadata));advancePresenterPptx(state.presenter,1);publishPresenterState();finishColdLoad();
    }''')
    page.wait_for_function('root._keynoteHtml?.initialized && !state.presenter.pptxProgress.command && root._keynoteHtmlMetadata?.checkpoint?.phase==="final"');frame=page.frames[-1];assert frame.evaluate('__mindexKeynoteController.advances')==1

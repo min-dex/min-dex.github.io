@@ -119,3 +119,53 @@ Release journal `43939a06cd0b4518b6e3b8f5f8c96ca0`, FIFO `d67584b2ea2845a0a5ad41
 발견했다. 기존 후보는 변경하지 않고 별도 수정 후보에서 기존 생성기로 갱신했다.
 추가분은 보수적인 토큰 검사가 요구한 Equal 아이콘 하나이며 원본 Lucide는 유지한다.
 새 후보는 동일 release journal/FIFO에서 전체 웹·설치 gate를 다시 확인한다.
+
+
+## K01 설치 앱 Keynote 연결 후보
+
+`codex/native-keynote-connection`, `/tmp/mindex-keynote-connection`, journal
+`49356d1fd65340e1be9f51ba0fe470bf`. 현재 설치 앱의 file Origin은 도우미에서
+403이고 공개 웹 Origin은 200임을 재현했다. 기본 패키지 index를 연 컨트롤러
+프레임만 고정 loopback에 전용 IPC로 요청한다. null Origin 허용이나 승인 우회는 없다.
+
+실제 비공개 복사본을 Keynote15.4로 내보내 13장·21효과·250파일을 검증했다.
+NFD 한글 영상명과 265MiB 내장 영상이 기존 준비 경로에서 거부되는 문제도 수정했다.
+새 준비의 영상300MiB·기타50MiB와 전체500MiB 제한, 4MiB 범위 전송을 사용한다.
+기존 저장된 manifest의 전체500MiB 재생 경계는 유지한다. 실제 영상67청크/전체SHA,
+원본SHA, 영상·음성5523프레임/184.2841초 전체 decode PASS. 공개 업로드·예배 저장0.
+실제 원문·export·영상은 이 공개 저장소에 넣지 않는다.
+
+Node36개, Chromium/WebKit 실제 승인·준비·재시도·폴더복구·취소·입력 보호,
+숨긴 격리 설치 앱의 280MiB 합성 IPC, runtime/icon·패키지 파일·CI scope 검사 PASS.
+3OS 실제 packaged IPC/부창/이동한 컨트롤러 거부 검사를 Desktop workflow에 등록했다.
+별도 Mac ARM 설치 시험본에서 실제 도우미 health200 및 승인 우회·부창·이동한
+컨트롤러 거부 PASS. Playwright main 평가 영역은 require를 제공하지 않아 경로를
+앱의 절대 경로에서 구성하도록 시험 코드를 수정했다.
+사용자 Mac의 기존 도우미는 코드/manifest만 갱신했고 실행 파일·시작 설정은 유지했다.
+전송/자식 변환 없음 확인 뒤 idle restart, 공개 Origin200/null403 유지 PASS.
+사용자 실행 Mindex·작성 중인 내용·원본은 재시작/수정하지 않았다.
+설치 앱 수정은 1.0.14 동결에 추가하지 않고 다음1.0.15 후보로 보존한다.
+컴포넌트 scoped 결과는 최종 combined SHA의 필수 web/native gate·게시를 대신하지 않는다.
+
+K01 후속 저장 제한 보완: 도우미 준비 후 기존 Storage50MiB 상한도 점검했다.
+265MiB 영상은 원본·영상 바이트를 유지한 채 16MiB 이하17조각으로 저장 계획을
+만들며, opaque 프레임에서 각 조각/전체SHA를 검증한 뒤 재생한다. 실제 비공개
+Apple15.4 엔진에서 Chromium/WebKit13장·21단계 준비 및 영상 처음/중간/끝
+seek·해독 PASS, 공개 업로드/예배 저장0. 새 전송형식은 기존 v1과 구분한다.
+합성 50MiB+ 저장 제한·편집 충돌·불확실한 저장·업로드 실패 보존과 canonical
+미디어 복구 검사를 추가했다. Safari 오프라인 검사에서 Blob 요청까지 차단했던
+설정을 바로잡았으며 외부 HTTP 연결 차단과 해독/무결성 조건은 유지한다.
+
+K01 첫 1.0.15 combined gate(`dda7b09c`)는 기존 코드 크기 ratchet과 updater VM의
+신규 Keynote 모듈 상대 경로 누락으로 실패했다. 공개 main은 1.0.14 그대로다.
+기준을 올리지 않고 inline UI helper를 기존 presenter-ui, 미디어 경고를
+media-state, 행 제어 스타일을 presenter-media로 옮겼다. VM은 실제 bridge
+모듈을 테스트 위치에서 명시적으로 resolve한다. 기존 source-extraction fixture도
+UI owner를 읽으며, 기능/저장/승인 경계와 script load 순서는 유지한다.
+동일 승인 범위의 새 SHA 전체 web/native gate와 공개 검증이 필요하다.
+
+첫 gate의 봉헌 배치 fixture는 inline control 렌더링으로 기본 순서가 투영된 뒤에도
+원래 배열0번을 봉헌으로 가정했다. 안정된 qa-offering ID로 같은 항목을 다시
+찾도록 고쳤으며 세 유형 전환·저장 버튼 단일성·30px·넘침·미저장 선택영역
+보존 조건은 그대로다. Chromium/WebKit320/700/1100 전부 PASS.
+SOLID ratchet, offline desktop preflight, 등록 Node 전수 및 관련 browser8쌍 PASS.

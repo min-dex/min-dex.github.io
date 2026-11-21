@@ -70,13 +70,25 @@ try:
    assert result=={'count':23,'pages':20,'paths':True,'dialogs':0},(engine,result)
    assert protocol_calls.count('/convert')==1
    page.evaluate("""()=>{
+    window.mindexElectron={isDesktop:true,platform:'darwin',keynoteBridgeRequest:async p=>{
+     const response=await fetch(PRESENTER_KEYNOTE_BRIDGE+p.path,{method:p.method,headers:p.headers,body:p.body,credentials:'omit',redirect:'error'});
+     return {ok:true,status:response.status,body:new Uint8Array(await response.arrayBuffer())};
+    }};
+    keynotePrepareResult=null;
+    void preparePresenterKeynoteBrowserFile(new File(['offline KEY'],'source.key'),()=>true)
+      .then(files=>keynotePrepareResult=files.length,e=>keynotePrepareResult=e.message);
+   }""")
+   page.wait_for_function('keynotePrepareResult!==null')
+   assert page.evaluate('keynotePrepareResult')==23
+   assert protocol_calls.count('/convert')==2
+   page.evaluate("""()=>{
     window.keynoteFixtureUnchanged=false;window.keynotePrepareResult=null;
     preparePresenterKeynoteBrowserFile(new File(['offline KEY'],'source.key'),()=>keynoteFixtureUnchanged)
       .then(()=>keynotePrepareResult='unexpected',error=>keynotePrepareResult=error.message);
    }""")
    page.wait_for_function("keynotePrepareResult!==null")
    assert page.evaluate("keynotePrepareResult!=='unexpected'")
-   assert protocol_calls.count('/convert')==1,'edit must stop before conversion/upload'
+   assert protocol_calls.count('/convert')==2,'edit must stop before conversion/upload'
    page.evaluate("""sha=>{
     const serviceId='fixture',itemId='deck',keynoteHtml={url:'https://fixture.invalid/manifest.json',sha256:sha,pages:20};
     const original={format:'key',sha256:sha},key=keynoteHtml.url+'|'+sha;

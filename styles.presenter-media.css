@@ -119,3 +119,27 @@
 .svc-board-media-rail .svc-reference-media-toolbar:empty { display:none; }
 .svc-board-media-rail .svc-input-media-controls { flex:0 0 auto; padding:0; }
 .svc-board-subgroup-controls[hidden], .svc-board-subgroup-control-item[hidden] { display:none; }
+
+/* Compact controls beside the controller input and media rows. */
+.svc-board-inline-structure-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+.svc-board-inline-structure-actions > .icon-btn {
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.svc-board-inline-structure-actions > .icon-btn:is(:hover, :focus-visible) {
+  background: var(--ui-surface-field);
+}
+.svc-board-inline-structure-actions > .icon-btn.danger:is(:hover, :focus-visible) {
+  color: var(--danger);
+}

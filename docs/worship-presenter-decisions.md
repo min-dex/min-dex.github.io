@@ -18,6 +18,19 @@ No worship record, order, timing or authored attachment is rewritten. Audio
 identity, encoding compensation and verification boundaries are documented in
 `friday-prayer-music.md`. Local candidate is not a publication receipt.
 
+## Controller-owned element management · 2026-11-21
+
+- 슬라이드 우클릭으로 열리던 전체 섹션 편집 팝업은 사용자 경로에서 제거한다.
+  우클릭은 현재 엘리멘트를 선택할 뿐 별도 편집창을 열지 않는다.
+- 현재 예배에서 자주 쓰는 엘리멘트 순서 이동과 삭제는 컨트롤러의 해당
+  엘리멘트 제목 줄에 작은 아이콘으로 둔다. 이동할 수 없는 방향은 표시하지 않아
+  단일 엘리멘트에는 삭제만 보인다.
+- 삭제는 기존 확인 문구와 template suppression을 그대로 사용한다. 현재 예배의
+  엘리멘트만 제외하며 기본 양식, 찬양·성경 DB, 다른 엘리멘트를 변경하지 않는다.
+- 섹션명·엘리멘트 타입·전체 내용 편집을 한꺼번에 노출하던 팝업 UI는 더 이상
+  컨트롤러의 편집 경로가 아니다. 기존 입력·개별 저장·송출 및 atomic full-save
+  계약은 유지한다.
+
 ## Dawn prayer r2 default asset ·2026-11-06
 
 User approved the six-point (7ms total) pop-corrected r2 MP3 for the shared dawn
@@ -967,6 +980,8 @@ Small visual polish that does not alter behavior does not need an entry.
 - 금요 2주 문화예배와 3주 삼삼오오예배의 자동 배정은 2026년 8월에만
   적용한다. 이후 2·3주는 기본 금요기도회이며, 명시적으로 지정한 개별
   예외는 유지한다. 1주 월삭예배와 4주 구역연합예배 규칙은 유지한다.
+- 2026-11-27은 4주차라도 구역연합예배가 아닌 일반 금요기도회다. 날짜별
+  일반 예배 override는 별명과 `friday_variant` 자동 메타데이터를 만들지 않는다.
 - 어린이부 예배, 청소년부 예배, 청년부 예배는 주일 자동 생성 대상이다.
 - 단, 해당 주일의 교회력 `church_schedule`에 `온세대 찬양예배`가
   명시된 경우에만 어린이부, 청소년부, 청년부 예배를 별도로 생성하지
@@ -4936,9 +4951,29 @@ uploads stop before storing an incomplete replacement. The verified Apple15.4
 runtime is hash pinned; unsupported versions fail before upload/execution.
 Prepared playback runs inside Mindex web and desktop without Keynote at playback
 time. Total export limit is 500 MiB, at most 5,000 resources and 300 slides;
-individual resources currently must fit the 50 MiB Storage upload limit.
+individual Storage objects must fit the 50 MiB upload limit. New large MP4/MOV
+resources use the versioned split-media transport described below.
 
 ### Chrome Keynote automatic preparation ·2026-10-31
+
+설치 앱의 `file://` 문서는 도우미의 공개 웹 Origin으로 인정하지 않는다.
+Mac 설치 앱은 패키지의 정확한 index 파일을 연 기본 컨트롤러 프레임에서만
+전용 IPC를 통해 고정 IPv4 loopback 도우미에 요청한다. URL·메서드·헤더·크기와
+시간 제한을 검사하고, 연결 승인·세션·원본/내보내기 해시 검증은 그대로 유지한다.
+`Origin:null`, 임의 주소, 승인 POST 및 도우미 종료 요청은 허용하지 않는다.
+브라우저도 기존 승인·해시 검증을 사용하며 원본·작성 내용과 atomic 저장 계약은 유지한다.
+한글 NFC/NFD 리소스 이름은 문자·결합문자·숫자와 기존 안전 구분자만 허용한다.
+점으로 시작하는 경로·상위 이동·인코딩 우회·링크는 계속 차단한다. 새 준비 시 영상(MP4/MOV)은
+300MiB까지, 나머지 리소스는 50MiB까지 허용하며 전체 500MiB 제한은 유지한다.
+큰 리소스는 4MiB 범위로 전송하고 전체 해시를 재검증한다. 도우미는 파일 변경 시
+해시 검증을 다시 수행하며, 원본이나 내장 영상을 재인코딩하지 않는다.
+50MiB를 넘는 영상의 재생 사본은 16MiB 이하 객체로 저장한다. 각 조각과 전체
+영상의 크기·SHA-256을 검증하고 opaque 재생 프레임 안에서 연속 버퍼로 재조립한다.
+분할 사본은 `apple-keynote-html-parts-v1` 형식으로 구분하여 구형 앱이 일반 HTML
+재생 자료로 오인하지 않게 한다. 기존 `apple-keynote-html-v1` 자료는 그대로 읽는다.
+manifest의 원래 영상 크기·해시와 원본 KEY 정보는 유지하며, 조각 경로·크기·해시는
+해당 파일의 `parts`에 둔다. Blob 주소는 프레임 수명 동안만 사용하고 복구 위치에는
+원래 영상 주소를 기록한다. 큰 영상 검증이 끝나기 전에 엔진이나 준비 완료를 시작하지 않는다.
 
 Keynote's normal controller flow is file selection, preparation, then the usual
 slide/output controls. The chooser discloses public original storage before
@@ -5155,6 +5190,14 @@ file names.
 송폼 구간 묶음, 슬라이드 번호·이동·선택과 실제 가사·송출 화면은 유지한다.
 V1·C·B·T 등 다른 송폼 배지는 유지하고, 숨긴 배지의 별도 공간도 남기지 않는다.
 DB 가사 블록의 유형 선택과 저장 데이터는 변경하지 않는다.
+
+## Controller hierarchy title deduplication ·2026-11-22
+
+컨트롤러의 하위 항목 행은 이미 행 이름이나 상위 섹션 이름으로 표시한 문구를
+내용 제목으로 반복하지 않는다. 이 규칙은 특정 신앙고백 문구만의 예외가 아니라
+모든 `Section > Element` 관계에 적용한다. 실제 슬라이드의 제목·본문, 저장된
+항목명과 사용자 지정 제목은 바꾸지 않으며, 상위 섹션과 다른 사용자 지정 제목은
+계속 표시한다.
 
 ## Actual media source identity ·2026-10-28
 

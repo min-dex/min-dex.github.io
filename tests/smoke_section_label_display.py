@@ -15,7 +15,12 @@ try:
               state.services=[service];state.selectedServiceId=service.id;
               const items=[{id:'prayer-song',service_id:service.id,label:'기도찬양 1',_origIndex:0,_worshipSectionKey:'prayer',memo:''}];
               state.serviceItems[service.id]=items;
-              serviceTemplateHierarchyIndex=()=>({sections:[{key:'prayer',elements:[{label:'기도찬양 1'},{label:'기도찬양 2'}]}]});
+              const hierarchySections=[{key:'prayer',elements:[{label:'기도찬양 1'},{label:'기도찬양 2'}]}];
+              serviceTemplateHierarchyIndex=()=>({
+                sections:hierarchySections,
+                elementBySectionAndLabel:new Map(),elementByLabel:new Map(),
+                sectionByKey:new Map(hierarchySections.map(section=>[section.key,section])),sectionByLabel:new Map(),
+              });
               getServiceItems=()=>items;
               const context={service,sectionItems:items};
               const mount=document.createElement('div');
@@ -44,7 +49,21 @@ try:
               check(draw('generated-ready')==='', 'generated preparation leaked a title');
               waiting.raw_title=waiting.label;
               check(draw(waiting.id)==='', 'waiting title repeated its label');
-              return 'PASS ordinal labels, waiting title parity and no-op source preservation';
+              const creed={
+                id:'creed-item',service_id:service.id,label:'사도신경',raw_title:'신앙고백',
+                _worshipSectionKey:'creed',memo:JSON.stringify({elementType:'body',introSlide:{title:'신앙고백',body:'사도신경'}})
+              };
+              items.push(creed);
+              const creedSlide={id:'creed-slide',elementId:creed.id,type:'title-content',title:'신앙고백',text:'신앙고백\\n사도신경'};
+              mount.innerHTML=renderPresenterBoardSubgroup({id:creed.id,label:'사도신경',title:'신앙고백',slides:[{slide:creedSlide,slideIndex:0}]},-1,service.id,{showHead:true,slides:[]});
+              check(mount.querySelector('.svc-board-subgroup-head span')?.textContent.trim()==='사도신경','creed element label missing');
+              check(!mount.querySelector('.svc-board-subgroup-head strong'),'parent section title repeated in child row');
+              check(creedSlide.title==='신앙고백' && creedSlide.text==='신앙고백\\n사도신경','output slide changed while simplifying controller');
+              check(creed.raw_title==='신앙고백','saved creed title changed');
+              creed.raw_title='사용자 지정 고백';
+              mount.innerHTML=renderPresenterBoardSubgroup({id:creed.id,label:'사도신경',title:creed.raw_title,slides:[{slide:creedSlide,slideIndex:0}]},-1,service.id,{showHead:true,slides:[]});
+              check(mount.querySelector('.svc-board-subgroup-head strong')?.textContent.trim()==='사용자 지정 고백','custom child title hidden');
+              return 'PASS ordinal labels, hierarchy deduplication, custom titles and no-op source preservation';
             }'''), flush=True)
             browser.close()
 finally:

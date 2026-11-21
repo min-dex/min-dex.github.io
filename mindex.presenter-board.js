@@ -942,10 +942,10 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const summary = preparation && context ? serviceItemSummaryDisplayParts(context.item, context.service) : null;
   const display = summary ? { label: summary.meta, title: summary.title } : presenterBoardSubgroupDisplay(serviceId, subgroup);
   const { label: visibleLabel, title } = display;
-  const visibleTitle = preparation && !context ? "" : presenterVisibleTitle(visibleLabel, title);
+  const visibleTitle = preparation && !context ? "" : presenterVisibleTitle(visibleLabel, title, context);
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
-  const warnings = presenterWarningsForEntries(subgroup.slides);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
+  const warnings = presenterWarningsForCurrentInputs(subgroup.slides, inputContexts);
   const formWarnings = uniqueList(inputContexts.flatMap(({ item }) => serviceFormInputWarnings(item)));
   const staticWarnings = warnings.filter(warning => !formWarnings.includes(warning));
   // Single-song rows use the same compact controls as medley rows.
@@ -955,12 +955,14 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const headerDbContext = options.showHead && inputContexts.length === 1 ? inputContexts[0] : null;
   const inputControls = renderPresenterBoardSubgroupInputControls(serviceId, subgroup, { headerActions: Boolean(headerContext), headerDbLink: Boolean(headerDbContext) });
   const headerActions = headerContext && inputControls ? renderPresenterBoardItemActions(serviceId, headerContext) : "";
+  const structureActions = context ? renderPresenterBoardStructureActions(serviceId, context) : "";
   const itemIndexAttr = context ? ` data-service-item-index="${escapeAttr(String(context.index))}"` : "";
   const elementIdAttr = context?.item?.id ? ` data-service-element-id="${escapeAttr(context.item.id)}"` : "";
   const hidden = context?.item
     ? serviceItemPresentationHidden(context.item)
     : subgroup.slides.length > 0 && subgroup.slides.every(({ slide }) => presenterSlideIsHidden(slide));
-  const showHead = hidden || Boolean(options.showHead && (visibleLabel || visibleTitle || warnings.length || headerActions));
+  const showHead = hidden || Boolean(options.showHead
+    && (visibleLabel || visibleTitle || warnings.length || headerActions || structureActions));
   return `
     <div class="svc-board-subgroup${active ? " active" : ""}${showHead ? "" : " collapsed-head"}"${itemIndexAttr}${elementIdAttr}>
       ${showHead ? `
@@ -979,6 +981,7 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
           </button>
           ${headerDbContext ? renderServiceItemLinkControl(headerDbContext.item, headerDbContext.index) : ""}
           ${headerActions}
+          ${structureActions}
         </header>` : ""}
       ${inputControls}
       ${renderServiceSlotMusic(context)}
@@ -1221,10 +1224,17 @@ function renderPresenterWarnings(warnings = []) {
   }</span>`;
 }
 
-function presenterVisibleTitle(label, title) {
+function presenterVisibleTitle(label, title, context = null) {
   const cleanTitle = String(title || "").trim();
-  // Titles stay in the model; the header just does not print the label twice.
-  return compactSearchValue(cleanTitle) === compactSearchValue(label) ? "" : cleanTitle;
+  const compactTitle = compactSearchValue(cleanTitle);
+  // Titles stay in the model and on the output slide. The controller header
+  // only removes information already expressed by its own row or parent section.
+  if (compactTitle === compactSearchValue(label)) return "";
+  const item = context?.item || null;
+  const sectionTitle = item
+    ? serviceCanonicalSectionTitle(item._worshipSectionKey || item.section_key || "")
+    : "";
+  return sectionTitle && compactTitle === compactSearchValue(sectionTitle) ? "" : cleanTitle;
 }
 
 // Controller-only grouping: preserve slide objects, indexes and output order.

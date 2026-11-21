@@ -222,14 +222,21 @@
     const profile = versionProfile(song, version);
     const audioPresent = hasVersionAudio(version);
     const childMode = isChildrenMode(item);
-    const valid = childMode && audioPresent && validSet(profile, version) && profile?.enabled && profile.url && !validate(profile, slides, true);
+    const profileMatches = childMode && audioPresent && validSet(profile, version);
+    const timingIssue = profileMatches && profile?.enabled ? validate(profile, slides, true) : '';
+    const valid = profileMatches && profile?.enabled && profile.url && !timingIssue;
     if (valid && profile.databaseTiming) remoteSources.add(profile.url);
     let page = 0;
     return slides.map(slide => {
       const timed = slide.type === 'lyrics' || slide.type === 'blank';
       const intro = slide.type === 'song-title' && page === 0;
       const result = { ...slide, songTimingKey: key, songTimingEligible: audioPresent && childMode, songTimingAudio: childMode && audioPresent && validSet(profile, version) && profile?.url ? {url:profile.url,name:profile.audioName} : null };
-      if (childMode && !valid) result.warnings = [...(slide.warnings || []), "버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요."];
+      // Never present a song that has never had audio as corrupted data. The
+      // controller owns that normal empty state with one "음원 추가" action.
+      // Warn only when persisted material exists but no longer matches.
+      if (childMode && profile && (!profileMatches || timingIssue)) result.warnings = [...(slide.warnings || []), timingIssue
+        ? "버전 음원의 자동 넘김 시각을 확인하세요."
+        : "버전 음원이 현재 가사·송폼과 다릅니다. 음원 설정을 확인하세요."];
       if (timed || intro) {
         // Missing, stale or disabled DB timing must not inherit another timeline.
         if (audioPresent || profile || childMode) delete result.syncTimeline;

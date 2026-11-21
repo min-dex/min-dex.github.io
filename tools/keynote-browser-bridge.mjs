@@ -5,8 +5,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { spawn } from 'node:child_process';
+import { createReadStream } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { KEYNOTE_HTML_RUNTIME_SHA256, validateKeynoteHtmlManifest, assertKnownKeynoteHtmlRuntime } from '../mindex.keynote-html-engine.mjs';
+import { KEYNOTE_HTML_RUNTIME_SHA256, KEYNOTE_HTML_RESOURCE_CHUNK, keynoteHtmlResourceLimit, validateKeynoteHtmlManifest, assertKnownKeynoteHtmlRuntime } from '../mindex.keynote-html-engine.mjs';
 
 export const PROTOCOL = 'mindex-keynote-bridge-v1';
 const MAX_BYTES = 500 * 1024 * 1024;
@@ -34,9 +35,9 @@ export async function prepareExport(source, folder) {
       if (entry.name.startsWith('.') || entry.name === 'manifest.json') continue;
       const target = path.join(dir, entry.name), name = path.relative(folder, target).split(path.sep).join('/');
       if (entry.isDirectory()) { await walk(target);continue; }
-      if (!entry.isFile() || (name !== 'index.html' && !name.startsWith('assets/')) || !/^[a-zA-Z0-9_./@-]+$/.test(name) || name.split('/').some(p=>p.startsWith('.'))) throw Error('지원하지 않는 재생 자료 경로입니다.');
+      if (!entry.isFile() || (name !== 'index.html' && !name.startsWith('assets/')) || !/^[\p{L}\p{M}\p{N}_./@-]+$/u.test(name) || name.split('/').some(p=>p.startsWith('.'))) throw Error('지원하지 않는 재생 자료 경로입니다.');
       const stat = await fs.stat(target);total += stat.size;
-      if (stat.size > 50 * 1024 * 1024 || total > MAX_BYTES || Object.keys(files).length >= 5000) throw Error('재생 자료의 크기를 확인해 주세요.');
+      if (stat.size > keynoteHtmlResourceLimit(name) || total > MAX_BYTES || Object.keys(files).length >= 5000) throw Error('재생 자료의 크기를 확인해 주세요.');
       files[name] = { size:stat.size, sha256:digest(await fs.readFile(target)) };
     }
   }
@@ -113,7 +114,7 @@ export async function createBridge({ port=43181, origin='https://min-dex.github.
       if (app) {
         res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');
         res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type, X-Mindex-Keynote-Client');
+        res.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type, X-Mindex-Keynote-Client, Range');
         res.setHeader('Access-Control-Allow-Private-Network','true');
       }
       if(req.method==='OPTIONS') {res.writeHead(204);return res.end();}
@@ -181,6 +182,25 @@ export async function createBridge({ port=43181, origin='https://min-dex.github.
         if(!expected||name.split('/').some(p=>!p||p.startsWith('.')))return json(404,{error:'재생 자료가 없습니다.'});
         const target=path.join(job.folder,...name.split('/')),stat=await fs.lstat(target);
         if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==expected.size)return json(409,{error:'재생 자료가 변경됐습니다.'});
+        if(req.headers.range){
+          const match=req.headers.range.match(/^bytes=(\d+)-(\d+)$/),start=Number(match?.[1]),end=Number(match?.[2]);
+          if(!match||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||end<start||end>=stat.size||end-start+1>KEYNOTE_HTML_RESOURCE_CHUNK)return json(416,{error:'재생 자료 범위를 확인해 주세요.'});
+          const signature=s=>[s.dev,s.ino,s.size,s.mtimeMs,s.ctimeMs].join('|'),key=signature(stat);
+          job.verified ||= new Map();
+          if(job.verified.get(name)!==key){
+            const hash=crypto.createHash('sha256');for await(const chunk of createReadStream(target))hash.update(chunk);
+            if(hash.digest('hex')!==expected.sha256||signature(await fs.lstat(target))!==key)return json(409,{error:'재생 자료가 변경됐습니다.'});
+            job.verified.set(name,key);
+          }
+          const handle=await fs.open(target,'r');let bytes;
+          try{
+            if(signature(await handle.stat())!==key)return json(409,{error:'재생 자료가 변경됐습니다.'});
+            bytes=Buffer.alloc(end-start+1);const read=await handle.read(bytes,0,bytes.length,start);
+            if(read.bytesRead!==bytes.length||signature(await handle.stat())!==key)return json(409,{error:'재생 자료가 변경됐습니다.'});
+          }finally{await handle.close();}
+          res.writeHead(206,{'Content-Type':mime(name),'Content-Length':bytes.length,'Content-Range':`bytes ${start}-${end}/${stat.size}`,'Cache-Control':'no-store'});return res.end(bytes);
+        }
+        if(stat.size>50*1024*1024)return json(413,{error:'큰 영상은 나누어 읽어 주세요.'});
         const bytes=await fs.readFile(target);
         if(digest(bytes)!==expected.sha256)return json(409,{error:'재생 자료가 변경됐습니다.'});
         res.writeHead(200,{'Content-Type':mime(name),'Content-Length':bytes.length,'Cache-Control':'no-store'});return res.end(bytes);

@@ -1772,22 +1772,14 @@ function handleServiceOutlineSlideEvent(event) {
 
 function handleDetailContextMenu(event) {
   const presenterThumb = event.target.closest(".svc-slide-thumb[data-presenter-index][data-service-id]");
-  const sectionEditButton = event.target.closest("[data-presenter-section-edit]");
-  if (!presenterThumb && !sectionEditButton) return;
+  if (!presenterThumb) return;
   event.preventDefault();
-  if (sectionEditButton) {
-    requestPresenterSectionEditor(sectionEditButton.dataset.serviceId || state.selectedServiceId, {
-      sectionKey: sectionEditButton.dataset.presenterSectionEdit,
-    });
-    return;
-  }
   const serviceId = presenterThumb.dataset.serviceId;
   const index = Number(presenterThumb.dataset.presenterIndex);
   if (!serviceId || !Number.isFinite(index)) return;
   selectPresenterBoardSlide(serviceId, index, {
     elementKey: presenterThumb.dataset.presenterElementKey || presenterSlideElementKey(serviceId, index),
   });
-  requestPresenterSectionEditorForSlide(serviceId, index);
 }
 
 function handlePresenterBoardPointerDown(event) {
@@ -4248,6 +4240,9 @@ function autoUpcomingPublicServiceTargets(baseDate = new Date()) {
 }
 
 const FRIDAY_SERVICE_VARIANT_START_DATE = "2026-08-01";
+const REGULAR_FRIDAY_SERVICE_DATE_OVERRIDES = new Set([
+  "2026-11-27",
+]);
 
 const FRIDAY_SERVICE_VARIANTS = {
   1: {
@@ -4316,6 +4311,7 @@ function fridayWeekOfMonth(dateValue = "") {
 function fridayServiceVariantForDate(dateValue = "") {
   const date = String(dateValue || "").trim().slice(0, 10);
   if (!date || date < FRIDAY_SERVICE_VARIANT_START_DATE) return null;
+  if (REGULAR_FRIDAY_SERVICE_DATE_OVERRIDES.has(date)) return null;
   const week = fridayWeekOfMonth(date);
   if ((week === 2 || week === 3) && date.slice(0, 7) !== "2026-08") return null;
   return FRIDAY_SERVICE_VARIANTS[week] || null;
@@ -9121,6 +9117,8 @@ function handlePresenterDetailClick(event) {
     return true;
   }
 
+  if (handlePresenterInlineItemAction(event)) return true;
+
   const presenterSectionAdd = event.target.closest("[data-presenter-section-add]");
   if (presenterSectionAdd) {
     runPresenterSectionItemAction("add", -1);
@@ -12882,12 +12880,14 @@ function runServiceItemActionUnscoped(action, index, label = "", title = "") {
   updateSaveState();
 }
 
-function runPresenterSectionItemAction(action, index) {
+function runPresenterSectionItemAction(action, index, options = {}) {
   const editor = state.presenterSectionEditor;
-  const serviceId = editor?.serviceId || state.selectedServiceId;
+  const serviceId = options.serviceId || editor?.serviceId || state.selectedServiceId;
   if (!serviceId) return;
   const service = state.services.find((svc) => svc.id === serviceId);
-  const context = presenterSectionEditorContext(service);
+  const context = options.inline
+    ? presenterSectionItemActionContext(service, index)
+    : presenterSectionEditorContext(service);
   if (!context) return;
   const items = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
   const beforeMove = ["up","down"].includes(action) ? serviceEditSnapshot(items, serviceMoveFields) : null;

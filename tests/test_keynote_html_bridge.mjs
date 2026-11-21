@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { keynoteHtmlFrameBridge } from '../mindex.keynote-html-engine.mjs';
 
-function fixture() {
+function fixture(originalSource) {
  const messages=[], handlers=new Map(), tracks=[];let tick;
  class Track extends EventTarget {
   constructor(src){super();Object.assign(this,{src,currentSrc:src,currentTime:0,duration:6,paused:true,ended:false,isConnected:true,readyState:4,seeking:false,plays:0});tracks.push(this)}
@@ -18,7 +18,7 @@ function fixture() {
   jumpToScene(n){this.currentSceneIndex=n;this.currentSlideIndex=n>1?1:0;this.nextSceneIndex=n===2?-1:n+1;this.state='IdleAtInitialState';this.onJump?.()},
   changeState(state){this.state=state},playCurrentScene(){this.state='Playing'}};
  const parent={postMessage:message=>messages.push(message)}, token='00000000-0000-4000-8000-000000000000';
- const context=vm.createContext({HTMLMediaElement:Track,window:{__mindexKeynoteController:e},parent,document:{querySelectorAll:()=>tracks.filter(x=>x.isConnected)},addEventListener:(name,fn)=>handlers.set(name,fn),setInterval:fn=>{tick=fn;return 1},clearInterval(){},setTimeout,clearTimeout,Promise,Map,Set,Date,Error,JSON,Number});
+ const context=vm.createContext({HTMLMediaElement:Track,window:{__mindexKeynoteController:e,__mindexKeynoteOriginalMediaSource:originalSource},parent,document:{querySelectorAll:()=>tracks.filter(x=>x.isConnected)},addEventListener:(name,fn)=>handlers.set(name,fn),setInterval:fn=>{tick=fn;return 1},clearInterval(){},setTimeout,clearTimeout,Promise,Map,Set,Date,Error,JSON,Number});
  vm.runInContext(`(${keynoteHtmlFrameBridge.toString()})(${JSON.stringify(token)})`,context);
  const send=async(request,source=parent,overrideToken=token)=>{handlers.get('message')({source,data:{type:'mindex-keynote-html-command',token:overrideToken,request}});await new Promise(setImmediate)};
  return {e,Track,tracks,messages,send,tick:()=>tick(),ready:()=>tick(),close:()=>handlers.get('pagehide')()};
@@ -54,6 +54,17 @@ test('status reconnect cancels an old queued next instead of dispatching it late
  f.e.state='IdleAtInitialState';await new Promise(resolve=>setTimeout(resolve,70));
  assert.equal(f.e.advances,0);assert.ok(f.messages.some(x=>x.kind==='ack'&&x.id==='status001'));
  await f.send({id:'fresh0001',action:'next'});assert.equal(f.e.advances,1);f.close();
+});
+
+test('split-media checkpoints restore canonical sources across different frame Blob URLs',async()=>{
+ const canonical='https://media.example/deck/assets/movie.mp4',f=fixture(src=>src.startsWith('blob:')?canonical:src);
+ const old=new f.Track('blob:null/old');await old.play();let current;
+ f.e.onJump=()=>{old.isConnected=false;current=new f.Track('blob:null/new');void current.play()};f.ready();
+ assert.equal(f.messages.find(x=>x.kind==='ready').checkpoint.media[0].src,canonical);
+ await f.send({id:'restore-chunk',action:'restore',checkpoint:{scene:0,phase:'final',slide:0,nextScene:1,media:[{src:canonical,time:1.25,paused:false,resume:true}]}});
+ assert.equal(current.currentTime,1.25);assert.equal(current.paused,true);assert.equal(old.currentTime,0);
+ const ack=f.messages.findLast(x=>x.kind==='ack');assert.equal(ack.checkpoint.media.find(x=>x.time===1.25).src,canonical);
+ await f.send({id:'resume-chunk',action:'play'});assert.equal(current.plays,1);assert.equal(old.plays,0);f.close();
 });
 
 test('terminal native scene retains the last page when Apple reports slide minus one',()=>{
