@@ -57,7 +57,11 @@ try:
    assert output.evaluate("document.body.textContent.includes('TWO')")
    assert main.evaluate("readPresenterStoredPayload().slides.some(s=>s.text==='UPDATED NEXT') && readPresenterStoredPayload().slides[2].text==='TWO'")
    assert output.evaluate("beforeControllerReload===document.querySelector('#presenterOutputRoot > video.presenter-output-background-video')&&!beforeControllerReload.paused")
-   output.evaluate("async()=>{const v=beforeControllerReload;v.pause();const seek=new Promise(r=>v.addEventListener('seeked',r,{once:true}));v.currentTime=v.duration*.5;await seek}")
+   # canplay may resume this short looping fixture after seek; hold its selected
+   # frame until reload so pagehide tests a decoded frame, not a loop-boundary seek.
+   # The listener belongs to the old document; restored playback is still required.
+   output.evaluate("async()=>{const v=beforeControllerReload;v.addEventListener('play',()=>v.pause());v.pause();const seek=new Promise(r=>v.addEventListener('seeked',r,{once:true}));v.currentTime=v.duration*.5;await seek}")
+   output.wait_for_function("beforeControllerReload.paused&&!beforeControllerReload.seeking&&beforeControllerReload.readyState>=2&&beforeControllerReload.currentTime>0.02")
    output.add_init_script("window.savedReloadTime=JSON.parse(sessionStorage.getItem('mindex.presenter.background-checkpoint')||'null')?.time; document.addEventListener('seeked',e=>{if(e.target.matches('video.presenter-output-background-video'))window.restoredSeekTime??=e.target.currentTime},true)")
    output.evaluate("""()=>window.addEventListener('pagehide',()=>{
     const v=document.querySelector('#presenterOutputRoot > video.presenter-output-background-video');
