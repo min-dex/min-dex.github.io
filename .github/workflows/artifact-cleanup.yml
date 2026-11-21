@@ -26,7 +26,9 @@ jobs:
         with:
           script: |
             const minimumBytes = 100 * 1024 * 1024;
-            const cutoff = Date.now() - 60 * 60 * 1000;
+            // A completed workflow has no remaining downstream artifact consumer.
+            // Keep a short grace period for API/eventual-consistency delays only.
+            const cutoff = Date.now() - 10 * 60 * 1000;
             const disposable = /^(?:mindex-(?:mac|win)-(?:test|internal|signed)|github-pages)$/;
             const artifacts = await github.paginate(
               github.rest.actions.listArtifactsForRepo,
