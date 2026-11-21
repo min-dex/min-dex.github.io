@@ -22,7 +22,7 @@ const assert=require('node:assert/strict'),http=require('node:http'),crypto=requ
    const bypass=await page.evaluate(()=>mindexElectron.keynoteBridgeRequest({path:'/connect/'+'a'.repeat(36),method:'POST'}));
    assert.equal(bypass.ok,false);assert.equal(calls,1);
    const other=await app.evaluate(async({BrowserWindow,app})=>{
-    const path=require('node:path'),window=new BrowserWindow({show:false,webPreferences:{preload:path.join(app.getAppPath(),'electron/preload.js'),contextIsolation:true,nodeIntegration:false}});
+    const window=new BrowserWindow({show:false,webPreferences:{preload:app.getAppPath()+'/electron/preload.js',contextIsolation:true,nodeIntegration:false}});
     try{await window.loadURL('data:text/html,<title>isolated untrusted window</title>');return await window.webContents.executeJavaScript("mindexElectron.keynoteBridgeRequest({path:'/health'})");}finally{window.destroy();}
    });
    assert.equal(other.ok,false);assert.equal(calls,1,'secondary windows must not access helper');

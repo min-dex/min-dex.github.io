@@ -138,6 +138,9 @@ NFD 한글 영상명과 265MiB 내장 영상이 기존 준비 경로에서 거�
 Node36개, Chromium/WebKit 실제 승인·준비·재시도·폴더복구·취소·입력 보호,
 숨긴 격리 설치 앱의 280MiB 합성 IPC, runtime/icon·패키지 파일·CI scope 검사 PASS.
 3OS 실제 packaged IPC/부창/이동한 컨트롤러 거부 검사를 Desktop workflow에 등록했다.
+별도 Mac ARM 설치 시험본에서 실제 도우미 health200 및 승인 우회·부창·이동한
+컨트롤러 거부 PASS. Playwright main 평가 영역은 require를 제공하지 않아 경로를
+앱의 절대 경로에서 구성하도록 시험 코드를 수정했다.
 사용자 Mac의 기존 도우미는 코드/manifest만 갱신했고 실행 파일·시작 설정은 유지했다.
 전송/자식 변환 없음 확인 뒤 idle restart, 공개 Origin200/null403 유지 PASS.
 사용자 실행 Mindex·작성 중인 내용·원본은 재시작/수정하지 않았다.
