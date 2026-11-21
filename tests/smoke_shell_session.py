@@ -44,7 +44,11 @@ def main():
                                   document.body.dataset.theme=theme;
                                   applyRightSidebarVisibility(true);
                                 }''',theme)
-                                page.wait_for_timeout(150)
+                                page.wait_for_function('''()=>{
+                                  const b=s=>document.querySelector(s).getBoundingClientRect();
+                                  const a=b('.topbar-actions'),r=b('.right-sidebar'),t=b('.topbar'),l=b('.nav-sidebar'),n=b('.primary-switcher');
+                                  return [Math.abs(a.x-r.x),Math.abs(n.x-l.right),Math.abs(a.height-t.height),Math.abs(r.width-l.width),Math.abs(a.width-l.width)].every(v=>v<1);
+                                }''')
                                 geometry=page.evaluate('''()=>{
                                   const b=s=>document.querySelector(s).getBoundingClientRect();
                                   const a=b('.topbar-actions'),r=b('.right-sidebar'),t=b('.topbar'),l=b('.nav-sidebar'),n=b('.primary-switcher');
