@@ -41,6 +41,9 @@ on:
       - tests/test_electron_updater.cjs
       - tests/test_minimatch_compat.cjs
       - tests/test_electron_test_isolation.cjs
+      - tests/test_isolated_electron_cleanup.cjs
+      - tests/test_isolated_electron_cleanup_live.cjs
+      - tests/helpers/close-isolated-electron.cjs
       - tests/test_electron_runtime_files.py
       - scripts/release-electron.mjs
       - tests/test_release_preflight.mjs
@@ -263,6 +266,7 @@ jobs:
         if: ${{ !inputs.publish_release }}
         run: python tests/cleanup_desktop_ci.py test
       - name: Build and verify church internal installers without publication
+        timeout-minutes: 25
         if: ${{ !inputs.publish_release }}
         shell: bash
         env:
@@ -292,6 +296,7 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/internal-install.json" internal
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/internal-proof.json" restart "$GITHUB_SHA" "$version"
+          node tests/test_isolated_electron_cleanup_live.cjs "$exe" "$GITHUB_SHA" "$version"
           node tests/test_bulletin_desktop_live.cjs "$exe" "$GITHUB_SHA" "$version"
           node tests/test_desktop_keynote_bridge.cjs "$exe" "$GITHUB_SHA" "$version"
           python tests/cleanup_desktop_ci.py internal
@@ -424,6 +429,7 @@ jobs:
           name: mindex-mac-internal
           path: dist/internal
       - name: Verify actual Intel church installer and preservation
+        timeout-minutes: 25
         shell: bash
         run: |
           version="$(node -p 'require("./package.json").version')"
@@ -439,6 +445,7 @@ jobs:
           python tests/install_test_fixture.py "$installer" "$RUNNER_TEMP/intel-internal.json" internal
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" upgrade "$GITHUB_SHA" "$version"
           node tests/test_desktop_upgrade.cjs "$exe" "$RUNNER_TEMP/intel-internal-proof.json" restart "$GITHUB_SHA" "$version"
+          node tests/test_isolated_electron_cleanup_live.cjs "$exe" "$GITHUB_SHA" "$version"
           node tests/test_bulletin_desktop_live.cjs "$exe" "$GITHUB_SHA" "$version"
           node tests/test_desktop_keynote_bridge.cjs "$exe" "$GITHUB_SHA" "$version"
           python tests/cleanup_desktop_ci.py intel-internal

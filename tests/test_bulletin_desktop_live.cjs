@@ -1,5 +1,6 @@
 // Two isolated installed apps share synthetic RPC rows. No production profile/network access.
 const {_electron}=require('playwright');
+const {closeIsolatedElectron}=require('./helpers/close-isolated-electron.cjs');
 const assert=require('node:assert/strict'),crypto=require('node:crypto'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 async function main(){
  const [exe,sha,version]=process.argv.slice(2);
@@ -96,12 +97,12 @@ async function main(){
   assert.equal(await b.locator('[data-bulletin-field=news]').inputValue(),'직접 작성한 주간 소식');
   for(const app of apps)assert.equal(await app.evaluate(({app})=>app.getVersion()),version);
   console.log('PASS installed two-app bulletin settings via shared RPC: text/layout/labels update without restart; dirty input and weekly content preserved');
+ }catch(error){
+  console.error('Isolated bulletin assertion failed before cleanup:',error);throw error;
  }finally{
-  for(const app of apps){
-   for(const page of app.windows())await page.close({runBeforeUnload:false});
-   await app.close();
-  }
-  for(const token of tokens){
+  const closed=await Promise.allSettled(apps.map((app,index)=>closeIsolatedElectron(app,tokens[index])));
+  for(const [index,token] of tokens.entries()){
+   if(closed[index]?.status!=='fulfilled')continue;
    const dir=path.join(fs.realpathSync(os.tmpdir()),'mindex-isolated-upgrade-'+token),marker=path.join(dir,'fixture-only.json');
    if(!fs.existsSync(marker))continue;
    assert(!fs.lstatSync(dir).isSymbolicLink()&&!fs.lstatSync(marker).isSymbolicLink());
@@ -109,6 +110,9 @@ async function main(){
    assert.equal(saved.token,token);assert.equal(saved.appId,'kr.mindex.app.test');
    fs.rmSync(dir,{recursive:true});
   }
+  const errors=closed.filter(result=>result.status==='rejected').map(result=>result.reason);
+  if(errors.length)throw new AggregateError(errors,'Isolated bulletin app cleanup failed');
+  console.log('PASS owned isolated bulletin window cleanup');
  }
 }
 main().catch(error=>{console.error(error);process.exitCode=1;});

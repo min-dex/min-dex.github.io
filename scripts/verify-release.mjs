@@ -38,7 +38,7 @@ export function verifyRelease({ offline = false, publish = true, platform = proc
   }
   if (problems.length) throw new Error(`Release stopped. Required: ${problems.join(', ')}`);
   for (const args of [
-    ['--test','tests/test_electron_updater.cjs','tests/test_internal_updater.cjs','tests/test_release_preflight.mjs','tests/test_desktop_update_ui.cjs'],
+    ['--test','tests/test_electron_updater.cjs','tests/test_internal_updater.cjs','tests/test_release_preflight.mjs','tests/test_desktop_update_ui.cjs','tests/test_isolated_electron_cleanup.cjs'],
     ['tests/test_worship_input_module_contract.cjs'],
     ['--test','tests/test_product_identity.cjs','tests/test_electron_test_isolation.cjs','tests/test_minimatch_compat.cjs'],
   ]) {

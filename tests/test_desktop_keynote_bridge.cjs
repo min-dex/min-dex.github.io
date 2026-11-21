@@ -1,5 +1,6 @@
 // Isolated packaged app and synthetic loopback helper only; no Keynote or user files.
 const {_electron}=require('playwright');
+const {closeIsolatedElectron}=require('./helpers/close-isolated-electron.cjs');
 const assert=require('node:assert/strict'),http=require('node:http'),crypto=require('node:crypto'),fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 (async()=>{
  const [exe,sha,version]=process.argv.slice(2),token=crypto.randomBytes(16).toString('hex');
@@ -34,10 +35,16 @@ const assert=require('node:assert/strict'),http=require('node:http'),crypto=requ
    assert.equal(navigated.ok,false);assert.equal(calls,1,'a navigated controller must not retain access');
   }else{assert.equal(result.reason,'unsupported-platform');assert.equal(calls,0);}
   console.log('PASS packaged Keynote protected IPC, fixed-origin helper health, approval-bypass rejection and untrusted-window isolation');
+ }catch(error){
+  console.error('Isolated Keynote assertion failed before cleanup:',error);throw error;
  }finally{
-  if(app){for(const page of app.windows())await page.close({runBeforeUnload:false});await app.close();}
-  await new Promise(resolve=>server.close(resolve));
+  let cleanupError;
+  try{if(app)await closeIsolatedElectron(app,token);}catch(error){cleanupError=error;}
+  server.closeAllConnections();
+  await new Promise(resolve=>server.close(()=>resolve()));
   const folder=path.join(fs.realpathSync(os.tmpdir()),'mindex-isolated-upgrade-'+token),marker=path.join(folder,'fixture-only.json');
-  if(fs.existsSync(marker)){assert(!fs.lstatSync(folder).isSymbolicLink());const value=JSON.parse(fs.readFileSync(marker));assert.equal(value.token,token);assert.equal(value.appId,'kr.mindex.app.test');fs.rmSync(folder,{recursive:true});}
+  if(!cleanupError&&fs.existsSync(marker)){assert(!fs.lstatSync(folder).isSymbolicLink());const value=JSON.parse(fs.readFileSync(marker));assert.equal(value.token,token);assert.equal(value.appId,'kr.mindex.app.test');fs.rmSync(folder,{recursive:true});}
+  if(cleanupError)throw cleanupError;
+  console.log('PASS owned isolated Keynote window cleanup');
  }
 })().catch(error=>{console.error(error);process.exitCode=1;});

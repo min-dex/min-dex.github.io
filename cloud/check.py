@@ -16,6 +16,7 @@ NODE_TESTS = (
     "test_internal_updater.cjs",
     "test_desktop_update_ui.cjs",
     "test_electron_test_isolation.cjs",
+    "test_isolated_electron_cleanup.cjs",
     "test_praise_id_aliases.cjs",
     "test_praise_classification.cjs",
     "test_praise_groups.cjs",
