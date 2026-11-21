@@ -211,3 +211,8 @@ The standalone browser preview is published at `tools/broadcast-prototype/`.
 Pages staging includes only its reviewed static file allowlist; other tools,
 Electron code and untracked files remain excluded. The main application's
 desktop-only broadcast launcher is unchanged.
+
+Full HD caption layers use readback-oriented 2D contexts because alpha-transition
+comparison reads their pixels. Linux WebKit verification caught empty accelerated
+layer readback despite successful draw calls; Chromium and WebKit must both show
+caption pixels in the final 1080p composite.

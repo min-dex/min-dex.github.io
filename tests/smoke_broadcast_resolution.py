@@ -17,19 +17,6 @@ def main():
                 browser = launch_chromium(p) if engine == 'chromium' else p.webkit.launch()
                 try:
                     page = browser.new_page(viewport={'width': 1320, 'height': 1000})
-                    page.add_init_script("""(() => {
-                        window.captionTrace=[];
-                        for(const name of ['fillRect','fillText']){
-                            const original=CanvasRenderingContext2D.prototype[name];
-                            CanvasRenderingContext2D.prototype[name]=function(...args){
-                                if(!this.canvas.isConnected){
-                                    captionTrace.push({name,args,size:[this.canvas.width,this.canvas.height],transform:[this.getTransform().a,this.getTransform().d],font:this.font,fill:this.fillStyle});
-                                    if(captionTrace.length>20)captionTrace.shift();
-                                }
-                                return original.apply(this,args);
-                            };
-                        }
-                    })();""")
                     page.set_default_timeout(15000)
                     errors = []
                     page.on('pageerror', lambda error: errors.append(str(error)))
@@ -41,22 +28,12 @@ def main():
                     page.get_by_text('수동 자막 및 화면 설정', exact=True).click()
                     page.locator('#text').fill('1080p browser caption')
                     page.locator('#apply').click()
-                    try:
-                        page.wait_for_function('''() => {
+                    page.wait_for_function('''() => {
                         const c=document.querySelector('#broadcast');
                         const d=c.getContext('2d').getImageData(0,850,1920,230).data;
                         for(let i=0;i<d.length;i+=4)if(d[i]>220&&d[i+1]>220&&d[i+2]>220)return true;
                         return false;
                     }''')
-                    except Exception:
-                        print('BROADCAST_ERRORS', errors, flush=True)
-                        print('BROADCAST_DIAGNOSTIC', engine, page.evaluate("""() => {
-                            const c=document.querySelector('#broadcast'),d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
-                            let count=0,minY=c.height,maxY=-1;
-                            for(let i=0;i<d.length;i+=4)if(d[i]>220&&d[i+1]>220&&d[i+2]>220){count++;const y=Math.floor(i/4/c.width);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
-                            return {trace:window.captionTrace,count,minY,maxY,stats:broadcastPrototype.stats(),transition:broadcastPrototype.transition(),routing:broadcastPrototype.routing(),fonts:document.fonts.status,faces:[...document.fonts].filter(f=>f.family.includes('Presenter')).map(f=>[f.family,f.weight,f.status]),rect:c.getBoundingClientRect().toJSON(),text:document.querySelector('#text').value};
-                        }"""), flush=True)
-                        raise
                     assert page.locator('#ytStart').is_disabled()
                     assert not errors, errors
                     print(f'PASS {engine}: browser 1080p canvas, scaled caption, no desktop bridge')
