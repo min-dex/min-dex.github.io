@@ -1004,3 +1004,67 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   };
   start();
 }
+
+// Inline controller item controls share the section editor action owner.
+function presenterSectionItemActionContext(service, itemIndex) {
+  if (!service || !Number.isInteger(itemIndex)) return null;
+  const items = servicePrepEditorItems(service.id);
+  const rawItems = getServiceItems(service.id);
+  const target = items.find((item) => Number(item._origIndex) === itemIndex) || null;
+  if (!target) return null;
+  const groupKey = presenterSectionEditorGroupKey(target);
+  const sectionItems = items.filter((item) => presenterSectionEditorMatches(item, groupKey, target));
+  if (!sectionItems.length) return null;
+  return {
+    service,
+    rawItems,
+    items,
+    groupKey,
+    sectionItems,
+    sectionTitle: presenterSectionEditorTitle(sectionItems),
+  };
+}
+
+function renderPresenterBoardStructureActions(serviceId, context) {
+  const actionContext = presenterSectionItemActionContext(context.service, context.index);
+  const indexes = (actionContext?.sectionItems || [])
+    .map((item) => Number(item._origIndex))
+    .filter(Number.isInteger);
+  const position = indexes.indexOf(context.index);
+  if (position < 0) return "";
+  const moveUp = position > 0
+    ? `<button class="icon-btn" type="button" data-presenter-inline-item-action="up"
+        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
+        aria-label="엘리멘트 위로 이동" title="위로 이동"><i data-lucide="arrow-up"></i></button>`
+    : "";
+  const moveDown = position < indexes.length - 1
+    ? `<button class="icon-btn" type="button" data-presenter-inline-item-action="down"
+        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
+        aria-label="엘리멘트 아래로 이동" title="아래로 이동"><i data-lucide="arrow-down"></i></button>`
+    : "";
+  return `
+    <div class="svc-board-inline-structure-actions" role="group" aria-label="엘리멘트 관리">
+      ${moveUp}
+      ${moveDown}
+      <button class="icon-btn danger" type="button" data-presenter-inline-item-action="delete"
+        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
+        aria-label="엘리멘트 삭제" title="엘리멘트 삭제"><i data-lucide="trash-2"></i></button>
+    </div>`;
+}
+
+function handlePresenterInlineItemAction(event) {
+  const presenterInlineItemAction = event.target.closest("[data-presenter-inline-item-action]");
+  if (presenterInlineItemAction) {
+    runPresenterSectionItemAction(
+      presenterInlineItemAction.dataset.presenterInlineItemAction,
+      Number(presenterInlineItemAction.dataset.serviceItemIndex),
+      {
+        serviceId: presenterInlineItemAction.dataset.serviceId || state.selectedServiceId,
+        inline: true,
+      },
+    );
+    return true;
+  }
+
+  return false;
+}

@@ -9117,18 +9117,7 @@ function handlePresenterDetailClick(event) {
     return true;
   }
 
-  const presenterInlineItemAction = event.target.closest("[data-presenter-inline-item-action]");
-  if (presenterInlineItemAction) {
-    runPresenterSectionItemAction(
-      presenterInlineItemAction.dataset.presenterInlineItemAction,
-      Number(presenterInlineItemAction.dataset.serviceItemIndex),
-      {
-        serviceId: presenterInlineItemAction.dataset.serviceId || state.selectedServiceId,
-        inline: true,
-      },
-    );
-    return true;
-  }
+  if (handlePresenterInlineItemAction(event)) return true;
 
   const presenterSectionAdd = event.target.closest("[data-presenter-section-add]");
   if (presenterSectionAdd) {
@@ -12976,25 +12965,6 @@ function runPresenterSectionItemAction(action, index, options = {}) {
   renderCurrentServiceModuleDetail();
   renderServiceList();
   updateSaveState();
-}
-
-function presenterSectionItemActionContext(service, itemIndex) {
-  if (!service || !Number.isInteger(itemIndex)) return null;
-  const items = servicePrepEditorItems(service.id);
-  const rawItems = getServiceItems(service.id);
-  const target = items.find((item) => Number(item._origIndex) === itemIndex) || null;
-  if (!target) return null;
-  const groupKey = presenterSectionEditorGroupKey(target);
-  const sectionItems = items.filter((item) => presenterSectionEditorMatches(item, groupKey, target));
-  if (!sectionItems.length) return null;
-  return {
-    service,
-    rawItems,
-    items,
-    groupKey,
-    sectionItems,
-    sectionTitle: presenterSectionEditorTitle(sectionItems),
-  };
 }
 
 function confirmPresenterSectionItemDeletion(item = {}, service = null) {

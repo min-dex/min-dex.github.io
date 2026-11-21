@@ -500,3 +500,14 @@ three bounded workers; it does not reload or replace the entire services list.
 disposable, connection-scoped native Praise read snapshot. It performs no startup
 I/O itself. Praise storage/content-live opt in only for non-auth-required clients;
 the single-song boundary owns fresh-server and full-catalog validation/adoption.
+
+## 1.0.15 controller scope repair
+
+Inline item action context, button rendering and click routing live in the existing
+`mindex.presenter-ui.js`; media-mode warning filtering lives in
+`mindex.presenter-media-state.js`. Compact controller row control styles live beside
+the input/media controls in `styles.presenter-media.css`. These functions execute
+after bootstrap; no script order or persistence owner changes. The existing app,
+board and workspace size ratchets remain unchanged. Source-extraction fixtures
+include the UI owner, and the main-process updater fixture resolves the real
+Keynote bridge module instead of resolving it relative to the test directory.

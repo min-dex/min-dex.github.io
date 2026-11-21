@@ -3547,28 +3547,6 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
 .svc-board-subgroup-head-row > .svc-board-subgroup-head {
   flex: 1 1 160px;
 }
-.svc-board-inline-structure-actions {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 5px;
-  margin-left: auto;
-}
-.svc-board-inline-structure-actions > .icon-btn {
-  width: 30px;
-  min-width: 30px;
-  height: 30px;
-  min-height: 30px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-.svc-board-inline-structure-actions > .icon-btn:is(:hover, :focus-visible) {
-  background: var(--ui-surface-field);
-}
-.svc-board-inline-structure-actions > .icon-btn.danger:is(:hover, :focus-visible) {
-  color: var(--danger);
-}
 .svc-board-subgroup-control-head {
   display: flex;
   flex: 1 0 100%;

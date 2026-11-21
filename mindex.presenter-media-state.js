@@ -400,3 +400,16 @@ function takePreparedServiceAudio(source) {
   previous?.load?.();
   return prepared;
 }
+
+// Controller warnings follow the selected input media mode.
+const PRESENTER_VERSION_AUDIO_WARNINGS = new Set([
+  "버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요.",
+  "버전 음원의 자동 넘김 시각을 확인하세요.",
+  "버전 음원이 현재 가사·송폼과 다릅니다. 음원 설정을 확인하세요.",
+]);
+
+function presenterWarningsForCurrentInputs(entries = [], inputContexts = []) {
+  const acceptsVersionAudio = inputContexts.some(({ item }) => servicePraiseInputMode(item) === "children_audio");
+  return presenterWarningsForEntries(entries)
+    .filter(warning => acceptsVersionAudio || !PRESENTER_VERSION_AUDIO_WARNINGS.has(warning));
+}

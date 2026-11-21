@@ -30,9 +30,13 @@ try:
     bounds=[]
     for mode in ['special','video','hymn']:
      print(page.evaluate('''mode=>{
-      const service=state.services[0], item=state.serviceItems[service.id][0];
+      const service=state.services[0];
+      // Rendering materializes template defaults; retain the offering's identity, not its old array position.
+      const index=state.serviceItems[service.id].findIndex(item=>item.id==='qa-offering');
+      const item=state.serviceItems[service.id][index];
+      if(!item)throw Error('Offering identity lost');
       if(!replaceServiceOfferingSpecial(item,mode))throw Error('transition failed');
-      const context={item,index:0,service};
+      const context={item,index,service};
       presenterBoardSubgroupInputContexts=()=>[context];presenterBoardSubgroupItemContext=()=>context;
       presenterBoardSubgroupDisplay=()=>({label:item.label,title:item.raw_title});
       document.getElementById('capture').innerHTML=renderPresenterBoardSubgroup({slides:[],name:item.label},-1,service.id,{showHead:true});

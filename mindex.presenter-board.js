@@ -991,33 +991,6 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
     </div>`;
 }
 
-function renderPresenterBoardStructureActions(serviceId, context) {
-  const actionContext = presenterSectionItemActionContext(context.service, context.index);
-  const indexes = (actionContext?.sectionItems || [])
-    .map((item) => Number(item._origIndex))
-    .filter(Number.isInteger);
-  const position = indexes.indexOf(context.index);
-  if (position < 0) return "";
-  const moveUp = position > 0
-    ? `<button class="icon-btn" type="button" data-presenter-inline-item-action="up"
-        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
-        aria-label="엘리멘트 위로 이동" title="위로 이동"><i data-lucide="arrow-up"></i></button>`
-    : "";
-  const moveDown = position < indexes.length - 1
-    ? `<button class="icon-btn" type="button" data-presenter-inline-item-action="down"
-        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
-        aria-label="엘리멘트 아래로 이동" title="아래로 이동"><i data-lucide="arrow-down"></i></button>`
-    : "";
-  return `
-    <div class="svc-board-inline-structure-actions" role="group" aria-label="엘리멘트 관리">
-      ${moveUp}
-      ${moveDown}
-      <button class="icon-btn danger" type="button" data-presenter-inline-item-action="delete"
-        data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}"
-        aria-label="엘리멘트 삭제" title="엘리멘트 삭제"><i data-lucide="trash-2"></i></button>
-    </div>`;
-}
-
 function renderPresenterCitationComposer(subgroup, serviceId) {
   const slide = subgroup.slides.find(({ slide }) => slide?.liveScriptureControl)?.slide;
   if (!slide?.elementId) return "";
@@ -1242,18 +1215,6 @@ function presenterWarningsForEntries(entries = []) {
       seen.add(key);
       return true;
     });
-}
-
-const PRESENTER_VERSION_AUDIO_WARNINGS = new Set([
-  "버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요.",
-  "버전 음원의 자동 넘김 시각을 확인하세요.",
-  "버전 음원이 현재 가사·송폼과 다릅니다. 음원 설정을 확인하세요.",
-]);
-
-function presenterWarningsForCurrentInputs(entries = [], inputContexts = []) {
-  const acceptsVersionAudio = inputContexts.some(({ item }) => servicePraiseInputMode(item) === "children_audio");
-  return presenterWarningsForEntries(entries)
-    .filter(warning => acceptsVersionAudio || !PRESENTER_VERSION_AUDIO_WARNINGS.has(warning));
 }
 
 function renderPresenterWarnings(warnings = []) {

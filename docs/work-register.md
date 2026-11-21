@@ -155,3 +155,17 @@ seek·해독 PASS, 공개 업로드/예배 저장0. 새 전송형식은 기존 v
 합성 50MiB+ 저장 제한·편집 충돌·불확실한 저장·업로드 실패 보존과 canonical
 미디어 복구 검사를 추가했다. Safari 오프라인 검사에서 Blob 요청까지 차단했던
 설정을 바로잡았으며 외부 HTTP 연결 차단과 해독/무결성 조건은 유지한다.
+
+K01 첫 1.0.15 combined gate(`dda7b09c`)는 기존 코드 크기 ratchet과 updater VM의
+신규 Keynote 모듈 상대 경로 누락으로 실패했다. 공개 main은 1.0.14 그대로다.
+기준을 올리지 않고 inline UI helper를 기존 presenter-ui, 미디어 경고를
+media-state, 행 제어 스타일을 presenter-media로 옮겼다. VM은 실제 bridge
+모듈을 테스트 위치에서 명시적으로 resolve한다. 기존 source-extraction fixture도
+UI owner를 읽으며, 기능/저장/승인 경계와 script load 순서는 유지한다.
+동일 승인 범위의 새 SHA 전체 web/native gate와 공개 검증이 필요하다.
+
+첫 gate의 봉헌 배치 fixture는 inline control 렌더링으로 기본 순서가 투영된 뒤에도
+원래 배열0번을 봉헌으로 가정했다. 안정된 qa-offering ID로 같은 항목을 다시
+찾도록 고쳤으며 세 유형 전환·저장 버튼 단일성·30px·넘침·미저장 선택영역
+보존 조건은 그대로다. Chromium/WebKit320/700/1100 전부 PASS.
+SOLID ratchet, offline desktop preflight, 등록 Node 전수 및 관련 browser8쌍 PASS.
