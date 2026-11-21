@@ -133,7 +133,7 @@ async function main(){
    const row={key:args.p_key,value:args.p_value,revision:'1',requestId:args.p_request_id};
    (record.rows[scope]||= {})[row.key]=row;return {data:row,error:null};
   });
-  const data=await page.evaluate(async ({seed,legacyCopies})=>{
+  const data=await page.evaluate(async ({seed,retiredTheme,legacyCopies})=>{
    const service={id:'fixture-worship',service_date:'2026-11-04',service_alias:'설치 보존 시험'};
    const client=window.supabase.createClient('https://fixture.invalid','fixture-public-id',{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async (url,options)=>{
     if(!String(url).includes('/rest/v1/mindex_worship_service')||(options?.method||'GET')!=='GET')throw Error('Unexpected fixture request');
@@ -153,7 +153,9 @@ async function main(){
     for(const [key,value]of Object.entries(legacyCopies))localStorage.setItem(key,value);
    }
    const actual=Object.fromEntries(Object.keys(values).map(key=>[key,storage.getItem('local',key)]));
-   for(const key in values)if(actual[key]!==values[key])throw Error('Raw fixture mismatch: '+key);
+   const expected={...values};
+   if(retiredTheme)expected['mindex.theme']=null;
+   for(const key in expected)if(actual[key]!==expected[key])throw Error('Raw fixture mismatch: '+key);
    const level = typeof readPresenterThumbLevel === 'function' ? readPresenterThumbLevel() : null;
    if(level === null ? readPresenterThumbScale() !== '1.5' : level !== '2') {
     throw Error('Controller slide view recovery mismatch');
@@ -161,14 +163,17 @@ async function main(){
    const restored=JSON.parse(actual[Object.keys(values)[0]]);
    if(restored.value.items[0].raw_body!==draft.value.items[0].raw_body)throw Error('Draft text recovery mismatch');
    return {worship:await fetchWorshipServiceListRows(),values:actual,recoveredText:restored.value.items[0].raw_body,identity:localStorage.getItem('mindex.server.identity:upgrade-fixture')};
-  },{seed:phase==='seed',legacyCopies});
+  },{seed:phase==='seed',retiredTheme:phase==='upgrade',legacyCopies});
   assert.equal(data.identity.length,64);
   if(phase==='seed'){
    record={...record,profile:native.profile,data,hashes:Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)]))};
    fs.writeFileSync(proof,JSON.stringify(record,null,2));
   }else{
-   assert.deepEqual(data,record.data);assert.equal(JSON.stringify(record.rows),originalRows);
-   assert.deepEqual(Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)])),record.hashes);
+   const expected=structuredClone(record.data);
+   if(phase==='upgrade')expected.values['mindex.theme']=null;
+   assert.deepEqual(data,expected);assert.equal(JSON.stringify(record.rows),originalRows);
+   if(phase==='upgrade')assert(Object.values(record.rows).some(rows=>rows['mindex.theme']?.value==='dark'),'Retired theme row must remain byte-preserved');
+   assert.deepEqual(Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)])),Object.fromEntries(Object.entries(expected).map(([k,v])=>[k,hash(v)])));
   }
   if(phase==='upgrade'){
    retiredLegacyCopies=await page.evaluate(async copies=>{
