@@ -721,3 +721,12 @@ cell. Remaining staff retain their authored order in subsequent two-column rows.
 All Swiss department calendars use 12.5pt dates/event names and 10pt time
 qualifiers (including 토 제외). Order labels and assignees use 10pt; the central
 content remains 12.5pt. These are shared renderer rules, not PDF-only styling.
+
+### Shared rule geometry
+
+All Swiss rules use #808080 at 0.2mm. Worship separators span 128.5mm
+and appear after rows; each row uses 6.25mm line slots plus 1.25mm top/bottom
+padding. All cells share an explicit baseline 4.5mm below their line-slot top,
+without global baseline snapping; shorter cells are vertically centered.
+Sermon writing rules start 10mm below the point text box and repeat every 10mm.
+The 2/3/4-point layouts allocate equal writing heights per item.

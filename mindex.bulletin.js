@@ -562,7 +562,8 @@
       const content=creed?'사도신경':r.content,person=(r.label==='광고'?value('announcer')||r.person:r.person||'').replace(/다같이/g,'다 같이');
       const cells=[{t:label,x:10,w:22.5,size:10},{t:content,x:35,w:76,size:12.5},{t:person,x:113.5,w:25,size:10,align:'right'}];
       const counts=cells.map(c=>wrap(c.t||'',c.w,c.size,500).length),h=Math.max(...counts,1)*6.25+2.5;
-      cells.forEach((c,i)=>text(order,'order',c.t,c.x,y+1.25+(Math.max(...counts,1)-counts[i])*6.25/2,c.w,c.size,c.align||'left',r.label==='설교'&&i===1?700:500,false,y+h));
+      const row=svg('g',{'data-order-row':r.id,'data-row-top':y,'data-row-height':h});order.append(row);
+      cells.forEach((c,i)=>{const top=y+1.25+(Math.max(...counts,1)-counts[i])*6.25/2,weight=r.label==='설교'&&i===1?700:500;writeStyled(row,runs(c.t||'',c.size).map(run=>({...run,weight:run.weight===700?700:weight})),{x:c.x,y:top,w:c.w,h:y+h-top,size:c.size,baselineY:top+4.5,leading:6.25*MM,weight,align:c.align||'left',color:'#171717',family:'MindexBulletin'},issues,'order');});
       y+=h;rule(order,10,y);
     }
     if(y>(department==='youth'?148:185))issues.add('order');
