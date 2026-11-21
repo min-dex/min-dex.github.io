@@ -186,3 +186,12 @@ PASS(18:44:21Z) 뒤 test_bulletin_desktop_live의 종료에서 멈춰 90분 제�
 개별 gate/push/운영 저장을 시작하지 않고 자기 waiting ticket을 반환했다.
 Swiss journal `a77694b624354eef826caa411467f66e`를 기존 K01 journal/FIFO와 연결한다.
 새1.0.16 combined SHA의 전체 필수 gate/공개 readback 전까지 배포 완료가 아니다.
+
+1.0.16 최초 `e1c54307`의 web44944850703 네 shard와 Mac native는 PASS였지만,
+Windows 새 unload 회귀가 cleanup PID guard에서 거부됐다. pinned Playwright1.58
+`server/electron/electron.js`는 win32에서 shell:true로 cmd를 spawn한다. process()는
+launcher PID이고 native main은 직계 자식이므로 Windows에서만 그 관계를 확인한다.
+token/marker/profile/network/symlink 보호는 유지한다. ownership 응답을 먼저 받은 뒤
+종료를 시작하고, 실제 native 중단과 launcher exit 0으로 완료를 판정한다.
+Windows shell 종료만으로 실제 앱 종료를 가정하지 않는다. 실패·비정상 exit·timeout은
+계속 실패한다. 실제 앱 종료 보호와 주보/Keynote 본문 단언은 변경하지 않는다.

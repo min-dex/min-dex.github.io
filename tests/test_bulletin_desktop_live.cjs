@@ -108,11 +108,11 @@ async function main(){
    assert(!fs.lstatSync(dir).isSymbolicLink()&&!fs.lstatSync(marker).isSymbolicLink());
    const saved=JSON.parse(fs.readFileSync(marker));
    assert.equal(saved.token,token);assert.equal(saved.appId,'kr.mindex.app.test');
-   fs.rmSync(dir,{recursive:true});
+   fs.rmSync(dir,{recursive:true,maxRetries:5,retryDelay:100});
   }
   const errors=closed.filter(result=>result.status==='rejected').map(result=>result.reason);
   if(errors.length)throw new AggregateError(errors,'Isolated bulletin app cleanup failed');
   console.log('PASS owned isolated bulletin window cleanup');
  }
 }
-main().catch(error=>{console.error(error);process.exitCode=1;});
+main().catch(error=>{console.error(error);if(process.env.GITHUB_ACTIONS==='true')process.exit(1);else process.exitCode=1;});

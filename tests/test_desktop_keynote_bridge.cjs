@@ -43,8 +43,8 @@ const assert=require('node:assert/strict'),http=require('node:http'),crypto=requ
   server.closeAllConnections();
   await new Promise(resolve=>server.close(()=>resolve()));
   const folder=path.join(fs.realpathSync(os.tmpdir()),'mindex-isolated-upgrade-'+token),marker=path.join(folder,'fixture-only.json');
-  if(!cleanupError&&fs.existsSync(marker)){assert(!fs.lstatSync(folder).isSymbolicLink());const value=JSON.parse(fs.readFileSync(marker));assert.equal(value.token,token);assert.equal(value.appId,'kr.mindex.app.test');fs.rmSync(folder,{recursive:true});}
+  if(!cleanupError&&fs.existsSync(marker)){assert(!fs.lstatSync(folder).isSymbolicLink());const value=JSON.parse(fs.readFileSync(marker));assert.equal(value.token,token);assert.equal(value.appId,'kr.mindex.app.test');fs.rmSync(folder,{recursive:true,maxRetries:5,retryDelay:100});}
   if(cleanupError)throw cleanupError;
   console.log('PASS owned isolated Keynote window cleanup');
  }
-})().catch(error=>{console.error(error);process.exitCode=1;});
+})().catch(error=>{console.error(error);if(process.env.GITHUB_ACTIONS==='true')process.exit(1);else process.exitCode=1;});

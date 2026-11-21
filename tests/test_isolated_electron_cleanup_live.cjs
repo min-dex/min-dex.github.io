@@ -27,8 +27,8 @@ const assert = require('node:assert/strict'), crypto = require('node:crypto'), f
       const root = path.join(fs.realpathSync(os.tmpdir()), 'mindex-isolated-upgrade-' + token), marker = path.join(root, 'fixture-only.json');
       assert(!fs.lstatSync(root).isSymbolicLink() && !fs.lstatSync(marker).isSymbolicLink());
       const saved = JSON.parse(fs.readFileSync(marker)); assert.equal(saved.token, token); assert.equal(saved.appId, 'kr.mindex.app.test');
-      fs.rmSync(root, {recursive: true});
+      fs.rmSync(root, {recursive: true, maxRetries: 5, retryDelay: 100});
     }
   }
   console.log('PASS owned isolated app cleanup despite canceled unload; real app/profile inaccessible');
-})().catch(error => {console.error(error); process.exitCode = 1;});
+})().catch(error => {console.error(error); if(process.env.GITHUB_ACTIONS==='true')process.exit(1);else process.exitCode=1;});
