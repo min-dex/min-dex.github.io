@@ -18,3 +18,5 @@ The July 5 fourth-song discrepancy and September 6 hymn-number discrepancy remai
 
 `content.sourceSnapshot` freezes the selected weekly projection and each saved roster month. It uses the existing content JSON column; no schema or production backfill is needed.
 The explicit source-refresh action clears that snapshot and archive-copy selection while preserving manually edited fields. Common/monthly sharing excludes weekly source snapshots.
+
+- `ria-mark-orange.svg` retains the exact original paths from `ria-mark-ink.svg`; only fill changes to the approved young-adult accent #B65C24.

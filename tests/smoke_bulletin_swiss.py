@@ -22,6 +22,7 @@ try:
      const doc={...B.normalizeSnapshot({settings:{design:'swiss-'+department,theme:''},fields:{outline:'1. 첫 번째 대지\n2. 두 번째 대지\n3. 세 번째 대지',monthlyTheme:'함께 나누어요',memoryVerse:'서로 사랑하라',memoryReference:'요한복음 13:34',reflection:'',worshipPoint:'함께 예배해요',staff:'회장 학생 하나 · 서기 학생 둘'}}),source};
      window.samples[department]=doc;const before=JSON.stringify(doc),r=B.renderPages(doc,'print');
      if(r.issues.size)throw Error(department+' issues '+[...r.issues]);
+     const bar=r.pages[0].querySelector('[data-swiss-bar]');if(bar.getAttribute('fill')!==({'young-adult':'#B65C24',youth:'#574579',children:'#155436'}[department]))throw Error('Department accent');if(department==='children'&&r.pages[0].querySelector('[data-frame-id=coverTitle]'))throw Error('Cover sermon title remains');
      if(JSON.stringify(doc)!==before)throw Error('Renderer changed source');
      const restored={};B.applyStored(restored,{revision:1,...B.storedValue(doc)});
      if(JSON.stringify(restored.fields)!==JSON.stringify(doc.fields)||restored.settings.design!==doc.settings.design)throw Error('Persistence lost data');
@@ -43,7 +44,7 @@ try:
     window.documents=new Map();window.saved=[];window.templateRows={};
     const original={...B.normalizeSnapshot({settings:{design:'youth-tov',appearance:{assets:{logo:'assets/bulletin/ria-mark.webp'}}},fields:{news:'직접 쓴 광고',outline:'1. 첫 대지\n2. 둘째 대지',reflection:'',welcome:''},months:{'2026-11':'직접 쓴 월 일정'}}),source:structuredClone(samples.youth.source)};
     window.row={revision:3,...B.storedValue(original)};window.preserved=JSON.stringify(row.content);
-    window.editor=B.mount(document.querySelector('#host'),{serviceId:'youth',scope:'swiss-fixture',documents,services:[{id:'youth',label:'청소년부'}],loadSource:async()=>structuredClone(samples.youth.source),loadDraft:async()=>structuredClone(row),saveDraft:async(id,value,revision)=>{if(id!=='youth'||revision!==row.revision)throw Error('CAS mismatch');saved.push(value);return row={revision:revision+1,...structuredClone(value)};}});
+    window.editor=B.mount(document.querySelector('#host'),{serviceId:'youth',scope:'swiss-fixture',documents,services:[{id:'youth',label:'청소년부'}],loadSource:async()=>{if(window.rejectSource)throw Error('source unavailable');if(window.holdSource)await new Promise(r=>window.releaseSource=r);return structuredClone(samples.youth.source)},loadDraft:async()=>structuredClone(row),saveDraft:async(id,value,revision)=>{if(id!=='youth'||revision!==row.revision)throw Error('CAS mismatch');saved.push(value);return row={revision:revision+1,...structuredClone(value)};}});
    }''')
    page.wait_for_function("documents.get('youth')?.dbLoaded&&document.querySelector('[data-bulletin-use-swiss]')")
    page.locator('[data-bulletin-use-swiss]').click()
@@ -56,6 +57,29 @@ try:
    page.evaluate('editor.reload()')
    page.wait_for_function("documents.get('youth').revision===4&&document.querySelector('[data-bulletin-field=scriptureNote]')?.value==='연결 본문에 대한 노트'")
    assert page.evaluate("documents.get('youth').fields.welcome===''&&documents.get('youth').fields.reflection===''&&documents.get('youth').months['2026-11']==='직접 쓴 월 일정'")
+   # Live linked projections refresh independently of authored fields/revisions.
+   page.evaluate("document.activeElement.blur()")
+   page.evaluate("samples.youth.source.sermon='갱신된 설교';samples.youth.source.scripture='요한복음 3:16';documents.get('youth').dirty=false")
+   assert page.evaluate("editor.refreshSourceRemote()") is True
+   assert page.evaluate("documents.get('youth').source.sermon==='갱신된 설교'&&documents.get('youth').fields.news==='직접 쓴 광고'&&documents.get('youth').revision===4&&saved.length===1")
+   page.evaluate("samples.youth.source.sermon='편집 중 원본 변경';documents.get('youth').dirty=true")
+   assert page.evaluate("editor.refreshSourceRemote()") is False
+   assert page.evaluate("documents.get('youth').source.sermon==='갱신된 설교'")
+   page.evaluate("documents.get('youth').dirty=false")
+   assert page.evaluate("editor.refreshSourceRemote()") is True
+   page.evaluate("window.holdSource=true;window.pendingSource=editor.refreshSourceRemote();void 0")
+   page.wait_for_function("typeof releaseSource==='function'")
+   page.locator('[data-bulletin-field=scriptureNote]').fill('조회 중 새 입력')
+   page.evaluate("window.holdSource=false;releaseSource()")
+   assert page.evaluate("pendingSource") is False
+   assert page.evaluate("documents.get('youth').fields.scriptureNote==='조회 중 새 입력'")
+   page.evaluate("documents.get('youth').dirty=false;document.activeElement.blur();window.rejectSource=true")
+   assert page.evaluate("editor.refreshSourceRemote()") is False
+   assert '연동 자료 갱신 실패' in page.locator('.bulletin-status').inner_text()
+   page.evaluate("window.rejectSource=false")
+   assert page.evaluate("editor.refreshSourceRemote()") is True
+   # Old evidence remains stored but cannot mask current linked source values.
+   assert page.evaluate("""()=>{const d=documents.get('youth'),stored=MindexBulletin.storedValue(d);const fresh={...d.source,sermon:'최신 원본'};return MindexBulletin.applySourceSnapshot(fresh,stored.content.sourceSnapshot).sermon==='최신 원본'}""")
    page.evaluate("""()=>{window.printCalls=0;const descriptor=Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype,'contentWindow');Object.defineProperty(HTMLIFrameElement.prototype,'contentWindow',{get(){const w=descriptor.get.call(this);if(w)w.print=()=>{printCalls++;w.dispatchEvent(new w.Event('afterprint'))};return w}})}""")
    page.locator('[data-bulletin-print]').click()
    page.wait_for_function('printCalls===1')
