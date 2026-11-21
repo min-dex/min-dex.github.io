@@ -4240,6 +4240,9 @@ function autoUpcomingPublicServiceTargets(baseDate = new Date()) {
 }
 
 const FRIDAY_SERVICE_VARIANT_START_DATE = "2026-08-01";
+const REGULAR_FRIDAY_SERVICE_DATE_OVERRIDES = new Set([
+  "2026-11-27",
+]);
 
 const FRIDAY_SERVICE_VARIANTS = {
   1: {
@@ -4308,6 +4311,7 @@ function fridayWeekOfMonth(dateValue = "") {
 function fridayServiceVariantForDate(dateValue = "") {
   const date = String(dateValue || "").trim().slice(0, 10);
   if (!date || date < FRIDAY_SERVICE_VARIANT_START_DATE) return null;
+  if (REGULAR_FRIDAY_SERVICE_DATE_OVERRIDES.has(date)) return null;
   const week = fridayWeekOfMonth(date);
   if ((week === 2 || week === 3) && date.slice(0, 7) !== "2026-08") return null;
   return FRIDAY_SERVICE_VARIANTS[week] || null;

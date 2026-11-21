@@ -18,7 +18,7 @@ for (const [date, key] of [['2026-08-07','monthly'],['2026-08-14','culture'],
   assert.equal(context.fridayServiceVariantForDate(date)?.key, key, date);
 }
 for (const date of ['2026-07-17','2026-09-11','2026-09-18','2026-10-09',
-  '2026-10-16','2026-10-30','2027-08-13','2027-08-20']) {
+  '2026-10-16','2026-10-30','2026-11-27','2027-08-13','2027-08-20']) {
   assert.equal(context.fridayServiceVariantForDate(date), null, date);
   const target = context.autoFridayServiceTarget(date);
   assert.equal(target.typeId, 'friday');
@@ -32,4 +32,4 @@ for (const date of ['2026-08-07', '2026-09-04', '2026-10-02', '2027-01-01']) {
   assert.equal(target.typeId, 'monthly');
   assert.equal(target.alias, '온세대 월삭예배', date);
 }
-console.log('PASS August-only special Fridays; later regular Fridays; first/fourth weeks preserved');
+console.log('PASS August-only special Fridays; dated regular overrides; first/fourth weeks preserved');
