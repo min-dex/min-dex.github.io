@@ -39,7 +39,8 @@ def main():
                     }''')
                     page.evaluate("window.dispatchEvent(new Event('online'))")
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
-                    assert page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_ping').args.p_status.browser.startsWith('웹 · ')")
+                    assert page.evaluate("monitorCalls.find(c=>c.name==='mindex_monitor_ping').args.p_status.browser") in {'Chrome', 'Safari'}
+                    assert page.get_by_label('접속명',exact=True).input_value() in {'macOS · Chrome', 'macOS · Safari'}
                     assert not page.locator('.monitor-panel').is_visible()
                     page.locator('#monitorPanelBtn').click()
                     assert page.locator('.monitor-panel').is_visible()
@@ -71,7 +72,8 @@ def main():
                     assert not page.evaluate("monitorCalls.some(c=>c.name==='mindex_monitor_login')")
                     assert page.locator('[data-devices] img').count() == 0
                     assert page.locator('.monitor-facts, [data-event-filter], [data-device-filter]').count() == 0
-                    assert '접속 방식 미확인 · Whale' in page.locator('[data-devices]').inner_text()
+                    assert 'Windows · Whale' in page.locator('[data-devices]').inner_text()
+                    assert '접속 방식 미확인' not in page.locator('[data-devices]').inner_text()
                     assert '송출 중' in page.locator('[data-devices]').inner_text()
                     page.evaluate("monitorMode='stale'")
                     page.locator('[data-refresh]').click()

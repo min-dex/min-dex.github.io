@@ -1,4 +1,6 @@
-"""First paint uses the system theme until server preferences are available."""
+"""First paint follows the system theme and ignores retired saved preferences."""
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from io import BytesIO
 from time import monotonic
 from PIL import Image

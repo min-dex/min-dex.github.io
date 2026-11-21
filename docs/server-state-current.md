@@ -428,3 +428,14 @@ The output window and Remote do not receive this controller view setting.
   확인한다. 저장 중 입력했거나 실패해 남은 초안은 기존 확인창으로 보호한다.
 - Offline Chromium/WebKit 실제 가사 입력·저장 안 함 대화상자 및 경합 검증 통과.
   운영 쓰기 없음. 공유 release의 exact-SHA gate·배포 검증은 별도다.
+
+## 창별 임시 테마 · 2026-11-21
+
+테마는 서버·localStorage·sessionStorage에 저장하지 않는다. 접속/새로고침 시
+시스템 설정을 따르고, 버튼으로 바꾸면 현재 창의 메모리에서만 유지한다.
+직접 선택하기 전에는 실행 중 OS 테마 변경도 따른다. 직접 선택한 뒤에는
+OS 변경이나 서버 갱신으로 선택을 덮지 않는다. 다른 창·기기에 전파하지 않는다.
+옛 공용/기기별/브라우저 테마 값은 읽거나 이관하지 않으며 자동 삭제도 하지 않는다.
+테마 외 초안·설정의 기존 서버 저장 규칙은 유지한다.
+검증: smoke_theme_switch.py의 시스템 기본값/창 격리/재접속/무저장 검사,
+smoke_theme_bootstrap.py와 서버 저장·legacy 회귀 검사. 배포 상태는 별도 기록한다.

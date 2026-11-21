@@ -21,8 +21,16 @@
   try { name = window.MINDEX_SERVER_STORAGE?.getItem("local","mindex.monitor.name") || ""; } catch {}
   const ua = navigator.userAgent;
   const os = /Windows/.test(ua) ? "Windows" : /Android/.test(ua) ? "Android" : /iPhone|iPad/.test(ua) ? "iOS" : /Mac/.test(ua) ? "macOS" : "Other";
-  const browserName = /Whale\//.test(ua) ? "Whale" : /Edg\//.test(ua) ? "Edge" : /Chrome\//.test(ua) ? "Chrome" : /Firefox\//.test(ua) ? "Firefox" : /Safari\//.test(ua) ? "Safari" : "Browser";
-  const browser = window.mindexElectron?.isDesktop === true ? "앱 · Mindex" : `웹 · ${browserName}`;
+  const safariBrowser = /Safari\//.test(ua) && !/(?:Chrome|Chromium|CriOS|Edg|Whale)\//.test(ua);
+  const browser = window.mindexElectron?.isDesktop === true ? "Mindex App" : safariBrowser ? "Safari" : "Chrome";
+  const defaultName = `${os} · ${browser}`;
+  const normalizeLegacyDefaultName = value => {
+    const text = String(value || "").trim();
+    if (text === `${os} 앱 · Mindex`) return `${os} · Mindex App`;
+    const legacyWeb = text.match(new RegExp(`^${os} 웹 · (?:Chrome|Safari|Whale|Edge|Firefox|Browser)$`));
+    return legacyWeb ? `${os} · ${browser}` : text;
+  };
+  name = normalizeLegacyDefaultName(name);
   const panel = document.createElement("dialog");
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" type="button" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
@@ -36,7 +44,7 @@
     <section class="monitor-section"><h3>이 접속</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC" aria-describedby="monitorNameStatus"><button class="btn secondary" type="button" data-name-retry hidden>다시 저장</button></div><p id="monitorNameStatus" data-name-status role="status"></p><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section></div>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
-  $("#monitorName").value = name || `${os} ${browser}`;
+  $("#monitorName").value = name || defaultName;
   function message(text) { $(".monitor-message").textContent = text; }
   panel.addEventListener('keydown', event => event.stopPropagation());
   let nameDirty = false, nameSaveSerial = 0, nameSaving = false, nameRequested = null;
@@ -79,7 +87,7 @@
       if(tab.at>Date.now()+5000||Date.now()-tab.at>=STALE_MS){tabs.delete(id);continue}
       if(tab.output===true)output=true;
     }
-    return { name: name.trim().slice(0,60) || `${os} ${browser}`, os, browser, output };
+    return { name: name.trim().slice(0,60) || defaultName, os, browser, output };
   }
   function renderDevice(root, data, lastSeen, id = "local") {
     const local = id === "local";
@@ -90,7 +98,8 @@
     const status = document.createElement("span"); status.className = "monitor-health";
     status.textContent = data.output === true ? "송출 중" : "송출 안 함"; row.append(status);
     const identity = document.createElement("p"); identity.className = "monitor-environment";
-    identity.textContent = `${local ? "이 접속 · " : ""}${data.os || ""} · ${/^(앱|웹) · /.test(data.browser || "") ? data.browser : `접속 방식 미확인 · ${data.browser || ""}`}`;
+    const browserLabel = String(data.browser || "").trim().replace(/^(?:앱|웹)\s*·\s*/, "");
+    identity.textContent = `${local ? "이 접속 · " : ""}${data.os || ""} · ${browserLabel === "Mindex" ? "Mindex App" : browserLabel || "Browser"}`;
     row.append(identity);
     const seen = document.createElement("p"); seen.className = "monitor-environment";
     const at = timestamp(lastSeen);

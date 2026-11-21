@@ -205,6 +205,7 @@ const UI_MESSAGES = {
 };
 let currentUiLocale = UI_DEFAULT_LOCALE;
 
+let windowThemeOverride = null;
 const SYSTEM_THEME_QUERY = window.matchMedia?.("(prefers-color-scheme: dark)") || null;
 const TITLE_COLLATOR = new Intl.Collator("ko-KR", {
   numeric: true,
@@ -1501,7 +1502,7 @@ function bindStaticEvents() {
   bindPresenterViewportLifecycleEvents();
 
   SYSTEM_THEME_QUERY?.addEventListener("change", () => {
-    if (!safeStorageGet("local", STORAGE.theme)) applyTheme(readTheme());
+    if (windowThemeOverride === null) applyTheme(readTheme());
   });
 
   bindPresenterInputGuardEvents();
@@ -2171,8 +2172,7 @@ function uiText(key, params = {}) {
 }
 
 function readTheme() {
-  const saved = safeStorageGet("local", STORAGE.theme);
-  if (saved === "dark" || saved === "light") return saved;
+  if (windowThemeOverride !== null) return windowThemeOverride;
   return SYSTEM_THEME_QUERY?.matches ? "dark" : "light";
 }
 
@@ -2201,7 +2201,7 @@ function applyTheme(theme) {
 
 function toggleTheme() {
   const next = state.theme === "dark" ? "light" : "dark";
-  safeStorageSet("local", STORAGE.theme, next);
+  windowThemeOverride = next;
   applyTheme(next);
 }
 

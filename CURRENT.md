@@ -799,3 +799,11 @@ ID검사cache 소스·검증(bcb04765), 최신코드/테스트 운영규칙(88f5
 새 inline 실제충돌 회귀, font cache72cases, runtime/solid/governance PASS.
 final gate 이후 범위 추가 금지. 운영 DB 신규쓰기/실재생/송출/인쇄 없음.
 필수4shard·동일SHA main/Pages·공개파일/UI 검증 전 완료 보고 금지.
+## 1.0.11 패널·송출·접속·창별 테마 후보 · 2026-11-21
+
+1.0.10 공개 SHA `3ed1223c8` 위에서 좌우 패널·상단 버튼 영역을 동일한 260px로 맞추고,
+WebKit 송출 stage를 inset/auto-margin 방식으로 중앙 정렬했다. 접속 환경 표기는
+`macOS · Chrome`, `macOS · Mindex App`처럼 단순화하고 구형 접두어만 표시에서 제거한다.
+테마는 서버나 브라우저 저장소에 쓰지 않고 시작·새로고침 때 OS 설정을 따르며,
+직접 바꾼 선택은 현재 창 메모리에만 유지한다. 운영 자료·설정·미저장 입력 쓰기 없음.
+버전 파일은 1.0.11(`20261121-internal-1011`)로 준비하며 exact-SHA gate와 공개 확인 전이다.

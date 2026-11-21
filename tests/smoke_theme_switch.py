@@ -7,7 +7,10 @@ try:
  with sync_playwright() as p:
   for engine in ('chromium','webkit'):
    browser=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-   page=browser.new_page()
+   context=browser.new_context(color_scheme="light")
+   context.add_init_script("localStorage.setItem('mindex.theme','dark')")
+   context.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
+   page=context.new_page()
    page.route('**/*',lambda r:r.continue_() if r.request.url.startswith(url.rsplit('/',1)[0]+'/') else r.abort())
    page.goto(url+'?mindexSmokeRaw=1');page.wait_for_function("typeof toggleTheme==='function' && !document.body.classList.contains('ui-booting')")
    page.locator('.mindex-boot').wait_for(state='hidden')
@@ -32,6 +35,25 @@ try:
      return getComputedStyle(refs.detailPane.querySelector('button')).transitionDuration;
     }''',theme)
     assert values!='0s',values
-   print('PASS',engine,'synchronous palette, editor identity/focus/selection and hover transitions preserved',flush=True)
+   # Manual choice is window memory only, regardless of legacy saved theme.
+   page.reload();page.wait_for_function("typeof toggleTheme==='function' && !document.body.classList.contains('ui-booting')")
+   assert page.evaluate("readTheme()")=='light'
+   page.emulate_media(color_scheme='dark');page.wait_for_function("document.body.dataset.theme==='dark'")
+   page.emulate_media(color_scheme='light');page.wait_for_function("document.body.dataset.theme==='light'")
+   page.evaluate("window.themeWrites=[];window.originalThemeStorage=safeStorageSet;safeStorageSet=(...args)=>{themeWrites.push(args);return originalThemeStorage(...args)};toggleTheme()")
+   assert page.evaluate("readTheme()")=='dark'
+   assert page.evaluate("themeWrites.length") == 0
+   sibling=context.new_page();sibling.goto(url+'?mindexSmokeRaw=1')
+   sibling.wait_for_function("typeof toggleTheme==='function' && !document.body.classList.contains('ui-booting')")
+   assert sibling.evaluate("readTheme()")=='light'
+   page.emulate_media(color_scheme='dark');page.emulate_media(color_scheme='light')
+   page.evaluate("window.dispatchEvent(new Event('mindex-server-shared-updated'));window.dispatchEvent(new Event('mindex-server-storage-ready'))")
+   assert page.evaluate("readTheme()")=='dark'
+   assert sibling.evaluate("readTheme()")=='light'
+   assert page.evaluate("localStorage.getItem('mindex.theme')")=='dark' # untouched legacy evidence
+   page.reload();page.wait_for_function("typeof toggleTheme==='function' && !document.body.classList.contains('ui-booting')")
+   assert page.evaluate("readTheme()")=='light'
+   sibling.close()
+   print('PASS',engine,'synchronous palette, editor identity/focus/selection and hover transitions preserved; OS default/live changes, manual window isolation, reload reset, no theme writes',flush=True)
    browser.close()
 finally:server.shutdown()

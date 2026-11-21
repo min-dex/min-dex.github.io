@@ -29,7 +29,9 @@ def main():
                         }''')
                         page.wait_for_function('presence.length>0')
                         label=page.evaluate('presence[0].browser')
-                        assert label == '앱 · Mindex' if desktop else label.startswith('웹 · ')
+                        assert label == 'Mindex App' if desktop else label in {'Chrome','Safari'}
+                        expected_name = 'macOS · Mindex App' if desktop else f'macOS · {label}'
+                        assert page.get_by_label('접속명',exact=True).input_value() == expected_name
                         page.evaluate("""async () => {
                           if (state.module !== 'presenter') await switchModule('presenter');
                           applyRightSidebarVisibility(true);
@@ -45,7 +47,13 @@ def main():
                                 geometry=page.evaluate('''()=>{
                                   const b=s=>document.querySelector(s).getBoundingClientRect();
                                   const a=b('.topbar-actions'),r=b('.right-sidebar'),t=b('.topbar'),l=b('.nav-sidebar'),n=b('.primary-switcher');
-                                  return {right:Math.abs(a.x-r.x),left:Math.abs(n.x-l.right),strokeHeight:Math.abs(a.height-t.height)};
+                                  return {
+                                    right:Math.abs(a.x-r.x),
+                                    left:Math.abs(n.x-l.right),
+                                    strokeHeight:Math.abs(a.height-t.height),
+                                    panelWidth:Math.abs(r.width-l.width),
+                                    actionWidth:Math.abs(a.width-l.width),
+                                  };
                                 }''')
                                 assert all(v<1 for v in geometry.values()),geometry
                         page.close()

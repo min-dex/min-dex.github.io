@@ -16,7 +16,7 @@ try:
             page.wait_for_function("typeof renderPresenterOutput==='function'&&!document.body.classList.contains('ui-booting')")
             page.evaluate("""() => {
                 document.body.className='presenter-output-body';
-                document.body.innerHTML='<main id="presenterOutputRoot" class="presenter-output-root"></main>';
+                document.body.innerHTML='<div class="presenter-tool-stage"><main id="presenterOutputRoot" class="presenter-output-root"></main></div>';
                 window.ratioService={id:'ratio-children',type_id:'children',date:'2026-11-01'};
                 state.services=[ratioService];state.serviceTypes=[{id:'children',name:'어린이부 예배'}];
                 const ready=presenterReadySlide(ratioService);
@@ -49,14 +49,18 @@ try:
             for index in range(3):
                 page.evaluate("i=>renderPresenterOutput({serviceId:ratioService.id,serviceType:'children',chromakey:false,backgroundImages:['assets/worship-backgrounds/26-C2.png'],slides:ratioSlides,index:i})", index)
                 page.wait_for_function('(i)=>ratioRoot.querySelector(".is-active")?.dataset.presenterFrameKey?.includes(ratioSlides[i].id)', arg=index)
-                for width, height in ((1870, 1180), (1280, 900), (900, 1280), (1920, 1080), (2560, 1080)):
+                for width, height in ((1870, 1180), (1280, 900), (900, 1280), (1920, 1080), (2560, 1080), (3420, 2224)):
                     page.set_viewport_size({'width': width, 'height': height})
                     result = page.evaluate("""() => {
-                        const r=ratioRoot.getBoundingClientRect();return {width:r.width,height:r.height,left:r.left,top:r.top,media:ratioRoot.classList.contains('is-media-output')};
+                        const r=ratioRoot.getBoundingClientRect();
+                        const s=ratioRoot.closest('.presenter-tool-stage').getBoundingClientRect();
+                        return {width:r.width,height:r.height,left:r.left,top:r.top,stageWidth:s.width,stageHeight:s.height,stageLeft:s.left,stageTop:s.top,media:ratioRoot.classList.contains('is-media-output')};
                     }""")
                     scale=min(width/1920,height/1080)
                     assert not result['media'] and abs(result['width']-1920*scale)<1 and abs(result['height']-1080*scale)<1, (engine,index,width,height,result)
                     assert abs(result['left']-(width-result['width'])/2)<1 and abs(result['top']-(height-result['height'])/2)<1
+                    assert abs(result['stageWidth']-result['width'])<1 and abs(result['stageHeight']-result['height'])<1
+                    assert abs(result['stageLeft']-result['left'])<1 and abs(result['stageTop']-result['top'])<1
                     if index == 0 and width == 1870 and os.environ.get('MINDEX_TEST_OUTPUT_DIR'):
                         output=Path(os.environ['MINDEX_TEST_OUTPUT_DIR']);output.mkdir(parents=True,exist_ok=True)
                         page.evaluate('document.fonts.ready')
@@ -70,7 +74,7 @@ try:
                 return [image,video].map(s=>presenterOutputFrameStateForSlide(s,{chromakey:false}).mediaOutput);
             }""")
             assert projection == [True, True]
-            print('PASS', engine, 'actual generated ready/preparation/blank builders retain centered 16:9 across five viewports; image/video viewport-fit preserved; operational writes/output/playback 0', flush=True)
+            print('PASS', engine, 'actual generated ready/preparation/blank builders retain centered 16:9 across six viewports; image/video viewport-fit preserved; operational writes/output/playback 0', flush=True)
             browser.close()
 finally:
     server.shutdown()

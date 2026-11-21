@@ -1,7 +1,8 @@
 // Receives only caller-filtered application entries; never reads browser credentials.
-const shared=new Set(['mindex.worshipBackgroundRegistry','mindex.theme','mindex.music.fadeStop']);
+const shared=new Set(['mindex.worshipBackgroundRegistry','mindex.music.fadeStop']);
 export function legacyStateDestination(scope,key,project){
  if(shared.has(key))return 'shared';
+ if(key==='mindex.theme')return null; // Retired preference: each window follows its OS.
  if(/^mindex\.atomic\.pending\.v2:/.test(key)||/^mindex\.department\.pending\.v1:/.test(key)){
   try{if(JSON.parse(key.slice(key.indexOf(':')+1))[0]!==project)return null}catch{return null}
   return 'device';

@@ -52,6 +52,9 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
   stay `40px`; normal icon buttons stay `35px`; dense inline controls may use
   `30px` or `28px` only when they sit inside compact editor/tool rows.
 - Opening the right panel must not change the detail pane gutter.
+- The desktop right panel and its topbar action column use the same `260px`
+  width as the persistent left sidebar. Responsive breakpoints may reflow the
+  presenter into one vertical flow, but must not introduce a wider desktop rail.
 - Topbar icon buttons are square, `40px` by `40px`.
 - Home, theme, and save controls share the same button geometry at all widths.
 - The left module buttons and the right desktop utilities share a row, 40px slots,
