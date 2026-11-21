@@ -522,6 +522,7 @@
     const brand=group(0,'brand'),asset=doc.settings.appearance?.assets?.logo;
     const logo=asset||(department==='children'?childrenLogoPath:department==='young-adult'?swissLogoPath:'');
     if(logo){const w=department==='children'?60:56.25;brand.append(svg('image',{x:222.75-w/2,y:62.5,width:w,height:40,href:new URL(logo,document.baseURI).href,preserveAspectRatio:'xMidYMax meet'}));}
+    else if(Object.hasOwn(doc.fields,'brand')){text(brand,'brand',value('brand'),158.5,62.5,128.5,40,'center',700,false,102.5);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}
     else {text(brand,'brand','토브',158.5,75,128.5,40,'center',700);text(brand,'brand','청소년부',158.5,90,128.5,20,'center',700);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));brand.setAttribute('transform','translate(222.75 102.5) scale(1.5) translate(-222.75 -102.5)');}
     text(group(0,'motto'),'motto',value('motto'),158.5,112.5,128.5,12.5,'center',500,false,140);
     const verse=group(0,'verse'),copy=value('verse').trim(),citation=copy.match(/(?:\n\s*[—–-]?\s*|\s*[（(])((?:[가-힣]+)\s*\d+\s*:\s*[\d–—:a-z,\s-]+)[)）]?$/);
