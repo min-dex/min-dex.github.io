@@ -2,7 +2,6 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {chromium}=require('playwright');
-const {PDFDocument}=require('pdf-lib');
 const fixture=require('./fixtures/bulletin-20260920.json');
 const root=path.resolve(__dirname,'..');
 const server=http.createServer((req,res)=>{
@@ -63,7 +62,8 @@ const server=http.createServer((req,res)=>{
   assert.equal(saved.row.common.welcome,'2027 함께 예배해요');assert.equal(saved.row.layout.itemGap,5);
   assert.equal('news' in saved.row.common,false);assert.equal('sourceSnapshot' in saved.row,false);
   await page.locator('[data-bulletin-template-exit]').click();
-  assert.equal((await get()).welcome,'공통 환영 인사');
+  await page.waitForFunction(()=>audit.documents.get('week-a').settings.templateRevision===2);
+  assert.equal((await get()).welcome,'2027 함께 예배해요');
   await page.locator('[data-bulletin-service]').selectOption('week-b');
   await page.waitForFunction(()=>audit.documents.get('week-b')?.settings.templateRevision===2);
   assert.equal(await page.evaluate(()=>MindexBulletin.fieldValue(audit.documents.get('week-b'),'welcome')),'2027 함께 예배해요');
@@ -76,14 +76,15 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.evaluate(()=>audit.row.common.welcome),'2027 함께 예배해요');
   await page.locator('[data-bulletin-service]').selectOption('week-a');
   await page.waitForFunction(()=>document.querySelector('[data-bulletin-service]')?.disabled===false);
-  assert.equal((await get()).welcome,'공통 환영 인사');
+  await page.waitForFunction(()=>audit.documents.get('week-a').settings.templateRevision===2);
+  assert.equal((await get()).welcome,'2027 함께 예배해요');
   await page.evaluate(()=>{audit.handle.destroy();audit.documents.clear();localStorage.clear();audit.handle=audit.mount('week-a');});
   await page.waitForFunction(()=>document.querySelector('[data-bulletin-print]')?.disabled===false);
-  assert.equal((await get()).welcome,'공통 환영 인사','Saved week must retain template v1 after reopening against v2');
+  assert.equal((await get()).welcome,'2027 함께 예배해요','Clean saved week follows the latest common presentation');
   await page.locator('[data-bulletin-template-apply]').click();
   await page.waitForFunction(()=>audit.documents.get('week-a').settings.templateRevision===2);
   assert.equal(await page.locator('[data-bulletin-field="news"]').inputValue(),'① 이번 주만 바꾸는 소식');
-  assert.equal((await get()).welcome,'공통 환영 인사','Explicit design apply preserves authored and inherited copy');
+  assert.equal((await get()).welcome,'2027 함께 예배해요','Explicit design apply preserves the current inherited copy');
   // A conflicting template save must leave edits and all dated records intact.
   await page.locator('[data-bulletin-template-edit]').click();
   await page.locator('[data-bulletin-mode="content"]').click();
@@ -94,6 +95,6 @@ const server=http.createServer((req,res)=>{
   assert.equal(await page.locator('[data-bulletin-field="welcome"]').inputValue(),'충돌 시 보존할 변경');
   assert.equal(await page.evaluate(()=>audit.row.revision),2);
   assert.equal(await page.evaluate(()=>JSON.stringify(audit.rows['week-a'])),original);
-  console.log('PASS common-template isolation, saved-week freezing, next-week inheritance, separate saves, weekly override, explicit apply and conflict preservation');
+  console.log('PASS common-template isolation, saved-week content preservation and live presentation, next-week inheritance, separate saves, weekly override, explicit apply and conflict preservation');
  }finally{await browser.close();server.close();}
 })().catch(e=>{console.error(e);server.close();process.exitCode=1;});

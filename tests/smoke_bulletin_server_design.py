@@ -56,8 +56,9 @@ try:
    assert page.evaluate("(()=>{const d=document.querySelector('iframe').contentDocument;return d.querySelectorAll('svg').length===2&&d.body.textContent.includes('우리의 소식')&&d.body.textContent.includes('함께 읽어요')&&d.querySelector('image').getAttribute('href').startsWith('data:image/png;base64,')})()")
    page.locator('[data-bulletin-template-exit]').click();page.wait_for_function("document.querySelector('[data-bulletin-field=news]')?.disabled===false")
    assert page.locator('[data-bulletin-field=news]').input_value()=='직접 작성한 소식'
-   # Common save never silently rewrites the already-saved issue.
-   assert page.evaluate("docs.get('old').settings.appearance===undefined")
+   # A clean editor follows the new presentation, without writing the saved issue.
+   page.wait_for_function("docs.get('old').settings.appearance?.palette.cover==='#dceafb'")
+   assert page.evaluate("sent.length===0&&docs.get('old').fields.news==='직접 작성한 소식'")
    page.locator('[data-bulletin-template-apply]').click();page.wait_for_function("docs.get('old').settings.appearance?.palette.cover==='#dceafb'&&document.querySelector('[data-bulletin-print]')?.disabled===false")
    assert page.evaluate("docs.get('old').fields.welcome==='직접 쓴 환영'&&docs.get('old').fields.coverTitle===''&&docs.get('old').fields.news==='직접 작성한 소식'&&docs.get('old').fields.memoryVerse==='직접 쓴 말씀'")
    page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===1')

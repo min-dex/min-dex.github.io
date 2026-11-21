@@ -15113,12 +15113,22 @@ async function saveBulletinDraft(serviceId, value, revision) {
 }
 
 async function loadBulletinTemplate(key) {
+  if(key==="youth-tov"){
+    const {readTemplate}=await import(`./mindex.bulletin-template-store.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE||"bulletin-template")}`);
+    return readTemplate(state.client,key);
+  }
   const {data,error}=await state.client.from("mindex_bulletin_templates").select("template_key,title,department,effective_from,layout,common,revision").eq("template_key",key).maybeSingle().then(null,error=>{throw departmentInputError(error,"공통 양식 불러오기");});
   if(error)throw departmentInputError(error,"공통 양식 불러오기");
   return data;
 }
 async function saveBulletinTemplate(key,value,revision) {
   const publishClient=state.client;
+  if(key==="youth-tov"){
+    const {writeTemplate}=await import(`./mindex.bulletin-template-store.mjs?v=${encodeURIComponent(window.MINDEX_RELEASE||"bulletin-template")}`);
+    const row=await writeTemplate(publishClient,key,value,revision);
+    if(publishClient===state.client)window.MINDEX_CONTENT_LIVE?.publish("bulletin-template",key);
+    return row;
+  }
   const table=publishClient.from("mindex_bulletin_templates");
   const query=revision?table.update(value).eq("template_key",key).eq("revision",revision):table.insert({template_key:key,...value});
   const {data,error}=await query.select("template_key,title,department,effective_from,layout,common,revision").maybeSingle().then(null,error=>{throw new Error(`${departmentInputError(error,"공통 양식 저장").message} 편집 내용은 유지됩니다.`,{cause:error});});

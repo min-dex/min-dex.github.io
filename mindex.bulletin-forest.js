@@ -96,10 +96,8 @@
     add('tovPointTitle',1,23,168,111,9,15,'label:예배 포인트','text','left',800);
     add('worshipPoint',1,23,181,111,14,11.5,'field:worshipPoint');
     add('notesTitle',1,160,12,119,11,22.5,'label:말씀 노트','text','left',800);
-    add('tovScriptureTitle',1,165,33,51,8,12.5,'label:성경 본문','text','left',800);
-    add('tovOutlineTitle',1,224,33,50,8,12.5,'label:말씀 이해','text','left',800);
-    add('scriptureNote',1,165,44,51,112,11.5,'field:scriptureNote');
-    add('outline',1,224,44,50,112,11.5,'field:outline');
+    add('tovOutlineTitle',1,165,33,109,8,12.5,'label:설교 요점','text','left',800);
+    add('outline',1,165,44,109,112,11.5,'field:outline');
     add('tovReflectionTitle',1,165,168,111,9,15,'label:내게 주신 말씀 / 내가 받은 은혜','text','left',800);
     add('reflection',1,165,181,111,14,11.5,'field:reflection');
     const displayTitles=new Set(['tovTitle','eventsTitle','newsTitle','orderTitle','notesTitle','tovPointTitle','tovReflectionTitle']);
@@ -131,7 +129,6 @@
       add('rect',{x:160,y:30,width:119,height:130,fill:'none',stroke:p.line,'stroke-width':.3});
       rect(160.15,30.15,118.7,11.5,p.soft);
       line(160,42,279,42);
-      line(219.5,30,219.5,160);
       for(const x of [18,160]){
         rect(x,164,120,36,p.soft,4);
         line(x+5,179,x+115,179);

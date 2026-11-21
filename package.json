@@ -101,6 +101,7 @@
       "mindex.worship-atomic-client.mjs",
       "mindex.worship-store.mjs",
       "mindex.server-state.mjs",
+      "mindex.bulletin-template-store.mjs",
       "mindex.legacy-state.mjs",
       "mindex.server-storage.js",
       "mindex.disclosure-state.js",

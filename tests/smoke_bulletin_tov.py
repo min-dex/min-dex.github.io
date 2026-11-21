@@ -54,7 +54,21 @@ try:
             assert page.locator("[data-bulletin-field=news]").input_value().startswith("① 함께")
             assert page.locator("[data-frame-id=staff]").text_content() == "회장 가나다 · 부회장 라마바 · 서기 사아자"
             assert "출력에서 생략할 전문" not in page.locator("[data-frame-id=order]").text_content()
-            page.locator("[data-bulletin-field=scriptureNote]").fill("본문 노트의 직접 입력")
+            assert page.locator("[data-bulletin-field=scriptureNote]").count() == 0
+            assert page.locator("[data-frame-id=tovOutlineTitle]").text_content() == "설교 요점"
+            page.evaluate("""() => {
+                const B=MindexBulletin;
+                const legacy={fields:{scriptureNote:'기존 노트',outline:'기존 요점'},settings:{design:'youth-tov'},
+                    frames:[{id:'outline',x:224,y:44,w:50,h:112,size:11.5}]};
+                const merged=B.normalizeSnapshot(legacy);
+                if(merged.fields.outline!=='기존 노트\\n\\n기존 요점'||'scriptureNote' in merged.fields)throw Error('Legacy notes lost');
+                if(B.normalizeSnapshot(merged).fields.outline!==merged.fields.outline)throw Error('Repeated migration duplicated notes');
+                if(merged.frames.find(f=>f.id==='outline').w!==109)throw Error('Old default not widened');
+                if(B.normalizeSnapshot({...legacy,fields:{scriptureNote:'동일',outline:'동일'}}).fields.outline!=='동일')throw Error('Duplicate text');
+                const custom=B.normalizeSnapshot({...legacy,frames:[{id:'outline',x:180,y:50,w:90,h:100,size:11.5}]});
+                if(custom.frames.find(f=>f.id==='outline').w!==90)throw Error('Custom layout changed');
+            }""")
+            page.locator("[data-bulletin-field=outline]").fill("본문 노트의 직접 입력")
             page.locator("[data-bulletin-field=worshipPoint]").fill("말씀에 귀를 기울여요.")
             page.locator("[data-bulletin-field=reflection]").fill("받은 은혜 기록")
             page.locator("[data-bulletin-field=nextPrayer]").fill("다음번 기도 · 학생 담당")
@@ -110,8 +124,8 @@ try:
                 if(blank.querySelectorAll('[data-frame-id=reflection] [data-tov-writing-rule]').length!==2
                     ||!blank.querySelector('[data-frame-id=outline] [data-tov-writing-rule]')
                     ||print.pages[1].querySelector('[data-tov-writing-rule]'))throw Error('Writing guides must only appear in empty note areas');
-                const overflow=MindexBulletin.renderPages({...doc,fields:{...doc.fields,scriptureNote:'긴 본문 '.repeat(500)}},'print');
-                if(!overflow.issues.has('scriptureNote'))throw Error('Long note must block printing');
+                const overflow=MindexBulletin.renderPages({...doc,fields:{...doc.fields,outline:'긴 본문 '.repeat(500)}},'print');
+                if(!overflow.issues.has('outline'))throw Error('Long note must block printing');
             }""")
             page.locator("[data-bulletin-save]").click()
             page.wait_for_function("saved.length===1&&!documents.get(source.id).dirty")
@@ -119,11 +133,11 @@ try:
                 && JSON.stringify(saved[0].content.sourceSnapshot.weekly.order)===JSON.stringify(source.order)
                 && saved[0].content.fields.staff==='회장 가나다 · 부회장 라마바 · 서기 사아자'""")
             page.evaluate("editor.reload()")
-            page.wait_for_function("document.querySelector('[data-bulletin-field=scriptureNote]')?.disabled===false")
-            assert page.locator("[data-bulletin-field=scriptureNote]").input_value() == "본문 노트의 직접 입력"
+            page.wait_for_function("document.querySelector('[data-bulletin-field=outline]')?.disabled===false")
+            assert page.locator("[data-bulletin-field=outline]").input_value() == "본문 노트의 직접 입력"
             page.locator("[data-bulletin-service]").select_option("youth-new")
-            page.wait_for_function("documents.get('youth-new')?.settings.design==='youth-tov'&&document.querySelector('[data-bulletin-field=scriptureNote]')?.disabled===false")
-            assert page.locator("[data-bulletin-field=scriptureNote]").input_value() == ""
+            page.wait_for_function("documents.get('youth-new')?.settings.design==='youth-tov'&&document.querySelector('[data-bulletin-field=outline]')?.disabled===false")
+            assert page.locator("[data-bulletin-field=outline]").input_value() == ""
             print("PASS Tov default, layout-only adoption, editable notes, officers, print overflow and CAS reload", engine, flush=True)
             browser.close()
 finally:
