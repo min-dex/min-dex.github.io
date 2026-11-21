@@ -30,7 +30,8 @@ def main():
                         page.wait_for_function('presence.length>0')
                         label=page.evaluate('presence[0].browser')
                         assert label == 'Mindex App' if desktop else label in {'Chrome','Safari'}
-                        expected_name = 'macOS · Mindex App' if desktop else f'macOS · {label}'
+                        reported_os = page.evaluate('presence[0].os')
+                        expected_name = f'{reported_os} · {"Mindex App" if desktop else label}'
                         assert page.get_by_label('접속명',exact=True).input_value() == expected_name
                         page.evaluate("""async () => {
                           if (state.module !== 'presenter') await switchModule('presenter');
