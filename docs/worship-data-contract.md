@@ -1114,8 +1114,11 @@ duplicate fields after enforcement; retain their drafts and require reload.
 No operational migration is implied by this candidate document.
 
 DB: 음원 and DB: 악보 omit category suffixes. Only the audio-present list
-filter is exposed. Within a selected DB audio item, missing audio is an explicit
-empty state; source/form mismatch and invalid cue timing have distinct notices.
+filter is exposed. Within a selected DB audio item, never-configured audio is a
+normal compact `음원 추가` action, not a corruption warning or empty player;
+source/form mismatch and invalid cue timing have distinct notices. A freshly
+changed DB: 가사 row must ignore any stale DB-audio projection while slides are
+being refreshed.
 No absent-audio list badge/filter, cross-version fallback or autoplay is added.
 
 Score eligibility is actual selected-version manifest source presence, not a

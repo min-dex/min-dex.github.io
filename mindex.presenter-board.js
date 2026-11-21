@@ -944,8 +944,8 @@ function renderPresenterBoardSubgroup(subgroup, activeIndex, serviceId, options 
   const { label: visibleLabel, title } = display;
   const visibleTitle = preparation && !context ? "" : presenterVisibleTitle(visibleLabel, title);
   const interactionLabel = presenterSlideInteractionHint(serviceId, subgroup.name || visibleLabel);
-  const warnings = presenterWarningsForEntries(subgroup.slides);
   const inputContexts = presenterBoardSubgroupInputContexts(serviceId, subgroup);
+  const warnings = presenterWarningsForCurrentInputs(subgroup.slides, inputContexts);
   const formWarnings = uniqueList(inputContexts.flatMap(({ item }) => serviceFormInputWarnings(item)));
   const staticWarnings = warnings.filter(warning => !formWarnings.includes(warning));
   // Single-song rows use the same compact controls as medley rows.
@@ -1242,6 +1242,18 @@ function presenterWarningsForEntries(entries = []) {
       seen.add(key);
       return true;
     });
+}
+
+const PRESENTER_VERSION_AUDIO_WARNINGS = new Set([
+  "버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요.",
+  "버전 음원의 자동 넘김 시각을 확인하세요.",
+  "버전 음원이 현재 가사·송폼과 다릅니다. 음원 설정을 확인하세요.",
+]);
+
+function presenterWarningsForCurrentInputs(entries = [], inputContexts = []) {
+  const acceptsVersionAudio = inputContexts.some(({ item }) => servicePraiseInputMode(item) === "children_audio");
+  return presenterWarningsForEntries(entries)
+    .filter(warning => acceptsVersionAudio || !PRESENTER_VERSION_AUDIO_WARNINGS.has(warning));
 }
 
 function renderPresenterWarnings(warnings = []) {

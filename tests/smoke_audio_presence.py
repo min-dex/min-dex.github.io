@@ -46,15 +46,27 @@ try:
     const host=document.createElement('div');document.body.append(host);
     const paint=()=>{const has=MindexSongTiming.audioFor(context.timingEntries,item.id);host.innerHTML=renderPresenterBoardItemAudioControls(service.id,context,{manager:!!has?.url});return host.textContent;};
     check(!paint().includes('등록된 음원이 없습니다'),'valid audio not missing');
+    context.item={...lyricsItem,label:'찬양'};
+    host.innerHTML=renderPresenterBoardItemAudioControls(service.id,context,{manager:true});
+    check(!host.textContent.trim()&&!host.querySelector('.svc-audio-manager'),'lyrics mode rejects stale DB audio projection');
+    const oldAudioWarning='버전 음원·타이밍이 없거나 변경됐습니다. 버전 음원·타이밍에서 자료를 확인하세요.';
+    check(!presenterWarningsForCurrentInputs([{slide:{warnings:[oldAudioWarning]}}],[{item:context.item}]).length,'lyrics mode hides stale audio warning');
+    context.item={...item,label:'찬양'};
+    check(presenterWarningsForCurrentInputs([{slide:{warnings:[oldAudioWarning]}}],[{item:context.item}]).length===1,'audio mode retains actionable warning');
     const saved=version.audio_set;delete version.audio_set;context.timingEntries=[];
-    check(paint().includes('등록된 음원이 없습니다.'),'missing audio empty state');
+    check(paint().trim()==='음원 추가','missing audio has one compact action');
+    check(host.querySelectorAll('[data-song-timing-open]').length===1,'missing audio action unique');
+    check(host.querySelector('[data-song-timing-open]').getAttribute('aria-label').includes('등록된 음원이 없습니다.'),'missing audio accessible state');
+    check(MindexSongTiming.decorate(slides,item,song,version).every(s=>!(s.warnings||[]).length),'never-configured audio is not corruption warning');
     check(!host.querySelector('[data-song-timing-play]'),'missing audio cannot play');
     version.audio_set={...saved,sourceSignature:'stale'};
-    check(paint().includes('가사·송폼이 변경'),'stale lyrics distinct');
-    check(MindexSongTiming.decorate(slides,item,song,version).every(s=>!s.syncTimeline&&!s.songTimingAudio),'stale set never borrowed or auto played');
+    const stale=MindexSongTiming.decorate(slides,item,song,version);
+    check(stale.every(s=>(s.warnings||[]).some(w=>w.includes('현재 가사·송폼과 다릅니다'))),'stale lyrics distinct');
+    check(stale.every(s=>!s.syncTimeline&&!s.songTimingAudio),'stale set never borrowed or auto played');
     version.audio_set={...saved,starts:[2]};context.timingEntries=slides.map(slide=>({slide:{...slide,elementId:item.id}}));
-    check(paint().includes('자동 넘김 타이밍이 맞지'),'invalid timing distinct');
-    check(MindexSongTiming.decorate(slides,item,song,version).every(s=>!s.syncTimeline),'invalid timing never auto advances');
+    const invalidTiming=MindexSongTiming.decorate(slides,item,song,version);
+    check(invalidTiming.every(s=>(s.warnings||[]).some(w=>w.includes('자동 넘김 시각'))),'invalid timing distinct');
+    check(invalidTiming.every(s=>!s.syncTimeline),'invalid timing never auto advances');
     version.audio_set=saved;
     version.audio_set.enabled=false;check(versionHasAudio(version),'paused autosync has audio');
     check(MindexSongTiming.decorate(slides,item,song,version).every(s=>!s.syncTimeline),'disabled timing remains disabled');
@@ -72,6 +84,6 @@ try:
     check(serviceSelectableSongVersions(custom,scoreItem,service).length===1,'non-hymnal score selectable');
     state.songs.push(custom);clearSearchCaches();
     check(!serviceItemSongSelectionInvalid({...scoreItem,song_id:custom.id,version_id:'custom-score'},service,custom),'registered custom selection accepted');
-    return 'PASS audio/source ownership, empty/stale/timing states, real score presence, new/other edition isolation, manual mode and preserved cues';
+    return 'PASS audio/source ownership, compact empty state, stale projection isolation, stale/timing warnings, real score presence, new/other edition isolation, manual mode and preserved cues';
    }"""),flush=True);b.close()
 finally:server.shutdown()
