@@ -1,0 +1,21 @@
+name: Broadcast browser diagnostic
+on:
+  push:
+    branches: [codex/native-browser-1080-1014]
+    paths: [tests/smoke_broadcast_resolution.py, .github/workflows/broadcast-diagnostic.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: bash cloud/setup.sh
+      - run: .cache/cloud-venv/bin/python tests/smoke_broadcast_resolution.py

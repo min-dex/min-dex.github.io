@@ -28,12 +28,21 @@ def main():
                     page.get_by_text('수동 자막 및 화면 설정', exact=True).click()
                     page.locator('#text').fill('1080p browser caption')
                     page.locator('#apply').click()
-                    page.wait_for_function('''() => {
+                    try:
+                        page.wait_for_function('''() => {
                         const c=document.querySelector('#broadcast');
                         const d=c.getContext('2d').getImageData(0,850,1920,230).data;
                         for(let i=0;i<d.length;i+=4)if(d[i]>220&&d[i+1]>220&&d[i+2]>220)return true;
                         return false;
                     }''')
+                    except Exception:
+                        print('BROADCAST_DIAGNOSTIC', engine, page.evaluate("""() => {
+                            const c=document.querySelector('#broadcast'),d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+                            let count=0,minY=c.height,maxY=-1;
+                            for(let i=0;i<d.length;i+=4)if(d[i]>220&&d[i+1]>220&&d[i+2]>220){count++;const y=Math.floor(i/4/c.width);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
+                            return {count,minY,maxY,stats:broadcastPrototype.stats(),transition:broadcastPrototype.transition(),routing:broadcastPrototype.routing(),fonts:document.fonts.status,faces:[...document.fonts].filter(f=>f.family.includes('Presenter')).map(f=>[f.family,f.weight,f.status]),rect:c.getBoundingClientRect().toJSON(),text:document.querySelector('#text').value};
+                        }"""), flush=True)
+                        raise
                     assert page.locator('#ytStart').is_disabled()
                     assert not errors, errors
                     print(f'PASS {engine}: browser 1080p canvas, scaled caption, no desktop bridge')
