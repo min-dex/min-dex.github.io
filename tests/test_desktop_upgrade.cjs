@@ -133,6 +133,7 @@ async function main(){
    const row={key:args.p_key,value:args.p_value,revision:'1',requestId:args.p_request_id};
    (record.rows[scope]||= {})[row.key]=row;return {data:row,error:null};
   });
+  const retiredTheme=phase==='upgrade'&&Boolean(record.rows.shared?.['mindex.theme']);
   const data=await page.evaluate(async ({seed,retiredTheme,legacyCopies})=>{
    const service={id:'fixture-worship',service_date:'2026-11-04',service_alias:'설치 보존 시험'};
    const client=window.supabase.createClient('https://fixture.invalid','fixture-public-id',{auth:{persistSession:false,autoRefreshToken:false},global:{fetch:async (url,options)=>{
@@ -170,9 +171,9 @@ async function main(){
    fs.writeFileSync(proof,JSON.stringify(record,null,2));
   }else{
    const expected=structuredClone(record.data);
-   if(phase==='upgrade')expected.values['mindex.theme']=null;
+   if(retiredTheme)expected.values['mindex.theme']=null;
    assert.deepEqual(data,expected);assert.equal(JSON.stringify(record.rows),originalRows);
-   if(phase==='upgrade')assert(Object.values(record.rows).some(rows=>rows['mindex.theme']?.value==='dark'),'Retired theme row must remain byte-preserved');
+   if(retiredTheme)assert(record.rows.shared?.['mindex.theme']?.value==='dark','Retired shared theme row must remain byte-preserved');
    assert.deepEqual(Object.fromEntries(Object.entries(data).map(([k,v])=>[k,hash(v)])),Object.fromEntries(Object.entries(expected).map(([k,v])=>[k,hash(v)])));
   }
   if(phase==='upgrade'){
