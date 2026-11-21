@@ -1,4 +1,5 @@
 :is(.monitor-panel, .remote-panel) { box-sizing: border-box; width: min(560px, calc(100% - 24px)); max-height: 85vh; padding: 20px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); color: var(--ink); overflow-y: auto; }
+.monitor-panel { width: min(920px, calc(100% - 24px)); }
 :is(.monitor-panel, .remote-panel)::backdrop { background: #0008; }
 :is(.monitor-panel, .remote-panel) form, .monitor-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
 :is(.monitor-panel, .remote-panel) header { display: flex; align-items: center; flex-wrap: nowrap; gap: 10px; margin-bottom: 20px; }
@@ -23,6 +24,7 @@
 :is(.monitor-panel, .remote-panel) .monitor-message { min-height: 22px; }
 :is(.monitor-panel, .remote-panel) .monitor-message:empty { display: none; }
 .monitor-section { padding: 15px 0; border-top: 1px solid var(--line); }
+.monitor-status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(310px, 100%), 1fr)); gap: 0 24px; }
 .monitor-section-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .monitor-section-heading h3 { flex: 1; margin: 0; }
 .monitor-section > h3 { margin: 0 0 15px; }
@@ -38,6 +40,9 @@
 :is(.monitor-panel, .remote-panel) [data-count] { margin-left: auto; font-size: 12px; color: var(--muted); }
 :is(.monitor-panel, .remote-panel) summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 :is(.monitor-panel, .remote-panel) [hidden] { display: none !important; }
+@media (max-width: 680px) {
+  .monitor-status-grid { grid-template-columns: 1fr; }
+}
 @media (max-width: 480px) { :is(.monitor-panel, .remote-panel) form label { flex-basis: 100%; } }
 
 /* Remote dialog follows shared dialog rhythm without changing device-status UI. */
