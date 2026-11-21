@@ -1891,7 +1891,7 @@
         }
         const key=t.dataset.bulletinSetting;if(!["theme","design","compactOrder","archiveReference","outlineColumns"].includes(key)&&!validMonth(t.value)){t.value=doc.settings[key]||doc.source?.[key]||"";return;}
         remember();doc.settings[key]=["compactOrder","archiveReference"].includes(key)?t.checked:key==="outlineColumns"?Number(t.value):t.value;
-        if(key==="design"){doc.frames=defaultFrames(t.value);if(t.value==="youth-tov"||swissDesign(t.value))delete doc.settings.appearance;}
+        if(key==="design"){doc.frames=defaultFrames(t.value);if(swissDesign(t.value)){const logo=doc.settings.appearance?.assets?.logo;delete doc.settings.appearance;if(logo)doc.settings.appearance={assets:{logo}};}else if(t.value==="youth-tov")delete doc.settings.appearance;}
         if(["compactOrder","archiveReference"].includes(key))doc.sourceSnapshot=null;
         if(templateSession){persist();properties();preview();return;}
         persist();
@@ -1928,7 +1928,7 @@
           row=normalizeTemplate(row);remember();applyTemplate(doc,row,{common:false});persist();templateError="";assetLoaded=false;return readyBackground(doc).then(()=>{if(doc===target)assetLoaded=true;});
         }).catch(e=>{if(doc===target)saveError=e.message;}).finally(()=>{if(!signal.aborted){loading=false;properties();preview();status();}});return;
       }
-      if(b.hasAttribute("data-bulletin-use-swiss")){remember();doc.settings.design="swiss-"+doc.source.department;doc.frames=defaultFrames(doc.settings.design);delete doc.settings.appearance;persist();properties();void designImages();return;}
+      if(b.hasAttribute("data-bulletin-use-swiss")){remember();const logo=doc.settings.appearance?.assets?.logo;doc.settings.design="swiss-"+doc.source.department;doc.frames=defaultFrames(doc.settings.design);delete doc.settings.appearance;if(logo)doc.settings.appearance={assets:{logo}};persist();properties();void designImages();return;}
       if(b.hasAttribute("data-bulletin-use-forest")){remember();doc.settings.design="children-forest";doc.frames=defaultFrames("children-forest");assetLoaded=false;persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();}).catch(e=>{error=e.message;status();});return;}
       if(b.hasAttribute("data-bulletin-use-tov")&&doc.source?.department==="youth"){remember();doc.settings.design="youth-tov";delete doc.settings.appearance;doc.frames=defaultFrames("youth-tov");persist();properties();void designImages();return;}
       if(b.hasAttribute("data-bulletin-use-simple")){remember();doc.settings.design="simple";doc.frames=defaultFrames("simple");persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();});return;}

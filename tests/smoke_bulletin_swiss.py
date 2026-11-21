@@ -41,7 +41,7 @@ try:
    page.evaluate(r'''()=>{
     const B=MindexBulletin,cache=new Map();window.MINDEX_SERVER_STORAGE={ready:true,getItem:(_,k)=>cache.get(k),keys:()=>[...cache.keys()],setItem:async(_,k,v)=>cache.set(k,v),queue:(_,k,v)=>{cache.set(k,v);return true}};
     window.documents=new Map();window.saved=[];window.templateRows={};
-    const original={...B.normalizeSnapshot({settings:{design:'youth-tov'},fields:{news:'직접 쓴 광고',outline:'1. 첫 대지\n2. 둘째 대지',reflection:'',welcome:''},months:{'2026-11':'직접 쓴 월 일정'}}),source:structuredClone(samples.youth.source)};
+    const original={...B.normalizeSnapshot({settings:{design:'youth-tov',appearance:{assets:{logo:'assets/bulletin/ria-mark.webp'}}},fields:{news:'직접 쓴 광고',outline:'1. 첫 대지\n2. 둘째 대지',reflection:'',welcome:''},months:{'2026-11':'직접 쓴 월 일정'}}),source:structuredClone(samples.youth.source)};
     window.row={revision:3,...B.storedValue(original)};window.preserved=JSON.stringify(row.content);
     window.editor=B.mount(document.querySelector('#host'),{serviceId:'youth',scope:'swiss-fixture',documents,services:[{id:'youth',label:'청소년부'}],loadSource:async()=>structuredClone(samples.youth.source),loadDraft:async()=>structuredClone(row),saveDraft:async(id,value,revision)=>{if(id!=='youth'||revision!==row.revision)throw Error('CAS mismatch');saved.push(value);return row={revision:revision+1,...structuredClone(value)};}});
    }''')
@@ -49,6 +49,7 @@ try:
    page.locator('[data-bulletin-use-swiss]').click()
    page.wait_for_function("document.querySelectorAll('[data-bulletin-design=swiss-youth]').length===2&&document.querySelector('[data-bulletin-print]').disabled===false")
    assert page.evaluate("JSON.stringify(MindexBulletin.storedValue(documents.get('youth')).content)===preserved")
+   assert page.evaluate("documents.get('youth').settings.appearance.assets.logo==='assets/bulletin/ria-mark.webp'")
    page.locator('[data-bulletin-field=scriptureNote]').fill('연결 본문에 대한 노트')
    page.locator('[data-bulletin-save]').click()
    page.wait_for_function('saved.length===1')
