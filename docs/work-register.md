@@ -169,3 +169,20 @@ UI owner를 읽으며, 기능/저장/승인 경계와 script load 순서는 유�
 찾도록 고쳤으며 세 유형 전환·저장 버튼 단일성·30px·넘침·미저장 선택영역
 보존 조건은 그대로다. Chromium/WebKit320/700/1100 전부 PASS.
 SOLID ratchet, offline desktop preflight, 등록 Node 전수 및 관련 browser8쌍 PASS.
+
+K01 1.0.15 마감 실패/새 1.0.16 묶음: `f4383c43` branch web44932676824와
+native44932676796 세 플랫폼 PASS, main Pages44935311208 및 공개14파일/양엔진
+카드·영상 검증 PASS. main native44935311096 Windows는 주보 two-app 설정 검증
+PASS(18:44:21Z) 뒤 test_bulletin_desktop_live의 종료에서 멈춰 90분 제한으로 취소됐다.
+설치본15는 게시되지 않았다. 원본/운영 저장/사용자 앱 변경0.
+
+시험 종료 수리 `475d92ee`는 소유권·격리·PID 확인 후 시험용 창만 destroy한다.
+종료 실패/15초 제한은 소유 시험 자식 정리 후 실패로 전파하고, 실제 프로필은
+거부한다. 주보/Keynote native fixture의 원래 단언은 유지한다. 실제 취소 unload
+회귀는 현재 설치12를 별도 격리 프로필로 실행해 PASS(사용자 실행 인스턴스 미접근),
+안전 단위5건·offline desktop preflight·cloud 분배/정책 PASS. 세 OS 최종 검증은 별도.
+
+승인 Swiss `c1685bf6242b54b794a2f03cd7ecd9ff8a62272d`를 병합했다. 해당 담당은
+개별 gate/push/운영 저장을 시작하지 않고 자기 waiting ticket을 반환했다.
+Swiss journal `a77694b624354eef826caa411467f66e`를 기존 K01 journal/FIFO와 연결한다.
+새1.0.16 combined SHA의 전체 필수 gate/공개 readback 전까지 배포 완료가 아니다.
