@@ -89,6 +89,10 @@ or invalid input uses warning; failed/destructive work uses danger; confirmed
 success uses success. Text and explicit labels remain alongside status colors.
 Focus uses a visible accent outline. Placeholder ink is solid secondary text.
 
+Incomplete `입력 필요` guidance is warning-colored text, not a filled pill. It
+keeps its semantic warning color without adding a background, border radius or
+horizontal padding inside the outline.
+
 Slide artwork/chromakey/preview content, presenter-output stylesheet and printed
 bulletin styling are excluded. Do not derive output colors from these UI roles.
 

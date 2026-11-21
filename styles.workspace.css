@@ -3623,6 +3623,13 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.service-outline-badge {
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  line-height: 14px;
+  padding: 0;
+}
 .svc-board-subgroup-audio {
   display: flex;
   flex-wrap: wrap;

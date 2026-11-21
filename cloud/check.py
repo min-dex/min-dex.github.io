@@ -270,6 +270,7 @@ SMOKES = (
     "smoke_presenter_focus_view.py",
     "smoke_presenter_thumb_scale.py",
     "smoke_presenter_emergency_mode.py",
+    "smoke_presenter_navigation_polish.py",
     "smoke_presenter_left_input.py",
     "smoke_presenter_left_input_save.py",
     "smoke_hymn_number_create_guard.py",

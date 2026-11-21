@@ -207,7 +207,7 @@ function renderPresenterScreenManagement(serviceId, slides = []) {
       ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
       ${toggle('black', '암전', 'eye-off')}
       ${toggle('transparent', '투명', 'layers')}
-      <button type="button" class="icon-btn svc-presenter-emergency" data-presenter-action="emergency" data-service-id="${escapeAttr(serviceId)}" aria-pressed="${Boolean(own && state.presenter.emergencyMode)}" aria-label="비상 모드${own && state.presenter.emergencyMode ? ' 해제' : ''}" title="검은 배경 · 크로마키 양식" ${own && slides.length ? '' : 'disabled'}><i data-lucide="triangle-alert" aria-hidden="true"></i><span>비상 모드${own && state.presenter.emergencyMode ? ' 켜짐' : ''}</span></button>
+      <button type="button" class="icon-btn svc-presenter-emergency" data-presenter-action="emergency" data-service-id="${escapeAttr(serviceId)}" aria-pressed="${Boolean(own && state.presenter.emergencyMode)}" aria-label="배경 없이 송출${own && state.presenter.emergencyMode ? ' 해제' : ''}" title="배경 영상·이미지를 숨기고 검은 바탕에 내용을 송출합니다." ${own && slides.length ? '' : 'disabled'}><i data-lucide="triangle-alert" aria-hidden="true"></i><span>배경 없이${own && state.presenter.emergencyMode ? ' 켜짐' : ''}</span></button>
     </div>
     ${globalThis.MindexPresenterRefresh?.controls(serviceId, slides) || ''}
   </section>`;

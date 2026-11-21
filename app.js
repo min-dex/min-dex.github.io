@@ -1638,13 +1638,15 @@ function serviceOutlineSlideTarget(serviceOutlineItem) {
   const itemIndex = resolved?.index ?? rawItemIndex;
   let slideIndex = -1;
   if (currentItem) {
-    const slideIndexByItemId = buildPresenterSlideItemIndexMap(slides);
-    slideIndex = firstPresenterSlideIndexForServiceItem(currentItem, slides, slideIndexByItemId);
     const datasetSlideIndex = slideValue ? Number(slideValue) : -1;
-    if (slideIndex < 0
-      && Number.isFinite(datasetSlideIndex)
+    // The outline already owns the exact first slide. Rebuilding the complete
+    // item-to-slide index on every click made long services feel unresponsive.
+    if (Number.isFinite(datasetSlideIndex)
       && presenterSlideBelongsToItem(slides[datasetSlideIndex], currentItem)) {
       slideIndex = datasetSlideIndex;
+    } else {
+      const slideIndexByItemId = buildPresenterSlideItemIndexMap(slides);
+      slideIndex = firstPresenterSlideIndexForServiceItem(currentItem, slides, slideIndexByItemId);
     }
   } else if (slideValue) {
     slideIndex = Number(slideValue);
@@ -1722,8 +1724,8 @@ function handleServiceOutlineSlideClick(serviceOutlineItem) {
     const outline = refs.songList?.querySelector(".service-outline-list");
     if (!outline?.contains(serviceOutlineItem)) renderServiceList();
   }
-  if (!scrollPresenterBoardToServiceItem(target.serviceId, target.itemIndex, { force: true, behavior: "auto", block: "start" })) {
-    scrollPresenterBoardToIndex(target.serviceId, target.slideIndex, { force: true, behavior: "auto", target: "subgroup", block: "start" });
+  if (!scrollPresenterBoardToServiceItem(target.serviceId, target.itemIndex, { force: false, behavior: "auto", block: "nearest" })) {
+    scrollPresenterBoardToIndex(target.serviceId, target.slideIndex, { force: false, behavior: "auto", target: "subgroup", block: "nearest" });
   }
 }
 
@@ -7933,6 +7935,7 @@ function sundayEditSyncItemSnapshot(item = {}) {
     elementType: serviceMemoElementType(memo),
     inputMode: content.inputMode || memo.inputMode || "",
   };
+  if (Object.hasOwn(content, "sermonSubtitle")) snapshotMemo.sermonSubtitle = content.sermonSubtitle;
   if (Object.hasOwn(content, "references")) {
     snapshotMemo.scriptureReference = content.references[0] || "";
     snapshotMemo.scriptureReferences = content.references;
@@ -7989,7 +7992,9 @@ function sundayEditSyncEligible(item = {}, service = null) {
 function sundayEditSyncContent(item = {}) {
   const key = sundaySharedContentKey(item);
   const memo = parseServiceItemMemo(item.memo);
-  if (key === "sermon-title") return { title: item.raw_title || "", assignee: item.assignee || "" };
+  if (key === "sermon-title") return {
+    title: item.raw_title || "", assignee: item.assignee || "", sermonSubtitle: memo.sermonSubtitle || "",
+  };
   if (["scripture-reading", "sermon-scripture", "sermon-citation"].includes(key)) {
     return { references: serviceItemDirectScriptureReferences(item, memo), payloads: memo.scriptureReferencePayloads || [] };
   }
@@ -8039,7 +8044,10 @@ function applySundayEditSync(target, source, { preserveExistingForm = false } = 
     next.memo = serializeServiceItemMemo({ ...memo, ...form, slides: content.slides,
       inputMode: preserveDisplayMode ? memo.inputMode : content.inputMode,
       outputMode: preserveDisplayMode || memo.inputMode === content.inputMode ? memo.outputMode : parseServiceItemMemo(source.memo).outputMode });
-  } else Object.assign(next, { raw_title: content.title, assignee: content.assignee });
+  } else {
+    Object.assign(next, { raw_title: content.title, assignee: content.assignee });
+    next.memo = serializeServiceItemMemo({ ...memo, sermonSubtitle: content.sermonSubtitle || "" });
+  }
   return next;
 }
 
@@ -11160,6 +11168,7 @@ function emptyServiceItemMemo(rawNote = "") {
     scriptureInputCleared: false,
     manualScripture: null,
     introSlide: null,
+    sermonSubtitle: "",
     formHint: "",
     formPreset: null,
     formPresetDisabled: false,
@@ -11460,6 +11469,7 @@ function parseServiceItemMemo(value) {
       const audioAsset = normalizeServiceAudioAsset(parsed.audioAsset || parsed.audio_asset || parsed.audio || parsed.mr);
       const presenterRole = normalizeServicePresenterRole(parsed.presenterRole || parsed.presenter_role || parsed.role);
       const introSlide = normalizeServiceIntroSlide(parsed.introSlide || parsed.intro_slide || parsed.titleSlide || parsed.title_slide);
+      const sermonSubtitle = String(parsed.sermonSubtitle || parsed.sermon_subtitle || "").replace(/\s*\n\s*/g, " ").trim();
       const connectedPraise = normalizeServiceConnectedPraise(parsed.connectedPraise || parsed.connected_praise);
       return {
         note: String(parsed.note || parsed.memo || "").trim(),
@@ -11473,6 +11483,7 @@ function parseServiceItemMemo(value) {
         scriptureReferencePayloads: normalizeServiceScriptureReferencePayloads(parsed.scriptureReferencePayloads || parsed.scripture_reference_payloads),
         manualScripture: normalizeServiceManualScripture(parsed.manualScripture || parsed.manual_scripture),
         introSlide,
+        sermonSubtitle,
         formHint: String(parsed.formHint || parsed.form_hint || parsed.forms || "").trim(),
         formPreset: normalizeServiceFormPreset(parsed.formPreset || parsed.form_preset, parsed.formHint || parsed.form_hint || parsed.forms),
         formPresetDisabled: Boolean(parsed.formPresetDisabled || parsed.form_preset_disabled || parsed.disableFormPreset || parsed.disable_form_preset),
@@ -11728,6 +11739,7 @@ function serializeServiceItemMemo(value = {}) {
   const formPresetDisabled = Boolean(value.formPresetDisabled || value.form_preset_disabled || value.disableFormPreset || value.disable_form_preset);
   const formPresetRules = normalizeServiceFormPresetRules(value.formPresetRules || value.form_preset_rules);
   const introSlide = normalizeServiceIntroSlide(value.introSlide || value.intro_slide || value.titleSlide || value.title_slide);
+  const sermonSubtitle = String(value.sermonSubtitle || value.sermon_subtitle || "").replace(/\s*\n\s*/g, " ").trim();
   const templateKey = String(value.templateKey || value.template_key || "").trim();
   const templateVariant = String(value.templateVariant || value.template_variant || "").trim();
   const elementType = serviceMemoElementType(value);
@@ -11748,7 +11760,7 @@ function serializeServiceItemMemo(value = {}) {
   const templateSuppressed = Boolean(value.templateSuppressed || value.template_suppressed);
   const defaultAssetKind = serviceAssetKindForElementType(elementType);
   if (!asset.kind && defaultAssetKind && hasServiceAsset(asset)) asset.kind = defaultAssetKind;
-  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !value.scriptureInputCleared && !manualScripture && !hasServiceIntroSlide(introSlide) && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !audioTiming && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
+  if (!normalizeAnnouncementRegions(value.announcementRegions) && !slides.length && !scriptureReference && !scriptureReferences.length && !scriptureTranslationId && !scriptureReferencePayloads.length && !value.scriptureInputCleared && !manualScripture && !hasServiceIntroSlide(introSlide) && !sermonSubtitle && !formHint && !formPreset && !formPresetDisabled && !formPresetRules.length && !templateKey && !templateVariant && !elementType && !outputMode && !inputMode && !textHighlights.length && !hasServiceAsset(asset) && !hasServiceAsset(audioAsset) && !audioTiming && !hasServicePlaybackConfig(playback) && !presenterRole && !connectedPraise && !presentation && !mediaPlacement && !benedictionReplacement && !offeringVariants && !hiddenInPresentation && !templateSuppressed) return note;
   const payload = { note };
   if(normalizeAnnouncementRegions(value.announcementRegions))payload.announcementRegions=normalizeAnnouncementRegions(value.announcementRegions);
   if (value.scriptureInputCleared === true) payload.scriptureInputCleared = true;
@@ -11758,6 +11770,7 @@ function serializeServiceItemMemo(value = {}) {
   if (scriptureReferencePayloads.length) payload.scriptureReferencePayloads = scriptureReferencePayloads;
   if (manualScripture) payload.manualScripture = manualScripture;
   if (hasServiceIntroSlide(introSlide)) payload.introSlide = introSlide;
+  if (sermonSubtitle) payload.sermonSubtitle = sermonSubtitle;
   if (formHint) payload.formHint = formHint;
   if (formPreset) payload.formPreset = formPreset;
   if (formPresetDisabled) payload.formPresetDisabled = true;
@@ -29595,6 +29608,8 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
   const titlePlaceholder = presenterServiceTitleInputPlaceholder(item, memo, titleLabel);
   const assigneeLabel = presenterServiceAssigneeInputLabel(item);
   const assigneePlaceholder = assigneeLabel;
+  const sermonTitle = String(item?._worshipSectionKey || item?.section_key || "") === "sermon"
+    || ["설교", "설교제목"].includes(compactSearchValue(item?.label || ""));
   return `
     ${announcementText ? renderServiceAnnouncementEditor(item,index,model?.service?.id,memo):""}
     ${needsTitle && !announcementText ? `
@@ -29604,6 +29619,10 @@ function renderPresenterServiceTextInputs(item, index, model, memo) {
           <input class="svc-presenter-input-control" type="text" data-service-item-field="raw_title" data-service-item-index="${index}"
             value="${escapeAttr(model.titleValueOverride ?? item.raw_title ?? "")}" placeholder="${escapeAttr(titlePlaceholder)}" onkeydown="handleDetailKeydown(event)" ${specialSong ? `autocomplete="off" spellcheck="false"` : ""} aria-label="${escapeAttr(`${item.label || "항목"} ${titleLabel}`)}" />`}
       </label>` : ""}
+    ${sermonTitle ? `<label class="svc-presenter-input-field">
+      <input class="svc-presenter-input-control" type="text" data-service-item-field="sermon_subtitle" data-service-item-index="${index}"
+        value="${escapeAttr(memo.sermonSubtitle || "")}" placeholder="부제목" onkeydown="handleDetailKeydown(event)" aria-label="설교 부제목" />
+    </label>` : ""}
     ${manualPraise ? renderPresenterManualLyricsField(item, index, model?.service?.id || state.presenter.serviceId) : ""}
     ${needsAssignee ? `
       <label class="svc-presenter-input-field">
