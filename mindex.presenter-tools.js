@@ -167,6 +167,18 @@ const presenterTools = (() => {
 })();
 
 // Manual media selection belongs with the media controls.
+const DAWN_BGM = Object.freeze({ source: "./assets/presenter/dawn-bgm-5efc56784907.mp3", label: "새벽기도 배경음악" });
+
+function serviceBgmPlayerOptions(options = {}) {
+  const typeId = options.bgmService?.type_id || options.bgmService?.service_type_id;
+  const dawn = (WORSHIP_SERVICE_TYPE_ALIASES[typeId] || typeId) === "holy-week-dawn";
+  const currentSource = state.serviceMusic.sourceKey;
+  const customMusic = currentSource && !serviceMusicSourceIsSlotOwned(currentSource) && currentSource !== DAWN_BGM.source;
+  // A preset is only a binding: rendering must never load, replace or start audio.
+  if (!options.source && dawn && !customMusic) return { ...options, ...DAWN_BGM, serviceId: options.bgmService.id, repeatAllowed: true };
+  return options;
+}
+
 function loadServiceMusicFile(file) {
   if (!file) return;
   const audio = getServiceMusicAudio();
