@@ -1,3 +1,15 @@
+## Dawn AR2 + MR1 default ·2026-11-21 candidate
+
+The owner approved the edited seven-song AR set twice followed by the seven-song
+MR set once as the shared dawn default. Use the bundled 48 kHz/160 kbps delivery
+`dawn-free-prayer-9778d2abaf3d.mp3` (4633.690395833333s), preserving the existing
+explicit-attachment priority and formerly published audio URL. The approved
+320 kbps listening original stays local; delivery is encoded from the same
+lossless master to fit Git and the precise transport's unchanged memory limit.
+No worship record, order, timing or authored attachment is rewritten. Audio
+identity, encoding compensation and verification boundaries are documented in
+`friday-prayer-music.md`. Local candidate is not a publication receipt.
+
 ## Dawn prayer r2 default asset ·2026-11-06
 
 User approved the six-point (7ms total) pop-corrected r2 MP3 for the shared dawn

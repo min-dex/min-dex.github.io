@@ -43,7 +43,7 @@ async function main(){
    });
    assert(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().every(w=>w.webContents.isAudioMuted())));
    bundledAudio=await page.evaluate(async()=>{
-    const url=new URL('./assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3',location.href);
+    const url=new URL('./assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3',location.href);
     if(url.protocol!=='file:')throw Error('Installed audio must use the bundled local protocol');
     const audio=new Audio();audio.muted=true;audio.preload='metadata';
     let timer;
@@ -55,7 +55,7 @@ async function main(){
      return await Promise.race([(async()=>{
       const ready=waitFor('loadedmetadata');audio.src=url.href;audio.load();await ready;
       const duration=audio.duration;
-      if(Math.abs(duration-2946.712875)>0.1)throw Error('Bundled MP3 duration mismatch');
+      if(Math.abs(duration-4633.690395833333)>0.1)throw Error('Bundled MP3 duration mismatch');
       const progressing=waitFor('timeupdate');await audio.play();await progressing;
       if(audio.paused||audio.currentTime<=0||!audio.muted)throw Error('Bundled MP3 did not advance muted');
       const progressed=audio.currentTime;
@@ -100,7 +100,7 @@ async function main(){
    preciseAudio=await page.evaluate(async fingerprints=>{
     let timer;try{return await Promise.race([(async()=>{
     const source=SERVICE_SLOT_MUSIC['dawn.free'].source;
-    if(!source.endsWith('dawn-free-prayer-9b788b6e16dd.mp3'))throw Error('Installed dawn default is stale');
+    if(!source.endsWith('dawn-free-prayer-9778d2abaf3d.mp3'))throw Error('Installed dawn default is stale');
     const audio=MindexPreciseAudio.attach(new Audio());audio.muted=true;
     try {
      const ready=new Promise((resolve,reject)=>{audio.addEventListener('loadedmetadata',resolve,{once:true});audio.addEventListener('error',()=>reject(Error('Precise local source failed')),{once:true});});

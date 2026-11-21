@@ -6,7 +6,7 @@ from pathlib import Path
 os.environ['MINDEX_SMOKE_OFFLINE'] = '1'
 from smoke_app import start_local_app_server, sync_playwright, launch_chromium
 
-SOURCE = './assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3'
+SOURCE = './assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3'
 
 def main():
     fingerprints = json.loads((Path(__file__).parent / 'fixtures/prayer-audio-timing-fingerprints.json').read_text())
@@ -64,7 +64,7 @@ def main():
                             async decodeAudioData(bytes) {
                                 const header = String.fromCharCode(...new Uint8Array(bytes).subarray(0,200));
                                 const buffer = await context.decodeAudioData(bytes);
-                                if (!header.includes('Xing')) return buffer;
+                                if (!header.includes('Xing') && !header.includes('Info')) return buffer;
                                 const untrimmed = context.createBuffer(buffer.numberOfChannels,buffer.length+1105,buffer.sampleRate);
                                 for (let c=0;c<buffer.numberOfChannels;c++) untrimmed.copyToChannel(buffer.getChannelData(c),c,1105);
                                 return untrimmed;

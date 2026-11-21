@@ -23,10 +23,10 @@ let dawnAudio = null;
 for (const {name, blob} of files) {
  const bytes = asar.extractFile(archive, path.normalize(name));
  assert.equal(gitBlob(bytes), blob, name);
- if (name === 'assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3') {
+ if (name === 'assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3') {
   dawnAudio = {bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex')};
-  assert.equal(dawnAudio.bytes, 81289196);
-  assert.equal(dawnAudio.sha256, '9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150');
+  assert.equal(dawnAudio.bytes, 92675129);
+  assert.equal(dawnAudio.sha256, '9778d2abaf3df2c51efce27790724efa36dde5286b5e320b2c2fd3b07b1f878f');
  }
 }
 assert.ok(dawnAudio, 'approved dawn MP3 is included');

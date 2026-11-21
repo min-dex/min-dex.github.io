@@ -40,8 +40,8 @@ const sermon=steps.find(s=>s.sectionKey==='sermon');assert.ok(sermon.elements.so
 const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_title:'공동기도',_worshipSectionKey:'corporate_prayer',_worshipSectionId:crypto.randomUUID(),_worshipSectionTitle:'공동기도',_worshipElementTemplateModified:true,memo:serializeServiceItemMemo({elementType:'image',inputMode:'asset',asset:{kind:'image',name:'다니엘기도회 공동기도.png',url:'./assets/presenter/daniel-common-prayer-template-7473226f8525.png'}})};
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');
 assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
-assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('9b788b6e16dd.mp3'));
-assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('9b788b6e16dd'));
+assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('9778d2abaf3d.mp3'));
+assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('9778d2abaf3d'));
 // Only an explicitly reviewed duplicate is projected away; original rows stay intact.
 const fri={id:'10000000-0000-4000-8000-000000000098',type_id:'friday',date:'2026-11-06',alias:'온세대 월삭예배',_worshipSourceRef:{created_from:'mindex_template'}};
 const monthly={id:'10000000-0000-4000-8000-000000000099',type_id:'monthly',date:fri.date,alias:fri.alias,_worshipSourceRef:{navigation_duplicate_of:fri.id}};
@@ -74,10 +74,11 @@ state.services=[{...fri,_worshipSourceRef:{start_time:'05:00'}}];assert.equal(wo
 console.log('PASS linked replacements preserve absence, route all three card layouts and setlist status to the actual service');
 `,c);
 
-assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3')).digest('hex'),'9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150','Restored dawn audio must match the verified candidate');
+assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3')).digest('hex'),'9778d2abaf3df2c51efce27790724efa36dde5286b5e320b2c2fd3b07b1f878f','Restored dawn audio must match the verified candidate');
 
-// The user retired all original/intermediate All Nations assets on 2026-11-09.
-// Preserve the approved final bytes and prevent any stale variant from returning.
+// Keep the formerly published immutable URL for explicitly authored attachments.
+// Retired pre-2026-11-09 variants must not return; the AR2/MR1 file is the new default.
 const dawnAssets=fs.readdirSync('assets/presenter').filter(name=>/^dawn-free-prayer.*\.mp3$/.test(name));
-assert.deepEqual(dawnAssets,['dawn-free-prayer-9b788b6e16dd.mp3']);
-assert.equal(fs.statSync('assets/presenter/'+dawnAssets[0]).size,81289196);
+assert.deepEqual(dawnAssets.sort(),['dawn-free-prayer-9778d2abaf3d.mp3','dawn-free-prayer-9b788b6e16dd.mp3'].sort());
+assert.equal(require('node:crypto').createHash('sha256').update(fs.readFileSync('assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3')).digest('hex'),'9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150','Published attachments remain byte-identical');
+assert.equal(fs.statSync('assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3').size,92675129);

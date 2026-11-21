@@ -27,7 +27,31 @@
 
 ## Audio
 
-- Current dawn default (2026-11-09, user-approved integrated final):
+- Current dawn default candidate (2026-11-21, user-approved AR twice + MR once):
+  `assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3`, 92,675,129 bytes,
+  SHA-256 `9778d2abaf3df2c51efce27790724efa36dde5286b5e320b2c2fd3b07b1f878f`.
+  Stereo 48 kHz, 160 kbps, decoded 4633.690395833333 seconds (1:17:13.690).
+  Seven edited vocal songs play twice, followed by the same seven MR songs once.
+  AR repeat starts 1462.35s; MR starts 2925.45s. Approved opening is preserved;
+  vocal instrumental gaps are trimmed, with one-second smooth equal-power joins.
+  Per-song constant gains target -18 LUFS; MR song bodies and order are preserved.
+  The 185,350,169-byte approved 320 kbps listening file (SHA-256
+  `6e986f71acb861ddbd7815b39b37ec5699a0c499d2541d313200a569d2292d58`)
+  remains local. This smaller delivery is independently encoded from its same
+  lossless master, with constant 1/0.95 encoder-input compensation for LAME's
+  measured low-bitrate attenuation. It is not byte-identical to the listening file.
+  Exact decoded sample count, sparse independent PCM anchors covering both AR
+  passes/MR/end, and master correlation/gain checks establish delivery fidelity;
+  they do not claim perceptual transparency. No source lyrics/stems are shipped.
+  Bundle the delivery for offline desktop playback; its 92.7 MB size fits both
+  Git's per-file limit and the unchanged 128 MiB precise-transport guard.
+  Only `dawn.free` changes. Friday audio, explicit attachments, operational rows,
+  save paths and synchronization data are untouched. Keep the former published
+  `9b788b6e16dd` file byte-identical and available for authored references.
+  Required branch gate, same-SHA Pages/public readback and desktop package
+  acceptance remain separate from local audio/source verification.
+
+- Previous dawn default (2026-11-09, retained for explicit attachments):
   `assets/presenter/dawn-free-prayer-9b788b6e16dd.mp3`, 81,289,196 bytes,
   SHA-256 `9b788b6e16ddab6ef50f8bf6b8917fa798cdb5fd283e30707a7c290b30dfc150`; stereo48kHz, decoded2946.712875s.
   Seven vocal tracks followed by seven MR counterparts; MR begins1463.55s.
@@ -38,15 +62,15 @@
   retained song bodies match source plus fixed gains and R2 repairs. Two R2
   repair locations are retained; four occur in approved removed MR tails.
   Digital validation does not certify auditory perfection or separation artifacts.
-  Only `dawn.free` selects this file. Explicit user attachments and all worship
-  records, timings and metadata remain unchanged.
+  The 2026-11-21 default below supersedes this selection. Existing explicit
+  user attachments, worship records, timings and metadata remain unchanged.
   On 2026-11-09 the user explicitly finalized MP3-only delivery and retired
   original/intermediate All Nations audio and edit records. Only the approved
-  final asset remains in the current source tree. Its exact hash, independent
+  final asset remained in the source tree at that time. Its exact hash, independent
   decoded PCM timing fingerprints, playback/seek and attachment-isolation
   regressions remain required. Historical packet/v5 assertions are retired with
   the obsolete assets; this does not change the current playback checks.
-  No re-encoding is performed. Existing Git history is not rewritten.
+  That retained asset is never re-encoded. Existing Git history is not rewritten.
 
 - Original supplied M4A, unchanged, approximately 46 minutes 42 seconds.
 - SHA-256: `8c888a525cde94b7fbd91046f0ee774a7ba8fda06a199646112b201eb57f72da`
