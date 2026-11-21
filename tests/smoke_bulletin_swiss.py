@@ -33,6 +33,8 @@ try:
      results.push({department,issues:[...r.issues]});
     }
     for(const n of [2,3,4]){const d=structuredClone(samples['young-adult']);d.fields.outline=Array.from({length:n},(_,i)=>`${i+1}. 설교 대지`).join('\n');const r=B.renderPages(d,'print');if(r.issues.size)throw Error('Outline overflow '+n);const counts=[...r.pages[1].querySelectorAll('[data-outline-item]')].map(g=>g.querySelectorAll('[data-swiss-rule]').length);if(new Set(counts).size!==1||counts[0]<1)throw Error('Unequal writing lines');results.push({points:n,lines:counts});}
+    for(const n of [2,3,4]){const d=structuredClone(samples.youth);d.fields.outline=Array.from({length:n},(_,i)=>`${i+1}. 청소년부 대지`).join('\n');const r=B.renderPages(d,'print');if(r.issues.size)throw Error('Youth outline '+n+' '+[...r.issues]);const counts=[...r.pages[1].querySelectorAll('[data-outline-item]')].map(g=>g.querySelectorAll('[data-swiss-rule]').length);if(new Set(counts).size!==1||counts[0]<1)throw Error('Youth writing lines');}
+    const fortnight=structuredClone(samples.children);fortnight.fields.monthlyTheme='이달의 주제\n함께 나누어요\n서로 사랑해요';fortnight.fields.memoryVerse='서로 사랑하며\n함께 말씀을 읽어요\n친구와 나누어요';fortnight.fields.readingPlan=Array.from({length:14},(_,i)=>`11월 ${i+1}일 · 잠언 ${i+1}장`).join('\n');if(B.renderPages(fortnight,'print').issues.size)throw Error('Two-week reading plan lost');
     const long=structuredClone(samples.children);long.fields.news='많은 내용 '.repeat(500);if(!B.renderPages(long,'print').issues.has('news'))throw Error('Overflow not blocked');
     return results;
    }''')

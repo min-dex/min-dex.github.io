@@ -566,15 +566,19 @@
       let yy=top;items.forEach((t,i)=>{const row=svg('g',{'data-outline-item':i+1,'data-writing-height':space});g.append(row);text(row,'outline',t,158.5,yy,128.5,12.5,'left',500,false,yy+heights[i]+1);lines(row,158.5,yy+heights[i],yy+heights[i]+space);yy+=heights[i]+space+2.5;});
     }
     if(department==='children'){
-      let yy=heading(1,'monthlyThemeTitle','이달의 주제',158.5,25,month('curriculumMonth'),'themeMonth');text(group(1,'monthlyTheme'),'monthlyTheme',value('monthlyTheme'),158.5,yy,128.5,15,'left',700,false,67.5);
-      yy=heading(1,'memoryTitle','새길 말씀',158.5,80,value('memoryReference'),'memoryReference');text(group(1,'memoryVerse'),'memoryVerse',value('memoryVerse'),158.5,yy,128.5,12.5,'left',500,false,132.5);
+      let yy=heading(1,'monthlyThemeTitle','이달의 주제',158.5,25,month('curriculumMonth'),'themeMonth');
+      const themeEnd=yy+text(group(1,'monthlyTheme'),'monthlyTheme',value('monthlyTheme'),158.5,yy,128.5,15,'left',700,false,100);
+      yy=heading(1,'memoryTitle','새길 말씀',158.5,themeEnd+10,value('memoryReference'),'memoryReference');
+      const memoryEnd=yy+text(group(1,'memoryVerse'),'memoryVerse',value('memoryVerse'),158.5,yy,128.5,12.5,'left',500,false,160);
       const reading=value('readingPlan').split('\n').filter(Boolean),count=Math.ceil(reading.length/2),rh=count*6.25,ry=185-rh;
-      heading(1,'readingTitle','잠잠성경',158.5,ry-13);if(ry-13<142.5)issues.add('readingPlan');const g=group(1,'readingPlan');reading.forEach((t,i)=>text(g,'readingPlan','□ '+t,158.5+(i>=count?66.75:0),ry+(i%count)*6.25,61.75,10,'left',500,false,ry+(i%count)*6.25+6.25));
+      heading(1,'readingTitle','잠잠성경',158.5,ry-13);
+      const extra=(ry-13-memoryEnd-10)/2;if(extra<0)issues.add('readingPlan');else for(const id of ['memoryTitle','memoryReference','memoryVerse'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);
+      const g=group(1,'readingPlan');reading.forEach((t,i)=>text(g,'readingPlan','□ '+t,158.5+(i>=count?66.75:0),ry+(i%count)*6.25,61.75,10,'left',500,false,ry+(i%count)*6.25+6.25));
     }else{
       heading(1,'notesTitle','설교 노트',158.5,25);const g=group(1,'sermon');text(g,'sermon',doc.source.sermon,158.5,38,78.5,15,'left',700,false,50);text(g,'sermon',Object.hasOwn(doc.fields,'sermonReference')?value('sermonReference'):doc.source.scripture,242,39,45,10,'right',500,false,50);
       if(department==='youth'){
         let start=50;if(value('scriptureNote')){start+=text(group(1,'scriptureNote'),'scriptureNote',value('scriptureNote'),158.5,start,128.5,12.5,'left',500,false,75)+5;}
-        outline(start,117.5);heading(1,'reflectionTitle','받은 은혜',158.5,132.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,145.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,145.5,185);
+        outline(start,127.5);heading(1,'reflectionTitle','받은 은혜',158.5,142.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,155.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,155.5,185);
         const next=Object.hasOwn(doc.fields,'nextPrayer')?value('nextPrayer'):doc.source.prayers?.find(r=>r.next)?.person||'';text(group(1,'nextPrayer'),'nextPrayer',next?(/^다음번 기도/.test(next)?next:'다음번 기도 · '+next):'',10,152.5,128.5,10);
         heading(1,'pointTitle','예배 포인트',10,165);text(group(1,'worshipPoint'),'worshipPoint',value('worshipPoint'),10,178,128.5,12.5,'left',500,false,185);
       }else{
