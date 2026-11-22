@@ -747,3 +747,7 @@ Cover date/issue, liturgical occasion, theme-scripture body and citation use
 bold 700; existing sizes remain 12.5pt for body/date and 10pt for citation.
 Tov logo theme draft uses navy #303C85, lavender #CED2ED, magenta #B466C4;
 the draft asset does not replace registered logos until approved.
+
+The user approved the newly generated `assets/bulletin/tov-approved.png` logo.
+Use that asset for the Tov common template, with motto 예수님 안에서 함께 성장하는 우리.
+Earlier TOV Latin/sprout drafts are unapproved and must not be published.
