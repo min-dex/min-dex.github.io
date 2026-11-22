@@ -692,9 +692,9 @@ H2 15pt, 본문 12.5pt, 보조 10pt. 광고 괄호는 짝이 맞는 경우만 80
 표시하며 다음 조회에서 재시도한다. 자동 갱신이 수동 저장/초안 복구가 되지 않는다.
 
 표지 영역 이름은 표어와 주제 말씀이다. Swiss 주제 말씀은 본문12.5pt 왼쪽,
-출처10pt 별도 줄 오른쪽, 사이2.5mm다. 로고 하단과 표어 시작은10mm 간격을
-기준으로 한다. RIA는 기존 PDF의 윤곽 SVG를 주황 #B65C24로 사용하며 가로56.25mm,
-어린이부는 기존 로고 가로60mm/포인트 #155436, 토브는 보라 #574579를 유지한다.
+출처10pt 별도 줄 오른쪽, 사이2.5mm다. 로고 박스 하단과 표어 시작은5mm 간격을
+기준으로 한다. RIA는 기존 PDF의 윤곽 SVG를 주황 #B65C24로 사용하며 가로70.3125mm,
+어린이부는 기존 로고 가로75mm/포인트 #155436, 토브는 보라 #574579를 유지한다.
 어린이부 표지 설교제목은 표시하지 않되 원래 coverTitle 필드와 안쪽 설교는 보존한다.
 청소년부 장소는1층 베데스다홀이다. 기존 등록 로고·개별 작성 문구는 유지한다.
 서버 공통 양식의 색·로고·문구 변경 및 사용자 앱 업데이트는 배포 후 별도 CAS로
@@ -788,3 +788,14 @@ known honorifics only for duplicate comparison, preserving display spelling.
 Editor help reports the linked praise value and its Operations ownership.
 
 Swiss combined leader heading prefix is `인도: ` (supersedes 인도자 ·).
+
+### Enlarged cover identity · 2026-11-22
+
+All Swiss logo image boxes grow 25% proportionally (height50mm, bottom102.5mm).
+Motto starts107.5mm: a shared5mm gap below the logo box. Original assets and
+aspect ratios are preserved; theme Scripture stays at150mm.
+
+The complete logo/motto block is vertically centered between37.5mm (metadata
+end) and150mm (theme Scripture start). The measured motto height, including
+wrapped lines, determines equal free space above and below; the5mm internal gap
+is preserved. This supersedes the fixed logo-bottom position above.
