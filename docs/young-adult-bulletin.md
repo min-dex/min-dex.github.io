@@ -742,3 +742,8 @@ remaining space is distributed above the notices, with overflow still blocked.
 Inside p2 uses the top bar and top-left church label; p3 uses the bottom bar
 and bottom-right full department name: RIA 청년부 / TOV 청소년부 / 꿈꾸는 어린이부.
 Outside-page bars and labels are unchanged.
+
+Cover date/issue, liturgical occasion, theme-scripture body and citation use
+bold 700; existing sizes remain 12.5pt for body/date and 10pt for citation.
+Tov logo theme draft uses navy #303C85, lavender #CED2ED, magenta #B466C4;
+the draft asset does not replace registered logos until approved.

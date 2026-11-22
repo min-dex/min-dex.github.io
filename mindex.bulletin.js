@@ -517,8 +517,8 @@
     for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),10,15,'left'],[1,'insideBrand',({'young-adult':'RIA 청년부',youth:'TOV 청소년부',children:'꿈꾸는 어린이부'})[department],158.5,190,'right']]){
       const g=group(page,id);text(g,id,t,x,y,128.5,10,align);g.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));
     }
-    text(group(0,'issue'),'issue',[dateLabel(doc.source.date),value('issue')?`제${value('issue')}호`:''].filter(Boolean).join(' · '),158.5,25,65,12.5);
-    text(group(0,'liturgical'),'liturgical',doc.source.liturgical,226,25,61,12.5,'right');
+    text(group(0,'issue'),'issue',[dateLabel(doc.source.date),value('issue')?`제${value('issue')}호`:''].filter(Boolean).join(' · '),158.5,25,65,12.5,'left',700);
+    text(group(0,'liturgical'),'liturgical',doc.source.liturgical,226,25,61,12.5,'right',700);
     const brand=group(0,'brand'),asset=doc.settings.appearance?.assets?.logo;
     const logo=asset||(department==='children'?childrenLogoPath:department==='young-adult'?swissLogoPath:'');
     if(logo){const w=department==='children'?60:56.25;brand.append(svg('image',{x:222.75-w/2,y:62.5,width:w,height:40,href:new URL(logo,document.baseURI).href,preserveAspectRatio:'xMidYMax meet'}));}
@@ -527,8 +527,8 @@
     text(group(0,'motto'),'motto',value('motto'),158.5,112.5,128.5,12.5,'center',500,false,140);
     const verse=group(0,'verse'),copy=value('verse').trim(),citation=copy.match(/(?:\n\s*[—–-]?\s*|\s*[（(])((?:[가-힣]+)\s*\d+\s*:\s*[\d–—:a-z,\s-]+)[)）]?$/);
     const body=citation?copy.slice(0,citation.index).trim():copy;
-    const end=150+text(verse,'verse',body,158.5,150,100,12.5,'left',500,false,180);
-    if(citation){const ref=citation[1].trim().replace(/^창\s/,'창세기 ');text(verse,'verse',ref,158.5,end+2.5,128.5,10,'right',500,false,187.5);}
+    const end=150+text(verse,'verse',body,158.5,150,100,12.5,'left',700,false,180);
+    if(citation){const ref=citation[1].trim().replace(/^창\s/,'창세기 ');text(verse,'verse',ref,158.5,end+2.5,128.5,10,'right',700,false,187.5);}
     // Back page uses measured content and distributes only the remaining space.
     let y=heading(0,'eventsTitle','교회 일정',10,25,month('eventsMonth'),'eventsMonth');
     const events=group(0,'events');
