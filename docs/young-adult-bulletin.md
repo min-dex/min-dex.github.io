@@ -767,3 +767,7 @@ officer titles include 학생, and 이재희 is displayed as 설교자 이재희
 Swiss sermon titles use a single pair of corner brackets 「…」 in both order
 and sermon-note headings, without changing stored source titles. Approved
 2026-11-22 youth assignees: 주기도문 다 같이; 광고 허호범 선생님 (weekly content).
+
+Children 공동체고백 displays as order label 나래파송 and content title 공동체고백,
+without printing the full liturgical text or modifying its stored source.
+2026-11-22 approved assignees: 예배의 부름/광고 인도자; 주기도문 다 같이.

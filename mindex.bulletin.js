@@ -559,7 +559,7 @@
     if(eventsEnd>newsStart)issues.add('events');
     // Linked worship rows: no fabricated post-praise prayer, no liturgical body.
     y=heading(1,'orderTitle','예배 순서',10,25,value('leader'),'leader');const order=group(1,'order');
-    const rows=orderRowsForDisplay(doc.source).filter(r=>r.id!=='bulletin-communal-prayer');
+    const rows=orderRowsForDisplay(doc.source).filter(r=>r.id!=='bulletin-communal-prayer').map(r=>department==='children'&&r.label==='공동체고백'?{...r,label:'나래파송',content:'공동체고백'}:r);
     for(const r of rows){
       const creed=['사도신경','신앙고백'].includes(r.label),label=creed?'신앙고백':r.label;
       const content=creed?'사도신경':r.label==='설교'?sermonTitle(r.content):r.content,person=(r.label==='광고'?value('announcer')||r.person:r.person||'').replace(/다같이/g,'다 같이');
