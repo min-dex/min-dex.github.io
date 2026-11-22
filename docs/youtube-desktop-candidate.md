@@ -216,3 +216,20 @@ Full HD caption layers use readback-oriented 2D contexts because alpha-transitio
 comparison reads their pixels. Linux WebKit verification caught empty accelerated
 layer readback despite successful draw calls; Chromium and WebKit must both show
 caption pixels in the final 1080p composite.
+
+
+Normal recording/RTMPS stop waits for encoded-byte transfer, both FFmpeg
+processes, local relay EOF and TLS writable completion. Successful TLS sockets
+are gracefully ended and consumed, never immediately destroyed by cleanup. Muxer exit alone does not prove the last bytes drained.
+At muxer process exit, detach only the reverse TLS-to-muxer pipe and consume
+remaining server replies. Writing a late reply into the dead muxer's TCP endpoint
+can reset the socket and discard its still-unread outgoing tail. Live replies
+remain connected; outgoing backpressure is unchanged and no extra queue is added.
+Local close without EOF, TLS write error, abort and writes that exceed the
+unchanged eight-second deadline remain failures. A peer that delays its own EOF
+after completed writes does not cause false failure: the retired socket is closed
+by the same total stop deadline, with its abort listener and timer removed. Synthetic tests cover delayed writes, replies between process
+exit and stdio close, normal/live replies, missing local EOF, delayed peer EOF, isolated retirement
+and error/deadline paths.
+Actual slow-TLS verification retained all 90 H.264 and 142 AAC packet hashes;
+packaged acceptance still compares every recording/receiver packet unchanged.

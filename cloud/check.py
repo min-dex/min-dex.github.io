@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 NODE_TESTS = (
     "test_output_close_guard.cjs",
     "test_youtube_profile.cjs",
+    "test_youtube_engine_drain.cjs",
     "test_broadcast_capture.mjs",
     "test_broadcast_frame_cadence.mjs",
     "test_product_identity.cjs",

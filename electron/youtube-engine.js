@@ -20,11 +20,14 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
   const sockets = new Set();
   const listeners = [];
   const transferAbort = new AbortController();
-  let child, muxer, recording, transfer, finished, closing = false, live = false;
-  const cleanup = () => {
+  let completeRelay;
+  const relayDrained = new Promise(resolve => { completeRelay = resolve; });
+  let child, muxer, recording, transfer, finished, relaySocket, closing = false, live = false;
+  const cleanup = preserveSocket => {
+    completeRelay(false);
     transferAbort.abort();
     for (const server of listeners) server.close();
-    for (const socket of sockets) socket.destroy();
+    for (const socket of sockets) if (socket !== preserveSocket) socket.destroy();
     child?.kill('SIGKILL');
     muxer?.kill('SIGKILL');
     recording?.destroy();
@@ -42,13 +45,37 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
   signal.addEventListener('abort', cleanup, {once:true});
   try {
     const encrypted = remember(tls.connect({...destination, rejectUnauthorized:true, minVersion:'TLSv1.2'}));
+    // Local muxer exit does not mean the relay's final TLS writes have drained.
+    // Finish local TLS writes, then allow a graceful half-close. A peer need
+    // not return EOF immediately; the original stop deadline bounds retirement.
+    let transportFailed = false;
+    const transportDrained = new Promise(resolve => {
+      encrypted.once('finish', () => resolve(true));
+      encrypted.once('error', () => { transportFailed = true; resolve(false); });
+      encrypted.once('close', hadError => {
+        if (hadError || !encrypted.writableFinished) transportFailed = true;
+        resolve(!transportFailed);
+      });
+    });
     encrypted.setTimeout(12000, () => encrypted.destroy(Error('전송 시간 초과')));
     await once(encrypted, 'secureConnect', {signal});
     encrypted.once('end', () => { if (!closing) cleanup(); });
     encrypted.once('close', () => { if (!closing) cleanup(); });
     const relay = net.createServer(socket => {
       relay.close();
+      relaySocket = socket;
+      socket.once('end', () => completeRelay(true));
+      socket.once('error', () => completeRelay(false));
+      socket.once('close', () => completeRelay(socket.readableEnded));
       remember(socket).pipe(encrypted).pipe(socket);
+      // FFmpeg can close its local RTMP socket without a readable EOF. Once
+      // that source is closed, end (not destroy) TLS so buffered writes flush.
+      socket.once('close', () => {
+        if (!closing) return;
+        encrypted.unpipe(socket);
+        encrypted.resume();
+        if (!encrypted.writableEnded) encrypted.end();
+      });
       encrypted.on('close', () => socket.destroy());
     });
     await listen(relay, {host:'127.0.0.1', port:0});
@@ -77,6 +104,13 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
       '-rtmp_tcurl','rtmps://' + destination.host + ':' + destination.port + '/live2',
       '-rw_timeout','8000000','-progress','pipe:1','-f','flv','rtmp://127.0.0.1:' + relay.address().port + '/live2'];
     muxer = spawn(exe, muxArgs, {windowsHide:true, stdio:['pipe','pipe','ignore',...(windows?[]:['pipe'])]});
+    // A dead muxer cannot read late server replies. Do not write them into its
+    // closed TCP endpoint: EPIPE would destroy the still-readable outgoing tail.
+    const discardReplies = () => {
+      if (relaySocket) { encrypted.unpipe(relaySocket); encrypted.resume(); }
+    };
+    muxer.once('exit', discardReplies);
+    muxer.once('close', discardReplies);
     muxer.stdin.on('error', () => {});
     if (!windows) {
       muxer.stdio[3].on('error', () => {});
@@ -113,11 +147,15 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
         live = true; onState('live');
       }
     });
-    finished = Promise.all([encoderClosed,muxerClosed,transfer]).then(results=>results.every(Boolean));
+    finished = Promise.all([encoderClosed,muxerClosed,transfer,relayDrained,transportDrained])
+      .then(results=>results.every(Boolean) && !transportFailed && !signal.aborted);
     finished.then(ok => {
-      cleanup();
-      signal.removeEventListener('abort', cleanup);
-      onState(closing && ok ? 'stopped' : 'failed');
+      const graceful = closing && ok;
+      cleanup(graceful ? encrypted : undefined);
+      const detach = () => signal.removeEventListener('abort', cleanup);
+      if (graceful && !encrypted.destroyed) encrypted.once('close', detach);
+      else detach();
+      onState(graceful ? 'stopped' : 'failed');
     });
     let writing = false;
     return {
@@ -132,7 +170,12 @@ async function startEncoder({exe, key, destination = youtube, onState, signal, b
         closing = true;
         child.stdin.end();
         const timer = setTimeout(cleanup, 8000);
-        try { return await finished; } finally { clearTimeout(timer); }
+        try { return await finished; } finally {
+          // Successful writes may finish before the peer's half-close. Keep
+          // that TLS socket alive only within the same total stop deadline.
+          if (encrypted.destroyed) clearTimeout(timer);
+          else encrypted.once('close', () => clearTimeout(timer));
+        }
       }
     };
   } catch {
