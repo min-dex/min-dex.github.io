@@ -34,7 +34,12 @@ try:
     const before=JSON.stringify({item,clean});
     check(serviceSelectableSongVersions(song,item,{}).length===1,'CCM audio selectable');
     check(serviceSelectableSongVersions(manual,item,{}).length===0,'missing audio excluded');
-    check(same(MindexSongTiming.formsFor(item,song,version,[]),forms),'saved audio form order');
+    const currentPlan=presenterFormPlanForServiceItem(version,item,song).forms.filter(form=>!form._presenterTitle);
+    check(same(MindexSongTiming.formsFor(item,song,version,currentPlan),forms),'matching current form plan preserves saved audio pages');
+    const emptyPlan=[];check(MindexSongTiming.formsFor(item,song,version,emptyPlan)===emptyPlan,'empty current plan never reinstated from audio');
+    const changedPlan=[{...currentPlan[0],lyrics:'직접 지정한 다른 가사'}];
+    check(MindexSongTiming.formsFor(item,song,version,changedPlan)===changedPlan,'current changed plan wins over saved audio pages');
+    check(MindexSongTiming.decorate([{type:'lyrics',text:changedPlan[0].lyrics}],item,song,version).every(slide=>!slide.syncTimeline),'changed current plan cannot inherit old cues');
     const rendered=MindexSongTiming.decorate(slides,item,song,version);
     check(rendered.every(s=>s.syncTimeline?.audioSrc===version.audio_set.audioUrl),'CCM auto timing');
     check(rendered[0].syncTimeline.start===2 && rendered[1].syncTimeline.start===9,'cue preservation');

@@ -5963,3 +5963,5 @@ streaming/recording capabilities. See youtube-desktop-candidate.md.
 ## 주보 연결 정보 갱신 · 2026-11-22
 
 사용자 승인으로 1.0.17 후보는 11월22일 이후 주보의 연결 예배/교회력 정보를 최신 원본에서 갱신한다. 직접 입력 및 편집/인쇄 중 상태는 보존한다. 부서 표지·색·로고 후속과 운영 CAS 적용 계약은 `young-adult-bulletin.md`의 1.0.17 항목을 따른다. 게시 전 운영 적용 완료로 표시하지 않는다.
+
+음원 presence 검사는 현재 실제 form plan이 일치할 때의 page/cue 보존과 함께, 빈 plan 또는 변경한 plan을 저장된 음원 page로 되살리지 않는다는 새 우선순위를 검증한다. 원본 음원·cue 보존 및 stale cue 차단 검사는 유지한다.
