@@ -392,10 +392,11 @@ function warmSelectedServiceAudio(serviceId, service, slides) {
 }
 
 function takePreparedServiceAudio(source) {
-  const prepared = presenterPreparedAudio.get(source);
+  const normalizedSource = normalizePresenterMediaSource(source);
+  const prepared = presenterPreparedAudio.get(normalizedSource);
   const previous = state.serviceMusic.audio;
   if (!prepared || prepared.error || state.serviceMusic.pending || (previous && !previous.paused)) return null;
-  presenterPreparedAudio.delete(source);
+  presenterPreparedAudio.delete(normalizedSource);
   previous?.removeAttribute?.("src");
   previous?.load?.();
   return prepared;

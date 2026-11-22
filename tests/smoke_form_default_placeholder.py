@@ -51,6 +51,9 @@ try:
       }
       const mixed = {...clean,songPosition:{...clean.songPosition,labels:['L','C'],index:1}};
       check(renderPresenterSlideFrame(mixed,{noChromakey:true}).includes('<span aria-current="step">C</span>'),'mixed forms retain real section and active step');
+      const timed = {...mixed,syncTimeline:{localTiming:true,groupId:'fixture',audioSrc:'/fixture.mp3',start:2}};
+      const timedHtml = renderPresenterSlideFrame(timed,{noChromakey:true});
+      check(timedHtml.includes('presenter-lyric-song-name')&&!timedHtml.includes('presenter-lyric-song-steps'),'timed fullscreen lyrics omit bottom form progress');
     }
     const stage=document.createElement('div');
     stage.className='presenter-output-root no-chromakey';document.body.append(stage);

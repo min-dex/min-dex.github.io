@@ -504,10 +504,12 @@
     const slides = presenterSlidesForService(serviceId);
     const index = slides.findIndex(s => belongsTo(s, elementId) && s.syncTimeline?.localTiming && !s.hiddenInPresentation);
     if (index < 0) { showToast('현재 가사·사진 순서의 동기화를 먼저 저장해 주세요.', 'info'); return; }
-    runPresenterAction('jump', serviceId, {index, scroll:false});
+    const alreadyOnTarget = state.presenter.index === index && !state.presenter.safetyBlank
+      && !state.presenter.liveScripture?.active && !state.presenter.livePraise?.active;
+    if (!alreadyOnTarget) runPresenterAction('jump', serviceId, {index, scroll:false});
     const sync = state.presenter.slides[state.presenter.index]?.syncTimeline;
     if (!sync?.localTiming) return;
-    const prepared = presenterPreparedAudio.get(sync.audioSrc);
+    const prepared = presenterPreparedAudio.get(normalizePresenterMediaSource(sync.audioSrc));
     const audio = getServiceMusicAudio(sync.audioSrc);
     setServiceMusicSource(audio, sync.audioSrc, 'presenter-audio', {loop:false, repeatAllowed:false}, sync.audioTitle);
     // Explicit restart rebuilds the media pipeline. WebKit can stall on a backward
