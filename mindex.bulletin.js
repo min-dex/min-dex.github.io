@@ -592,7 +592,7 @@
       yy=heading(1,'memoryTitle','새길 말씀',158.5,themeEnd+10,value('memoryReference'),'memoryReference');
       const memoryEnd=yy+text(group(1,'memoryVerse'),'memoryVerse',value('memoryVerse'),158.5,yy,128.5,12.5,'left',500,false,160);
       const reading=value('readingPlan').split('\n').filter(Boolean),count=Math.ceil(reading.length/2),rh=count*6.25,ry=185-rh;
-      heading(1,'readingTitle','잠잠성경',158.5,ry-13);
+      heading(1,'readingTitle','잠잠성경',158.5,ry-13,'잠들기 전, 잠언 읽기!','readingHelp');
       const extra=(ry-13-memoryEnd-10)/2;if(extra<0)issues.add('readingPlan');else for(const id of ['memoryTitle','memoryReference','memoryVerse'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);
       const g=group(1,'readingPlan');reading.forEach((t,i)=>text(g,'readingPlan','□ '+t,158.5+(i>=count?66.75:0),ry+(i%count)*6.25,61.75,10,'left',500,false,ry+(i%count)*6.25+6.25));
     }else{
