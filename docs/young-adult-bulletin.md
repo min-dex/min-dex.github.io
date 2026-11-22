@@ -751,3 +751,9 @@ the draft asset does not replace registered logos until approved.
 The user approved the newly generated `assets/bulletin/tov-approved.png` logo.
 Use that asset for the Tov common template, with motto 예수님 안에서 함께 성장하는 우리.
 Earlier TOV Latin/sprout drafts are unapproved and must not be published.
+
+Cover date and liturgical season remain 12.5pt/700 at y25mm. Issue number is
+a separate 10pt/500 line at y32.5mm under the date. Calendar note (commemorative
+Sunday) appears only when present, 10pt/500 beneath the season at y32.5mm.
+Legacy combined liturgical strings are preserved for old layouts. Approved
+2026-11-22 issues: young-adult32, youth36, children34; these are weekly values.

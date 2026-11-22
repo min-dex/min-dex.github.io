@@ -349,7 +349,7 @@
     const date = service.service_date;
     const department=supportsDepartment(service.service_type_id)?service.service_type_id:"young-adult";
     const today = calendar.find(r=>r.date===date) || {};
-    const source = {id:service.id, date, department, leader:clean(service.worship_leader), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
+    const source = {id:service.id, date, department, leader:clean(service.worship_leader), liturgicalSeason:clean(today.liturgical), commemoration:clean(today.note), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
       sermon:"", scripture:"", news:"", order:[], orderSummaryOnly:Object.create(null), linkedPraiseTitles:Object.create(null), prayers:[], events:"", loadedAt:new Date().toISOString()};
     const hasReading=elements.some(e=>sectionById.get(e.section_id)?.section_key==="scripture_reading");
     const ordered = elements.filter(e=>sectionById.has(e.section_id)).sort((a,b)=>
@@ -517,8 +517,10 @@
     for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),10,15,'left'],[1,'insideBrand',({'young-adult':'RIA 청년부',youth:'TOV 청소년부',children:'꿈꾸는 어린이부'})[department],158.5,190,'right']]){
       const g=group(page,id);text(g,id,t,x,y,128.5,10,align);g.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));
     }
-    text(group(0,'issue'),'issue',[dateLabel(doc.source.date),value('issue')?`제${value('issue')}호`:''].filter(Boolean).join(' · '),158.5,25,65,12.5,'left',700);
-    text(group(0,'liturgical'),'liturgical',doc.source.liturgical,226,25,61,12.5,'right',700);
+    text(group(0,'coverDate'),'coverDate',dateLabel(doc.source.date),158.5,25,65,12.5,'left',700);
+    if(value('issue'))text(group(0,'issue'),'issue',`제${value('issue').replace(/^제|호$/g,'')}호`,158.5,32.5,65,10,'left',500);
+    text(group(0,'liturgical'),'liturgical',doc.source.liturgicalSeason??doc.source.liturgical,226,25,61,12.5,'right',700);
+    if(doc.source.commemoration)text(group(0,'commemoration'),'commemoration',doc.source.commemoration,226,32.5,61,10,'right',500);
     const brand=group(0,'brand'),asset=doc.settings.appearance?.assets?.logo;
     const logo=asset||(department==='children'?childrenLogoPath:department==='young-adult'?swissLogoPath:'');
     if(logo){const w=department==='children'?60:56.25;brand.append(svg('image',{x:222.75-w/2,y:62.5,width:w,height:40,href:new URL(logo,document.baseURI).href,preserveAspectRatio:'xMidYMax meet'}));}
@@ -1411,7 +1413,7 @@
   }
   function snapshot(doc){return {fields:clone(doc.fields),settings:clone(doc.settings||{}),frames:clone(doc.frames),months:clone(doc.months||{}),inherited:clone(doc.inherited||{common:{},months:{}}),sourceSnapshot:clone(doc.sourceSnapshot||null)};}
 
-  const weeklySourceKeys=["leader","announcer","sermon","scripture","news","notices","welcome","outline","outlineTitle","sermonReference","liturgical","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"];
+  const weeklySourceKeys=["leader","announcer","sermon","scripture","news","notices","welcome","outline","outlineTitle","sermonReference","liturgical","liturgicalSeason","commemoration","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"];
   function normalizeSourceSnapshot(value) {
     if(!isRecord(value)||typeof value.serviceId!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(value.date||""))return null;
     const weekly={};for(const key of weeklySourceKeys)if(typeof value.weekly?.[key]==="string")weekly[key]=value.weekly[key];
