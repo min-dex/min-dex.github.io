@@ -542,7 +542,8 @@
     for(const line of value('eventsText').split('\n').filter(Boolean)){
       const split=line.includes('|')?line.split('|'):line.split(/\s{2,}/),a=split.shift(),b=split.join(' ');
       const timeAt=a.search(/\s+(?=(?:오전|오후|새벽|저녁|낮|평일|매일|\d{1,2}:))/),date=timeAt<0?a:a.slice(0,timeAt),time=timeAt<0?'':a.slice(timeAt);
-      const left=writeStyled(events,[...runs(date,12.5),...runs(time&&textWidth(date,12.5,500)+textWidth(time,10,500)>(b?63:128.5)?'\n'+time.trim():time,10)],{x:10,y,w:b?63:128.5,h:210-y,size:12.5,leading:6.25*MM,weight:500,align:'left',color:'#171717',family:'MindexBulletin'},issues,'events');
+      const gap=time?' ':'',timeText=time.trim(),breakTime=time&&textWidth(date+gap,12.5,500)+textWidth(timeText,10,500)>(b?63:128.5);
+      const left=writeStyled(events,[...runs(date+(breakTime?'':gap),12.5),...runs((breakTime?'\n':'')+timeText,10)],{x:10,y,w:b?63:128.5,h:210-y,size:12.5,leading:6.25*MM,weight:500,align:'left',color:'#171717',family:'MindexBulletin'},issues,'events');
       const h=Math.max(6.25,left,b?text(events,'events',b,75.5,y,63,12.5,'right'):0);y+=h+2.5;
     }
     const eventsEnd=y-2.5;
