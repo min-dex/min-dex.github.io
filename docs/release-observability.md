@@ -123,3 +123,5 @@ GitHub 장애로 artifact가 없으면 로컬 journal의 관찰 구간과 함께
 
 구현 근거: [actions/checkout v4 가져오기 처리](https://github.com/actions/checkout/blob/v4/src/git-source-provider.ts)
 는 sparse checkout에 blob filter를 사용한다. 다운로드 범위 축소는 이 기존 기능을 사용한다.
+
+1.0.18 후보는 기존 네 published upgrade 기준을 유지하며, 현재 공개 1.0.17의 immutable receipt/asset ID/크기/해시도 같은 fixture에 추가한다. 다섯 기준 모두 실제 재설치 및 합성 자료 보존을 확인한다.

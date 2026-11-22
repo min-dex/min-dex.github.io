@@ -98,5 +98,30 @@
         "sha256": "c92e64c9b9783549ba5ece55ddd81c8f6c9785bdabba80eb4888a7535089236f"
       }
     ]
+  },
+  "1.0.17": {
+    "version": "1.0.17",
+    "channel": "internal",
+    "sourceCommit": "9b88805a8af6cbe9ce26cbb0d7a63a8db0b8ea8c",
+    "assets": [
+      {
+        "file": "Mindex-1.0.17-mac-arm64.dmg",
+        "bytes": 1794347798,
+        "sha256": "ad75e9dd4eb87574fc72aab1d7da2dff9c4d9508618e3cf3d6b876b98b4e02fa",
+        "id": 777369371
+      },
+      {
+        "file": "Mindex-1.0.17-mac-x64.dmg",
+        "bytes": 1804343011,
+        "sha256": "5b597db5a083ad40521c2460b293eab44b28d7dda004fc2a4a75d677ce60c033",
+        "id": 777369368
+      },
+      {
+        "file": "Mindex-1.0.17-win-x64.exe",
+        "bytes": 1772653233,
+        "sha256": "5f158faf44f614fa61035f9e6df1b59ac48a81438c834d58cafe77a669ec5a91",
+        "id": 777369375
+      }
+    ]
   }
 }
