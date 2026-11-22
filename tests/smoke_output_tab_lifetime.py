@@ -1,9 +1,28 @@
 """Real same-profile tabs: no passive sender takeover; last main closes output."""
 import os
+import faulthandler
+import time
 from urllib.parse import urlsplit
 os.environ['MINDEX_SMOKE_OFFLINE']='1'
 from smoke_app import start_local_app_server,sync_playwright,launch_chromium,prepare_server_state_fixture
-s,u=start_local_app_server()
+def stage(engine, name, action):
+ started=time.monotonic()
+ print(f'{engine} START {name}',flush=True)
+ # Diagnostics only: never settle a pending operation or relax its assertion.
+ # The existing cloud/check.py 180-second process deadline remains authoritative.
+ faulthandler.dump_traceback_later(45,repeat=True)
+ try:
+  result=action()
+ except BaseException:
+  print(f'{engine} FAIL {name} after {time.monotonic()-started:.2f}s',flush=True)
+  raise
+ else:
+  print(f'{engine} END {name} after {time.monotonic()-started:.2f}s',flush=True)
+  return result
+ finally:
+  faulthandler.cancel_dump_traceback_later()
+
+s,u=stage('server','start',start_local_app_server)
 fixture=r'''(mode)=>{
  const prepare=mode===true, refreshed=mode==='updated';
  window.svc={id:'tab-lifetime-fixture',type_id:'sunday-second',title:'탭 검증'};
@@ -21,10 +40,10 @@ fixture=r'''(mode)=>{
 try:
  with sync_playwright() as p:
   for engine in ['chromium','webkit']:
-   b=launch_chromium(p) if engine=='chromium' else p.webkit.launch()
-   ctx=b.new_context(service_workers='block')
+   b=stage(engine,'launch',lambda: launch_chromium(p) if engine=='chromium' else p.webkit.launch())
+   ctx=stage(engine,'new_context',lambda: b.new_context(service_workers='block'))
    ctx.route('**/*',lambda r:r.continue_() if urlsplit(r.request.url).netloc==urlsplit(u).netloc else r.abort())
-   main=ctx.new_page();main.goto(u);main.wait_for_function("!!window.MindexPresenterLifetime&&!!window.MindexPresenterFreshness&&!document.body.classList.contains('ui-booting')")
+   main=stage(engine,'new_page',ctx.new_page);stage(engine,'main.goto',lambda: main.goto(u));main.wait_for_function("!!window.MindexPresenterLifetime&&!!window.MindexPresenterFreshness&&!document.body.classList.contains('ui-booting')")
    assert main.evaluate('!!navigator.locks?.query')
    prepare_server_state_fixture(main);main.evaluate(fixture,True)
    with main.expect_popup() as popup:main.click('#open')
@@ -60,7 +79,7 @@ try:
    # canplay may resume this short looping fixture after seek; hold its selected
    # frame until reload so pagehide tests a decoded frame, not a loop-boundary seek.
    # The listener belongs to the old document; restored playback is still required.
-   output.evaluate("async()=>{const v=beforeControllerReload;v.addEventListener('play',()=>v.pause());v.pause();const seek=new Promise(r=>v.addEventListener('seeked',r,{once:true}));v.currentTime=v.duration*.5;await seek}")
+   stage(engine,'seek selected background frame',lambda: output.evaluate("async()=>{const v=beforeControllerReload;v.addEventListener('play',()=>v.pause());v.pause();const seek=new Promise(r=>v.addEventListener('seeked',r,{once:true}));v.currentTime=v.duration*.5;await seek}"))
    output.wait_for_function("beforeControllerReload.paused&&!beforeControllerReload.seeking&&beforeControllerReload.readyState>=2&&beforeControllerReload.currentTime>0.02")
    output.add_init_script("window.savedReloadTime=JSON.parse(sessionStorage.getItem('mindex.presenter.background-checkpoint')||'null')?.time; document.addEventListener('seeked',e=>{if(e.target.matches('video.presenter-output-background-video'))window.restoredSeekTime??=e.target.currentTime},true)")
    output.evaluate("""()=>window.addEventListener('pagehide',()=>{
@@ -70,7 +89,7 @@ try:
    })""")
    held=[]
    output.route('**/tests/fixtures/praise-background.webm',lambda route:held.append(route))
-   output.reload(wait_until='domcontentloaded')
+   stage(engine,'output.reload',lambda: output.reload(wait_until='domcontentloaded'))
    try:
     output.wait_for_selector('.presenter-background-reload-poster',state='visible',timeout=8000)
    except Exception:
@@ -99,14 +118,15 @@ try:
    print(engine,'PASS new/duplicate/reloaded passive tabs do not publish; owner reload and pre-upgrade original-opener migration recover frame',flush=True)
    # The original opener can close while another main stays open, even with no heartbeat responses.
    await_fullscreen='async()=>{await presenterOutputFullscreenTask?.catch(()=>{});if(document.fullscreenElement)await document.exitFullscreen()}'
-   output.evaluate(await_fullscreen);main.close();second.close()
+   stage(engine,'settle fullscreen',lambda: output.evaluate(await_fullscreen));stage(engine,'main.close',main.close);stage(engine,'second.close',second.close)
    copied.evaluate('window.dispatchEvent(new Event("blur"))')
    output.wait_for_timeout(9000);assert not output.is_closed();assert output.evaluate("document.body.textContent.includes('TWO')")
-   copied.close()
+   stage(engine,'copied.close',copied.close)
    try:output.wait_for_event('close',timeout=16000)
    except Exception:
     print(engine,'LIFETIME DIAGNOSTIC',output.evaluate('async()=>({opener:!!window.opener,closed:window.opener?.closed,url:location.href,locks:await navigator.locks.query()})'),flush=True)
     raise
    print(engine,'PASS other main lock keeps frame with opener closed; last main closure closes actual popup',flush=True)
-   ctx.close();b.close()
-finally:s.shutdown();s.server_close()
+   stage(engine,'context.close',ctx.close);stage(engine,'browser.close',b.close)
+finally:
+ stage('server','shutdown',s.shutdown);stage('server','close',s.server_close)
