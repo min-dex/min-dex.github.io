@@ -811,3 +811,13 @@ Church-event date/time separator is one space in the date run at12.5pt/500 (2.32
 Post-1.0.18 follow-up: cover motto uses the resolved department accent (including authored palette override), retaining12.5pt/500. Theme Scripture remains black.
 
 Post-1.0.18 cover citation prefix: em dash followed by one space (— ),10pt/500, right aligned; stored reference text is unchanged.
+
+### Post-1.0.18 fixed logo-height and line-count cover layout
+Approved RIA/TOV/children assets render with50mm ink height; width follows their
+source aspect ratio after excluding embedded padding through an SVG viewport.
+Original asset bytes remain unchanged. Fixed source bounds are pixel/vector
+measurements, not page-layout tokens. Unknown custom artwork retains containment.
+Motto is12.5pt/500,7.5mm per line,5mm below logo. Total height is50+5+7.5N.
+Center the block in37.5–150mm: one line starts62.5mm (25mm free each side),
+two lines start58.75mm (21.25mm free each side). Positions lie on1.25mm grid.
+This supersedes measured-font-height centering and width-limited logo boxes.

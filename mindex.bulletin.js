@@ -525,14 +525,25 @@
     if(doc.source.commemoration)text(group(0,'commemoration'),'commemoration',doc.source.commemoration,226,32.5,61,10,'right',500);
     const brand=group(0,'brand'),asset=doc.settings.appearance?.assets?.logo;
     const logo=asset||(department==='children'?childrenLogoPath:department==='young-adult'?swissLogoPath:'');
-    if(logo){const w=(department==='children'?60:56.25)*1.25;brand.append(svg('image',{x:222.75-w/2,y:52.5,width:w,height:50,href:new URL(logo,document.baseURI).href,preserveAspectRatio:'xMidYMax meet'}));}
-    else if(Object.hasOwn(doc.fields,'brand')){text(brand,'brand',value('brand'),158.5,62.5,128.5,40,'center',700,false,102.5);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}
-    else {text(brand,'brand','토브',158.5,75,128.5,40,'center',700);text(brand,'brand','청소년부',158.5,90,128.5,20,'center',700);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));brand.setAttribute('transform','translate(222.75 102.5) scale(1.5) translate(-222.75 -102.5)');}
-    const motto=group(0,'motto'),mottoHeight=text(motto,'motto',value('motto'),158.5,107.5,128.5,12.5,'center',500,false,140);
+    // Source-space ink bounds remove asset padding without resampling the artwork.
+    const logoBounds={
+      [swissLogoPath]:[300,210,9.546875,9.7578125,283.12109375,185.9921875],
+      [childrenLogoPath]:[1334,773,0,0,1334,773],
+      'assets/bulletin/tov-approved.png':[1536,1024,161,103,1213,876]
+    };
+    if(logo){
+      const bounds=logoBounds[logo];
+      if(bounds){const [iw,ih,bx,by,bw,bh]=bounds,w=50*bw/bh,viewport=svg('svg',{x:222.75-w/2,y:0,width:w,height:50,viewBox:`${bx} ${by} ${bw} ${bh}`,'data-swiss-logo-height':50});viewport.append(svg('image',{x:0,y:0,width:iw,height:ih,href:new URL(logo,document.baseURI).href}));brand.append(viewport);}
+      else brand.append(svg('image',{x:158.5,y:0,width:128.5,height:50,href:new URL(logo,document.baseURI).href,preserveAspectRatio:'xMidYMid meet'}));
+    }else {text(brand,'brand',Object.hasOwn(doc.fields,'brand')?value('brand'):'토브\n청소년부',158.5,0,128.5,40,'center',700,false,50);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}
+    const motto=group(0,'motto');
+    const mottoLines=value('motto')?wrap(value('motto'),128.5,12.5,500):[];
+    mottoLines.forEach((line,i)=>text(motto,'motto',line,158.5,55+i*7.5,128.5,12.5,'center',500,false,100,true));
     motto.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));
-    // Center the complete logo/motto block between issue metadata and theme Scripture.
-    const identityOffset=(37.5+150-(52.5+107.5+mottoHeight))/2;
-    for(const g of [brand,motto])g.setAttribute('transform',`translate(0 ${identityOffset}) ${g.getAttribute('transform')||''}`.trim());
+    // 50mm logo + 5mm gap + 7.5mm per line; all placement lies on a 1.25mm grid.
+    const identityHeight=50+(mottoLines.length?5+mottoLines.length*7.5:0),identityTop=37.5+(112.5-identityHeight)/2;
+    for(const g of [brand,motto])g.setAttribute('transform',`translate(0 ${identityTop})`);
+    brand.setAttribute('data-identity-height',identityHeight);motto.setAttribute('data-line-count',mottoLines.length);
     const verse=group(0,'verse'),copy=value('verse').trim(),citation=copy.match(/(?:\n\s*[—–-]?\s*|\s*[（(])((?:[가-힣]+)\s*\d+\s*:\s*[\d–—:a-z,\s-]+)[)）]?$/);
     const body=citation?copy.slice(0,citation.index).trim():copy;
     const end=150+text(verse,'verse',body,158.5,150,100,12.5,'left',700,false,180);
