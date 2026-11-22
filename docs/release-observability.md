@@ -11,8 +11,17 @@ evaluate 응답이 유실되는 경우에는 native PID 종료와 launcher 정�
 차단 상태를 확인한다. pinned Playwright는 Windows에서 cmd.exe를 launch하므로
 같은 PID 또는 Windows에 한해 launcher의 직계 자식 PID만 인정한다. 다른 부모나
 POSIX의 임의 자식 관계는 거부한다. 소유권 확인은 창을 닫기 전에 별도 응답으로 받는다.
-모두 일치하는 시험용 창만 destroy하고 그 시험 app에만 exit(0)을 요청한다.
+모두 일치하는 시험 app에만 inspector 콜백이 반환된 다음 `setImmediate`로
+`app.exit(0)`을 한 번 요청한다. `app.exit` 자체가 창을 즉시 닫으므로 먼저
+`BrowserWindow.destroy()`를 호출하지 않는다. 마지막 창을 먼저 파괴하면 Windows의
+`window-all-closed → app.quit()`와 명시적인 `app.exit()`가 겹칠 수 있다.
 실제 앱의 종료·송출·편집 보호는 유지한다.
+
+[Electron app.exit 계약](https://www.electronjs.org/docs/latest/api/app#appexitexitcode)에
+따른 시험 전용 종료이며, Windows 마지막 창 quit 중복과 inspector 콜백 안 즉시 종료를
+합성 회귀로 금지한다. 사전 ownership 확인·실제 native PID 중단·launcher exit 0은
+그대로 필수다. `3221226525`(`0xC000041D`)를 포함한 비0 종료는 계속 실패이고,
+실제 3 OS 취소 unload/구버전 재설치 검사를 같은 통합 SHA로 다시 통과해야 한다.
 
 종료 응답이 유실돼도 소유 native process의 실제 중단과 launcher exit 0을
 독립 확인해야 완료다. Windows shell이 먼저 종료됐다는 사실만으로 성공하지 않는다.

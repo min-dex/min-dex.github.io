@@ -52,9 +52,11 @@ async function closeIsolatedElectron(application, token, {timeoutMs = 15000,
       }
       reject(new Error('Owned isolated Electron close timed out', {cause: errors.length ? new AggregateError(errors) : undefined}));
     }, timeoutMs);
-    void application.evaluate(({app, BrowserWindow}) => {
-      for (const window of BrowserWindow.getAllWindows()) window.destroy();
-      app.exit(0); // Discard only this proven synthetic fixture, never user input.
+    void application.evaluate(({app}) => {
+      // app.exit closes all windows itself. Destroying the last window first
+      // can also invoke Windows' window-all-closed -> app.quit teardown.
+      // Leave the inspector callback before the single owned exit request.
+      setImmediate(() => app.exit(0));
     }).catch(error => { shutdownError = error; checkStopped(); });
     checkStopped();
   });
