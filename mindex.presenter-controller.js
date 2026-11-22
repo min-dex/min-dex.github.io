@@ -2227,9 +2227,14 @@ function buildPresenterSlidesForServiceItem(item, service, index, options = {}) 
   const version = song ? getPresenterServiceItemVersion(song, item, service) : null;
   const formPlan = version ? presenterFormPlanForServiceItem(version, item, song) : { forms: [], warnings: [] };
   const explicitTitleSequence = serviceItemFormPreset(item)?.titleSequence;
-  const titleForms = formPlan.forms.filter(form => form._presenterTitle);
+  const plannedTitleForms = formPlan.forms.filter(form => form._presenterTitle);
+  const independentAudioTitle = servicePraiseInputMode(item, initialMemo) === "children_audio"
+    && presenterDefaultTitleForServiceItem(item, song, version) && !plannedTitleForms.length;
+  const titleForms = independentAudioTitle
+    ? [findPresenterFormForPresetLabel([], "T")]
+    : plannedTitleForms;
   const contentForms = formPlan.forms.filter(form => !form._presenterTitle);
-  const forms = explicitTitleSequence ? formPlan.forms
+  const forms = explicitTitleSequence ? (independentAudioTitle ? [...titleForms, ...contentForms] : formPlan.forms)
     : [...titleForms, ...(globalThis.MindexSongTiming?.formsFor(item, song, version, contentForms) || contentForms)];
   const formWarnings = formPlan.warnings;
   const memo = initialMemo;

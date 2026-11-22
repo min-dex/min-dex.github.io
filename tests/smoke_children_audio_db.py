@@ -48,6 +48,20 @@ try:
    ctx,page=load()
    assert page.evaluate("renderServicePraiseInputModeControl(state.serviceItems[state.selectedServiceId][0],0).includes('DB: 음원')")
    page.evaluate(r'''()=>{
+    const sid=state.selectedServiceId,item=state.serviceItems[sid][0],song=state.songs[0],version=song.versions[0];
+    const before=JSON.stringify({memo:item.memo,metadata:version.metadata});
+    version.metadata={presenter_form:{forms:['V1','C1','V1','C1','C1'],hint:'V1-C1-V1-C1-C1',strength:'song-default'}};
+    let slides=presenterSlidesForService(sid);
+    if(slides.filter(s=>s.type==='song-title').length!==1||slides.filter(s=>s.type==='lyrics').length!==2)throw Error('metadata audio form lost independent title');
+    const declared=presenterServiceItemFormPreset(version,item,song);
+    if(declared.forms.includes('T')||declared.forms.join('-')!=='V1-C1-V1-C1-C1')throw Error('metadata form rewritten for title');
+    item.memo=serializeServiceItemMemo({...parseServiceItemMemo(item.memo),formPreset:{forms:['C1','V1'],hint:'C1-V1',strength:'manual'}});
+    slides=presenterSlidesForService(sid);
+    if(slides.filter(s=>s.type==='song-title').length!==1||!slides.some(s=>s.type==='lyrics'))throw Error('manual audio form lost independent title');
+    if(serviceItemFormPreset(item).forms.join('-')!=='C1-V1')throw Error('manual form rewritten for title');
+    const saved=JSON.parse(before);item.memo=saved.memo;version.metadata=saved.metadata;
+   }''')
+   page.evaluate(r'''()=>{
     const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item'),entries=presenterSlidesForService(sid).map(slide=>({slide}));
     const html=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:entries});
     if(!html.includes('data-song-timing-open')||html.includes('data-service-item-audio-file'))throw Error('children preparation must use DB set editor');
