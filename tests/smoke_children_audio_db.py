@@ -48,6 +48,33 @@ try:
    ctx,page=load()
    assert page.evaluate("renderServicePraiseInputModeControl(state.serviceItems[state.selectedServiceId][0],0).includes('DB: 음원')")
    page.evaluate(r'''()=>{
+    const sid=state.selectedServiceId,item=state.serviceItems[sid][0],song=state.songs[0],version=song.versions[0];
+    const before=structuredClone({memo:item.memo,metadata:version.metadata,audio_set:version.audio_set});
+    const profileFor=(forms,slides)=>({enabled:true,audioUrl:location.origin+'/clock.wav',audioName:'기본 음원',audioFingerprint:'fixture',duration:100,
+      starts:MindexSongTiming.pagesFor(slides).map((_,index)=>1+index*2),forms:structuredClone(forms),
+      sourceSignature:MindexSongTiming.sourceSignature(version),lyricsFingerprint:MindexSongTiming.fingerprint(slides)});
+    version.metadata={presenter_form:{forms:['V1','C1','V1','C1','C1'],hint:'V1-C1-V1-C1-C1',strength:'song-default'}};
+    const declared=presenterServiceItemFormPreset(version,item,song);
+    if(declared.forms.includes('T')||declared.forms.join('-')!=='V1-C1-V1-C1-C1')throw Error('metadata form rewritten for title');
+    version.audio_set=null;
+    let slides=presenterSlidesForService(sid), pages=MindexSongTiming.pagesFor(slides);
+    version.audio_set=profileFor(presenterFormPlanForServiceItem(version,item,song).forms.filter(form=>!form._presenterTitle),slides);
+    slides=presenterSlidesForService(sid);
+    if(slides.filter(s=>s.type==='song-title').length!==1||MindexSongTiming.pagesFor(slides).length!==pages.length)throw Error('metadata audio form lost independent title');
+    if(!MindexSongTiming.pagesFor(slides).every((slide,index)=>slide.syncTimeline?.start===1+index*2))throw Error('metadata form lost matching cues');
+    const metadataPageCount=MindexSongTiming.pagesFor(slides).length;
+    item.memo=serializeServiceItemMemo({...parseServiceItemMemo(item.memo),formPreset:{forms:['C1','V1'],hint:'C1-V1',strength:'manual'}});
+    slides=presenterSlidesForService(sid);pages=MindexSongTiming.pagesFor(slides);
+    if(pages.length===metadataPageCount||pages.some(slide=>slide.syncTimeline))throw Error('manual form did not replace stale audio page plan');
+    version.audio_set=null;slides=presenterSlidesForService(sid);pages=MindexSongTiming.pagesFor(slides);
+    version.audio_set=profileFor(presenterFormPlanForServiceItem(version,item,song).forms.filter(form=>!form._presenterTitle),slides);
+    slides=presenterSlidesForService(sid);
+    if(slides.filter(s=>s.type==='song-title').length!==1||MindexSongTiming.pagesFor(slides).length!==pages.length)throw Error('manual audio form lost independent title');
+    if(!MindexSongTiming.pagesFor(slides).every((slide,index)=>slide.syncTimeline?.start===1+index*2))throw Error('manual form lost matching cues');
+    if(serviceItemFormPreset(item).forms.join('-')!=='C1-V1')throw Error('manual form rewritten for title');
+    item.memo=before.memo;version.metadata=before.metadata;version.audio_set=before.audio_set;
+   }''')
+   page.evaluate(r'''()=>{
     const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item'),entries=presenterSlidesForService(sid).map(slide=>({slide}));
     const html=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:entries});
     if(!html.includes('data-song-timing-open')||html.includes('data-service-item-audio-file'))throw Error('children preparation must use DB set editor');
@@ -178,9 +205,11 @@ try:
     preparedTitleAudio.load=()=>{preparedLoads++;return load()};
    }""")
    page.wait_for_function("preparedTitleAudio.readyState>=2")
+   page.evaluate("""()=>{window.realPresenterAction=runPresenterAction;window.pPlaybackJumps=0;runPresenterAction=(action,...args)=>{if(action==='jump')pPlaybackJumps++;return realPresenterAction(action,...args)}}""")
    page.keyboard.press('p')
    page.wait_for_function('state.serviceMusic.playing && state.serviceMusic.audio.currentTime>0')
-   assert page.evaluate("state.serviceMusic.audio===preparedTitleAudio && preparedLoads===0")
+   assert page.evaluate("state.serviceMusic.audio===preparedTitleAudio && preparedLoads===0 && pPlaybackJumps===0")
+   page.evaluate("runPresenterAction=realPresenterAction;void 0")
    page.evaluate("""()=>{const sid=state.selectedServiceId,item=getServiceItems(sid).find(i=>i.id==='children-db-item'),h=document.createElement('aside');h.id='live-audio-header';h.style.cssText='position:fixed;top:0;left:0;width:540px;max-width:100vw;z-index:9999;background:var(--ui-surface-panel);padding:10px;box-sizing:border-box';h.innerHTML=renderPresenterBoardItemAudioControls(sid,{item,index:0,timingEntries:state.presenter.slides.map(slide=>({slide}))},{manager:true});document.body.append(h);window.audioHeaderBefore=JSON.stringify({songs:state.songs,items:state.serviceItems});window.liveAudio=state.serviceMusic.audio;window.loadCount=0;window.realLoad=liveAudio.load;liveAudio.load=function(){loadCount++;return realLoad.call(this)};MindexSongTiming.updateTransport(liveAudio)}""")
    header=page.locator('#live-audio-header');bar=header.locator('[data-song-timing-seek]')
    assert header.locator('audio').count()==0

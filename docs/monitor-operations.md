@@ -10,6 +10,14 @@
 
 # Read-only operations panel
 
+## Current connection and active output layout · 2026-11-22
+
+현재 접속과 실제 송출 현황은 넓은 제어판에서 같은 행의 두 영역으로 표시한다.
+좁은 화면에서는 읽기 순서를 유지한 채 세로로 쌓는다. `송출 대기` 항목뿐이거나
+활성 송출이 하나도 없으면 송출 현황 영역 전체를 숨긴다. 조회 실패는 비송출로
+오인하지 않도록 오류 영역을 표시한다. 공개 조회·PIN·접속 heartbeat·예배 상태는
+변경하지 않는다.
+
 ## Presence controls and name-save feedback · 2026-11-09
 
 Refresh reports busy state for presence/output reads and blocks duplicate clicks.

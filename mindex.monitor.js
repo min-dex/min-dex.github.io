@@ -35,12 +35,13 @@
   panel.className = "monitor-panel"; panel.setAttribute("aria-labelledby", "monitorTitle");
   panel.innerHTML = `<header><h2 id="monitorTitle">접속 현황</h2><button class="icon-btn" type="button" data-close title="닫기" aria-label="닫기"><i data-lucide="x"></i></button></header>
 
-    <div class="monitor-scroll"><section class="monitor-section" aria-label="송출 현황">
-    <div class="monitor-section-heading"><h3>송출 현황</h3><button class="btn secondary" type="button" data-show-codes aria-expanded="false" aria-controls="monitorCodeEntry">코드 보기</button></div>
-    <div id="monitorCodeEntry" data-code-entry hidden><label>관리자 PIN <input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label> <button class="btn secondary" type="button" data-check-pin>확인</button></div>
-    <p data-code-status role="status"></p><div data-outputs></div></section>
+    <div class="monitor-scroll"><div class="monitor-status-grid">
     <section class="monitor-section" aria-labelledby="monitorRemoteTitle"><div class="monitor-section-heading"><h3 id="monitorRemoteTitle">현재 접속</h3><span data-count></span><button class="icon-btn" type="button" data-refresh title="새로고침" aria-label="새로고침"><i data-lucide="refresh-cw"></i></button></div>
     <p class="monitor-message" role="status"></p><div data-devices></div></section>
+    <section class="monitor-section" aria-label="송출 현황" data-output-section hidden>
+    <div class="monitor-section-heading"><h3>송출 현황</h3><button class="btn secondary" type="button" data-show-codes aria-expanded="false" aria-controls="monitorCodeEntry">코드 보기</button></div>
+    <div id="monitorCodeEntry" data-code-entry hidden><label>관리자 PIN <input data-pin type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label> <button class="btn secondary" type="button" data-check-pin>확인</button></div>
+    <p data-code-status role="status"></p><div data-outputs></div></section></div>
     <section class="monitor-section"><h3>이 접속</h3><div class="monitor-toolbar"><label for="monitorName">접속명</label><input id="monitorName" maxlength="60" autocomplete="off" placeholder="예: 본당 송출 PC" aria-describedby="monitorNameStatus"><button class="btn secondary" type="button" data-name-retry hidden>다시 저장</button></div><p id="monitorNameStatus" data-name-status role="status"></p><p class="monitor-share-status" role="status"></p><p>같은 브라우저 프로필의 창·탭은 하나로 표시합니다. 다른 브라우저·프로필은 별도로 표시하며, 브라우저 데이터 삭제 시 이름이 초기화됩니다.</p></section></div>`;
   document.body.append(panel);
   const $ = (selector) => panel.querySelector(selector);
@@ -195,9 +196,10 @@
       if(!result?.ok||!Array.isArray(result.outputs))throw Error();
       const {outputDirectorySummary}=await import('./mindex.remote-admin.mjs?v=12');
       if(serial!==outputRequest)return;
-      const items=result.outputs;
+      const items=result.outputs.filter(item=>String(item?.position||'')!=='송출 대기');
       const key=JSON.stringify([!!token,items]);if(key===outputKey)return;
       outputKey=key;
+      $('[data-output-section]').hidden=!items.length;
       const rows=items.map(item=>{
         const row=document.createElement('div');row.className='monitor-device';
         const title=document.createElement('strong');title.textContent=outputDirectorySummary(item).title;
@@ -206,8 +208,8 @@
         detail.textContent=[summary.detail,summary.code?'송출 코드 '+summary.code:''].filter(Boolean).join(' · ');
         row.append(title,detail);return row;
       });
-      $('[data-outputs]').replaceChildren(...(rows.length?rows:['현재 등록된 송출이 없습니다.']));
-    }catch{if(serial===outputRequest){outputKey='';$('[data-outputs]').textContent='송출 정보를 불러오지 못했습니다.';}}
+      $('[data-outputs]').replaceChildren(...rows);
+    }catch{if(serial===outputRequest){outputKey='';$('[data-output-section]').hidden=false;$('[data-outputs]').textContent='송출 정보를 불러오지 못했습니다.';}}
     finally{if(serial===outputRequest){outputBusy=false;updateReadControls();}}
   }
   $('[data-show-codes]').onclick=()=>{
@@ -234,7 +236,7 @@
   function clearView() {
     viewSerial++;hideCodes();
     for (const [controller, scope] of requests) if (scope === "viewer") controller.abort();
-    $("[data-devices]").replaceChildren(); $("[data-count]").textContent = "";
+    $("[data-devices]").replaceChildren(); $("[data-count]").textContent = "";$('[data-output-section]').hidden=true;
     remoteRows = []; remoteVerified = false; renderKeys.delete($("[data-devices]")); message("");
   }
   async function refresh() {

@@ -819,10 +819,10 @@ body[data-module="backgrounds"] .sidebar-list-head,
 .topbar-actions > .btn > *,
 :is(.topbar-actions > .icon-btn, .topbar-actions > #globalPlaybackControls > .icon-btn) > * { position: relative; }
 .topbar-actions > .btn span { display: none; }
-/* Update download: the percentage sits beside the icon until the download ends. */
-.topbar-actions > #desktopUpdateBtn.is-downloading { display: inline-flex; align-items: center; justify-content: center; gap: 4px; width: auto; min-width: var(--topbar-btn-size); flex: 0 0 auto; padding-inline: 6px; color: var(--accent); }
-.topbar-actions > #desktopUpdateBtn.is-downloading::before { width: calc(100% - 4px); }
-.desktop-update-progress { font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+/* Keep all six action centers even while the update percentage is visible. */
+.topbar-actions > #desktopUpdateBtn.is-downloading { color: var(--accent); }
+.topbar-actions > #desktopUpdateBtn.is-downloading > :is(i[data-lucide], svg.lucide) { transform: translateY(-5px); }
+.desktop-update-progress { position:absolute !important; left:50%; bottom:3px; transform:translateX(-50%); font-size:9px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; white-space:nowrap; }
 .desktop-update-progress[hidden] { display: none; }
 .topbar-actions :is(i[data-lucide], svg.lucide) { display: block; flex: 0 0 16px; width: 16px; height: 16px; stroke-width: var(--ui-icon-stroke); }
 :is(.topbar-actions > .icon-btn, .topbar-actions > #globalPlaybackControls > .icon-btn):not(.primary),

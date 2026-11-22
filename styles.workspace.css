@@ -5059,9 +5059,8 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
 .service-date-list--setlists .svc-setlist-leader-form input:focus { color: var(--ink-2); }
 
 /* A single presenter toolbar; expanded source stays in normal flow below it. */
-.svc-presenter-toolbar{display:grid;grid-template-columns:minmax(160px,1fr) max-content max-content max-content;gap:15px;align-items:center;margin-bottom:20px;overflow-x:auto}
-.svc-presenter-toolbar>.svc-output-action{grid-column:3;grid-row:1;min-height:35px;height:35px;margin:0;padding:0 10px;white-space:nowrap}
-.svc-presenter-toolbar-utilities{grid-column:4;grid-row:1;display:inline-flex;min-width:0;align-items:center;gap:5px}
+.svc-presenter-toolbar{margin-bottom:20px}
+.svc-presenter-toolbar-utilities{display:inline-flex;min-width:0;align-items:center;gap:5px}
 .svc-presenter-toolbar-utilities .svc-music-player{height:35px;padding:0;border:1px solid var(--line);border-radius:var(--r)}
 .svc-presenter-toolbar-utilities .svc-presenter-help{height:35px}
 .svc-presenter-toolbar-utilities .svc-presenter-help>summary{width:35px;height:35px}
@@ -5830,10 +5829,7 @@ body:has(#servicePresenterControls[data-focus-view="true"]) .svc-presenter-live-
 #servicePresenterControls[data-focus-view="true"] .svc-slide-board { padding-top: 10px; }
 #servicePresenterControls[data-focus-view="true"] .svc-slide-thumb-meta { font-variant-numeric: tabular-nums; }
 
-/* Both presenter views share a stable, wrapping toolbar. */
-.svc-presenter-toolbar { display: flex; flex-wrap: wrap; gap: 10px; overflow: visible; }
-.svc-presenter-toolbar > .svc-output-action { order: 3; }
-.svc-presenter-toolbar-utilities { order: 4; }
+/* Both presenter views share stable controls. Toolbar placement is defined once below. */
 .svc-focus-transport { align-items: flex-start; }
 .svc-focus-navigation { min-height: 35px; }
 .svc-focus-audio { justify-content: flex-end; }
@@ -6344,14 +6340,16 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 
 /* Keep the view controls together and dock live scripture at the right. */
 .svc-presenter-toolbar:has(> .svc-presenter-toolbar-layout) { display:block; }
-.svc-presenter-toolbar-layout { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+.svc-presenter-toolbar-layout { display:flex; width:100%; flex-wrap:wrap; align-items:center; gap:10px; overflow:visible; }
 .svc-presenter-toolbar-start, .svc-presenter-toolbar-end { display:flex; flex-wrap:wrap; align-items:center; gap:10px; min-width:0; max-width:100%; }
+.svc-presenter-toolbar-start { order:1; }
+.svc-presenter-toolbar-end { order:2; }
 .svc-presenter-toolbar-end > .svc-output-action { order:3; min-height:35px; height:35px; margin:0; padding:0 10px; white-space:nowrap; }
 .svc-presenter-toolbar-utilities { gap:10px; }
 .svc-presenter-toolbar-layout:not(:has(> .svc-toolbar-scripture)) > .svc-presenter-toolbar-end { margin-inline-start:auto; }
 
 /* One live scripture composer in the shared toolbar; wrap using available space. */
-.svc-toolbar-scripture { flex:1 1 300px; min-width:0; max-width:520px; margin-inline-start:auto; container-type:inline-size; }
+.svc-toolbar-scripture { order:3; flex:1 1 300px; min-width:0; max-width:520px; margin-inline-start:auto; container-type:inline-size; }
 .svc-toolbar-scripture .svc-citation-composer { margin:0; padding:0; border:0; border-radius:0; background:none; display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; }
 .svc-toolbar-scripture .svc-citation-composer-heading { display:contents; margin:0; }
 .svc-toolbar-scripture .svc-citation-composer-heading > span { display:inline-flex; font-size:var(--ui-meta-size); white-space:nowrap; }

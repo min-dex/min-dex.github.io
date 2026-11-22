@@ -19,14 +19,14 @@ def main():
                     page.goto(url, wait_until='networkidle')
                     page.wait_for_function("!!document.querySelector('.monitor-panel')")
                     page.evaluate('''() => {
-                      window.monitorCalls=[]; window.monitorMode='ok';
+                      window.monitorCalls=[]; window.monitorMode='ok';window.monitorOutputs=[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224'},{id:'s2',title:'대기 예배',device:'교육관 PC · 송출 대기',position:'송출 대기'}];
                       state.services=[{id:'editing',date:'2026-09-13',type_id:'sunday-second'}, {id:'output',date:'2026-09-13',type_id:'sunday-main'}];
                       state.selectedServiceId='editing'; state.module='presenter';
                       state.presenter.serviceId='output';state.presenter.index=2;state.presenter.slides=[{},{},{}];
                       state.presenter.outputConnectedAt=Date.now();
                       state.client={rpc:(name,args)=>({abortSignal:signal=>{
                         monitorCalls.push({name,args});
-                        if(name==='mindex_remote_outputs')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224'},{id:'s2',title:'대기 예배',device:'교육관 PC · 송출 대기',position:'송출 대기'}]}});
+                        if(name==='mindex_remote_outputs')return Promise.resolve({data:{ok:true,outputs:monitorOutputs}});
                         if(name==='mindex_remote_admin_login')return Promise.resolve({data:{ok:true,token:'fixture-only'}});
                         if(name==='mindex_remote_admin')return Promise.resolve({data:{ok:true,outputs:[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224',code:'0123'}]}});
                         if(monitorMode==='pending')return new Promise(resolve=>(window.monitorReleases ||= []).push(resolve));
@@ -51,12 +51,16 @@ def main():
                     assert summary['detail'] in page.locator('[data-outputs]').inner_text()
                     assert '0123' not in page.locator('[data-outputs]').inner_text()
                     assert '슬라이드 93 / 224' in page.locator('[data-outputs]').inner_text()
-                    assert page.locator('[data-outputs]').inner_text().count('송출 대기') == 1
+                    assert '송출 대기' not in page.locator('[data-outputs]').inner_text()
+                    assert page.locator('[data-output-section]').is_visible()
+                    status_sections=page.locator('.monitor-status-grid > .monitor-section')
+                    assert abs(status_sections.nth(0).bounding_box()['y']-status_sections.nth(1).bounding_box()['y']) < 2
                     page.click('[data-show-codes]');page.fill('[data-pin]','1111');page.click('[data-check-pin]')
                     page.wait_for_function("document.querySelector('[data-outputs]').textContent.includes('송출 코드 0123')")
                     assert '슬라이드 93 / 224' in page.locator('[data-outputs]').inner_text()
                     page.click('[data-show-codes]');assert '0123' not in page.locator('[data-outputs]').inner_text()
                     page.set_viewport_size({'width':390,'height':430})
+                    assert status_sections.nth(1).bounding_box()['y'] > status_sections.nth(0).bounding_box()['y']
                     header=page.locator('.monitor-panel header')
                     y=header.bounding_box()['y']
                     assert page.locator('.monitor-scroll').evaluate('el=>{el.scrollTop=el.scrollHeight;return el.scrollTop>0}')
@@ -65,6 +69,13 @@ def main():
                     assert page.locator('[data-share]').count() == 0
                     assert page.locator('[data-local]').count()==0
                     assert page.get_by_label('접속명').is_visible()
+                    page.evaluate("monitorOutputs=[]")
+                    page.locator('[data-refresh]').click()
+                    page.wait_for_function("document.querySelector('[data-output-section]').hidden")
+                    assert page.locator('[data-output-section]').is_hidden()
+                    page.evaluate("monitorOutputs=[{id:'s1',title:'주일예배 [3부]',device:'본당 PC',position:'93 / 224'}]")
+                    page.locator('[data-refresh]').click()
+                    page.wait_for_function("!document.querySelector('[data-output-section]').hidden")
                     page.wait_for_function("monitorCalls.some(c=>c.name==='mindex_monitor_ping')")
                     page.evaluate("emitMonitorSaveEvent('save_start');emitMonitorSaveEvent('save_ok');emitMonitorSaveEvent('save_failed')")
                     page.locator('[data-refresh]').click()

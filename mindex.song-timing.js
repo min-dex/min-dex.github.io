@@ -211,10 +211,85 @@
     const stored = version?.audio_set;
     return stored ? {...stored, url:stored.audioUrl, databaseTiming:true} : null;
   };
-  function formsFor(item, song, version, fallback) {
+  const audioFormOwnerId = form => String(form?._presenterSourceFormId || form?.id || '');
+  const audioFormOwnerKey = form => JSON.stringify([
+    String(form?.part_type || form?.type || form?.label || form?.name || '').trim().toLowerCase(),
+    form?.part_number ?? null,
+    String(form?.part_variant || '').trim().toLowerCase(),
+    audioText(form?.lyrics || form?.text || ''),
+  ]);
+  function audioSetFormSequence(profile, version) {
+    const sourceForms = version?.forms || [];
+    const ranges = [];
+    let offset = 0;
+    for (const form of sourceForms) {
+      const length = audioText(form?.lyrics || '').length;
+      ranges.push({id:audioFormOwnerId(form),key:audioFormOwnerKey(form),start:offset,end:offset+length});
+      offset += length;
+    }
+    const sequence = [];
+    const blank = '__audio_blank__';
+    let lastOwnerId = '';
+    let previousRangeStart = -1;
+    for (const form of profile?.forms || []) {
+      if (form?._presenterBlank) { sequence.push(blank); continue; }
+      if (!Array.isArray(form?.audioSourceRange)) {
+        const key = audioFormOwnerKey(form);
+        if (!audioFormOwnerId(form) || !key) return null;
+        sequence.push(key); lastOwnerId = audioFormOwnerId(form); previousRangeStart = -1;
+        continue;
+      }
+      const [start,end] = form.audioSourceRange;
+      const owners = ranges.filter(range => range.id && start < range.end && end > range.start);
+      if (!owners.length) return null;
+      owners.forEach((owner,index) => {
+        if (index || lastOwnerId !== owner.id || start <= previousRangeStart) sequence.push(owner.key);
+        lastOwnerId = owner.id;
+      });
+      previousRangeStart = start;
+    }
+    return sequence;
+  }
+  function audioSetMatchesFormPlan(profile, version, fallback = []) {
+    if (!validSet(profile, version)) return false;
+    const blank = '__audio_blank__';
+    const expected = fallback.filter(form => !form?._presenterTitle)
+      .map(form => form?._presenterBlank ? blank : audioFormOwnerKey(form));
+    const actual = audioSetFormSequence(profile, version);
+    if (!expected.length || !expected.every(Boolean) || !Array.isArray(actual)) return false;
+    let cursor = 0;
+    for (const token of expected) {
+      if (token === blank) {
+        cursor = actual.indexOf(blank, cursor) + 1;
+        if (!cursor) return false;
+      } else {
+        while (actual[cursor] === blank) cursor++;
+        if (actual[cursor++] !== token) return false;
+      }
+    }
+    return actual.slice(cursor).every(token => token === blank);
+  }
+  function formsFor(item, song, version, fallback, { preferAudioDefault = false } = {}) {
     if (!isChildrenMode(item) || !hasVersionAudio(version)) return fallback;
     const profile = versionProfile(song, version);
-    return validSet(profile, version) ? profile.forms.map(form => ({ ...form })) : fallback;
+    if (preferAudioDefault) return validSet(profile, version)
+      ? profile.forms.map(form => ({...form})) : fallback;
+    // Audio may retain its reviewed page splits and instrumental blanks only
+    // while they resolve to the exact current default/manual form sequence.
+    // A different form plan wins and decorate() keeps the old cues stale.
+    return audioSetMatchesFormPlan(profile, version, fallback)
+      ? profile.forms.map(form => ({...form})) : fallback;
+  }
+  function outputForms(item, song, version, formPlan) {
+    const plannedTitles = formPlan.forms.filter(form => form._presenterTitle);
+    const needsAudioTitle = isChildrenMode(item) && presenterDefaultTitleForServiceItem(item, song, version) && !plannedTitles.length;
+    const titles = needsAudioTitle ? [findPresenterFormForPresetLabel([], 'T')] : plannedTitles;
+    const content = formPlan.forms.filter(form => !form._presenterTitle);
+    const prefixTitles = formPlan.forms.slice(0, plannedTitles.length).every(form => form._presenterTitle);
+    if (plannedTitles.length && !prefixTitles) return formPlan.forms;
+    const declared = typeof presenterServiceItemDeclaredFormSource === 'function'
+      ? presenterServiceItemDeclaredFormSource(item, song, version) : true;
+    return [...titles, ...formsFor(item, song, version, content, {preferAudioDefault: !declared})];
   }
   function decorate(slides, item, song, version) {
     if (!song?.id) return slides;
@@ -504,10 +579,12 @@
     const slides = presenterSlidesForService(serviceId);
     const index = slides.findIndex(s => belongsTo(s, elementId) && s.syncTimeline?.localTiming && !s.hiddenInPresentation);
     if (index < 0) { showToast('현재 가사·사진 순서의 동기화를 먼저 저장해 주세요.', 'info'); return; }
-    runPresenterAction('jump', serviceId, {index, scroll:false});
+    const alreadyOnTarget = state.presenter.index === index && !state.presenter.safetyBlank
+      && !state.presenter.liveScripture?.active && !state.presenter.livePraise?.active;
+    if (!alreadyOnTarget) runPresenterAction('jump', serviceId, {index, scroll:false});
     const sync = state.presenter.slides[state.presenter.index]?.syncTimeline;
     if (!sync?.localTiming) return;
-    const prepared = presenterPreparedAudio.get(sync.audioSrc);
+    const prepared = presenterPreparedAudio.get(normalizePresenterMediaSource(sync.audioSrc));
     const audio = getServiceMusicAudio(sync.audioSrc);
     setServiceMusicSource(audio, sync.audioSrc, 'presenter-audio', {loop:false, repeatAllowed:false}, sync.audioTitle);
     // Explicit restart rebuilds the media pipeline. WebKit can stall on a backward
@@ -901,7 +978,7 @@
     });
     document.body.append(dialog); dialog.showModal();
   }
-  root.MindexSongTiming = { rebaseAudioSet, audioStatus, statusMarkup, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
+  root.MindexSongTiming = { rebaseAudioSet, audioStatus, statusMarkup, ownsTransport, resumeAutoSync, snapBeat, detectBeatGrid, composePhotos, validatePhotos, saveToVersion, keyFor, serviceKeyFor, pagesFor, fingerprint, validate, decorate, decorateService, audioFor, controls, open, play, transport, updateTransport, saveToWorship, formsFor, outputForms, sourceSignature, ownsSource: source => remoteSources.has(source), get revision() { return revision; } };
   if (typeof document !== 'undefined') {
     document.addEventListener('pointerdown', e => {
       activeSeekInput = e.target.closest('[data-song-timing-seek]:not(:disabled)');

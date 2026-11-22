@@ -1,6 +1,9 @@
 const assert=require('node:assert/strict');
 global.servicePraiseInputMode=item=>item.mode;
 global.versionEffectivePraiseTypes=(song,version)=>version.types||[];
+global.presenterDefaultTitleForServiceItem=()=>true;
+global.findPresenterFormForPresetLabel=()=>({_presenterTitle:true,id:'title',lyrics:''});
+global.presenterServiceItemDeclaredFormSource=()=>({kind:'metadata'});
 require('../mindex.song-timing.js');const T=global.MindexSongTiming;
 (async()=>{
  const song={id:'song'},version={id:'version',types:['children'],_worshipVersionPersisted:true,lyric_signature:'source-hash',forms:[{id:'form',lyrics:'가사'}]};
@@ -21,10 +24,54 @@ require('../mindex.song-timing.js');const T=global.MindexSongTiming;
  }
  const item={id:'item',mode:'children_audio'},result=T.decorate(slides,item,song,version);
  assert.equal(result[0].syncTimeline.start,2);assert.equal(result[0].syncTimeline.lead,1);assert.equal(T.audioFor(result,'item').url,version.audio_set.audioUrl);
- assert.deepEqual(T.formsFor(item,song,version,[]),version.forms);
+ assert.deepEqual(T.formsFor(item,song,version,version.forms),version.forms);
  const originalForms=version.audio_set.forms;
  version.audio_set.forms=[{id:'page',lyrics:'가\n사',audioSourceRange:[0,2]}];
- assert.equal(T.formsFor(item,song,version,[])[0].lyrics,'가\n사');
+ assert.equal(T.formsFor(item,song,version,version.forms)[0].lyrics,'가\n사');
+ const changedPlan=[{id:'other',part_type:'Chorus',lyrics:'다른 가사'}];
+ assert.deepEqual(T.formsFor(item,song,version,changedPlan),changedPlan);
+ const sequenceForms=['마라','나타','주예','수여','어서'].map((lyrics,index)=>({id:`part-${index}`,lyrics}));
+ const folded=sequenceForms.map(form=>form.lyrics.replace(/[^\p{L}\p{N}]/gu,''));
+ let offset=0;const audioPages=[];
+ sequenceForms.forEach((form,index)=>{
+  const length=folded[index].length, middle=offset+Math.max(1,Math.floor(length/2));
+  audioPages.push({lyrics:form.lyrics.slice(0,1),audioSourceRange:[offset,middle]},{lyrics:form.lyrics.slice(1),audioSourceRange:[middle,offset+length]});
+  if(index===1)audioPages.push({_presenterBlank:true,lyrics:''});
+  offset+=length;
+ });
+ audioPages.push({_presenterBlank:true,lyrics:''});
+ const sequenceVersion={forms:sequenceForms,audio_set:{...version.audio_set,forms:audioPages,sourceSignature:T.sourceSignature({forms:sequenceForms})}};
+ assert.equal(T.formsFor(item,song,sequenceVersion,sequenceForms).length,audioPages.length,'split pages and instrumental blanks keep reviewed cues');
+ const repeatedUnique=[
+  {id:'v-a',part_type:'Verse',part_number:1,lyrics:'마라나타'},
+  {id:'c-a',part_type:'Chorus',part_number:1,lyrics:'주 예수여'},
+  {id:'v-b',part_type:'Verse',part_number:1,lyrics:'마라나타'},
+  {id:'c-b',part_type:'Chorus',part_number:1,lyrics:'주 예수여'},
+  {id:'c-c',part_type:'Chorus',part_number:1,lyrics:'주 예수여'},
+ ];
+ const repeatedAudio={...version.audio_set,forms:repeatedUnique,sourceSignature:T.sourceSignature({forms:repeatedUnique})};
+ const repeatedPlan=[repeatedUnique[0],repeatedUnique[1],repeatedUnique[0],repeatedUnique[1],repeatedUnique[1]];
+ assert.equal(T.formsFor(item,song,{forms:repeatedUnique,audio_set:repeatedAudio},repeatedPlan).length,5,'equivalent repeated forms do not depend on unique DB ids');
+ const crossForms=sequenceForms.slice(0,2), crossLyrics=crossForms.map(form=>form.lyrics).join('');
+ const crossVersion={forms:crossForms,audio_set:{...version.audio_set,forms:[{lyrics:crossLyrics,audioSourceRange:[0,folded[0].length+folded[1].length]}],sourceSignature:T.sourceSignature({forms:crossForms})}};
+ assert.equal(T.formsFor(item,song,crossVersion,crossForms).length,1,'one reviewed page may span adjacent source forms');
+ const plannedBlank={id:'instrumental',_presenterBlank:true,lyrics:''};
+ const withBlank=[sequenceForms[0],plannedBlank,sequenceForms[1]];
+ const blankProfile={...sequenceVersion,audio_set:{...sequenceVersion.audio_set,forms:[audioPages[0],audioPages[1],{_presenterBlank:true,lyrics:''},audioPages[2],audioPages[3]]}};
+ assert.equal(T.formsFor(item,song,blankProfile,withBlank).length,5,'explicit instrumental form requires a matching audio blank');
+ blankProfile.audio_set.forms=blankProfile.audio_set.forms.filter(form=>!form._presenterBlank);
+ assert.deepEqual(T.formsFor(item,song,blankProfile,withBlank),withBlank,'missing explicit instrumental form invalidates old cues');
+ const title={_presenterTitle:true,id:'title',lyrics:''};
+ assert.equal(T.outputForms(item,song,sequenceVersion,{forms:[title,...sequenceForms]}).length,1+audioPages.length,'a leading authored T keeps reviewed audio pages and cues');
+ const titleInMiddle=[sequenceForms[0],{_presenterTitle:true,id:'title',lyrics:''},sequenceForms[1]];
+ assert.deepEqual(T.outputForms(item,song,sequenceVersion,{forms:titleInMiddle}),titleInMiddle,'a middle authored T keeps its exact position without guessed cues');
+ const declaredSource=global.presenterServiceItemDeclaredFormSource;
+ global.presenterServiceItemDeclaredFormSource=()=>null;
+ const inferredPlan={forms:[title,{id:'heuristic',part_type:'Verse',lyrics:'추정 가사'}]};
+ assert.equal(T.outputForms(item,song,sequenceVersion,inferredPlan).length,1+audioPages.length,'valid reviewed audio is the default when no form source is declared');
+ const invalidAudio={...sequenceVersion,audio_set:{...sequenceVersion.audio_set,sourceSignature:'stale'}};
+ assert.deepEqual(T.outputForms(item,song,invalidAudio,inferredPlan),inferredPlan.forms,'invalid audio never replaces an inferred plan');
+ global.presenterServiceItemDeclaredFormSource=declaredSource;
  version.audio_set.forms[0].lyrics='다른 가사';assert.deepEqual(T.formsFor(item,song,version,['fallback']),['fallback']);
  version.audio_set.forms[0]={_presenterBlank:true,lyrics:'hidden replacement'};assert.deepEqual(T.formsFor(item,song,version,['fallback']),['fallback']);
  version.audio_set.forms=originalForms;

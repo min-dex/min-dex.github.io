@@ -180,6 +180,17 @@ try:
        })""")
        assert page.locator('.svc-presenter-toolbar').evaluate('(e)=>e.scrollWidth<=e.clientWidth+1')
        assert page.evaluate("""()=>{
+        const layout=document.querySelector('.svc-presenter-toolbar-layout');
+        if(!layout)return false;
+        const groups=['.svc-presenter-toolbar-start','.svc-presenter-toolbar-end','.svc-toolbar-scripture']
+          .map(selector=>layout.querySelector(selector)).filter(Boolean);
+        if(!groups.length||groups.some(group=>{const r=group.getBoundingClientRect();return r.left<0||r.right>innerWidth+1;}))return false;
+        const orders=groups.map(group=>Number(getComputedStyle(group).order));
+        if(orders.some((order,index)=>index&&order<orders[index-1]))return false;
+        return [...layout.querySelectorAll('button,summary')].filter(control=>control.getBoundingClientRect().width>0)
+          .every(control=>{const r=control.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1;});
+       }""")
+       assert page.evaluate("""()=>{
         const left=document.querySelector('.module-switcher-tab').getBoundingClientRect();
         const right=document.querySelector('#themeBtn').getBoundingClientRect();
         return Math.abs(left.height-right.height)<1 && (innerWidth<=980 || Math.abs((left.top+left.height/2)-(right.top+right.height/2))<1);
