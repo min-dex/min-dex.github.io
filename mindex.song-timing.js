@@ -269,9 +269,11 @@
     }
     return actual.slice(cursor).every(token => token === blank);
   }
-  function formsFor(item, song, version, fallback) {
+  function formsFor(item, song, version, fallback, { preferAudioDefault = false } = {}) {
     if (!isChildrenMode(item) || !hasVersionAudio(version)) return fallback;
     const profile = versionProfile(song, version);
+    if (preferAudioDefault) return validSet(profile, version)
+      ? profile.forms.map(form => ({...form})) : fallback;
     // Audio may retain its reviewed page splits and instrumental blanks only
     // while they resolve to the exact current default/manual form sequence.
     // A different form plan wins and decorate() keeps the old cues stale.
@@ -285,7 +287,9 @@
     const content = formPlan.forms.filter(form => !form._presenterTitle);
     const prefixTitles = formPlan.forms.slice(0, plannedTitles.length).every(form => form._presenterTitle);
     if (plannedTitles.length && !prefixTitles) return formPlan.forms;
-    return [...titles, ...formsFor(item, song, version, content)];
+    const declared = typeof presenterServiceItemDeclaredFormSource === 'function'
+      ? presenterServiceItemDeclaredFormSource(item, song, version) : true;
+    return [...titles, ...formsFor(item, song, version, content, {preferAudioDefault: !declared})];
   }
   function decorate(slides, item, song, version) {
     if (!song?.id) return slides;
