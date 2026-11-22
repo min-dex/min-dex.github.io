@@ -514,7 +514,7 @@
         if(page===0||x===158.5)root.append(svg('rect',{x,y:198.75,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
       }
     }
-    for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),10,15,'left'],[1,'insideBrand',({'young-adult':'RIA 청년부',youth:'TOV 청소년부',children:'꿈꾸는 어린이부'})[department],158.5,190,'right']]){
+    for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideBrand',({'young-adult':'RIA 청년부',youth:'TOV 청소년부',children:'꿈꾸는 어린이부'})[department],10,15,'left'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),158.5,190,'right']]){
       const g=group(page,id);text(g,id,t,x,y,128.5,10,align);g.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));
     }
     text(group(0,'coverDate'),'coverDate',dateLabel(doc.source.date),158.5,25,65,12.5,'left',700);
@@ -547,9 +547,9 @@
       const detail=/^\s*[-–]/.test(line),number=line.match(/^\s*([①-⑳]|\d+[.)])\s*/);if(number){const label=svg('g');news.append(label);text(label,'news',number[1],10,ny,8,12.5);label.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}ny+=text(news,'news',number?line.slice(number[0].length):line,detail||number?18:10,ny,detail||number?120.5:128.5,detail?10:12.5,'left',500,true)+(detail?1.25:2.5);
     }
     ny+=2.5;const notices=group(0,'notices');ny+=text(notices,'notices',value('notices'),10,ny,128.5,12.5,'left',500,true);
-    const staff=group(0,'staff'),roles='주일학교장|담당\\s*교역자|위임목사|담임목사|부회장|회장|총무|서기|회계|부장';
+    const staff=group(0,'staff'),roles='설교자|주일학교장|담당\\s*교역자|위임목사|담임목사|부회장|회장|총무|서기|회계|부장';
     const people=value('staff').split(/\n|\s*·\s*/).filter(p=>p.trim()).map(p=>{const first=p.match(new RegExp('^('+roles+')\\s+(.+)$')),last=p.match(new RegExp('^(.+?)\\s+('+roles+')$'));return first?{role:first[1],name:first[2]}:last?{role:last[2],name:last[1]}:{role:'',name:p};});
-    if(department==='youth'&&people[0]?.role==='주일학교장')people.splice(1,0,{role:'',name:''});
+    if(department==='youth'&&people[0]?.role==='주일학교장'&&people[1]?.role!=='설교자')people.splice(1,0,{role:'',name:''});
     const staffRows=Math.ceil(people.length/2),rowHeights=Array.from({length:staffRows},(_,i)=>Math.max(7.5,...people.slice(i*2,i*2+2).map(p=>Math.max(wrap(p.role,20,10,500).length,wrap(p.name,p.role?39.25:61.75,10,700).length)*5+2.5))),staffY=185-(staffRows?rowHeights.reduce((a,b)=>a+b,0)+5:0);
     rule(staff,10,staffY);
     let staffTop=staffY+5;rowHeights.forEach((height,row)=>{people.slice(row*2,row*2+2).forEach((p,col)=>{const x=10+col*66.75,g=svg('g',{'data-staff-row':row,'data-staff-column':col});staff.append(g);if(p.role)text(g,'staff',p.role,x,staffTop,20,10,'left',500,false,210,true);text(g,'staff',p.name,x+(p.role?22.5:0),staffTop,p.role?39.25:61.75,10,'left',700,false,210,true);});staffTop+=height;});
@@ -593,8 +593,6 @@
       if(department==='youth'){
         let start=50;if(value('scriptureNote')){start+=text(group(1,'scriptureNote'),'scriptureNote',value('scriptureNote'),158.5,start,128.5,12.5,'left',500,false,75)+5;}
         outline(start,135);heading(1,'reflectionTitle','받은 은혜',158.5,142.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,155.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,155.5,185);
-        const next=Object.hasOwn(doc.fields,'nextPrayer')?value('nextPrayer'):doc.source.prayers?.find(r=>r.next)?.person||'';text(group(1,'nextPrayer'),'nextPrayer',next?(/^다음번 기도/.test(next)?next:'다음번 기도 · '+next):'',10,152.5,128.5,10);
-        heading(1,'pointTitle','예배 포인트',10,165);text(group(1,'worshipPoint'),'worshipPoint',value('worshipPoint'),10,178,128.5,12.5,'left',500,false,185);
       }else{
         outline(50,135);const prayers=doc.source.prayers||[],count=Math.ceil(prayers.length/2),py=185-count*7.5;
         heading(1,'prayersTitle','예배 위원',158.5,py-13,month('rosterMonth'),'prayersMonth');const g=group(1,'prayers');prayers.forEach((r,i)=>{const x=158.5+(i>=count?69.25:0),yy=py+(i%count)*7.5,sub=svg('g');g.append(sub);text(sub,'prayers',shortDate(r.date),x,yy,29,12.5);text(sub,'prayers',r.person==='미정'?'—':r.person,x+30,yy,29.25,12.5,'right');if(r.date.slice(0,7)!==doc.source.rosterMonth)sub.querySelectorAll('text').forEach(e=>e.setAttribute('fill','#808080'));});

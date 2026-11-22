@@ -757,3 +757,9 @@ a separate 10pt/500 line at y32.5mm under the date. Calendar note (commemorative
 Sunday) appears only when present, 10pt/500 beneath the season at y32.5mm.
 Legacy combined liturgical strings are preserved for old layouts. Approved
 2026-11-22 issues: young-adult32, youth36, children34; these are weekly values.
+
+Latest user correction: inside top-left label is the full department name and
+bottom-right label is church name; bar positions stay p2 top/p3 bottom.
+Swiss youth no longer renders next-prayer or worship-point blocks (stored inputs
+remain preserved). Tov staff row1 pairs 주일학교장 with 설교자; explicit student
+officer titles include 학생, and 이재희 is displayed as 설교자 이재희 교사.

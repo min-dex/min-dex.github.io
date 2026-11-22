@@ -36,7 +36,8 @@ try:
      const fonts=r.pages.flatMap(p=>[...p.querySelectorAll('tspan')].map(e=>Math.round(+e.getAttribute('font-size')*72/25.4*10)/10));if(fonts.some(n=>![8,10,12.5,15,20,40].includes(n)))throw Error('Font token '+fonts);
      const text=r.pages.map(p=>p.textContent).join(' ');for(const part of ['말씀을 따라','함께','광고 담당'])if(!text.includes(part))throw Error('Missing linked '+part);
      if(department==='children')for(const part of ['이달의 주제','새길 말씀','잠잠성경','잠언'])if(!text.includes(part))throw Error('Child section missing '+part);
-     if(department==='youth')for(const part of ['받은 은혜','예배 포인트','다음번 기도'])if(!text.includes(part))throw Error('Youth section missing '+part);
+     if(department==='youth')for(const part of ['받은 은혜'])if(!text.includes(part))throw Error('Youth section missing '+part);
+     if(department==='youth'&&r.pages[1].querySelector('[data-frame-id=nextPrayer],[data-frame-id=pointTitle],[data-frame-id=worshipPoint]'))throw Error('Retired youth sections');
      results.push({department,issues:[...r.issues]});
     }
     for(const n of [2,3,4]){const d=structuredClone(samples['young-adult']);d.fields.outline=Array.from({length:n},(_,i)=>`${i+1}. 설교 대지`).join('\n');const r=B.renderPages(d,'print');if(r.issues.size)throw Error('Outline overflow '+n);const counts=[...r.pages[1].querySelectorAll('[data-outline-item]')].map(g=>g.querySelectorAll('[data-swiss-rule]').length);if(new Set(counts).size!==1||counts[0]<1)throw Error('Unequal writing lines');results.push({points:n,lines:counts});}
