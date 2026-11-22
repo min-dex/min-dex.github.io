@@ -278,12 +278,13 @@
     return audioSetMatchesFormPlan(profile, version, fallback)
       ? profile.forms.map(form => ({...form})) : fallback;
   }
-  function outputForms(item, song, version, formPlan, explicitTitleSequence = false) {
+  function outputForms(item, song, version, formPlan) {
     const plannedTitles = formPlan.forms.filter(form => form._presenterTitle);
     const needsAudioTitle = isChildrenMode(item) && presenterDefaultTitleForServiceItem(item, song, version) && !plannedTitles.length;
     const titles = needsAudioTitle ? [findPresenterFormForPresetLabel([], 'T')] : plannedTitles;
     const content = formPlan.forms.filter(form => !form._presenterTitle);
-    if (explicitTitleSequence) return needsAudioTitle ? [...titles, ...content] : formPlan.forms;
+    const prefixTitles = formPlan.forms.slice(0, plannedTitles.length).every(form => form._presenterTitle);
+    if (plannedTitles.length && !prefixTitles) return formPlan.forms;
     return [...titles, ...formsFor(item, song, version, content)];
   }
   function decorate(slides, item, song, version) {
