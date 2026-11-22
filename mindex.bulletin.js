@@ -517,8 +517,8 @@
     for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),10,190,'left'],[1,'insideBrand',departmentName(department),158.5,15,'right']]){
       const g=group(page,id);text(g,id,t,x,y,128.5,10,align);g.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));
     }
-    text(group(0,'issue'),'issue',[dateLabel(doc.source.date),value('issue')?`제${value('issue')}호`:''].filter(Boolean).join(' · '),158.5,25,65,10);
-    text(group(0,'liturgical'),'liturgical',doc.source.liturgical,226,25,61,10,'right');
+    text(group(0,'issue'),'issue',[dateLabel(doc.source.date),value('issue')?`제${value('issue')}호`:''].filter(Boolean).join(' · '),158.5,25,65,12.5);
+    text(group(0,'liturgical'),'liturgical',doc.source.liturgical,226,25,61,12.5,'right');
     const brand=group(0,'brand'),asset=doc.settings.appearance?.assets?.logo;
     const logo=asset||(department==='children'?childrenLogoPath:department==='young-adult'?swissLogoPath:'');
     if(logo){const w=department==='children'?60:56.25;brand.append(svg('image',{x:222.75-w/2,y:62.5,width:w,height:40,href:new URL(logo,document.baseURI).href,preserveAspectRatio:'xMidYMax meet'}));}
@@ -552,7 +552,7 @@
     rule(staff,10,staffY);
     let staffTop=staffY+5;rowHeights.forEach((height,row)=>{people.slice(row*2,row*2+2).forEach((p,col)=>{const x=10+col*66.75,g=svg('g',{'data-staff-row':row,'data-staff-column':col});staff.append(g);if(p.role)text(g,'staff',p.role,x,staffTop,20,10,'left',500,false,210,true);text(g,'staff',p.name,x+(p.role?22.5:0),staffTop,p.role?39.25:61.75,10,'left',700,false,210,true);});staffTop+=height;});
     const extra=(staffY-ny-10)/2;
-    if(extra<0)issues.add('news');else for(const id of ['newsTitle','welcome','news','notices'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);
+    if(extra<0)issues.add('news');else {for(const id of ['newsTitle','welcome','news'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);notices.setAttribute('transform',`translate(0 ${extra*2})`);}
     if(eventsEnd>newsStart)issues.add('events');
     // Linked worship rows: no fabricated post-praise prayer, no liturgical body.
     y=heading(1,'orderTitle','예배 순서',10,25,value('leader'),'leader');const order=group(1,'order');

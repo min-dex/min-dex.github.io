@@ -734,3 +734,7 @@ The 2/3/4-point layouts allocate equal writing heights per item.
 Youth and young-adult sermon notes share the 50–135mm outline area when no
 additional scripture note is authored. Identical 2/3/4-point content must yield
 identical writing-rule counts and Y coordinates across both departments.
+
+Cover date/issue and liturgical occasion use 12.5pt in all Swiss designs.
+Recurring footer notices are bottom-aligned 10mm above the staff divider;
+remaining space is distributed above the notices, with overflow still blocked.
