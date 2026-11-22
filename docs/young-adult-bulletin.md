@@ -771,3 +771,18 @@ and sermon-note headings, without changing stored source titles. Approved
 Children 공동체고백 displays as order label 나래파송 and content title 공동체고백,
 without printing the full liturgical text or modifying its stored source.
 2026-11-22 approved assignees: 예배의 부름/광고 인도자; 주기도문 다 같이.
+
+The order heading shows an explicit right-aligned 인도자 label when a leader
+value exists; content height is measured before placing the first order row.
+Do not invent a leader when canonical/source and authored fields are empty.
+Children commissioning response is 다 같이 for the approved 2026-11-22 issue.
+
+### Linked praise and editable worship leaders
+
+Swiss heading combines live service.praise_leader (Operations-owned) with the
+editable weekly leader field (label 예배 인도자). Unauthored worship-leader values
+use service.worship_leader first, then children 박소영 전도사님 / youth 허호범 선생님 /
+young-adult 이재희 청년. An explicit blank remains blank; no source writes occur.
+Display praise leader first, worship leader second; normalize whitespace and
+known honorifics only for duplicate comparison, preserving display spelling.
+Editor help reports the linked praise value and its Operations ownership.

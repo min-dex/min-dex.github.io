@@ -349,7 +349,7 @@
     const date = service.service_date;
     const department=supportsDepartment(service.service_type_id)?service.service_type_id:"young-adult";
     const today = calendar.find(r=>r.date===date) || {};
-    const source = {id:service.id, date, department, leader:clean(service.worship_leader), liturgicalSeason:clean(today.liturgical), commemoration:clean(today.note), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
+    const source = {id:service.id, date, department, leader:clean(service.worship_leader), praiseLeader:clean(service.praise_leader), worshipLeader:clean(service.worship_leader)||({children:'박소영 전도사님',youth:'허호범 선생님','young-adult':'이재희 청년'})[department], liturgicalSeason:clean(today.liturgical), commemoration:clean(today.note), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
       sermon:"", scripture:"", news:"", order:[], orderSummaryOnly:Object.create(null), linkedPraiseTitles:Object.create(null), prayers:[], events:"", loadedAt:new Date().toISOString()};
     const hasReading=elements.some(e=>sectionById.get(e.section_id)?.section_key==="scripture_reading");
     const ordered = elements.filter(e=>sectionById.has(e.section_id)).sort((a,b)=>
@@ -558,7 +558,9 @@
     if(extra<0)issues.add('news');else {for(const id of ['newsTitle','welcome','news'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);notices.setAttribute('transform',`translate(0 ${extra*2})`);}
     if(eventsEnd>newsStart)issues.add('events');
     // Linked worship rows: no fabricated post-praise prayer, no liturgical body.
-    y=heading(1,'orderTitle','예배 순서',10,25,value('leader'),'leader');const order=group(1,'order');
+    const leaderParts=[doc.source.praiseLeader,value('leader')].flatMap(v=>String(v||'').replace(/^인도자\s*[·:]?\s*/,'').split(/\s*\/\s*/)).map(v=>v.trim()).filter(Boolean),seenLeaders=new Set();
+    const leaderText=leaderParts.filter(v=>{const key=v.replace(/\s+/g,'').replace(/(?:선생님|교사|전도사님|전도사|목사님|목사|청년|학생)$/,'');if(seenLeaders.has(key))return false;seenLeaders.add(key);return true;}).join(' / ');
+    y=heading(1,'orderTitle','예배 순서',10,25);if(leaderText){const leaderHeight=text(group(1,'leader'),'leader','인도자 · '+leaderText,60,27.5,78.5,10,'right');y=Math.max(y,27.5+leaderHeight+2.5);}const order=group(1,'order');
     const rows=orderRowsForDisplay(doc.source).filter(r=>r.id!=='bulletin-communal-prayer').map(r=>department==='children'&&r.label==='공동체고백'?{...r,label:'나래파송',content:'공동체고백'}:r);
     for(const r of rows){
       const creed=['사도신경','신앙고백'].includes(r.label),label=creed?'신앙고백':r.label;
@@ -1040,6 +1042,7 @@
       if(Object.hasOwn(doc.inherited?.months||{},month))return doc.inherited.months[month];
     }
     if(Object.hasOwn(doc.fields,key))return doc.fields[key];
+    if(key==='leader'&&swissDesign(doc.settings?.design))return doc.source?.worshipLeader??doc.source?.leader??'';
     if(key==="coverTitle")return doc.source?.sermon||"";
     if(Object.hasOwn(doc.inherited?.common||{},key)){
       const value=doc.inherited.common[key];
@@ -1412,7 +1415,7 @@
   }
   function snapshot(doc){return {fields:clone(doc.fields),settings:clone(doc.settings||{}),frames:clone(doc.frames),months:clone(doc.months||{}),inherited:clone(doc.inherited||{common:{},months:{}}),sourceSnapshot:clone(doc.sourceSnapshot||null)};}
 
-  const weeklySourceKeys=["leader","announcer","sermon","scripture","news","notices","welcome","outline","outlineTitle","sermonReference","liturgical","liturgicalSeason","commemoration","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"];
+  const weeklySourceKeys=["leader","praiseLeader","worshipLeader","announcer","sermon","scripture","news","notices","welcome","outline","outlineTitle","sermonReference","liturgical","liturgicalSeason","commemoration","monthlyTheme","memoryVerse","memoryReference","readingPlan","issue"];
   function normalizeSourceSnapshot(value) {
     if(!isRecord(value)||typeof value.serviceId!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(value.date||""))return null;
     const weekly={};for(const key of weeklySourceKeys)if(typeof value.weekly?.[key]==="string")weekly[key]=value.weekly[key];
@@ -1734,9 +1737,9 @@
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children",tov=["youth-tov","swiss-youth"].includes(doc.settings.design);
-        const field=key=>doc.settings.editorFields?.[key]?.visible===false?"":`<label ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(doc.settings.editorFields?.[key]?.label||(tov&&key==="staff"?"섬김이 · 임원진":fields[key]))}</span>${["issue","church","website","memoryReference"].includes(key)?
+        const field=key=>doc.settings.editorFields?.[key]?.visible===false?"":`<label ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(doc.settings.editorFields?.[key]?.label||(key==="leader"&&swissDesign(doc.settings.design)?"예배 인도자":tov&&key==="staff"?"섬김이 · 임원진":fields[key]))}</span>${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
-          `${["news","outline","notices","welcome"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" ${key==="news"?'data-announcement-numbered aria-describedby="bulletin-news-help"':''} rows="1">${escape(fieldValue(doc,key))}</textarea>`}${key==="news"?'<small id="bulletin-news-help" class="bulletin-input-help">Enter 다음 번호 · Shift+Enter 이어 쓰기</small>':''}</label>`;
+          `${["news","outline","notices","welcome"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" ${key==="news"?'data-announcement-numbered aria-describedby="bulletin-news-help"':''} rows="1">${escape(fieldValue(doc,key))}</textarea>`}${key==='leader'&&swissDesign(doc.settings.design)?`<small class="bulletin-input-help">찬양 인도자: ${escape(doc.source?.praiseLeader||'미입력')} · 운영 탭에서 연동</small>`:''}${key==="news"?'<small id="bulletin-news-help" class="bulletin-input-help">Enter 다음 번호 · Shift+Enter 이어 쓰기</small>':''}</label>`;
         const modern=swissDesign(doc.settings.design)||["editorial","simple"].includes(doc.settings.design);
         if(templateSession){
           p.innerHTML=`<section class="bulletin-property-section"><h3>${escape(templateTitle(doc))} · 문구</h3><p class="bulletin-help">새 주보에 사용할 문구입니다.</p>${profileKeys.map(field).join("")}</section>`;
