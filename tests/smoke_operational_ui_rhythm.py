@@ -48,6 +48,15 @@ try:
                         if name=='toolbar':
                             assert page.locator('.svc-presenter-toolbar-utilities .svc-presenter-help > summary').evaluate('e=>e.getBoundingClientRect().height')==35
                             page.locator('.svc-presenter-toolbar-utilities').scroll_into_view_if_needed()
+                            page.locator('[data-presenter-help]').evaluate('e=>e.open=false')
+                            controls=['[data-service-bulletin-action="open"]','.svc-presenter-toolbar .svc-music-name','.svc-presenter-toolbar .svc-presenter-help > summary']
+                            hovered=[]
+                            for selector in controls:
+                                control=page.locator(selector);assert control.count()==1,(engine,theme,width,selector)
+                                control.hover(force=True);assert control.evaluate("e=>e.matches(':hover')"),(engine,theme,width,selector)
+                                page.wait_for_timeout(180)
+                                hovered.append(control.evaluate("e=>{const s=getComputedStyle(e);return [s.backgroundColor,s.color,s.borderTopWidth]}"))
+                            assert hovered[1:]==[hovered[0],hovered[0]],(engine,theme,width,hovered)
                         if name=='section':
                             panel=page.locator('[data-presenter-section-editor]');box=panel.bounding_box()
                             assert box and box['x']>=0 and box['x']+box['width']<=width and box['y']>=50 and box['y']+box['height']<=height,box
