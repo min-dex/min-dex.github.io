@@ -560,7 +560,7 @@
     // Linked worship rows: no fabricated post-praise prayer, no liturgical body.
     const leaderParts=[doc.source.praiseLeader,value('leader')].flatMap(v=>String(v||'').replace(/^인도자\s*[·:]?\s*/,'').split(/\s*\/\s*/)).map(v=>v.trim()).filter(Boolean),seenLeaders=new Set();
     const leaderText=leaderParts.filter(v=>{const key=v.replace(/\s+/g,'').replace(/(?:선생님|교사|전도사님|전도사|목사님|목사|청년|학생)$/,'');if(seenLeaders.has(key))return false;seenLeaders.add(key);return true;}).join(' / ');
-    y=heading(1,'orderTitle','예배 순서',10,25);if(leaderText){const leaderHeight=text(group(1,'leader'),'leader','인도자 · '+leaderText,60,27.5,78.5,10,'right');y=Math.max(y,27.5+leaderHeight+2.5);}const order=group(1,'order');
+    y=heading(1,'orderTitle','예배 순서',10,25);if(leaderText){const leaderHeight=text(group(1,'leader'),'leader','인도: '+leaderText,60,27.5,78.5,10,'right');y=Math.max(y,27.5+leaderHeight+2.5);}const order=group(1,'order');
     const rows=orderRowsForDisplay(doc.source).filter(r=>r.id!=='bulletin-communal-prayer').map(r=>department==='children'&&r.label==='공동체고백'?{...r,label:'나래파송',content:'공동체고백'}:r);
     for(const r of rows){
       const creed=['사도신경','신앙고백'].includes(r.label),label=creed?'신앙고백':r.label;

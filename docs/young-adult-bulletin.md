@@ -786,3 +786,5 @@ young-adult 이재희 청년. An explicit blank remains blank; no source writes 
 Display praise leader first, worship leader second; normalize whitespace and
 known honorifics only for duplicate comparison, preserving display spelling.
 Editor help reports the linked praise value and its Operations ownership.
+
+Swiss combined leader heading prefix is `인도: ` (supersedes 인도자 ·).
