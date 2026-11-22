@@ -486,6 +486,7 @@
   function renderSwiss(doc,mode,selected) {
     const department=swissDepartment(doc.settings.design),accent=doc.settings.appearance?.palette?.accent||swissAccent(department),issues=new Set(),pages=[];
     const value=k=>String(fieldValue(doc,k)||'');
+    const sermonTitle=t=>{const v=String(t||'').trim();return v?`「${v.replace(/^[「『]|[」』]$/g,'')}」`:'';};
     const month=k=>{const [y,m]=(doc.source?.[k]||'').split('-');return y&&m?`${y}년 ${+m}월`:'';};
     const groups=new Map();
     const rule=(g,x,y,w=128.5)=>g.append(svg('rect',{x,y,width:w,height:.2,fill:'#808080','data-swiss-rule':'true'}));
@@ -561,7 +562,7 @@
     const rows=orderRowsForDisplay(doc.source).filter(r=>r.id!=='bulletin-communal-prayer');
     for(const r of rows){
       const creed=['사도신경','신앙고백'].includes(r.label),label=creed?'신앙고백':r.label;
-      const content=creed?'사도신경':r.content,person=(r.label==='광고'?value('announcer')||r.person:r.person||'').replace(/다같이/g,'다 같이');
+      const content=creed?'사도신경':r.label==='설교'?sermonTitle(r.content):r.content,person=(r.label==='광고'?value('announcer')||r.person:r.person||'').replace(/다같이/g,'다 같이');
       const cells=[{t:label,x:10,w:22.5,size:10},{t:content,x:35,w:76,size:12.5},{t:person,x:113.5,w:25,size:10,align:'right'}];
       const counts=cells.map(c=>wrap(c.t||'',c.w,c.size,500).length),h=Math.max(...counts,1)*6.25+2.5;
       const row=svg('g',{'data-order-row':r.id,'data-row-top':y,'data-row-height':h});order.append(row);
@@ -589,7 +590,7 @@
       const extra=(ry-13-memoryEnd-10)/2;if(extra<0)issues.add('readingPlan');else for(const id of ['memoryTitle','memoryReference','memoryVerse'])groups.get(id)?.setAttribute('transform',`translate(0 ${extra})`);
       const g=group(1,'readingPlan');reading.forEach((t,i)=>text(g,'readingPlan','□ '+t,158.5+(i>=count?66.75:0),ry+(i%count)*6.25,61.75,10,'left',500,false,ry+(i%count)*6.25+6.25));
     }else{
-      heading(1,'notesTitle','설교 노트',158.5,25);const g=group(1,'sermon');text(g,'sermon',doc.source.sermon,158.5,38,78.5,15,'left',700,false,50);text(g,'sermon',Object.hasOwn(doc.fields,'sermonReference')?value('sermonReference'):doc.source.scripture,242,39,45,10,'right',500,false,50);
+      heading(1,'notesTitle','설교 노트',158.5,25);const g=group(1,'sermon');text(g,'sermon',sermonTitle(doc.source.sermon),158.5,38,78.5,15,'left',700,false,50);text(g,'sermon',Object.hasOwn(doc.fields,'sermonReference')?value('sermonReference'):doc.source.scripture,242,39,45,10,'right',500,false,50);
       if(department==='youth'){
         let start=50;if(value('scriptureNote')){start+=text(group(1,'scriptureNote'),'scriptureNote',value('scriptureNote'),158.5,start,128.5,12.5,'left',500,false,75)+5;}
         outline(start,135);heading(1,'reflectionTitle','받은 은혜',158.5,142.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,155.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,155.5,185);

@@ -763,3 +763,7 @@ bottom-right label is church name; bar positions stay p2 top/p3 bottom.
 Swiss youth no longer renders next-prayer or worship-point blocks (stored inputs
 remain preserved). Tov staff row1 pairs 주일학교장 with 설교자; explicit student
 officer titles include 학생, and 이재희 is displayed as 설교자 이재희 교사.
+
+Swiss sermon titles use a single pair of corner brackets 「…」 in both order
+and sermon-note headings, without changing stored source titles. Approved
+2026-11-22 youth assignees: 주기도문 다 같이; 광고 허호범 선생님 (weekly content).
