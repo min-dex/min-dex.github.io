@@ -529,6 +529,7 @@
     else if(Object.hasOwn(doc.fields,'brand')){text(brand,'brand',value('brand'),158.5,62.5,128.5,40,'center',700,false,102.5);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));}
     else {text(brand,'brand','토브',158.5,75,128.5,40,'center',700);text(brand,'brand','청소년부',158.5,90,128.5,20,'center',700);brand.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));brand.setAttribute('transform','translate(222.75 102.5) scale(1.5) translate(-222.75 -102.5)');}
     const motto=group(0,'motto'),mottoHeight=text(motto,'motto',value('motto'),158.5,107.5,128.5,12.5,'center',500,false,140);
+    motto.querySelectorAll('text').forEach(e=>e.setAttribute('fill',accent));
     // Center the complete logo/motto block between issue metadata and theme Scripture.
     const identityOffset=(37.5+150-(52.5+107.5+mottoHeight))/2;
     for(const g of [brand,motto])g.setAttribute('transform',`translate(0 ${identityOffset}) ${g.getAttribute('transform')||''}`.trim());

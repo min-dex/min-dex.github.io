@@ -807,3 +807,5 @@ Swiss children reading-plan heading shows 잠들기 전, 잠언 읽기! at the r
 Cover theme-Scripture citation is10pt/500 Medium, matching other references. The Scripture body remains12.5pt/700 Bold. Swiss general body/motto/meta uses500; headings/date/season and explicit emphasis use700.
 
 Church-event date/time separator is one space in the date run at12.5pt/500 (2.325pt advance), followed by10pt time. Width checks use the same metrics; wrapped times omit the leading space.
+
+Post-1.0.18 follow-up: cover motto uses the resolved department accent (including authored palette override), retaining12.5pt/500. Theme Scripture remains black.
