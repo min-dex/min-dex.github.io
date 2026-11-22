@@ -809,3 +809,5 @@ Cover theme-Scripture citation is10pt/500 Medium, matching other references. The
 Church-event date/time separator is one space in the date run at12.5pt/500 (2.325pt advance), followed by10pt time. Width checks use the same metrics; wrapped times omit the leading space.
 
 Post-1.0.18 follow-up: cover motto uses the resolved department accent (including authored palette override), retaining12.5pt/500. Theme Scripture remains black.
+
+Post-1.0.18 cover citation prefix: em dash followed by one space (— ),10pt/500, right aligned; stored reference text is unchanged.

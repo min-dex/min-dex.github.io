@@ -536,7 +536,7 @@
     const verse=group(0,'verse'),copy=value('verse').trim(),citation=copy.match(/(?:\n\s*[—–-]?\s*|\s*[（(])((?:[가-힣]+)\s*\d+\s*:\s*[\d–—:a-z,\s-]+)[)）]?$/);
     const body=citation?copy.slice(0,citation.index).trim():copy;
     const end=150+text(verse,'verse',body,158.5,150,100,12.5,'left',700,false,180);
-    if(citation){const ref=citation[1].trim().replace(/^창\s/,'창세기 ');text(verse,'verse',ref,158.5,end+2.5,128.5,10,'right',500,false,187.5);}
+    if(citation){const ref=citation[1].trim().replace(/^창\s/,'창세기 ');text(verse,'verse','— '+ref,158.5,end+2.5,128.5,10,'right',500,false,187.5);}
     // Back page uses measured content and distributes only the remaining space.
     let y=heading(0,'eventsTitle','교회 일정',10,25,month('eventsMonth'),'eventsMonth');
     const events=group(0,'events');
