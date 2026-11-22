@@ -543,7 +543,7 @@ function updateServiceItemField(field, options = {}) {
       item.memo = serializeServiceItemMemo(parsed);
     }
   }
-  if (key === "background_video" || key === "memo_note" || key === "slide_overrides" || key === "manual_praise_lyrics" || key === "form_hint" || key === "element_type" || key === "component_type" || key === "input_mode" || key === "asset_name" || key === "asset_url" || key === "presenter_role" || key === "auto_advance_at") {
+  if (key === "background_video" || key === "memo_note" || key === "sermon_subtitle" || key === "slide_overrides" || key === "manual_praise_lyrics" || key === "form_hint" || key === "element_type" || key === "component_type" || key === "input_mode" || key === "asset_name" || key === "asset_url" || key === "presenter_role" || key === "auto_advance_at") {
     applyServiceItemMetadataField(item, field, service);
   }
   if (key === "label") {
@@ -635,6 +635,7 @@ function applyServiceItemMetadataField(item, field, service) {
   // Portable source restores metadata without the interactive praise-mode conversion.
   if (key === "input_mode") parsed.inputMode = field.tagName === "SELECT" ? serviceInputModeValue(field.value) : normalizeServiceInputMode(field.value);
   if (key === "memo_note") parsed.note = field.value;
+  if (key === "sermon_subtitle") parsed.sermonSubtitle = String(field.value || "").replace(/\s*\n\s*/g, " ").trim();
   if (key === "background_video") {
     const presentation = { ...(parsed.presentation || {}) };
     presentation.backgroundVideo = field.value;

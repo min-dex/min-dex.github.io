@@ -453,6 +453,9 @@ function presenterElementSlideFromMemoCore(item, section, index, memo, displayTe
     const compactLabel = compactSearchValue(safeLabel);
     const orderTitle = String(section.sectionHeading || section.sectionTitle || section.sectionLabel || "").trim();
     const sermonTitle = section.sectionKey === "sermon" || ["설교", "설교제목"].includes(compactLabel);
+    const sermonSubtitle = sermonTitle && !presenterServiceUsesChromakey(service)
+      ? String(memo.sermonSubtitle || "").trim()
+      : "";
     const contentTitle = sermonTitle
       ? presenterSermonContentTitle(displayText)
       : compactLabel === "특송"
@@ -483,6 +486,7 @@ function presenterElementSlideFromMemoCore(item, section, index, memo, displayTe
       // Keep the presentation role on the slide. Re-inferring this from a
       // section label later can route a sermon title through a split layout.
       titlePresentation: sermonTitle ? "sermon" : "",
+      sermonSubtitle,
       marker: "",
       text: hasThreeParts
         ? cleanList([orderTitle, contentTitle, threePartAssignee]).join("\n")
@@ -4455,13 +4459,6 @@ function renderPresenterImageSlide(slide, options = {}) {
   return `<img class="presenter-image${referenceClass}" src="${escapeAttr(source)}" alt="" decoding="${decoding}" loading="${loading}" fetchpriority="${fetchPriority}" draggable="false" />`;
 }
 
-function presenterOrderDisplayLabel(value = "") {
-  const label = String(value || "");
-  // Hide sequence numbers only in output headings, never in stored labels/content.
-  return label.replace(/^([가-힣A-Za-z][가-힣A-Za-z ]*?)\s*(?:\d+|[①-⑳㉑-㉟㊱-㊿])(?:\s*[·–~-]\s*(?:\d+|[①-⑳㉑-㉟㊱-㊿]))*\s*$/u,
-    (_, name) => name.trim());
-}
-
 function renderPresenterReadingAssigneeTab(slide) {
   const assignee = isPresenterScriptureReadingSource(slide)
     ? cleanPresenterAssignee(slide.scriptureReadingAssignee)
@@ -4478,15 +4475,16 @@ function renderPresenterTitleAssigneeSlide(slide) {
   const rawContentTitle = String(slide.contentTitle || "").trim();
   const contentTitle = PRESENTER_SONG_NOTE_PATTERN.test(rawContentTitle) ? formatPresenterSongTitleText(rawContentTitle) : rawContentTitle;
   const contentMarkup = PRESENTER_SONG_NOTE_PATTERN.test(contentTitle) ? renderPresenterSongText(contentTitle, slide) : escapeHtml(contentTitle);
+  const sermonSubtitle = String(slide.sermonSubtitle || "").trim();
   const titleChars = presenterLineCharEstimate(title);
   const assigneeChars = presenterLineCharEstimate(assignee);
   const orderChars = presenterLineCharEstimate(orderTitle);
   const contentChars = presenterLineCharEstimate(contentTitle);
-  if (presenterTitleAssigneeIsSermon(slide) && contentTitle && assignee) {
+  if (presenterTitleAssigneeIsSermon(slide) && contentTitle) {
     return `
       <div class="presenter-slide-text presenter-title-assignee presenter-title-assignee--sermon">
-        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}">${contentMarkup}</span>
-        <span class="presenter-title-assignee-person" style="--line-chars: ${escapeAttr(assigneeChars)}">${escapeHtml(assignee)}</span>
+        <span class="presenter-title-assignee-content" style="--line-chars: ${escapeAttr(contentChars)}"><span>${contentMarkup}</span>${sermonSubtitle ? `<small class="presenter-sermon-subtitle">${escapeHtml(sermonSubtitle)}</small>` : ""}</span>
+        ${assignee ? `<span class="presenter-title-assignee-person" style="--line-chars: ${escapeAttr(assigneeChars)}">${escapeHtml(assignee)}</span>` : ""}
       </div>
     `;
   }

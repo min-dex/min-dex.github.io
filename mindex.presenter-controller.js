@@ -208,11 +208,10 @@ function scrollPresenterBoardToIndex(serviceId, index, options = {}) {
       : thumb.closest(".svc-slide-thumb-wrap") || thumb;
     const viewportRect = viewport.getBoundingClientRect();
     const thumbRect = scrollTarget.getBoundingClientRect();
-    const fullyVisible = thumbRect.top >= viewportRect.top + (focusBoard ? 0 : presenterViewportStickyTopOffset(viewport))
-      && thumbRect.bottom <= viewportRect.bottom
-      && thumbRect.left >= viewportRect.left
-      && thumbRect.right <= viewportRect.right;
-    if (fullyVisible && !options.force) return true;
+    const visibleTop = viewportRect.top + (focusBoard ? 0 : presenterViewportStickyTopOffset(viewport));
+    const partiallyVisible = thumbRect.bottom > visibleTop && thumbRect.top < viewportRect.bottom
+      && thumbRect.right > viewportRect.left && thumbRect.left < viewportRect.right;
+    if (partiallyVisible && !options.force) return true;
     if (focusBoard) {
       focusBoard.scrollLeft += thumbRect.left - viewportRect.left - (viewportRect.width - thumbRect.width) / 2;
       return true;
@@ -266,11 +265,10 @@ function scrollPresenterBoardToServiceItem(serviceId, itemIndex, options = {}) {
     }
     const viewportRect = viewport.getBoundingClientRect();
     const subgroupRect = subgroup.getBoundingClientRect();
-    const fullyVisible = subgroupRect.top >= viewportRect.top + presenterViewportStickyTopOffset(viewport)
-      && subgroupRect.bottom <= viewportRect.bottom
-      && subgroupRect.left >= viewportRect.left
-      && subgroupRect.right <= viewportRect.right;
-    if (fullyVisible && !options.force) return true;
+    const visibleTop = viewportRect.top + presenterViewportStickyTopOffset(viewport);
+    const partiallyVisible = subgroupRect.bottom > visibleTop && subgroupRect.top < viewportRect.bottom
+      && subgroupRect.right > viewportRect.left && subgroupRect.left < viewportRect.right;
+    if (partiallyVisible && !options.force) return true;
     scrollWithinPresenterViewport(subgroup, {
       block: options.block || "start",
       behavior: options.behavior || "auto",

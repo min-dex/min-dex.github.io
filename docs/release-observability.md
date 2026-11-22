@@ -2,6 +2,11 @@
 
 ## 격리 설치 시험의 종료
 
+공개된 이전 버전의 seed/restart/upgrade 시험도 같은 소유권 확인 종료 helper를
+사용한다. 기존 보존 단언과 proof 기록은 그대로 두고, 이전 버전 창이 닫히며
+evaluate 응답이 유실되는 경우에는 native PID 종료와 launcher 정상 종료를
+독립 확인한다. 이전 버전 fixture도 실제 사용자 앱을 닫을 권한은 없다.
+
 설치 시험은 종료 전에 token·marker·정확한 userData 경로·main PID와 네트워크
 차단 상태를 확인한다. pinned Playwright는 Windows에서 cmd.exe를 launch하므로
 같은 PID 또는 Windows에 한해 launcher의 직계 자식 PID만 인정한다. 다른 부모나

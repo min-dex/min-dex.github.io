@@ -1,4 +1,11 @@
 /* Input rows and Media management share the actual media clocks. */
+.service-outline-badge {
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  line-height: 14px;
+  padding: 0;
+}
 .svc-deck-controls, .svc-deck-playback { display:flex; flex-wrap:wrap; align-items:center; gap:5px 10px; min-width:0; }
 .svc-deck-controls { flex:1 1 auto; }
 .svc-deck-status { color:var(--ink-3); font-size:var(--ui-meta-size); white-space:nowrap; }

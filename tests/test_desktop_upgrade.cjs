@@ -1,5 +1,6 @@
 // Disposable TEST installation only; all records and credentials are synthetic.
 const { _electron }=require('playwright');
+const { closeIsolatedElectron }=require('./helpers/close-isolated-electron.cjs');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const hash=value=>crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
 async function main(){
@@ -213,14 +214,8 @@ async function main(){
   // Preservation assertions above intentionally leave a recovered dirty editor.
   // Destroy only this test app's windows so native beforeunload cannot wait for
   // human input. Persisted fixture records remain available for the restart test.
-  await app.evaluate(({app,BrowserWindow},token)=>{
-   const path=process.getBuiltinModule('node:path'),fs=process.getBuiltinModule('node:fs'),os=process.getBuiltinModule('node:os');
-   const expected=path.join(fs.realpathSync(os.tmpdir()),'mindex-isolated-upgrade-'+token,'userData');
-   if(!globalThis.__mindexTestIsolation?.networkBlocked||app.getPath('userData')!==expected)throw Error('Requires owned isolated upgrade cleanup');
-   for(const window of BrowserWindow.getAllWindows())window.destroy();
-  },record.token);
-  await app.close();
+  await closeIsolatedElectron(app,record.token);
   console.log('PASS isolated upgrade window cleanup: '+phase);
  }
 }
-main().catch(error=>{console.error(error);process.exitCode=1;});
+main().catch(error=>{console.error(error);if(process.env.GITHUB_ACTIONS==='true')process.exit(1);else process.exitCode=1;});
