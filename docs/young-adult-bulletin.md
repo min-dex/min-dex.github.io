@@ -738,3 +738,7 @@ identical writing-rule counts and Y coordinates across both departments.
 Cover date/issue and liturgical occasion use 12.5pt in all Swiss designs.
 Recurring footer notices are bottom-aligned 10mm above the staff divider;
 remaining space is distributed above the notices, with overflow still blocked.
+
+Inside p2 uses the top bar and top-left church label; p3 uses the bottom bar
+and bottom-right full department name: RIA 청년부 / TOV 청소년부 / 꿈꾸는 어린이부.
+Outside-page bars and labels are unchanged.

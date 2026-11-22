@@ -31,6 +31,7 @@ try:
      if(JSON.stringify(doc)!==before)throw Error('Renderer changed source');
      const restored={};B.applyStored(restored,{revision:1,...B.storedValue(doc)});
      if(JSON.stringify(restored.fields)!==JSON.stringify(doc.fields)||restored.settings.design!==doc.settings.design)throw Error('Persistence lost data');
+     const insideBars=[...r.pages[1].querySelectorAll('[data-swiss-bar]')].map(e=>[+e.getAttribute('x'),+e.getAttribute('y')]);if(JSON.stringify(insideBars)!==JSON.stringify([[10,10],[158.5,198.75]]))throw Error('Inside bar positions');if(r.pages[1].querySelector('[data-frame-id=insideBrand]').textContent!==({'young-adult':'RIA 청년부',youth:'TOV 청소년부',children:'꿈꾸는 어린이부'}[department]))throw Error('Full department name');
      const widths=r.pages.flatMap(p=>[...p.querySelectorAll('[data-swiss-bar]')].map(e=>+e.getAttribute('width')));if(widths.length!==6||widths.some(w=>w!==128.5))throw Error('Bars');
      const fonts=r.pages.flatMap(p=>[...p.querySelectorAll('tspan')].map(e=>Math.round(+e.getAttribute('font-size')*72/25.4*10)/10));if(fonts.some(n=>![8,10,12.5,15,20,40].includes(n)))throw Error('Font token '+fonts);
      const text=r.pages.map(p=>p.textContent).join(' ');for(const part of ['말씀을 따라','함께','광고 담당'])if(!text.includes(part))throw Error('Missing linked '+part);
