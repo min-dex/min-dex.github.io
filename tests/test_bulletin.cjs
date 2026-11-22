@@ -265,3 +265,10 @@ for(const marker of ['◇','◆','◈']){
  assert.match(B.fieldValue(sourceOnly,'notices'),/오전 10시 30분/);
 }
 console.log('PASS diamond recurring notices move to footer for old fields and snapshots, without duplicates or stored mutations');
+
+const cellCalendar=[{date:'2026-11-08',church_schedule:'청년부 자율 셀 모임 / 기도회'},{date:'2026-11-15',church_schedule:'연합예배 / 청년부 연합 셀 모임'}];
+const cellRoster=monthlyView(cellCalendar,'2026-11-22');
+assert.equal(cellRoster.prayers.find(r=>r.date==='2026-11-08').person,'(자율 셀 모임)');
+assert.equal(cellRoster.prayers.find(r=>r.date==='2026-11-15').person,'(연합 셀 모임)');
+assert.equal(monthlyView(cellCalendar,'2026-11-22',{},[],'children').prayers.find(r=>r.date==='2026-11-08').person,'미정');
+console.log('PASS calendar-linked cell gathering labels and department isolation');

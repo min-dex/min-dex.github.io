@@ -799,3 +799,5 @@ The complete logo/motto block is vertically centered between37.5mm (metadata
 end) and150mm (theme Scripture start). The measured motto height, including
 wrapped lines, determines equal free space above and below; the5mm internal gap
 is preserved. This supersedes the fixed logo-bottom position above.
+
+Young-adult monthly roster recognizes calendar 청년부 자율 셀 모임 and 연합 셀 모임 alongside 야외예배. Service exceptions remain authoritative; other departments are unchanged. Swiss roster gives the label38.25mm and applies the existing80% parenthesis rule.

@@ -72,7 +72,8 @@
     const nextDate=next.toISOString().slice(0,10),prayers=[];
     do {
       const day=cursor.toISOString().slice(0,10),row=calendar.find(r=>r.date===day)||{};
-      const exception=services.find(r=>r.date===day&&r.noGathering)||(department==="young-adult"&&/청년부\s*야외예배/.test(row.church_schedule||"")?{label:"야외예배"}:null);
+      const gathering=department==="young-adult"&&String(row.church_schedule||"").match(/청년부\s*(야외예배|(?:자율|연합)\s*셀\s*모임)/);
+      const exception=services.find(r=>r.date===day&&r.noGathering)||(gathering?{label:gathering[1].replace(/\s*셀\s*모임/," 셀 모임")}:null);
       prayers.push({date:day,person:exception?`(${exception.label||"집회 없음"})`:clean(row[department==="youth"?"youth_prayer":department==="children"?"children_prayer":"young_adult_prayer"])||"미정",next:day===nextDate});
       cursor.setUTCDate(cursor.getUTCDate()+7);
     } while(prayers[prayers.length-1].date.slice(0,7)===rosterMonth);
@@ -601,7 +602,7 @@
         outline(start,135);heading(1,'reflectionTitle','받은 은혜',158.5,142.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,155.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,155.5,185);
       }else{
         outline(50,135);const prayers=doc.source.prayers||[],count=Math.ceil(prayers.length/2),py=185-count*7.5;
-        heading(1,'prayersTitle','예배 위원',158.5,py-13,month('rosterMonth'),'prayersMonth');const g=group(1,'prayers');prayers.forEach((r,i)=>{const x=158.5+(i>=count?69.25:0),yy=py+(i%count)*7.5,sub=svg('g');g.append(sub);text(sub,'prayers',shortDate(r.date),x,yy,29,12.5);text(sub,'prayers',r.person==='미정'?'—':r.person,x+30,yy,29.25,12.5,'right');if(r.date.slice(0,7)!==doc.source.rosterMonth)sub.querySelectorAll('text').forEach(e=>e.setAttribute('fill','#808080'));});
+        heading(1,'prayersTitle','예배 위원',158.5,py-13,month('rosterMonth'),'prayersMonth');const g=group(1,'prayers');prayers.forEach((r,i)=>{const x=158.5+(i>=count?69.25:0),yy=py+(i%count)*7.5,sub=svg('g');g.append(sub);text(sub,'prayers',shortDate(r.date),x,yy,20,12.5);text(sub,'prayers',r.person==='미정'?'—':r.person,x+21,yy,38.25,12.5,'right',500,true);if(r.date.slice(0,7)!==doc.source.rosterMonth)sub.querySelectorAll('text').forEach(e=>e.setAttribute('fill','#808080'));});
       }
     }
     if(mode==='layout')for(const f of doc.frames){const g=groups.get(f.id);if(!g)continue;g.append(svg('rect',{x:f.x,y:f.y,width:f.w,height:f.h,fill:'transparent',stroke:f.id===selected?accent:'none','data-frame-hit':f.id}));}
