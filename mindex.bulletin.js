@@ -590,7 +590,7 @@
       heading(1,'notesTitle','설교 노트',158.5,25);const g=group(1,'sermon');text(g,'sermon',doc.source.sermon,158.5,38,78.5,15,'left',700,false,50);text(g,'sermon',Object.hasOwn(doc.fields,'sermonReference')?value('sermonReference'):doc.source.scripture,242,39,45,10,'right',500,false,50);
       if(department==='youth'){
         let start=50;if(value('scriptureNote')){start+=text(group(1,'scriptureNote'),'scriptureNote',value('scriptureNote'),158.5,start,128.5,12.5,'left',500,false,75)+5;}
-        outline(start,127.5);heading(1,'reflectionTitle','받은 은혜',158.5,142.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,155.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,155.5,185);
+        outline(start,135);heading(1,'reflectionTitle','받은 은혜',158.5,142.5);const r=group(1,'reflection');if(value('reflection'))text(r,'reflection',value('reflection'),158.5,155.5,128.5,12.5,'left',500,false,185);else lines(r,158.5,155.5,185);
         const next=Object.hasOwn(doc.fields,'nextPrayer')?value('nextPrayer'):doc.source.prayers?.find(r=>r.next)?.person||'';text(group(1,'nextPrayer'),'nextPrayer',next?(/^다음번 기도/.test(next)?next:'다음번 기도 · '+next):'',10,152.5,128.5,10);
         heading(1,'pointTitle','예배 포인트',10,165);text(group(1,'worshipPoint'),'worshipPoint',value('worshipPoint'),10,178,128.5,12.5,'left',500,false,185);
       }else{

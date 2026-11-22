@@ -730,3 +730,7 @@ padding. All cells share an explicit baseline 4.5mm below their line-slot top,
 without global baseline snapping; shorter cells are vertically centered.
 Sermon writing rules start 10mm below the point text box and repeat every 10mm.
 The 2/3/4-point layouts allocate equal writing heights per item.
+
+Youth and young-adult sermon notes share the 50–135mm outline area when no
+additional scripture note is authored. Identical 2/3/4-point content must yield
+identical writing-rule counts and Y coordinates across both departments.
