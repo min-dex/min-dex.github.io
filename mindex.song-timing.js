@@ -212,33 +212,39 @@
     return stored ? {...stored, url:stored.audioUrl, databaseTiming:true} : null;
   };
   const audioFormOwnerId = form => String(form?._presenterSourceFormId || form?.id || '');
+  const audioFormOwnerKey = form => JSON.stringify([
+    String(form?.part_type || form?.type || form?.label || form?.name || '').trim().toLowerCase(),
+    form?.part_number ?? null,
+    String(form?.part_variant || '').trim().toLowerCase(),
+    audioText(form?.lyrics || form?.text || ''),
+  ]);
   function audioSetFormSequence(profile, version) {
     const sourceForms = version?.forms || [];
     const ranges = [];
     let offset = 0;
     for (const form of sourceForms) {
       const length = audioText(form?.lyrics || '').length;
-      ranges.push({id:audioFormOwnerId(form),start:offset,end:offset+length});
+      ranges.push({id:audioFormOwnerId(form),key:audioFormOwnerKey(form),start:offset,end:offset+length});
       offset += length;
     }
     const sequence = [];
     const blank = '__audio_blank__';
-    let lastOwner = '';
+    let lastOwnerId = '';
     let previousRangeStart = -1;
     for (const form of profile?.forms || []) {
       if (form?._presenterBlank) { sequence.push(blank); continue; }
       if (!Array.isArray(form?.audioSourceRange)) {
-        const id = audioFormOwnerId(form);
-        if (!id) return null;
-        sequence.push(id); lastOwner = id; previousRangeStart = -1;
+        const key = audioFormOwnerKey(form);
+        if (!audioFormOwnerId(form) || !key) return null;
+        sequence.push(key); lastOwnerId = audioFormOwnerId(form); previousRangeStart = -1;
         continue;
       }
       const [start,end] = form.audioSourceRange;
-      const owners = ranges.filter(range => range.id && start < range.end && end > range.start).map(range => range.id);
+      const owners = ranges.filter(range => range.id && start < range.end && end > range.start);
       if (!owners.length) return null;
-      owners.forEach((id,index) => {
-        if (index || lastOwner !== id || start <= previousRangeStart) sequence.push(id);
-        lastOwner = id;
+      owners.forEach((owner,index) => {
+        if (index || lastOwnerId !== owner.id || start <= previousRangeStart) sequence.push(owner.key);
+        lastOwnerId = owner.id;
       });
       previousRangeStart = start;
     }
@@ -248,7 +254,7 @@
     if (!validSet(profile, version)) return false;
     const blank = '__audio_blank__';
     const expected = fallback.filter(form => !form?._presenterTitle)
-      .map(form => form?._presenterBlank ? blank : audioFormOwnerId(form));
+      .map(form => form?._presenterBlank ? blank : audioFormOwnerKey(form));
     const actual = audioSetFormSequence(profile, version);
     if (!expected.length || !expected.every(Boolean) || !Array.isArray(actual)) return false;
     let cursor = 0;

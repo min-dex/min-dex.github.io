@@ -27,7 +27,7 @@ require('../mindex.song-timing.js');const T=global.MindexSongTiming;
  const originalForms=version.audio_set.forms;
  version.audio_set.forms=[{id:'page',lyrics:'가\n사',audioSourceRange:[0,2]}];
  assert.equal(T.formsFor(item,song,version,version.forms)[0].lyrics,'가\n사');
- const changedPlan=[{id:'other',lyrics:'가사'}];
+ const changedPlan=[{id:'other',part_type:'Chorus',lyrics:'다른 가사'}];
  assert.deepEqual(T.formsFor(item,song,version,changedPlan),changedPlan);
  const sequenceForms=['마라','나타','주예','수여','어서'].map((lyrics,index)=>({id:`part-${index}`,lyrics}));
  const folded=sequenceForms.map(form=>form.lyrics.replace(/[^\p{L}\p{N}]/gu,''));
@@ -41,6 +41,16 @@ require('../mindex.song-timing.js');const T=global.MindexSongTiming;
  audioPages.push({_presenterBlank:true,lyrics:''});
  const sequenceVersion={forms:sequenceForms,audio_set:{...version.audio_set,forms:audioPages,sourceSignature:T.sourceSignature({forms:sequenceForms})}};
  assert.equal(T.formsFor(item,song,sequenceVersion,sequenceForms).length,audioPages.length,'split pages and instrumental blanks keep reviewed cues');
+ const repeatedUnique=[
+  {id:'v-a',part_type:'Verse',part_number:1,lyrics:'마라나타'},
+  {id:'c-a',part_type:'Chorus',part_number:1,lyrics:'주 예수여'},
+  {id:'v-b',part_type:'Verse',part_number:1,lyrics:'마라나타'},
+  {id:'c-b',part_type:'Chorus',part_number:1,lyrics:'주 예수여'},
+  {id:'c-c',part_type:'Chorus',part_number:1,lyrics:'주 예수여'},
+ ];
+ const repeatedAudio={...version.audio_set,forms:repeatedUnique,sourceSignature:T.sourceSignature({forms:repeatedUnique})};
+ const repeatedPlan=[repeatedUnique[0],repeatedUnique[1],repeatedUnique[0],repeatedUnique[1],repeatedUnique[1]];
+ assert.equal(T.formsFor(item,song,{forms:repeatedUnique,audio_set:repeatedAudio},repeatedPlan).length,5,'equivalent repeated forms do not depend on unique DB ids');
  const crossForms=sequenceForms.slice(0,2), crossLyrics=crossForms.map(form=>form.lyrics).join('');
  const crossVersion={forms:crossForms,audio_set:{...version.audio_set,forms:[{lyrics:crossLyrics,audioSourceRange:[0,folded[0].length+folded[1].length]}],sourceSignature:T.sourceSignature({forms:crossForms})}};
  assert.equal(T.formsFor(item,song,crossVersion,crossForms).length,1,'one reviewed page may span adjacent source forms');
