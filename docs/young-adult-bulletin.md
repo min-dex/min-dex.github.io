@@ -821,3 +821,11 @@ Motto is12.5pt/500,7.5mm per line,5mm below logo. Total height is50+5+7.5N.
 Center the block in37.5–150mm: one line starts62.5mm (25mm free each side),
 two lines start58.75mm (21.25mm free each side). Positions lie on1.25mm grid.
 This supersedes measured-font-height centering and width-limited logo boxes.
+
+## Swiss 반복 행 기준선 · 2026-11-22
+
+Swiss 세 부서의 글자 기준선은 mm 좌표에 글자 크기(pt→mm)를 더해 고정한다.
+공용 구형 pt 격자로 다시 올림하지 않는다. 예배 위원 7.5mm, 잠잠성경 6.25mm,
+섬김이 7.5mm의 행 간격과 같은 행 좌우 기준선이 그대로 유지된다. 교회 일정의
+날짜·시간 혼합 줄도 동일 기준선을 사용한다. 예배 순서의 기존 4.5mm 기준선과
+필기 줄 규칙은 유지한다. 저장 원문·이전 양식은 변경하지 않는다.

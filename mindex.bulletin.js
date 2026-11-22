@@ -497,7 +497,7 @@
       if(paren){const stack=[],pairs=[];chars.forEach((c,i)=>{if('（('.includes(c.text))stack.push(i);else if('）)'.includes(c.text)&&stack.length){const start=stack.at(-1);if((chars[start].text==='('&&c.text===')')||(chars[start].text==='（'&&c.text==='）')){stack.pop();pairs.push([start,i]);}}});for(let i=0;i<chars.length;i++)if(pairs.some(([a,b])=>i>=a&&i<=b))chars[i].size=size*.8;}
       return chars;
     }
-    function text(g,id,t,x,y,w=128.5,size=12.5,align='left',weight=500,paren=false,max=210,exactBaseline=false){
+    function text(g,id,t,x,y,w=128.5,size=12.5,align='left',weight=500,paren=false,max=210,exactBaseline=true){
       if(!t)return 0;
       const leading=size===10||size===8?5:size===12.5?6.25:size*1.2/MM;
       const h=writeStyled(g,runs(String(t),size,paren).map(r=>({...r,weight:r.weight===700?700:weight})),{x,y,w,h:Math.max(0,max-y),baselineY:exactBaseline?y+size/MM:undefined,size,leading:leading*MM,weight,align,color:'#171717',family:'MindexBulletin'},issues,id);
@@ -555,7 +555,7 @@
       const split=line.includes('|')?line.split('|'):line.split(/\s{2,}/),a=split.shift(),b=split.join(' ');
       const timeAt=a.search(/\s+(?=(?:오전|오후|새벽|저녁|낮|평일|매일|\d{1,2}:))/),date=timeAt<0?a:a.slice(0,timeAt),time=timeAt<0?'':a.slice(timeAt);
       const gap=time?' ':'',timeText=time.trim(),breakTime=time&&textWidth(date+gap,12.5,500)+textWidth(timeText,10,500)>(b?63:128.5);
-      const left=writeStyled(events,[...runs(date+(breakTime?'':gap),12.5),...runs((breakTime?'\n':'')+timeText,10)],{x:10,y,w:b?63:128.5,h:210-y,size:12.5,leading:6.25*MM,weight:500,align:'left',color:'#171717',family:'MindexBulletin'},issues,'events');
+      const left=writeStyled(events,[...runs(date+(breakTime?'':gap),12.5),...runs((breakTime?'\n':'')+timeText,10)],{x:10,y,w:b?63:128.5,h:210-y,baselineY:y+12.5/MM,size:12.5,leading:6.25*MM,weight:500,align:'left',color:'#171717',family:'MindexBulletin'},issues,'events');
       const h=Math.max(6.25,left,b?text(events,'events',b,75.5,y,63,12.5,'right'):0);y+=h+2.5;
     }
     const eventsEnd=y-2.5;
