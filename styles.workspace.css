@@ -6052,7 +6052,8 @@ body[data-theme="light"] .svc-board-subgroup-audio audio { color-scheme:light; }
 /* Peer presenter controls share the standard command rhythm. */
 .svc-presenter-toolbar .svc-music-player { height:35px; padding:0; }
 .svc-presenter-toolbar .svc-music-name,
-.svc-presenter-toolbar .svc-presenter-help > summary { box-sizing:border-box; height:35px; min-height:35px; border:0; border-radius:var(--r); background:var(--ui-surface-panel); color:var(--ink-3); font-weight:700; }
+.svc-presenter-toolbar .svc-presenter-help > summary { box-sizing:border-box; height:35px; min-height:35px; border:0; border-radius:var(--r); background:var(--ui-surface-panel); color:var(--ink-3); }
+.svc-presenter-toolbar .svc-music-name { padding:0 10px; font-weight:600; }
 .svc-presenter-toolbar .svc-music-name:is(:hover, :focus-visible),
 .svc-presenter-toolbar .svc-presenter-help > summary:is(:hover, :focus-visible) { background:var(--ui-surface-field); color:var(--ink-2); }
 #servicePresenterControls .svc-presenter-toolbar .svc-presenter-help > summary:is(:hover, :focus-visible) { color:var(--ink-2); }
