@@ -5695,6 +5695,12 @@ the complete item index when that reference is stale. A selected controller row
 or thumbnail that is even partly visible stays in place; automatic navigation
 must not repeatedly center it. Explicit jump commands may still force alignment.
 
+2026-11-25 app follow-up: one outline click resolves the normalized service item
+and slide deck once. Target selection, deferred board hydration and nearest-scroll
+reuse that exact context instead of recalculating the same hierarchy/signature at
+each step. Stale references still take the existing guarded fallback; slide order,
+output state, drafts and saved worship data are unchanged.
+
 Sermon title elements accept one authored subtitle line in their existing config.
 Only clean/fullscreen sermon-title slides show it, directly below the main title.
 Chromakey output, other elements and empty subtitles reserve no space. Preserve

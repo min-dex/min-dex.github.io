@@ -1,10 +1,10 @@
-function serviceOutlineSlideTarget(serviceOutlineItem) {
+function serviceOutlineSlideTarget(serviceOutlineItem, options = {}) {
   const serviceId = serviceOutlineItem?.dataset?.serviceOutlineService || state.selectedServiceId;
   const rawItemIndex = Number(serviceOutlineItem?.dataset?.serviceOutlineItemIndex);
   const rawItemId = String(serviceOutlineItem?.dataset?.serviceOutlineItemId || "").trim();
   const slideValue = String(serviceOutlineItem?.dataset?.serviceOutlineSlide || "").trim();
-  const slides = presenterSlidesForService(serviceId);
-  const resolved = resolveServiceOutlineItem(serviceId, rawItemIndex, rawItemId);
+  const slides = options.slides || presenterSlidesForService(serviceId);
+  const resolved = options.resolved || resolveServiceOutlineItem(serviceId, rawItemIndex, rawItemId);
   const currentItem = resolved?.item || null;
   const itemIndex = resolved?.index ?? rawItemIndex;
   let slideIndex = -1;

@@ -1666,8 +1666,9 @@ function handleServiceOutlineSlideClick(serviceOutlineItem) {
   const itemIndex = resolved?.index ?? -1;
   if (!serviceId || !item) return;
 
-  const target = serviceOutlineSlideTarget(serviceOutlineItem);
-  const targetSlide = target ? presenterSlidesForService(serviceId)[target.slideIndex] : null;
+  const slides = presenterSlidesForService(serviceId);
+  const target = serviceOutlineSlideTarget(serviceOutlineItem, { resolved, slides });
+  const targetSlide = target ? slides[target.slideIndex] : null;
   if (!target || !presenterSlideIsNavigable(targetSlide)) {
     // Empty optional items still have an editor anchor, even though they do not
     // contribute a slide to output navigation.
@@ -1681,6 +1682,8 @@ function handleServiceOutlineSlideClick(serviceOutlineItem) {
       force: true,
       behavior: "auto",
       block: "start",
+      item,
+      slides,
     });
     return;
   }
@@ -1688,14 +1691,20 @@ function handleServiceOutlineSlideClick(serviceOutlineItem) {
     && target.itemIndex >= 0
     && state.selectedServiceItemIndex !== target.itemIndex;
   if (Number.isFinite(target.itemIndex) && target.itemIndex >= 0) state.selectedServiceItemIndex = target.itemIndex;
-  selectPresenterBoardSlide(target.serviceId, target.slideIndex);
+  selectPresenterBoardSlide(target.serviceId, target.slideIndex, { slides });
   syncServiceOutlineSelection(serviceOutlineItem);
   patchServiceOutlineActiveState(target.serviceId);
   if (selectionChanged) {
     const outline = refs.songList?.querySelector(".service-outline-list");
     if (!outline?.contains(serviceOutlineItem)) renderServiceList();
   }
-  if (!scrollPresenterBoardToServiceItem(target.serviceId, target.itemIndex, { force: false, behavior: "auto", block: "nearest" })) {
+  if (!scrollPresenterBoardToServiceItem(target.serviceId, target.itemIndex, {
+    force: false,
+    behavior: "auto",
+    block: "nearest",
+    item,
+    slides,
+  })) {
     scrollPresenterBoardToIndex(target.serviceId, target.slideIndex, { force: false, behavior: "auto", target: "subgroup", block: "nearest" });
   }
 }

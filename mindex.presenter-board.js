@@ -188,10 +188,10 @@ function serviceOutlineItemForIndex(serviceId, itemIndex) {
   )) || null;
 }
 
-function hydrateDeferredPresenterBoardSectionForServiceItem(root, serviceId, itemIndex) {
-  const item = serviceOutlineItemForIndex(serviceId, itemIndex);
+function hydrateDeferredPresenterBoardSectionForServiceItem(root, serviceId, itemIndex, options = {}) {
+  const item = options.item || serviceOutlineItemForIndex(serviceId, itemIndex);
   if (!item) return false;
-  const slides = presenterSlidesForService(serviceId);
+  const slides = options.slides || presenterSlidesForService(serviceId);
   const itemId = String(item.id || "").trim();
   const groupIndex = groupPresenterSlidesBySection(slides, serviceId).findIndex((group) =>
     (group.subgroups || []).some((subgroup) => String(subgroup.id || "") === itemId)
@@ -225,8 +225,8 @@ function selectPresenterBoardSlide(serviceId, slideIndex, options = {}) {
   if (state.presenter.outputWindow?.closed) stopPresenterOutput(state.presenter.serviceId);
   const index = Number(slideIndex);
   if (!serviceId || !Number.isFinite(index) || index < 0) return;
-  const slides = presenterSlidesForService(serviceId);
-  const elementKey = options.elementKey || presenterSlideElementKey(serviceId, index);
+  const slides = options.slides || presenterSlidesForService(serviceId);
+  const elementKey = options.elementKey || presenterSlideElementGroupKey(slides[index]) || `slide:${index}`;
   const current = state.presenterBoardSelection || {};
   const sameElement = current.serviceId === serviceId && current.elementKey === elementKey;
   const anchorIndex = Number.isFinite(Number(options.anchorIndex))

@@ -239,7 +239,8 @@ function findPresenterBoardSubgroupByItemIndex(root, serviceId, itemIndex) {
 function scrollPresenterBoardToServiceItem(serviceId, itemIndex, options = {}) {
   const targetIndex = Number(itemIndex);
   if (!serviceId || !Number.isInteger(targetIndex) || targetIndex < 0) return false;
-  if (!serviceOutlineItemForIndex(serviceId, targetIndex)) return false;
+  const item = options.item || serviceOutlineItemForIndex(serviceId, targetIndex);
+  if (!item) return false;
   const run = () => {
     const root = document.getElementById("servicePresenterControls");
     if (!root?.isConnected) return false;
@@ -249,7 +250,10 @@ function scrollPresenterBoardToServiceItem(serviceId, itemIndex, options = {}) {
     if (!subgroup) {
       const overflowAnchor = viewport.style.overflowAnchor;
       viewport.style.overflowAnchor = "none";
-      if (!hydrateDeferredPresenterBoardSectionForServiceItem(root, serviceId, targetIndex)) {
+      if (!hydrateDeferredPresenterBoardSectionForServiceItem(root, serviceId, targetIndex, {
+        item,
+        slides: options.slides,
+      })) {
         viewport.style.overflowAnchor = overflowAnchor;
         return false;
       }

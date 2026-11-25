@@ -50,6 +50,22 @@ try:
               Object.assign(outline.dataset,{serviceOutlineService:sid,serviceOutlineItemIndex:String(itemIndex),serviceOutlineItemId:current.id,serviceOutlineSlide:String(directSlideIndex)});
               const oldMap=buildPresenterSlideItemIndexMap;buildPresenterSlideItemIndexMap=()=>{throw Error('outline rebuilt full slide map')};
               try{check(serviceOutlineSlideTarget(outline)?.slideIndex===directSlideIndex,'outline direct target failed')}finally{buildPresenterSlideItemIndexMap=oldMap}
+              const outlineList=document.createElement('div');outlineList.className='service-outline-list';outlineList.append(outline);refs.songList.replaceChildren(outlineList);
+              const oldSlidesForService=presenterSlidesForService,oldOutlineItems=getServiceOutlineItems,oldItemScroll=scrollPresenterBoardToServiceItem;
+              let slideReads=0,outlineReads=0,reusedScrollContext=false;
+              presenterSlidesForService=(serviceId)=>{slideReads++;return serviceId===sid?liveSlides:oldSlidesForService(serviceId)};
+              getServiceOutlineItems=(candidate)=>{outlineReads++;return oldOutlineItems(candidate)};
+              scrollPresenterBoardToServiceItem=(serviceId,index,options={})=>{
+                reusedScrollContext=serviceId===sid&&index===itemIndex&&options.item?.id===current.id&&options.slides===liveSlides;
+                return true;
+              };
+              try{
+                handleServiceOutlineSlideClick(outline);
+                check(slideReads===1&&outlineReads===1,'outline click repeated normalized reads '+JSON.stringify({slideReads,outlineReads}));
+                check(reusedScrollContext,'outline click discarded resolved context');
+              }finally{
+                presenterSlidesForService=oldSlidesForService;getServiceOutlineItems=oldOutlineItems;scrollPresenterBoardToServiceItem=oldItemScroll;
+              }
               const root=document.createElement('div');root.id='servicePresenterControls';
               const subgroup=document.createElement('div');subgroup.className='svc-board-subgroup';subgroup.dataset.serviceItemIndex=String(itemIndex);root.append(subgroup);document.body.append(root);
               const viewport=refs.detailPane,oldViewportRect=viewport.getBoundingClientRect.bind(viewport),oldSubgroupRect=subgroup.getBoundingClientRect.bind(subgroup),oldScroll=scrollWithinPresenterViewport;let scrollCalls=0;
@@ -65,7 +81,7 @@ try:
               const fallback=screen.querySelector('[data-presenter-action="emergency"]');
               check(fallback?.textContent.includes('배경 없이')&&fallback.title.includes('배경 영상'),'fallback purpose unclear');
               warning.remove();
-              return 'PASS direct outline target, partial visibility, subtitle, warning and fallback';
+              return 'PASS single-pass outline target, partial visibility, subtitle, warning and fallback';
             }""")
             print(engine, result, flush=True)
             browser.close()
