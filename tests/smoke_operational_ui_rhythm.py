@@ -69,6 +69,16 @@ try:
                             assert feedback[0]==feedback[1],(engine,theme,width,feedback)
                             assert feedback[0]['radius']=='5px' and feedback[0]['padding']=='10px 15px',feedback
                             assert feedback[0]['fontSize']=='12px' and feedback[0]['fontWeight']=='600',feedback
+                            help_summary=page.locator('.svc-presenter-toolbar .svc-presenter-help > summary')
+                            help_summary.click()
+                            help_panel=page.locator('.svc-presenter-toolbar .svc-presenter-help-panel')
+                            help_panel.wait_for(state='visible')
+                            help_style=help_panel.evaluate('''e=>{const s=getComputedStyle(e);return {padding:s.padding,radius:s.borderRadius,border:s.borderTopWidth,fontSize:s.fontSize,lineHeight:s.lineHeight,background:s.backgroundColor,shadow:s.boxShadow}}''')
+                            assert help_style['padding']=='15px' and help_style['radius']=='5px' and help_style['border']=='1px',help_style
+                            assert help_style['fontSize']=='12px' and float(help_style['lineHeight'].replace('px',''))==18,help_style
+                            assert help_style['background']!='rgba(0, 0, 0, 0)' and help_style['shadow']!='none',help_style
+                            assert help_panel.evaluate('e=>e.scrollWidth<=e.clientWidth+1'),(engine,theme,width)
+                            help_summary.click()
                         if name=='section':
                             panel=page.locator('[data-presenter-section-editor]');box=panel.bounding_box()
                             assert box and box['x']>=0 and box['x']+box['width']<=width and box['y']>=50 and box['y']+box['height']<=height,box

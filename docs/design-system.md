@@ -293,3 +293,9 @@ their existing native behavior but use the same surface, type and focus grammar.
 
 This foundation applies only to app chrome. Presenter output, artwork and
 bulletin print remain independently authored surfaces.
+
+The refinement pass keeps role-specific sizes but gives interactive shell
+controls one 5px icon/text gap, a 120ms color/surface transition and an immediate
+reduced-motion fallback. Form and presenter help popovers share a 15px inset,
+5px radius, panel surface, border, shadow and 12px label type. Their anchors and
+content remain contextual; this rule only removes visual drift between modules.

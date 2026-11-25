@@ -6,6 +6,43 @@
   --ui-dialog-gap: 10px;
   --ui-notice-padding-block: 10px;
   --ui-notice-padding-inline: 15px;
+  --ui-control-gap: 5px;
+  --ui-motion-fast: 120ms;
+}
+
+/* Shell controls move as one family without changing role-specific geometry. */
+body:not(.presenter-output-body) :is(button, summary, input, textarea, select) {
+  transition: background-color var(--ui-motion-fast) ease,
+    border-color var(--ui-motion-fast) ease,
+    color var(--ui-motion-fast) ease,
+    box-shadow var(--ui-motion-fast) ease;
+}
+body:not(.presenter-output-body) :is(button, summary) { touch-action: manipulation; }
+body:not(.presenter-output-body) :is(.btn, .icon-btn, .reference-new-btn) {
+  box-sizing: border-box;
+  gap: var(--ui-control-gap);
+}
+
+/* Help surfaces share the same inset and visual depth while retaining placement. */
+body:not(.presenter-output-body) :is(.svc-form-help-panel, .svc-presenter-help-panel) {
+  box-sizing: border-box;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--ui-surface-panel);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font-size: var(--ui-label-size);
+  line-height: 1.5;
+}
+body:not(.presenter-output-body) :is(.svc-form-help-panel, .svc-presenter-help-panel) header {
+  gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:not(.presenter-output-body) :is(button, summary, input, textarea, select) {
+    transition-duration: 0ms;
+  }
 }
 
 /* App feedback uses one compact notice grammar. Output and print surfaces are excluded. */
