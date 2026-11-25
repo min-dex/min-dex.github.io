@@ -15,7 +15,7 @@ try:
     if u.path.endswith('/mindex-release.json'):return r.fulfill(json={'version':version[0]})
     if u.path.endswith('/live-update-fixture.html'):
      loads.append(version[0])
-     return r.fulfill(content_type='text/html',body='''<link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.workspace.css"><main id="detailPane"><div data-bulletin-owner></div><textarea id="draft"></textarea><button id="save">저장</button><button id="idle">작업 완료</button></main><script>
+     return r.fulfill(content_type='text/html',body='''<link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/styles.workspace.css"><link rel="stylesheet" href="/styles.shell-foundation.css"><main id="detailPane"><div data-bulletin-owner></div><textarea id="draft"></textarea><button id="save">저장</button><button id="idle">작업 완료</button></main><script>
       window.MINDEX_RELEASE="'''+version[0]+'''";
       const state={},presenterPptxImports=new Set(),bulletinTabSessions=new Map([['hidden',new Map([['other',{dirty:true}]])]]);
       let dirty=true,busy=false,workbenchBlocked=true,sourcePending=false;document.querySelector('[data-bulletin-owner]').bulletinController={canApplyUpdate:()=>!workbenchBlocked};const refs={detailPane:document.querySelector('main')};

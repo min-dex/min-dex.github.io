@@ -4581,6 +4581,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid var(--line);
   border-radius: var(--r);
   background: var(--ui-surface-panel);
   box-shadow: 0 16px 40px rgba(0, 0, 0, .24);
@@ -4594,7 +4595,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-  padding: 15px;
+  padding: var(--ui-dialog-inset);
 }
 .presenter-section-editor-head h3 {
   margin: 0;
@@ -4609,7 +4610,7 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   gap: 10px;
   min-height: 0;
   overflow: auto;
-  padding: 0 15px 15px;
+  padding: 0 var(--ui-dialog-inset) var(--ui-dialog-inset);
 }
 .presenter-section-editor-field {
   display: grid;
@@ -4660,13 +4661,14 @@ body.is-chromium .svc-slide-thumb.active:hover .svc-slide-thumb-frame {
   min-width: 0;
   align-items: center;
   gap: 10px;
-  border-radius: var(--r);
-  background: var(--ui-surface-panel);
-  padding: 5px 10px;
+  border-top: 1px solid var(--line-soft);
+  border-radius: 0;
+  background: transparent;
+  padding: 10px 0;
 }
 .presenter-section-editor-item:hover,
 .presenter-section-editor-item:focus-within {
-  background: var(--ui-surface-field);
+  background: transparent;
 }
 .presenter-section-editor .svc-edit-actions { opacity: 1; }
 .presenter-section-editor [data-presenter-section-item-action="toggle-visibility"][aria-pressed="true"] {
@@ -5644,11 +5646,9 @@ body[data-module="praise"] .praise-forms-panel .version-compare-column {
   }
   .presenter-section-editor-add .reference-new-btn:hover { background: var(--ui-surface-field); }
   .presenter-section-editor-item:hover,
-  .presenter-section-editor-item:focus-within { background: var(--ui-surface-panel); }
+  .presenter-section-editor-item:focus-within { background: transparent; }
 }
 
-#serverStorageStatus:not([hidden]) { position: fixed; bottom: 1rem; left: 50%; transform: translateX(-50%); z-index: 1000; max-width: min(90vw, 44rem); padding: .7rem 1rem; background: var(--surface, #fff); color: var(--text, #222); border: 1px solid currentColor; border-radius: .6rem; font-size: .875rem; }
-#serverStorageStatus button { margin-left: .75rem; }
 /* Color belongs to the entire form group; labels remain plain text. */
 .svc-board-slide-block[data-form-color] > .svc-board-block-background {
   background: color-mix(in srgb, var(--form-color) 30%, var(--ui-surface-panel));
@@ -6372,9 +6372,6 @@ body[data-module="presenter"] .svc-presenter-toolbar::before {
 .global-playback-volume .svc-volume-control { display:flex; width:100%; }
 .global-playback-volume .svc-music-volume { flex:1; min-width:0; }
 .svc-volume-control:has(input:disabled) { opacity:0.5; }
-
-.live-update-notice { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:900; width:max-content; max-width:calc(100vw - 40px); padding:12px 18px; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink); font-size:13px; box-shadow:0 4px 20px #0003; pointer-events:none; }
-.live-update-notice[hidden] { display:none; }
 
 .service-sidebar-date-groups.is-upcoming .service-sidebar-date-head > .is-today { color:var(--accent); }
 

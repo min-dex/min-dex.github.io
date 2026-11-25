@@ -30,7 +30,7 @@ for (const file of modules) {
   assert(Object.values(context).every(value => typeof value === 'function'));
 }
 const styles = html.slice(html.indexOf('const styles = ['), html.indexOf('const retryUrl ='));
-assert.match(styles, /"styles.css", "styles.workspace.css", "styles.presenter-output.css"/);
+assert.match(styles, /"styles.css", "styles.workspace.css", "styles.shell-foundation.css", "styles.presenter-output.css"/);
 assert(packaged.includes('styles*.css'), 'all ordered styles must ship in desktop');
 assert(moduleList.includes('"mindex.praise-media.js"'));
 assert(packaged.includes('mindex.praise-media.js'));

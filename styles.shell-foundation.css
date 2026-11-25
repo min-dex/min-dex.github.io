@@ -1,0 +1,44 @@
+:root {
+  --ui-control-h: 35px;
+  --ui-control-dense-h: 30px;
+  --ui-control-compact-h: 28px;
+  --ui-dialog-inset: 20px;
+  --ui-dialog-gap: 10px;
+  --ui-notice-padding-block: 10px;
+  --ui-notice-padding-inline: 15px;
+}
+
+/* App feedback uses one compact notice grammar. Output and print surfaces are excluded. */
+:is(.live-update-notice, #serverStorageStatus:not([hidden])) {
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - 40px);
+  padding: var(--ui-notice-padding-block) var(--ui-notice-padding-inline);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  background: var(--ui-surface-panel);
+  color: var(--ink-2);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-sans);
+  font-size: var(--ui-label-size);
+  font-weight: var(--ui-label-weight);
+  line-height: 1.5;
+}
+
+.live-update-notice {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 900;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.live-update-notice[hidden] { display: none; }
+#serverStorageStatus:not([hidden]) {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 1000;
+  transform: translateX(-50%);
+}
+#serverStorageStatus button { margin-left: 10px; }

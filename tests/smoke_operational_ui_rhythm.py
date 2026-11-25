@@ -57,6 +57,18 @@ try:
                                 page.wait_for_timeout(180)
                                 hovered.append(control.evaluate("e=>{const s=getComputedStyle(e);return [s.backgroundColor,s.color,s.borderTopWidth]}"))
                             assert hovered[1:]==[hovered[0],hovered[0]],(engine,theme,width,hovered)
+                            feedback=page.evaluate('''()=>{
+                              let live=document.querySelector('.live-update-notice');
+                              if(!live){live=document.createElement('div');live.className='live-update-notice';live.textContent='업데이트 확인';document.body.append(live);}
+                              let server=document.getElementById('serverStorageStatus');
+                              if(!server){server=document.createElement('div');server.id='serverStorageStatus';server.textContent='서버 상태 확인';document.body.append(server);}
+                              server.hidden=false;
+                              const read=e=>{const s=getComputedStyle(e);return {radius:s.borderRadius,padding:s.padding,fontSize:s.fontSize,fontWeight:s.fontWeight,background:s.backgroundColor,color:s.color,maxWidth:s.maxWidth}};
+                              const result=[read(live),read(server)];live.remove();server.remove();return result;
+                            }''')
+                            assert feedback[0]==feedback[1],(engine,theme,width,feedback)
+                            assert feedback[0]['radius']=='5px' and feedback[0]['padding']=='10px 15px',feedback
+                            assert feedback[0]['fontSize']=='12px' and feedback[0]['fontWeight']=='600',feedback
                         if name=='section':
                             panel=page.locator('[data-presenter-section-editor]');box=panel.bounding_box()
                             assert box and box['x']>=0 and box['x']+box['width']<=width and box['y']>=50 and box['y']+box['height']<=height,box
@@ -70,6 +82,13 @@ try:
                             add=page.locator('[data-presenter-section-add]');add.scroll_into_view_if_needed()
                             assert add.bounding_box()['y']+add.bounding_box()['height']<=height
                             assert page.locator('.presenter-section-editor-head').evaluate('e=>e.scrollHeight<=e.clientHeight+1')
+                            chrome=panel.locator('.presenter-section-editor').evaluate('''e=>{
+                              const box=getComputedStyle(e),head=getComputedStyle(e.querySelector('.presenter-section-editor-head'));
+                              const rows=[...e.querySelectorAll('.presenter-section-editor-item')].map(row=>{const s=getComputedStyle(row);return {border:s.borderTopWidth,padding:s.padding,background:s.backgroundColor,radius:s.borderRadius}});
+                              return {border:box.borderTopWidth,radius:box.borderRadius,headPadding:head.padding,rows};
+                            }''')
+                            assert chrome['border']=='1px' and chrome['radius']=='5px' and chrome['headPadding']=='20px',chrome
+                            assert chrome['rows'] and all(r=={'border':'1px','padding':'10px 0px','background':'rgba(0, 0, 0, 0)','radius':'0px'} for r in chrome['rows']),chrome
                         if width in (1440,320):page.screenshot(path=f'/private/tmp/operational-{engine}-{theme}-{name}-{width}.png')
                     if name=='unsaved':page.locator('[data-unsaved-action="cancel"]').click()
                     print('PASS',engine,theme,name,'1440/900/760/390/320',flush=True)

@@ -16,6 +16,7 @@ const roots = [
   "mindex.presenter-ui.js",
   "mindex.setlist-links.js",
   "styles.css",
+  "styles.shell-foundation.css",
   "styles.calendar.css",
   "styles.presenter-output.css",
   "favicon.ico",

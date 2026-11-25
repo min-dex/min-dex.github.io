@@ -280,3 +280,16 @@ icon gap with the shared 5px radius. The former 12px/500 and 15px/10px
 insets/gap were stale defaults. Keep explicit 40px topbar, 35px ordinary,
 30px dense and 28px compact targets. Output artwork, 50/70px Remote targets,
 media transport and document controls retain their role-specific geometry.
+
+## Global shell foundation · 2026-11-25
+
+The app shell exposes one control ladder (`35/30/28px`) and one feedback-notice
+grammar. Status notices use the shared 5px radius, panel surface, line, soft
+shadow, 12/600 type and 10×15px inset in both themes; update/output behavior is
+unchanged. Dialogs use a 20px outer inset and 10px internal rhythm. Floating
+editor panels have a visible 1px boundary, while repeated editor rows use quiet
+separators instead of nested card backgrounds. File and secondary controls keep
+their existing native behavior but use the same surface, type and focus grammar.
+
+This foundation applies only to app chrome. Presenter output, artwork and
+bulletin print remain independently authored surfaces.
