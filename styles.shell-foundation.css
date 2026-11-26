@@ -11,16 +11,13 @@
 }
 
 /* Shell controls move as one family without changing role-specific geometry. */
-body:not(.presenter-output-body) :is(button, summary, input, textarea, select) {
-  transition: background-color var(--ui-motion-fast) ease,
-    border-color var(--ui-motion-fast) ease,
-    color var(--ui-motion-fast) ease,
+body:not(.presenter-output-body) :is(button, summary) {
+  transition: border-color var(--ui-motion-fast) ease,
     box-shadow var(--ui-motion-fast) ease;
 }
 body:not(.presenter-output-body) :is(button, summary) { touch-action: manipulation; }
 body:not(.presenter-output-body) :is(.btn, .icon-btn, .reference-new-btn) {
   box-sizing: border-box;
-  gap: var(--ui-control-gap);
 }
 
 /* Help surfaces share the same inset and visual depth while retaining placement. */
@@ -40,7 +37,7 @@ body:not(.presenter-output-body) :is(.svc-form-help-panel, .svc-presenter-help-p
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body:not(.presenter-output-body) :is(button, summary, input, textarea, select) {
+  body:not(.presenter-output-body) :is(button, summary) {
     transition-duration: 0ms;
   }
 }
