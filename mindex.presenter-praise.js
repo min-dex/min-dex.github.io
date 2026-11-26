@@ -969,7 +969,7 @@ function presenterRepeatableVerseChorusPresetForms(preset = null, source = []) {
   if (!alternating) return null;
 
   const verses = source.filter(({ target }) => target.type === "verse");
-  const choruses = source.filter(({ target }) => target.type === "chorus");
+  const choruses = source.filter(({ target }) => target.type === "chorus" && !target.variant);
   if (!verses.length || !choruses.length) return null;
 
   const preChoruses = source.filter(({ target }) => target.type === "pre-chorus");
@@ -991,14 +991,14 @@ function presenterFormTargetsMatch(target = {}, candidate = {}) {
 }
 
 function presenterSupplementalFormType(target = {}) {
-  return !["", "verse", "chorus"].includes(String(target.type || ""));
+  return Boolean(target.variant) || !["", "verse", "chorus"].includes(String(target.type || ""));
 }
 
 function presenterInsertPreChorusBeforeChoruses(forms = []) {
   return cleanList(forms).flatMap((label, index, list) => {
     const target = normalizePresenterFormPresetLabel(label);
     const previous = normalizePresenterFormPresetLabel(list[index - 1] || "");
-    if (target.type === "chorus" && previous.type !== "pre-chorus") return ["PC", label];
+    if (target.type === "chorus" && !target.variant && previous.type !== "pre-chorus") return ["PC", label];
     return [label];
   });
 }

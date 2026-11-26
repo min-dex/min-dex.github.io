@@ -125,3 +125,23 @@ for(const raw of ['V2A','V999A','V2@A'])assert.equal(c.findPresenterFormForPrese
 assert.ok(c.findPresenterFormForPresetLabel(unnumbered,'V1A'));
 assert.ok(c.findPresenterFormForPresetLabel(unnumbered,'VA'));
 console.log('PASS zero-number rejection, strict numbered group identity, Unicode delimiters and spaced Pre-Chorus');
+
+// A changed-word ending is supplemental, not a replacement for the last C.
+{
+  const forms = ['Verse 1','Verse 2','Pre-Chorus','Chorus','Chorus @'].map((label,i)=>({id:'variant-regression-'+i,label,part_type:['Verse','Verse','Pre-Chorus','Chorus','Chorus'][i],lyrics:'fixture '+i}));
+  const saved = JSON.stringify(forms);
+  const preset = {forms:['V1','C','V2','C'],strength:'auto'};
+  const result = c.presenterFormPresetWithAvailableForms(preset,forms);
+  const tokens = result.forms.map(x=>c.canonicalServiceFormToken(x));
+  assert.equal(tokens.join('-'),'V1-PC-C-V2-PC-C-C@');
+  assert.equal(JSON.stringify(forms),saved,'source forms unchanged');
+  for (const strength of ['manual','forced','default','song-default']) {
+    const explicit={forms:['V2','C@','C','C'],strength};
+    const actual=c.presenterFormPresetWithAvailableForms(explicit,forms);
+    assert.equal(actual.forms.map(x=>c.canonicalServiceFormToken(x)).join('-'),'V2-C@-C-C');
+  }
+  const grouped=forms.slice(0,4).concat(['C@A','C@B','Coda'].map(label=>({id:label,label,part_type:label==='Coda'?'Coda':'Chorus',lyrics:label})));
+  assert.equal(c.presenterFormPresetWithAvailableForms(preset,grouped).forms.map(x=>c.canonicalServiceFormToken(x)).join('-'),'V1-PC-C-V2-PC-C-C@A-C@B-Coda');
+  assert.equal(c.presenterFormPresetWithAvailableForms(preset,forms.slice(0,4)).forms.map(x=>c.canonicalServiceFormToken(x)).join('-'),'V1-PC-C-V2-PC-C');
+}
+console.log('PASS inferred regular chorus retained before supplemental variants; explicit order and source unchanged');

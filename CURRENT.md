@@ -866,7 +866,7 @@ WebKit 송출 stage를 inset/auto-margin 방식으로 중앙 정렬했다. 접�
 ## 1.0.20 전역 UX/UI·순서 이동 후보 · 2026-11-25
 
 공개 1.0.19 `db45b9fee` 위에 전역 shell control·알림·도움말 표면 규칙과
-예배 좌측 순서 이동 single-pass 계산을 통합한다. 송출 출력·주보 인쇄·운영
+예배 좌측 순서 이동 single-pass 계산, 자동 송폼의 변형 코러스 보존을 통합한다. 송출 출력·주보 인쇄·운영
 예배 자료는 변경하지 않는다. Chromium/WebKit 다크·라이트 320–1440px,
 부팅/업데이트 복구, 미저장 입력과 좌측 편집·IME·음원/송출 상태 보존 검사를
 통과한 후보이며, 동일 SHA 전체 web/native gate와 공개 readback 전까지

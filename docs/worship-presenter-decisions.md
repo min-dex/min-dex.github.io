@@ -892,6 +892,12 @@ Small visual polish that does not alter behavior does not need an entry.
 
 ### Presenter Song Forms
 
+- Inferred verse/chorus cycles repeat ordinary choruses only. A stored chorus
+  variant (`C@`, including its A/B blocks) remains supplemental in source order
+  after the final ordinary chorus when stored at the end; it must not replace
+  that chorus or receive another automatically inserted Pre-Chorus. Explicit
+  manual/forced/default/song-default sequences retain their exact selections.
+
 - Coda supports A/B groups, including numbered labels and `Ending` aliases.
   Preserve their identity through relational label save/reload and form presets.
   Explicit grouped blocks play their complete stored lyrics; only an ungrouped
