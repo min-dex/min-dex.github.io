@@ -1,6 +1,6 @@
 {
   "generator": "terser@5.44.0",
-  "version": "20261127-morning-110",
+  "version": "20261128-stable-111",
   "options": {
     "compress": false,
     "mangle": {

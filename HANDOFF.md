@@ -1901,3 +1901,10 @@ main과 통합할 때 exact-SHA full gate가 필요하다.
 표시만 명확히 했다. 저장 상태는 고정 60px 슬롯이라 입력·버튼 geometry가 유지된다.
 Chromium/WebKit light/dark 및 basic/focus 반응형 회귀가 통과했다. 운영 쓰기·실제
 송출·배포는 없으며 다음 공동 후보에서 exact-SHA gate가 필요하다.
+
+## 1.1.1 Stable 통합 배포 후보 · 2026-11-28
+
+1.1.0 `7aa682e52` 기준 후속 세 커밋 `a8b2c6835`, `2134b5db0`, `910382f5b`와
+버전 1.1.1(`20261128-stable-111`)을 한 배치로 준비한다. journal은
+`02c6e772cc214e08977382d48125c678`. 운영 쓰기 없이 exact-SHA web/native full
+gate·3OS 설치 보존·Pages/공개 파일 readback 후에만 완료 처리한다.

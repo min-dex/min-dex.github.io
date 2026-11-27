@@ -902,3 +902,12 @@ metadata에 실제 화면은 `송출`, 별도 선택은 `선택`으로 구분하
 변경은 입력·저장 버튼 위치를 움직이지 않는다. Chromium/WebKit의 light/dark,
 520/1200px 저장 geometry와 basic/focus 390–1440px 상태·초안·음원 보존을 통과했다.
 운영 쓰기·실제 송출·공개 배포는 수행하지 않았다.
+
+## 1.1.1 Stable 통합 배포 후보 · 2026-11-28
+
+공개 1.1.0 `7aa682e52` 위에 가사 catalog cache·기도회 음원 명칭/전환·폐기된
+`배경 없이` 제거 `a8b2c6835`, controller 재연결 ordering `2134b5db0`, 보수적
+상태 위계 `910382f5b`를 통합한다. 제품 버전은 1.1.1, 웹 build ID는
+`20261128-stable-111`이다. 운영 자료·설정·미저장 입력은 재작성하지 않는다.
+release journal은 `02c6e772cc214e08977382d48125c678`이며 exact-SHA full gate,
+3OS 설치 보존, Pages와 공개 readback 전에는 배포 완료로 보고하지 않는다.
