@@ -1,6 +1,6 @@
 const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
 const c={console,document:{addEventListener(){}},localStorage:{getItem(){return null}},setTimeout,clearTimeout,URL,URLSearchParams,crypto:require('node:crypto').webcrypto};c.window=c;c.__mindexRuntimeStarted=true;c.location={search:'',hash:'',pathname:'/'};vm.createContext(c);
-for(const f of ['mindex.constants.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.presenter-praise.js','mindex.presenter-board.js','mindex.presenter-media-state.js','mindex.presenter-controller.js','mindex.worship-input.js','mindex.worship-source.js','mindex.setlist-links.js','mindex.bulletin.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
+for(const f of ['mindex.constants.js','mindex.single-song.js','mindex.worship-model.js','mindex.worship-persistence.js','mindex.presenter.js','mindex.presenter-praise.js','mindex.presenter-board.js','mindex.presenter-media-state.js','mindex.presenter-controller.js','mindex.worship-input.js','mindex.worship-source.js','mindex.setlist-links.js','mindex.bulletin.js','app.js'])vm.runInContext(fs.readFileSync(f,'utf8'),c,{filename:f});
 c.assert=assert;
 vm.runInContext(`
 const service={id:'children-template-fixture',type_id:'children',date:'2026-10-25'};
@@ -13,6 +13,31 @@ assert.equal(fellowship.title,'교제');
 assert.deepEqual(Array.from(rows.elements.filter(e=>e.section_id===fellowship.id),e=>e.source_ref.label),['반별 모임']);
 assert.equal(JSON.stringify(childrenWorshipTemplate().find(s=>s.sectionKey==='fellowship')),JSON.stringify(youthWorshipTemplate().find(s=>s.sectionKey==='fellowship')));
 assert.equal(youngAdultWorshipTemplate().find(s=>s.sectionKey==='fellowship').elements[0].label,'셀 모임');
+const priorYoungAdult=serviceOrderTemplate('young-adult',{service:{id:'young-adult-prior',type_id:'young-adult',date:'2026-11-22'}});
+const revisedYoungAdult=serviceOrderTemplate('young-adult',{service:{id:'young-adult-revised',type_id:'young-adult',date:'2026-11-29'}});
+const praiseDefaults=(steps)=>Array.from(steps.flatMap(step=>step.elements||[]).filter(element=>['봉헌찬양','파송찬양'].includes(element.label)),element=>({label:element.label,title:element.defaultSong?.title||'',forms:element.formPreset?.forms||[]}));
+assert.deepEqual(praiseDefaults(priorYoungAdult),[
+ {label:'봉헌찬양',title:'임재',forms:['V','C']},
+ {label:'파송찬양',title:'피난처 되시는 주 예수',forms:['V','C1','C2']},
+]);
+assert.deepEqual(praiseDefaults(revisedYoungAdult),[
+ {label:'봉헌찬양',title:'내게 있는 향유 옥합',forms:[]},
+ {label:'파송찬양',title:'주의 진리 위해 십자가 군기',forms:[]},
+]);
+assert.equal(resolvePublicWorshipTemplateVersion('young-adult',{service:{type_id:'young-adult',date:'2026-11-22'}}).version,PUBLIC_WORSHIP_TEMPLATE_VERSION);
+assert.equal(resolvePublicWorshipTemplateVersion('young-adult',{service:{type_id:'young-adult',date:'2026-11-29'}}).version,'2026-q4-young-adult-praise');
+const songsBefore=state.songs;
+state.songs=[
+ {id:'offering-song',title:'내게 있는 향유 옥합',versions:[{id:'offering-version',name:'D',_worshipVersionPersisted:true}]},
+ {id:'sending-song',title:'주의 진리 위해 십자가 군기',versions:[{id:'sending-version',name:'G',_worshipVersionPersisted:true}]},
+];
+const revisedRows=buildWorshipServiceScaffold('young-adult-revised','young-adult',{service:{id:'young-adult-revised',type_id:'young-adult',date:'2026-11-29'}});
+const revisedPraiseRows=Array.from(revisedRows.elements.filter(element=>['봉헌찬양','파송찬양'].includes(element.source_ref.label)),element=>({label:element.source_ref.label,songId:element.song_id,versionId:element.song_version_id,forms:element.config?.formPreset?.forms||[]}));
+assert.deepEqual(revisedPraiseRows,[
+ {label:'봉헌찬양',songId:'offering-song',versionId:'offering-version',forms:[]},
+ {label:'파송찬양',songId:'sending-song',versionId:'sending-version',forms:[]},
+]);
+state.songs=songsBefore;
 const praise=rows.sections.find(s=>s.section_key==='praise');
 assert.equal(rows.elements.filter(e=>e.section_id===praise.id).length,4);
 const offering=rows.sections.find(s=>s.section_key==='offering');

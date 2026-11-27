@@ -21096,6 +21096,10 @@ const PUBLIC_WORSHIP_TEMPLATE_VERSIONS = {
     publicWorshipTemplateVersion(() => youthWorshipTemplate()),
     publicWorshipTemplateVersion(() => youthWorshipTemplate({ revisedOrder: true }), "2026-q4-youth-order", "2026-10-11"),
   ],
+  "young-adult": [
+    publicWorshipTemplateVersion(() => youngAdultWorshipTemplate()),
+    publicWorshipTemplateVersion(() => youngAdultWorshipTemplate({ revisedPraiseDefaults: true }), "2026-q4-young-adult-praise", "2026-11-29"),
+  ],
   "sunday-first": [
     publicWorshipTemplateVersion((options = {}) => {
         const pastorLeader = serviceHasPastorSermonLeader(options.service, options.items);
@@ -21591,7 +21595,11 @@ function youthWorshipTemplate({ revisedOrder = false } = {}) {
   return steps;
 }
 
-function youngAdultWorshipTemplate() {
+function youngAdultWorshipTemplate(options = {}) {
+  const revisedPraiseDefaults = Boolean(options.revisedPraiseDefaults);
+  const praiseDefault = (currentTitle, revisedTitle, forms) => revisedPraiseDefaults
+    ? { default_text: revisedTitle, defaultSong: { title: revisedTitle } }
+    : { default_text: currentTitle, defaultSong: { title: currentTitle }, formHint: forms.join("-"), formPreset: { forms, strength: "default" }, defaultStrength: "default" };
   return [
     publicWorshipReadyStep(),
     publicWorshipCreedStep(),
@@ -21611,11 +21619,7 @@ function youngAdultWorshipTemplate() {
           label: "봉헌찬양",
           name: "봉헌찬양",
           elementType: "praise",
-          default_text: "임재",
-          defaultSong: { title: "임재" },
-          formHint: "V-C",
-          formPreset: { forms: ["V", "C"], strength: "default" },
-          defaultStrength: "default",
+          ...praiseDefault("임재", "내게 있는 향유 옥합", ["V", "C"]),
         },
         { label: "봉헌기도", name: "봉헌기도", elementType: "title_person", person: defaultServiceOfferingPrayerLeader("young-adult") },
       ],
@@ -21628,11 +21632,7 @@ function youngAdultWorshipTemplate() {
         label: "파송찬양",
         name: "파송찬양",
         elementType: "praise",
-        default_text: "피난처 되시는 주 예수",
-        defaultSong: { title: "피난처 되시는 주 예수" },
-        formHint: "V-C1-C2",
-        formPreset: { forms: ["V", "C1", "C2"], strength: "default" },
-        defaultStrength: "default",
+        ...praiseDefault("피난처 되시는 주 예수", "주의 진리 위해 십자가 군기", ["V", "C1", "C2"]),
       }],
     }),
     departmentFellowshipStep("셀 모임"),
