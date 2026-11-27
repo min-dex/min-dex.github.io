@@ -108,9 +108,13 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
 .bulletin-properties input[type=color]::-webkit-color-swatch-wrapper{padding:0}
 .bulletin-properties input[type=color]::-webkit-color-swatch{border:0;border-radius:var(--r)}
 .bulletin-properties input[type=color]::-moz-color-swatch{border:0;border-radius:var(--r)}
-.bulletin-properties input[type=file]{padding:0;border:0;background:transparent;font-size:var(--ui-meta-size);line-height:35px}
-.bulletin-properties input[type=file]::file-selector-button{height:35px;margin-right:10px;padding:5px 10px;border:1px solid var(--line-2);border-radius:var(--r);font:inherit;color:var(--ink);background:var(--control-surface);cursor:pointer}
-.bulletin-properties input[type=file]::file-selector-button:hover{background:var(--panel)}
+.bulletin-file-control{position:relative;display:block;height:35px;min-width:0;overflow:hidden;border-radius:var(--r);background:var(--control-surface)}
+.bulletin-file-button{position:absolute;inset:0 auto 0 0;z-index:1;display:inline-flex;width:96px;align-items:center;justify-content:center;gap:5px;border:1px solid var(--line-2);border-radius:var(--r);background:var(--panel);color:var(--ink);font-size:var(--ui-label-size);font-weight:var(--ui-label-weight);pointer-events:none}
+.bulletin-file-button :is(i,svg){width:16px;height:16px;stroke-width:var(--ui-icon-stroke)}
+.bulletin-file-control input[type=file]{box-sizing:border-box;width:100%;height:35px;padding:5px 10px 5px 106px;border:0;background:transparent;color:var(--ink-2);font-size:var(--ui-label-size);cursor:pointer}
+.bulletin-file-control input[type=file]::file-selector-button{position:absolute;width:96px;margin:0 10px 0 -106px;border:0;color:transparent;background:transparent}
+.bulletin-file-control:hover .bulletin-file-button{background:var(--control-surface)}
+.bulletin-file-control:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .bulletin-properties [data-bulletin-design-image-reset]{min-height:30px;margin-bottom:15px}
 @container bulletin (max-width:600px){
   .bulletin-toolbar :is([data-bulletin-template-edit],[data-bulletin-template-exit]){grid-column:1/-1;justify-self:start}

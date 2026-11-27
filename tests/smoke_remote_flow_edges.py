@@ -81,6 +81,10 @@ try:
       box=page.locator(selector).bounding_box();assert box['height']>=44 and box['width']>=44
      page.locator('.remote-scripture').scroll_into_view_if_needed()
      assert page.locator('#scriptureFeedback').is_visible()
+     if width<=390:
+      page.evaluate('scrollTo(0,document.documentElement.scrollHeight)');page.wait_for_timeout(50)
+      gap=page.evaluate("()=>{const action=document.querySelector('#disconnect').getBoundingClientRect(),stepper=document.querySelector('.slide-stepper').getBoundingClientRect();return stepper.top-action.bottom}")
+      assert gap>=8,(engine,theme,width,gap)
      page.screenshot(path=f'/tmp/remote-flow-{engine}-{theme}-{width}.png')
    page.evaluate('remoteSession.usable=false');page.wait_for_timeout(300)
    assert page.locator('#scriptureShow').is_disabled() and page.locator('[data-action=sermon-title]').is_disabled()

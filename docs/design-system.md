@@ -81,6 +81,12 @@ visual coverage. The safe sequence is:
   label plus the selected filename. Keep the native input for keyboard and OS
   picker behavior, but do not expose platform-dependent English selector copy in
   the Mindex chrome.
+- Bulletin logo and cover-art pickers use the same 35px managed control. Their
+  native inputs, selected filenames, image validation and template persistence
+  remain unchanged.
+- The phone Remote keeps its fixed slide stepper, but reserves enough bottom and
+  scroll padding for the disconnect action to clear the stepper and device safe
+  area at 320px and wider.
 
 
 ## Semantic surfaces · 2026-10-17

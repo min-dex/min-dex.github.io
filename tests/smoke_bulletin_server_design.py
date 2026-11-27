@@ -39,7 +39,12 @@ try:
    page.locator('[data-bulletin-hidden]').check()
    page.locator('[data-bulletin-design-label=readingHelp]').fill('함께 읽어요')
    page.get_by_text('로고와 그림',exact=True).click()
+   file_control=page.locator('.bulletin-file-control').first
+   assert file_control.get_by_text('파일 선택',exact=True).count()==1
+   assert file_control.locator('input[type=file]').get_attribute('aria-label')=='로고 이미지 선택'
+   assert abs(file_control.bounding_box()['height']-35)<1
    page.locator('[data-bulletin-design-image=logo]').set_input_files({'name':'broken.png','mimeType':'image/png','buffer':b'not a valid image'})
+   assert page.locator('[data-bulletin-design-image=logo]').evaluate("e=>e.files[0]?.name")=='broken.png'
    page.wait_for_function("document.querySelector('.bulletin-status').textContent.includes('이미지를 불러오지')")
    page.locator('[data-bulletin-save]').click();page.wait_for_function("document.querySelector('.bulletin-status').textContent.includes('이미지를 불러오지')")
    assert page.evaluate('templateSent.length===0'), 'Broken artwork must not publish a common template'
