@@ -885,3 +885,11 @@ readback에서 파송곡(찬송가 358장, 두 판본)은 확인했지만 봉헌
 추정 생성하지 않는다. 검토된 곡이 나중에 등록되면 이후 새 예배부터 일반 제목 매칭으로
 연결한다. release queue ticket은 `d94b4c0eec314d7e91ac2b3e2f18a0bd`, 준비 journal은
 `9a3251bd43f24670b738d43756b7d05d`이며 운영 쓰기는 하지 않았다.
+
+## 컨트롤러·프레젠터 연결 보강 후보 · 2026-11-28
+
+출력 창은 재연결 때 현재 controller state를 즉시 요청하고, 응답이 없을 때만
+120ms 뒤 저장 snapshot을 복구한다. controller session이 교체된 뒤 늦게 온 구세션
+패킷은 전역 issue clock으로 폐기하며 같은 receipt에는 전체 snapshot을 다시 보내지
+않는다. Chromium/WebKit transport·receipt recovery·output latency·freeze/refresh와
+runtime/SOLID 검사를 통과했다. 운영 예배·송출·설정 쓰기와 공개 배포는 수행하지 않았다.

@@ -69,6 +69,18 @@ def run(browser, url):
     }''')
     renders = output.evaluate('window.renders')
     assert renders == sorted(set(renders)) and renders[-1] == 40, renders
+    # A retired controller can leave a packet in the event queue while a new
+    # controller has already advanced. Its per-sender sequence is independent,
+    # so the global issue clock must prevent the old frame from rolling back.
+    controller.evaluate('''() => {
+      const stale=JSON.parse(baseSnapshot);
+      stale.messageId='retired-controller:999';
+      stale.snapshotId=stale.messageId;
+      stale.index=2;
+      transportChannel.postMessage({type:'presenter-state',payload:stale});
+    }''')
+    output.wait_for_timeout(80)
+    assert output.evaluate('window.renders.at(-1)') == 40, output.evaluate('window.renders')
     # Reopening the output must restore the latest move, not the initial snapshot.
     output.reload(wait_until='domcontentloaded')
     output.wait_for_function("document.getElementById('presenterOutputRoot')?.textContent.includes('Slide 40')")

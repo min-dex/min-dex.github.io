@@ -1,3 +1,85 @@
+// Controller/output transport owns snapshot compaction, acknowledgement replay
+// and cross-controller ordering. Rendering remains in mindex.presenter.js.
+const PRESENTER_NAVIGATION_STORAGE_KEY = "mindex.presenter.state.navigation";
+let presenterTransportSequence = 0;
+const presenterTransportSession = `${Date.now()}:${Math.random()}`;
+let presenterTransportSnapshot = null;
+let presenterTransportLatest = null;
+let presenterTransportIssuedAt = Date.now();
+
+function nextPresenterTransportIssuedAt() {
+  presenterTransportIssuedAt = Math.max(Date.now(), presenterTransportIssuedAt + 1);
+  return presenterTransportIssuedAt;
+}
+
+function reconcilePresenterTransportReceipt(message = {}) {
+  const latest = presenterTransportLatest;
+  if (!latest || typeof message.receivedMessageId !== "string") return;
+  if (state.presenter.outputStopAt || latest.payload.serviceId !== state.presenter.serviceId) return;
+  if (message.receivedMessageId === latest.payload.messageId) return;
+  if (Date.now() - latest.sentAt < 750 || Date.now() - latest.retriedAt < 1000) return;
+  latest.retriedAt = Date.now();
+  safeStorageSet("local", PRESENTER_STORAGE_KEY, JSON.stringify(latest.payload));
+  try { state.presenter.outputWindow?.postMessage({type:"presenter-state",payload:latest.payload},window.location.origin); } catch {}
+  try {
+    state.presenter.channel?.postMessage({ type: "presenter-state", payload: latest.payload });
+  } catch {
+    // The storage event remains available when the channel has closed.
+  }
+}
+
+function mergePresenterNavigation(snapshot, navigation) {
+  if (!snapshot || navigation?.snapshotId !== snapshot.snapshotId) return snapshot;
+  if (Number(navigation.updatedAt) < Number(snapshot.updatedAt)) return snapshot;
+  return { ...snapshot, ...navigation, slides: snapshot.slides };
+}
+
+function readPresenterStoredPayload() {
+  const snapshot = JSON.parse(safeStorageGet("local", PRESENTER_STORAGE_KEY, "null") || "null");
+  try {
+    const navigation = JSON.parse(safeStorageGet("local", PRESENTER_NAVIGATION_STORAGE_KEY, "null") || "null");
+    return mergePresenterNavigation(snapshot, navigation);
+  } catch {
+    return snapshot;
+  }
+}
+
+function publishPresenterPayload(payload, options = {}) {
+  if (globalThis.MindexPresenterLifetime && !MindexPresenterLifetime.owns(payload.outputSessionId)) return;
+  const { index, slideAnchor, pptxProgress, safetyBlank, safetyBlankMode, liveScripture, livePraise, updatedAt,
+    snapshotId: previousSnapshotId, messageId: previousMessageId, transportIssuedAt: previousTransportIssuedAt,
+    ...content } = payload;
+  const contentKey = JSON.stringify(content);
+  const messageId = `${presenterTransportSession}:${++presenterTransportSequence}`;
+  const transportIssuedAt = nextPresenterTransportIssuedAt();
+  window.MindexRemote?.notify();
+  const compact = !options.force && state.presenter.outputTransportVersion === 1
+    && presenterTransportSnapshot?.contentKey === contentKey;
+  if (compact) {
+    const navigation = { snapshotId: presenterTransportSnapshot.id, messageId, transportIssuedAt,
+      index, slideAnchor, pptxProgress, safetyBlank, safetyBlankMode, liveScripture, livePraise, updatedAt };
+    presenterTransportLatest = { payload: { ...payload, ...navigation }, sentAt: Date.now(), retriedAt: 0 };
+    safeStorageSet("local", PRESENTER_NAVIGATION_STORAGE_KEY, JSON.stringify(navigation));
+    try { state.presenter.outputWindow?.postMessage({type:"presenter-navigation",payload:navigation},window.location.origin); } catch {}
+    try {
+      state.presenter.channel?.postMessage({ type: "presenter-navigation", payload: navigation });
+    } catch {
+      // Keep controller navigation usable while storage delivers the move.
+    }
+    return;
+  }
+  const snapshot = { ...payload, snapshotId: messageId, messageId, transportIssuedAt };
+  presenterTransportLatest = { payload: snapshot, sentAt: Date.now(), retriedAt: 0 };
+  const stored = safeStorageSet("local", PRESENTER_STORAGE_KEY, JSON.stringify(snapshot));
+  try { state.presenter.outputWindow?.postMessage({type:"presenter-state",payload:snapshot},window.location.origin); } catch {}
+  presenterTransportSnapshot = stored ? { id: messageId, contentKey } : null;
+  try {
+    state.presenter.channel?.postMessage({ type: "presenter-state", payload: snapshot });
+  } catch {
+    // Storage delivery and heartbeat reconciliation can recover this send.
+  }
+}
+
 // Output video lifecycle subscription; controller/remote transport remains external.
 function bindPresenterOutputMediaState(isActive, notify) {
   let timer = null;

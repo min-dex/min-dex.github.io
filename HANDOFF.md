@@ -1886,3 +1886,11 @@ readback에서 파송곡(찬송가 358장, 두 판본)은 확인했지만 봉헌
 추정 생성하지 않는다. 검토된 곡이 나중에 등록되면 이후 새 예배부터 일반 제목 매칭으로
 연결한다. release queue ticket은 `d94b4c0eec314d7e91ac2b3e2f18a0bd`, 준비 journal은
 `9a3251bd43f24670b738d43756b7d05d`이며 운영 쓰기는 하지 않았다.
+
+## 컨트롤러·프레젠터 연결 보강 후보 · 2026-11-28
+
+재연결 handshake를 즉시 시작하고 120ms bounded stored-state fallback을 둔다.
+새 controller state 뒤의 구세션 packet rollback과 동일 receipt full resend를 막았다.
+관련 Chromium/WebKit transport·recovery·latency·freeze 검사 및 runtime/SOLID는
+통과했다. 실제 송출·운영 저장·공개 배포는 하지 않았으며 다음 배포 후보가 최신
+main과 통합할 때 exact-SHA full gate가 필요하다.

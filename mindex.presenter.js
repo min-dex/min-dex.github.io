@@ -1735,7 +1735,9 @@ function handlePresenterControllerMessage(message = {}) {
   if (message.type === "presenter-ready") {
     markPresenterOutputConnected(message.clientId);
     const restoreState = restorePresenterControllerSession();
-    if (restoreState === "none") publishPresenterState({ force: true });
+    if (restoreState === "none" && message.receivedMessageId !== presenterTransportLatest?.payload?.messageId) {
+      publishPresenterState({ force: true });
+    }
     return;
   }
   if (message.type === "presenter-heartbeat") {
@@ -1851,79 +1853,6 @@ function publishPresenterState(options = {}) {
   if (!options.force && !payload.serviceId && !payload.slides.length) return;
   if (isPresenterOutputWindowOpen()) MindexPresenterHistory.record(payload);
   publishPresenterPayload(payload, options);
-}
-
-const PRESENTER_NAVIGATION_STORAGE_KEY = "mindex.presenter.state.navigation";
-let presenterTransportSequence = 0;
-const presenterTransportSession = `${Date.now()}:${Math.random()}`;
-let presenterTransportSnapshot = null;
-let presenterTransportLatest = null;
-
-function reconcilePresenterTransportReceipt(message = {}) {
-  const latest = presenterTransportLatest;
-  if (!latest || typeof message.receivedMessageId !== "string") return;
-  if (state.presenter.outputStopAt || latest.payload.serviceId !== state.presenter.serviceId) return;
-  if (message.receivedMessageId === latest.payload.messageId) return;
-  if (Date.now() - latest.sentAt < 750 || Date.now() - latest.retriedAt < 1000) return;
-  latest.retriedAt = Date.now();
-  // Replay the same ID: a delayed acknowledgement must not render twice.
-  safeStorageSet("local", PRESENTER_STORAGE_KEY, JSON.stringify(latest.payload));
-  try { state.presenter.outputWindow?.postMessage({type:"presenter-state",payload:latest.payload},window.location.origin); } catch {}
-  try {
-    state.presenter.channel?.postMessage({ type: "presenter-state", payload: latest.payload });
-  } catch {
-    // The storage event remains available when the channel has closed.
-  }
-}
-
-function mergePresenterNavigation(snapshot, navigation) {
-  if (!snapshot || navigation?.snapshotId !== snapshot.snapshotId) return snapshot;
-  if (Number(navigation.updatedAt) < Number(snapshot.updatedAt)) return snapshot;
-  return { ...snapshot, ...navigation, slides: snapshot.slides };
-}
-
-function readPresenterStoredPayload() {
-  const snapshot = JSON.parse(safeStorageGet("local", PRESENTER_STORAGE_KEY, "null") || "null");
-  try {
-    const navigation = JSON.parse(safeStorageGet("local", PRESENTER_NAVIGATION_STORAGE_KEY, "null") || "null");
-    return mergePresenterNavigation(snapshot, navigation);
-  } catch {
-    return snapshot;
-  }
-}
-
-function publishPresenterPayload(payload, options = {}) {
-  if (globalThis.MindexPresenterLifetime && !MindexPresenterLifetime.owns(payload.outputSessionId)) return;
-  const { index, slideAnchor, pptxProgress, safetyBlank, safetyBlankMode, liveScripture, livePraise, updatedAt,
-    snapshotId: previousSnapshotId, messageId: previousMessageId, ...content } = payload;
-  const contentKey = JSON.stringify(content);
-  const messageId = `${presenterTransportSession}:${++presenterTransportSequence}`;
-  window.MindexRemote?.notify();
-  const compact = !options.force && state.presenter.outputTransportVersion === 1
-    && presenterTransportSnapshot?.contentKey === contentKey;
-  if (compact) {
-    const navigation = { snapshotId: presenterTransportSnapshot.id, messageId,
-      index, slideAnchor, pptxProgress, safetyBlank, safetyBlankMode, liveScripture, livePraise, updatedAt };
-    presenterTransportLatest = { payload: { ...payload, ...navigation }, sentAt: Date.now(), retriedAt: 0 };
-    safeStorageSet("local", PRESENTER_NAVIGATION_STORAGE_KEY, JSON.stringify(navigation));
-    try { state.presenter.outputWindow?.postMessage({type:"presenter-navigation",payload:navigation},window.location.origin); } catch {}
-    try {
-      state.presenter.channel?.postMessage({ type: "presenter-navigation", payload: navigation });
-    } catch {
-      // Keep controller navigation usable while storage delivers the move.
-    }
-    return;
-  }
-  const snapshot = { ...payload, snapshotId: messageId, messageId };
-  presenterTransportLatest = { payload: snapshot, sentAt: Date.now(), retriedAt: 0 };
-  const stored = safeStorageSet("local", PRESENTER_STORAGE_KEY, JSON.stringify(snapshot));
-  try { state.presenter.outputWindow?.postMessage({type:"presenter-state",payload:snapshot},window.location.origin); } catch {}
-  presenterTransportSnapshot = stored ? { id: messageId, contentKey } : null;
-  try {
-    state.presenter.channel?.postMessage({ type: "presenter-state", payload: snapshot });
-  } catch {
-    // Storage delivery and heartbeat reconciliation can recover this send.
-  }
 }
 
 function presenterOutputUrl(options = {}) {
@@ -2255,9 +2184,16 @@ function initPresenterOutputCore() {
   let heartbeatTimer = null;
   const receivedMessages = new Set();
   const receivedSequences = new Map();
+  let acceptedTransportIssuedAt = 0;
+  let storedStateFallbackTimer = null;
   const applyPayload = (payload) => {
     if (outputSessionId && payload?.outputSessionId !== outputSessionId) return;
     if (payload?.messageId && receivedMessages.has(payload.messageId)) return;
+    const transportIssuedAt = Number(payload?.transportIssuedAt) || 0;
+    // A controller reload creates a new sender sequence. Keep one global issue
+    // clock as well so a delayed packet from the retired sender cannot roll the
+    // projector back after the new controller has already taken ownership.
+    if (transportIssuedAt && transportIssuedAt < acceptedTransportIssuedAt) return;
     if (payload?.messageId) {
       const split = payload.messageId.lastIndexOf(":");
       const sender = payload.messageId.slice(0, split);
@@ -2266,6 +2202,11 @@ function initPresenterOutputCore() {
       if (Number.isFinite(sequence)) receivedSequences.set(sender, sequence);
       receivedMessages.add(payload.messageId);
       if (receivedMessages.size > 128) receivedMessages.delete(receivedMessages.values().next().value);
+    }
+    if (transportIssuedAt) acceptedTransportIssuedAt = Math.max(acceptedTransportIssuedAt, transportIssuedAt);
+    if (storedStateFallbackTimer) {
+      window.clearTimeout(storedStateFallbackTimer);
+      storedStateFallbackTimer = null;
     }
     currentPayload = normalizePresenterPayload(payload);
     syncPresenterOutputDocumentTitle(currentPayload);
@@ -2309,6 +2250,10 @@ function initPresenterOutputCore() {
     if (heartbeatTimer) {
       window.clearInterval(heartbeatTimer);
       heartbeatTimer = null;
+    }
+    if (storedStateFallbackTimer) {
+      window.clearTimeout(storedStateFallbackTimer);
+      storedStateFallbackTimer = null;
     }
     channel?.close?.();
     channel = null;
@@ -2370,6 +2315,21 @@ function initPresenterOutputCore() {
     if (freshOnly && (!stored.updatedAt || Date.now() - Number(stored.updatedAt) > 5000)) return;
     applyPayload(stored);
   };
+  const requestCurrentPresenterState = () => {
+    sendControllerMessage({
+      type: "presenter-ready",
+      clientId: outputClientId,
+      receivedMessageId: currentPayload?.messageId || "",
+    });
+    postHeartbeat();
+  };
+  const scheduleStoredStateFallback = (freshOnly = false) => {
+    if (storedStateFallbackTimer) window.clearTimeout(storedStateFallbackTimer);
+    storedStateFallbackTimer = window.setTimeout(() => {
+      storedStateFallbackTimer = null;
+      if (!currentPayload) renderStoredState(freshOnly);
+    }, 120);
+  };
   const videoCommandReceipts = new Map();
   let lastVideoRetryId = "";
   const handleOutputSignalMessage = (message = {}) => {
@@ -2405,8 +2365,7 @@ function initPresenterOutputCore() {
       return;
     }
     if (message?.type === "presenter-controller-ready") {
-      sendControllerMessage({ type: "presenter-ready", clientId: outputClientId });
-      postHeartbeat();
+      requestCurrentPresenterState();
       return;
     }
     if (message?.type === "presenter-output-close") {
@@ -2432,19 +2391,13 @@ function initPresenterOutputCore() {
     }
   }
   if (channel) {
-    renderStoredState(!readPresenterBackgroundCheckpoint(outputSessionId));
     channel.onmessage = (event) => handleOutputSignalMessage(event.data || {});
-    window.setTimeout(() => {
-      sendControllerMessage({ type: "presenter-ready", clientId: outputClientId });
-      postHeartbeat();
-    }, 50);
+    scheduleStoredStateFallback(!readPresenterBackgroundCheckpoint(outputSessionId));
+    window.setTimeout(requestCurrentPresenterState, 0);
     heartbeatTimer = window.setInterval(postHeartbeat, PRESENTER_OUTPUT_HEARTBEAT_INTERVAL_MS);
   } else {
-    renderStoredState();
-    window.setTimeout(() => {
-      sendControllerMessage({ type: "presenter-ready", clientId: outputClientId });
-      postHeartbeat();
-    }, 50);
+    scheduleStoredStateFallback();
+    window.setTimeout(requestCurrentPresenterState, 0);
     heartbeatTimer = window.setInterval(postHeartbeat, PRESENTER_OUTPUT_HEARTBEAT_INTERVAL_MS);
   }
   window.addEventListener("pagehide", () => {
@@ -2560,6 +2513,7 @@ function normalizePresenterPayload(payload) {
     outputSessionId: payload?.outputSessionId || "",
     snapshotId: payload?.snapshotId || "",
     messageId: payload?.messageId || "",
+    transportIssuedAt: Number(payload?.transportIssuedAt) || 0,
     serviceId: payload?.serviceId || null,
     serviceType: payload?.serviceType || "",
     serviceTitle: payload?.serviceTitle || "",
