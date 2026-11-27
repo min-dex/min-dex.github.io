@@ -13,6 +13,7 @@ const c={state,window:{addEventListener(n,fn){events[n]=fn}},document:{addEventL
  departmentRefreshBlocked:()=>blocked,hasDirtyChanges:()=>dirty,dirtyModuleFingerprint:()=>'',
  songLoadPromise:null,scriptureLoadPromise:null,referenceLinksLoadPromise:null,calendarLoadPromise:null,serviceDataLoadPromise:null,activeServiceSavePromise:null,
  pendingSundayEditSync:new Set(),CALENDAR_MIN_DATE:'2025-01-01',
+ singleSongPersistentCacheOptions:()=>({persistent:true,cacheScope:'public'}),
  captureDetailViewportSnapshot:()=>({}),restoreDetailViewportSnapshot(){},refs:{detailPane:{querySelector:()=>null},songList:{scrollTop:37}},
  renderSongList(){},renderCalendarView(){},render(){},renderScriptureDetail(){},renderReferencesDetail(){},
  normalizeReferenceLink:r=>r,normalizeServerScripture:r=>r,extractUiVerses:()=>[],uiVerseSlot:()=>false,sortScriptures:(x,y)=>x.id.localeCompare(y.id),
