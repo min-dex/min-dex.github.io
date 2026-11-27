@@ -20960,18 +20960,18 @@ function showToast(message, type = "info") {
   close.innerHTML = '<i data-lucide="x"></i>';
   close.addEventListener("click", () => dismissToast(toast));
   toast.append(icon, text, close);
-  let hovered = false;
+  let hovered = false, focused = false;
   toast.scheduleRemoval = () => {
     window.clearTimeout(toast.removeTimer);
-    if (toast.hidden || hovered || toast.contains(document.activeElement)) return;
+    if (toast.hidden || hovered || focused || toast.contains(document.activeElement)) return;
     toast.removeTimer = window.setTimeout(() => dismissToast(toast), toastDisplayDuration(message, toastType));
   };
   toast.addEventListener("mouseenter", () => { hovered = true; window.clearTimeout(toast.removeTimer); });
   toast.addEventListener("mouseleave", () => { hovered = false; toast.scheduleRemoval(); });
-  toast.addEventListener("focusin", () => window.clearTimeout(toast.removeTimer));
+  toast.addEventListener("focusin", () => { focused = true; window.clearTimeout(toast.removeTimer); });
   toast.addEventListener("focusout", (event) => {
     if (!toast.contains(event.relatedTarget)) scheduleMicrotask(() => {
-      if (toast.isConnected) toast.scheduleRemoval();
+      focused = toast.contains(document.activeElement); if (toast.isConnected) toast.scheduleRemoval();
     });
   });
   refs.toastRegion.appendChild(toast);

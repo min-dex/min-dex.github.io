@@ -42,6 +42,19 @@ try:
               state.module='calendar';document.body.dataset.module='calendar';document.body.dataset.theme='dark';
               refs.searchInput.value=state.search;
               refs.songList.innerHTML=renderGlobalSearchSections(results);
+              const originalResults=getGlobalSearchResults;
+              getGlobalSearchResults=()=>({praise:[{id:'long-song',title:'아주 긴 찬양 제목이 좁은 화면에서도 잘리지 않고 자연스럽게 이어지는 검색 결과',subtitle:'검단우리교회 청년부와 다음세대를 위한 긴 설명',versions:[]}],scripture:[],service:[]});
+              state.search='교회 공동체와 다음세대를 함께 세우기 위한 아주 긴 검색 문장';
+              const layouts=[];
+              for(const width of [390,760,1440]) {
+                document.documentElement.style.width=width+'px';renderHomeSearchDetail();
+                const head=refs.detailPane.querySelector('.home-search-head strong');
+                const title=refs.detailPane.querySelector('.song-title-text');
+                const meta=refs.detailPane.querySelector('.song-meta-line');
+                layouts.push({width,head:head.scrollWidth<=head.clientWidth+1,title:title.scrollWidth<=title.clientWidth+1,meta:meta.scrollWidth<=meta.clientWidth+1,wrap:getComputedStyle(title).whiteSpace});
+              }
+              document.documentElement.style.width='';getGlobalSearchResults=originalResults;
+              check(layouts.every(item=>item.head&&item.title&&item.meta&&item.wrap==='normal'),'long search content clipped '+JSON.stringify(layouts));
               return 'PASS hidden count space, real results first, separate action and tab priority';
             }'''), flush=True)
             page.locator('.sidebar').screenshot(path='/tmp/mindex-search-layout-'+engine+'.png')

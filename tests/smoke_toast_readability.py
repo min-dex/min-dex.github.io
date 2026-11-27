@@ -1,4 +1,6 @@
 """Check reading time, pause/dismiss controls, and queued toast delivery."""
+import os
+os.environ["MINDEX_SMOKE_OFFLINE"] = "1"
 from smoke_app import launch_chromium, start_local_app_server, sync_playwright
 
 

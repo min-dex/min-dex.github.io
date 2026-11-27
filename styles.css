@@ -1094,21 +1094,19 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   gap: 6px;
   margin: 0;
   width: fit-content;
-  border-radius: 999px;
-  background: var(--ui-surface-panel);
-  padding: 4px 8px;
+  padding: 5px var(--sidebar-item-pad-x) 4px;
   color: var(--ink-3);
   font-size: var(--ui-label-size);
-  font-weight: 700;
+  font-weight: var(--ui-label-weight);
   letter-spacing: 0;
   line-height: 14px;
   text-transform: none;
 }
 .global-search-heading::before {
-  width: 3px;
-  height: 10px;
-  border-radius: 999px;
-  background: currentColor;
+  width: 2px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--accent);
   content: "";
   opacity: .9;
 }
@@ -1146,7 +1144,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 .empty-detail, .editor-shell { width: 100%; max-width: none; }
 .empty-detail { position: relative; display: grid; min-height: 100%; place-items: center; text-align: center; }
 .empty-detail-actions { position: absolute; top: 0; right: 0; }
-.empty-detail h2 { color: var(--ink-2); font-size: var(--ui-page-title-size); letter-spacing: .04em; text-transform: uppercase; }
+.empty-detail h2 { color: var(--ink-2); font-size: var(--ui-page-title-size); letter-spacing: 0; }
 .empty-detail p { margin-top: var(--s2); color: var(--ink-4); }
 .empty-detail .reference-new-btn { margin-top: 0; }
 .empty-detail .empty-verse {
@@ -1174,7 +1172,8 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .home-search-head {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
+  flex-wrap: wrap;
   gap: var(--s2);
   color: var(--ink-4);
 }
@@ -1186,13 +1185,13 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   text-transform: none;
 }
 .home-search-head strong {
-  min-width: 0;
-  overflow: hidden;
+  min-width: min(240px, 100%);
+  flex: 1 1 240px;
   color: var(--ink);
   font-size: 22px;
   font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 .home-search-head small {
   flex: 0 0 auto;
@@ -1214,6 +1213,12 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
 }
 .home-search-results .song-item:hover {
   background: var(--ui-surface-field);
+}
+.home-search-results :is(.song-title-text, .song-meta-line) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .reference-new-btn {
   display: inline-flex;
