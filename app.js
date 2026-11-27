@@ -9687,7 +9687,6 @@ function handleDetailChange(event) {
     renderWorshipBackgroundsDetail();
     return;
   }
-
   const serviceMusicFile = event.target.closest("[data-service-music-file]");
   if (serviceMusicFile) {
     loadServiceMusicFile(serviceMusicFile.files?.[0]);
@@ -16518,7 +16517,10 @@ function renderWorshipBackgroundsDetail() {
         </label>
         <label class="background-field background-file-field">
           <span>이미지</span>
-          <input type="file" accept="image/png,image/*" data-background-file />
+          <span class="background-file-control">
+            <span class="background-file-button" aria-hidden="true"><i data-lucide="image-up"></i>파일 선택</span>
+            <input type="file" accept="image/png,image/*" data-background-file aria-label="등록할 배경 이미지 선택" />
+          </span>
         </label>
         <button class="reference-new-btn" type="button" data-background-action="register" data-background-file="${escapeAttr(selectedFileName)}">
           <i data-lucide="upload"></i>

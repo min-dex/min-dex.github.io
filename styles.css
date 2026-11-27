@@ -1584,9 +1584,7 @@ body[data-module="calendar"] .detail-pane { overflow: hidden; }
   outline: 0;
   padding: 0 var(--s2);
 }
-.background-file-field input {
-  padding-top: 5px;
-}
+.background-file-field input { padding-top: 5px; }
 .background-toolbar > .reference-new-btn { min-height: 35px; font-size: var(--ui-label-size); }
 .background-path-row {
   display: flex;
@@ -3160,9 +3158,7 @@ body[data-module="praise"] .song-count-badge {
 @keyframes loading-status-spin {
   to { transform: rotate(360deg); }
 }
-.toast-region { position: fixed; right: var(--s4); bottom: var(--s4); z-index: 20; display: grid; gap: var(--s2); width: min(360px, calc(100vw - 32px)); }
-/* Open right panels own the notification column instead of covering the board. */
-body:is(.right-sidebar-open, [data-module="presenter"]) .toast-region { right: 0; width: var(--shell-right-w); box-sizing: border-box; padding-inline: var(--s3); }
+.toast-region { display: grid; min-width: 0; gap: var(--s2); }
 .toast { --toast-tone: var(--info); display: flex; align-items: flex-start; gap: 8px; border: 1px solid var(--line-soft); border-left: 3px solid var(--toast-tone); border-radius: var(--r); background: var(--ui-surface-panel); color: var(--ink-2); box-shadow: var(--shadow-soft); padding: var(--s3); }
 .toast[hidden] { display: none; }
 .toast.info { --toast-tone: var(--info); }

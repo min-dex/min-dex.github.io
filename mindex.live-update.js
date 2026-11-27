@@ -65,7 +65,7 @@
       if (visible && !notice) {
         notice = document.createElement('div');notice.className = 'live-update-notice';notice.setAttribute('role','status');
         notice.textContent = '새 버전이 준비됐어요. 편집 내용을 저장하고 작업을 마치면 자동으로 반영해요.';
-        document.body.append(notice);
+        (document.getElementById('systemFeedbackRegion') || document.body).append(notice);
       }
       if (notice) notice.hidden = !visible;
     },

@@ -47,7 +47,7 @@ def main():
                     result = page.locator('.background-manager').evaluate("""(manager,width) => {
                       manager.style.width=width+'px';
                       const group=manager.querySelector('.background-toolbar'),g=group.getBoundingClientRect();
-                      const boxes=[...group.querySelectorAll('input,select,button')].map(n=>n.getBoundingClientRect());
+                      const boxes=[...group.querySelectorAll('input:not([data-background-file]),select,button,.background-file-control')].map(n=>n.getBoundingClientRect());
                       const errors=[];
                       for(const b of boxes)if(b.left<g.left-1||b.right>g.right+1)errors.push('background overflow');
                       for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++)if(Math.min(boxes[i].right,boxes[j].right)>Math.max(boxes[i].left,boxes[j].left)+1&&Math.min(boxes[i].bottom,boxes[j].bottom)>Math.max(boxes[i].top,boxes[j].top)+1)errors.push('background overlap');

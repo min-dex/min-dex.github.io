@@ -40,8 +40,16 @@ try:
                                 button.scroll_into_view_if_needed();b=button.bounding_box()
                                 assert b['x']>=0 and b['x']+b['width']<=width,b
                         if name=='background':
-                            sizes=page.locator('.background-toolbar input,.background-toolbar select,.background-toolbar > button').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().height)')
+                            sizes=page.locator('.background-toolbar select,.background-toolbar > button,.background-file-control').evaluate_all('es=>es.map(e=>e.getBoundingClientRect().height)')
                             assert all(h==35 for h in sizes),sizes
+                            picker=page.locator('.background-file-control')
+                            assert picker.get_by_text('파일 선택',exact=True).count()==1
+                            if width==1440:
+                                page.locator('input[data-background-file]').set_input_files({'name':'예배-배경.png','mimeType':'image/png','buffer':b'png'})
+                                assert page.locator('input[data-background-file]').evaluate("e=>e.files[0]?.name")=='예배-배경.png'
+                            picker_box=picker.bounding_box()
+                            assert picker_box and abs(picker_box['height']-35)<1,picker_box
+                            assert page.locator('input[data-background-file]').evaluate("e=>getComputedStyle(e).cursor")=='pointer'
                         if name=='prep':
                             heights=page.locator('.svc-prep-editor .svc-form-hint-slot').evaluate_all('es=>es.map(e=>[e,e.querySelector("input"),e.querySelector("button")].map(n=>n.getBoundingClientRect().height))')
                             assert heights and all(all(abs(h-30)<1 for h in row) for row in heights),(engine,width,heights)
@@ -59,16 +67,23 @@ try:
                             assert hovered[1:]==[hovered[0],hovered[0]],(engine,theme,width,hovered)
                             feedback=page.evaluate('''()=>{
                               let live=document.querySelector('.live-update-notice');
-                              if(!live){live=document.createElement('div');live.className='live-update-notice';live.textContent='업데이트 확인';document.body.append(live);}
+                              const system=document.getElementById('systemFeedbackRegion');
+                              if(!live){live=document.createElement('div');live.className='live-update-notice';live.textContent='업데이트 확인';system.append(live);}
                               let server=document.getElementById('serverStorageStatus');
-                              if(!server){server=document.createElement('div');server.id='serverStorageStatus';server.textContent='서버 상태 확인';document.body.append(server);}
+                              if(!server){server=document.createElement('div');server.id='serverStorageStatus';server.textContent='서버 상태 확인';system.append(server);}
                               server.hidden=false;
+                              const toast=document.createElement('div');toast.className='toast info';toast.textContent='일반 알림';document.getElementById('toastRegion').append(toast);
                               const read=e=>{const s=getComputedStyle(e);return {radius:s.borderRadius,padding:s.padding,fontSize:s.fontSize,fontWeight:s.fontWeight,background:s.backgroundColor,color:s.color,maxWidth:s.maxWidth}};
-                              const result=[read(live),read(server)];live.remove();server.remove();return result;
+                              const boxes=[live,server,toast].map(e=>{const r=e.getBoundingClientRect();return {top:r.top,bottom:r.bottom,left:r.left,right:r.right}});
+                              const rail=document.getElementById('feedbackRail').getBoundingClientRect();
+                              const result={styles:[read(live),read(server)],boxes,rail:{left:rail.left,right:rail.right,width:rail.width}};live.remove();server.remove();toast.remove();return result;
                             }''')
-                            assert feedback[0]==feedback[1],(engine,theme,width,feedback)
-                            assert feedback[0]['radius']=='5px' and feedback[0]['padding']=='10px 15px',feedback
-                            assert feedback[0]['fontSize']=='12px' and feedback[0]['fontWeight']=='600',feedback
+                            assert feedback['styles'][0]==feedback['styles'][1],(engine,theme,width,feedback)
+                            assert feedback['styles'][0]['radius']=='5px' and feedback['styles'][0]['padding']=='10px 15px',feedback
+                            assert feedback['styles'][0]['fontSize']=='12px' and feedback['styles'][0]['fontWeight']=='600',feedback
+                            boxes=feedback['boxes']
+                            assert boxes[0]['bottom']<=boxes[1]['top'] and boxes[1]['bottom']<=boxes[2]['top'],feedback
+                            assert feedback['rail']['left']>=0 and feedback['rail']['right']<=width+1,feedback
                             help_summary=page.locator('.svc-presenter-toolbar .svc-presenter-help > summary')
                             help_summary.click()
                             help_panel=page.locator('.svc-presenter-toolbar .svc-presenter-help-panel')

@@ -30,7 +30,7 @@
   let node=document.getElementById('serverStorageStatus');
   // Routine background persistence is silent; failures still require action.
   if(!failures.size){if(node){node.hidden=true;node.textContent='';node._storageStatusSignature=null}return}
-  if(!node){node=document.createElement('div');node.id='serverStorageStatus';node.setAttribute('role','status');document.body.append(node);}
+  if(!node){node=document.createElement('div');node.id='serverStorageStatus';node.setAttribute('role','status');(document.getElementById('systemFeedbackRegion')||document.body).append(node);}
   node.hidden=false;
   const conflict=Object.entries(stores||{}).flatMap(([name,store])=>store.conflictKeys().map(key=>({name,key})))[0];
   const kinds=[...new Set([...failures.keys()].map(category))].join(', ');

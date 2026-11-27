@@ -71,6 +71,17 @@ visual coverage. The safe sequence is:
 4. Add smoke coverage if behavior can regress.
 5. Only then extract larger CSS or JS modules.
 
+## Feedback rail and file controls · 2026-11-27
+
+- Toasts, deferred web-update notices and server-storage failures share one
+  bottom feedback rail. Concurrent messages stack instead of occupying the same
+  fixed coordinates. The rail follows the existing right-panel column and keeps
+  retry/close controls interactive; normal content and output surfaces are unchanged.
+- File inputs that are part of an app-managed toolbar use a stable Korean action
+  label plus the selected filename. Keep the native input for keyboard and OS
+  picker behavior, but do not expose platform-dependent English selector copy in
+  the Mindex chrome.
+
 
 ## Semantic surfaces · 2026-10-17
 
