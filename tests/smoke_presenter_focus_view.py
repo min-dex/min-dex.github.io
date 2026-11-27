@@ -96,11 +96,8 @@ try:
     }''')
     page.evaluate('renderPresenterControlState()')
     assert '현재 송출' in page.locator('.svc-focus-screens').inner_text()
-    page.locator('.svc-focus-panel [data-presenter-action="emergency"]').click()
-    page.wait_for_function("state.presenter.emergencyMode && !!document.querySelector('.svc-focus-screens .is-emergency-mode')")
+    assert page.locator('.svc-focus-panel [data-presenter-action="emergency"]').count() == 0
     assert page.evaluate("state.serviceMusic.audio===focusAudio && focusAudio.currentTime===42 && !focusAudio.paused && focusItems===JSON.stringify(state.serviceItems) && focusDraft.value==='아직 저장하지 않은 제목'")
-    page.locator('.svc-focus-panel [data-presenter-action="emergency"]').click()
-    page.wait_for_function("!state.presenter.emergencyMode && !document.querySelector('.svc-focus-screens .is-emergency-mode')")
 
     page.evaluate('state.presenter.safetyBlank=true;syncPresenterFocusView()')
     assert '암전' in page.locator('.svc-focus-screens').inner_text()

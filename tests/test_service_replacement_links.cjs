@@ -41,7 +41,11 @@ const common={id:crypto.randomUUID(),service_id:target,label:'공동기도',raw_
 const deck=presenterElementSlideFromMemoCore(common,{},0,parseServiceItemMemo(common.memo),'공동기도');
 assert.equal(deck.type,'image');assert.equal(deck.label,'공동기도');assert.ok(deck.imageSrc.includes('daniel-common-prayer-template-'));
 assert.ok(SERVICE_SLOT_MUSIC['dawn.free'].source.endsWith('9778d2abaf3d.mp3'));
-assert.ok(!SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.includes('9778d2abaf3d'));
+assert.ok(SERVICE_SLOT_MUSIC['prayer.meeting.free'].source.endsWith('9778d2abaf3d.mp3'));
+assert.ok(SERVICE_SLOT_MUSIC['prayer.meeting.2026'].source.includes('friday-free-prayer.m4a'));
+assert.equal(worshipFreePrayerAudioKey({type_id:'friday',date:'2026-11-26'}),'prayer.meeting.2026');
+assert.equal(worshipFreePrayerAudioKey({type_id:'friday',date:'2026-11-27'}),'prayer.meeting.free');
+assert.equal(worshipFreePrayerAudioKey({type_id:'friday',date:'2026-11-27',_worshipSourceRef:{free_prayer_audio_key:'prayer.meeting.2026'}}),'prayer.meeting.2026');
 // Only an explicitly reviewed duplicate is projected away; original rows stay intact.
 const fri={id:'10000000-0000-4000-8000-000000000098',type_id:'friday',date:'2026-11-06',alias:'온세대 월삭예배',_worshipSourceRef:{created_from:'mindex_template'}};
 const monthly={id:'10000000-0000-4000-8000-000000000099',type_id:'monthly',date:fri.date,alias:fri.alias,_worshipSourceRef:{navigation_duplicate_of:fri.id}};

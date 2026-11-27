@@ -78,10 +78,9 @@ try:
               check(warningCss.backgroundColor==='rgba(0, 0, 0, 0)'&&warningCss.paddingLeft==='0px'&&warningCss.borderRadius==='0px','warning still boxed');
               const oldLive=isPresenterOutputWindowOpen;isPresenterOutputWindowOpen=()=>true;
               const screen=document.createElement('div');screen.innerHTML=renderPresenterScreenManagement(sid,[sermon]);isPresenterOutputWindowOpen=oldLive;
-              const fallback=screen.querySelector('[data-presenter-action="emergency"]');
-              check(fallback?.textContent.includes('배경 없이')&&fallback.title.includes('배경 영상'),'fallback purpose unclear');
+              check(!screen.querySelector('[data-presenter-action="emergency"]')&&!screen.textContent.includes('배경 없이'),'retired backgroundless action remains');
               warning.remove();
-              return 'PASS single-pass outline target, partial visibility, subtitle, warning and fallback';
+              return 'PASS single-pass outline target, partial visibility, subtitle, warning and retired backgroundless action';
             }""")
             print(engine, result, flush=True)
             browser.close()

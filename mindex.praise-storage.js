@@ -326,6 +326,11 @@ function renderSingleSongRelations(song) {
 // Release bootstrap checks server phase before enabling native storage.
 let singleSongActivationPending = null;
 const singleSongCatalogReadReceipts = new WeakMap();
+function singleSongPersistentCacheOptions() {
+  if (state.config?.authRequired !== true) return {persistent:true,cacheScope:'public'};
+  const account = String(state.auth?.user?.id || '').trim();
+  return account ? {persistent:true,cacheScope:`account:${account}`} : {persistent:false,cacheScope:''};
+}
 async function ensureSingleSongActivation() {
   if (globalThis.MINDEX_SINGLE_SONG_BOOTSTRAP_READY !== true || !state.client) return false;
   const client = state.client;
@@ -338,7 +343,7 @@ async function ensureSingleSongActivation() {
     return singleSongActivationPending.promise;
   }
   const promise = (async () => {
-    const prepared = await globalThis.MindexSingleSong.loadActivation(client,{persistent:state.config?.authRequired === false});
+    const prepared = await globalThis.MindexSingleSong.loadActivation(client,singleSongPersistentCacheOptions());
     if (state.client !== client) throw new Error("PRAISE_STORAGE_CLIENT_CHANGED");
     if (prepared.phase === 'legacy') return false;
     if (state.saving || Object.values(state.dirty || {}).some(Boolean)) throw new Error("미저장 입력을 보존한 뒤 다시 열어 주세요.");

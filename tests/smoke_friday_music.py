@@ -41,7 +41,7 @@ try:
             }""")
             print(engine, page.evaluate('''async () => {
  const check=(v,m)=>{if(!v)throw Error(m)};
- const service={id:'fixture',type_id:'friday'},item={_worshipSlotKey:'prayer.meeting.free'};
+ const service={id:'fixture',type_id:'friday',date:'2026-11-27'},item={_worshipSlotKey:'prayer.meeting.free'};
  const a={paused:true,currentTime:0,src:'',load(){this.loads=(this.loads||0)+1},pause(){this.paused=true},play(){this.paused=false;return Promise.resolve()}};
  state.serviceMusic.audio=a;
  state.serviceMusic.fadeStopEnabled=false; // Immediate-stop cases; fade envelope is verified separately.
@@ -49,6 +49,13 @@ try:
  const dawnItem={label:'자율기도',_worshipSlotKey:'prayer.meeting.free',memo:serializeServiceItemMemo({elementType:'title'})};
  const dawnMarkup=renderServiceSlotMusic({service:dawn,item:dawnItem});
  check(dawnMarkup.includes('dawn-free-prayer-9778d2abaf3d.mp3')&&!dawnMarkup.includes('friday-free-prayer'),'dawn source wrong');
+ check(dawnMarkup.includes('2027 기도회 음원'),'dawn label wrong');
+ const oldFridayMarkup=renderServiceSlotMusic({service:{id:'old-friday',type_id:'friday',date:'2026-11-20'},item});
+ check(oldFridayMarkup.includes('friday-free-prayer.m4a')&&oldFridayMarkup.includes('2026 기도회 음원'),'historic Friday source changed');
+ const currentFridayMarkup=renderServiceSlotMusic({service,item});
+ check(currentFridayMarkup.includes('dawn-free-prayer-9778d2abaf3d.mp3')&&currentFridayMarkup.includes('2027 기도회 음원'),'current Friday did not switch');
+ const explicitOldMarkup=renderServiceSlotMusic({service:{...service,_worshipSourceRef:{free_prayer_audio_key:'prayer.meeting.2026'}},item});
+ check(explicitOldMarkup.includes('friday-free-prayer.m4a'),'explicit historic selection lost');
  check(!renderServiceSlotMusic({service:dawn,item:{label:'기도',_worshipSlotKey:'prayer.opening'}}),'opening prayer received music');
  check(!renderServiceSlotMusic({service:{id:'other',type_id:'wednesday'},item:dawnItem}),'other service received dawn music');
  const explicit={...dawnItem,memo:serializeServiceItemMemo({audioAsset:{url:'https://example.invalid/preserved.mp3',name:'별도 음원'}})};

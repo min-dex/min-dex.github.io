@@ -1588,7 +1588,6 @@ function presenterStatePayload(serviceId = state.presenter.serviceId) {
     transitionLogo: normalizePresenterTransitionLogo(serviceRawSourceRef(service).transitionLogo),
     presentationDesign: normalizePresenterServiceDesign(serviceRawSourceRef(service).presentationDesign),
     chromakey: serviceChromakey,
-    emergencyMode: Boolean(state.presenter.emergencyMode),
     outputTheme: presenterOutputTheme(service?.type_id),
     backgroundImage: backgroundImages[0] || "",
     backgroundImages,
@@ -1644,7 +1643,6 @@ function restorePresenterControllerSession() {
     payload.index,
   );
   state.presenter.pptxProgress = payload.pptxProgress || null;
-  state.presenter.emergencyMode = Boolean(payload.emergencyMode);
   state.presenter.safetyBlank = Boolean(payload.safetyBlank);
   state.presenter.safetyBlankMode = payload.safetyBlankMode === "transparent" ? "transparent" : "black";
   state.presenter.jumpDraft = "";
@@ -2568,7 +2566,6 @@ function normalizePresenterPayload(payload) {
     serviceDate: payload?.serviceDate || payload?.service_date || "",
     chromakey: Boolean(payload?.chromakey),
     outputFrozen: Boolean(payload?.outputFrozen),
-    emergencyMode: Boolean(payload?.emergencyMode),
     transitionLogo: normalizePresenterTransitionLogo(payload?.transitionLogo),
     presentationDesign: normalizePresenterServiceDesign(payload?.presentationDesign),
     outputTheme: payload?.outputTheme || presenterOutputTheme(payload?.serviceType),
@@ -2657,9 +2654,9 @@ function renderPresenterOutput(payload, options = {}) {
   clearPresenterOutputAutoAdvanceTimer();
   const slides = Array.isArray(payload?.slides) ? payload.slides : [];
   const liveSlide = payload?.liveScripture?.active ? payload.liveScripture.slide : null;
-  const slide = presenterEmergencySlideView(payload?.safetyBlank
+  const slide = payload?.safetyBlank
     ? presenterSafetyBlankSlide(payload.safetyBlankMode)
-    : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)], payload?.emergencyMode && !payload?.safetyBlank);
+    : liveSlide || slides[clampPresenterIndex(payload?.index, slides.length)];
   const frameState = presenterOutputFrameStateForSlide(slide, payload);
   presenterTools.outputFrame(root, slide && !payload.safetyBlank ? presenterTools.key(payload.serviceId, payload.index, slide, !!liveSlide) : "");
   if (renderPresenterKeynoteHtmlOutput(root, payload)) return;
@@ -2738,9 +2735,7 @@ function presenterSlideUsesServiceBackground(slide) {
 }
 
 function presenterOutputFrameStateForSlide(slide, payload = {}) {
-  const emergencyMode = Boolean(payload?.emergencyMode && !payload?.safetyBlank
-    && !String(slide?.id || "").startsWith("presenter:safety-"));
-  slide = presenterEmergencySlideView(slide, emergencyMode);
+  const emergencyMode = false;
   const backgroundImages = slide?.formBackgroundImage
     ? [slide.formBackgroundImage] : presenterPayloadBackgroundImages(payload);
   const fallbackChromakey = Boolean(payload?.chromakey);

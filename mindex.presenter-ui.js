@@ -243,7 +243,6 @@ function renderPresenterScreenManagement(serviceId, slides = []) {
       ${renderPresenterAlwaysOnTopControl({ buttonStyle: true })}
       ${toggle('black', '암전', 'eye-off')}
       ${toggle('transparent', '투명', 'layers')}
-      <button type="button" class="icon-btn svc-presenter-emergency" data-presenter-action="emergency" data-service-id="${escapeAttr(serviceId)}" aria-pressed="${Boolean(own && state.presenter.emergencyMode)}" aria-label="배경 없이 송출${own && state.presenter.emergencyMode ? ' 해제' : ''}" title="배경 영상·이미지를 숨기고 검은 바탕에 내용을 송출합니다." ${own && slides.length ? '' : 'disabled'}><i data-lucide="triangle-alert" aria-hidden="true"></i><span>배경 없이${own && state.presenter.emergencyMode ? ' 켜짐' : ''}</span></button>
     </div>
     ${globalThis.MindexPresenterRefresh?.controls(serviceId, slides) || ''}
   </section>`;
@@ -750,7 +749,7 @@ function presenterControlBoardKey(service, slides = [], active = false, chromake
     service?.id || "",
     theme,
     chromakey ? "chroma" : "clean",
-    state.presenter.serviceId === service?.id && state.presenter.emergencyMode ? "emergency" : "normal",
+    "normal",
     active ? "active" : "preview",
     presenterControllerIsLive(service?.id) ? "live" : "offline",
     globalThis.MindexSongTiming?.revision || 0,

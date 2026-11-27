@@ -12,7 +12,7 @@ try:
    page.wait_for_function("typeof arrangePresenterBoardMediaControls==='function'&&!document.body.classList.contains('ui-booting')")
    print(engine,page.evaluate(r'''async()=>{
     const check=(v,m)=>{if(!v)throw Error(m)};
-    const dawn={id:'rail-dawn',type_id:'holy_week_dawn',date:'2026-11-02'},friday={id:'rail-friday',type_id:'friday',date:'2026-11-06'};
+    const dawn={id:'rail-dawn',type_id:'holy_week_dawn',date:'2026-11-02'},friday={id:'rail-friday',type_id:'friday',date:'2026-11-06'},currentFriday={id:'rail-friday-current',type_id:'friday',date:'2026-11-27'};
     const closing={id:'closing',service_id:dawn.id,label:'기도회',raw_title:'통성기도',_worshipSlotKey:'prayer.meeting.free',_worshipSectionKey:'prayer_meeting',memo:serializeServiceItemMemo({elementType:'title'})};
     const before=JSON.stringify(closing);state.services=[dawn,friday];state.serviceItems={[dawn.id]:[closing]};
     const projected=adaptServiceItemsForPresenterView(dawn,[closing]);check(projected[0].label==='자율기도'&&projected[0]._worshipSectionTitle==='자율기도','projection');
@@ -22,8 +22,9 @@ try:
     check(!serviceItemIsFreePrayer({...closing,label:'기도',memo:serializeServiceItemMemo({elementType:'title_person'})},dawn),'assigned prayer renamed or made static');
     check(!serviceItemIsFreePrayer({...closing,_worshipSlotKey:'response.prayer'},friday),'Friday response renamed');
     check(!presenterSlotMusicConfig({service:dawn,item:{label:'기도',_worshipSlotKey:'response.prayer',memo:serializeServiceItemMemo({elementType:'title_person'})}}),'assigned prayer gained music');
-    const slot=renderServiceSlotMusic({service:dawn,item:closing});check(slot.includes('새벽기도회 자율기도 음원')&&!slot.includes('자율기도 음악'),'audio label');
-    check(renderServiceSlotMusic({service:friday,item:{_worshipSlotKey:'prayer.meeting.free'}}).includes('금요기도회 자율기도 음원'),'Friday audio label');
+    const slot=renderServiceSlotMusic({service:dawn,item:closing});check(slot.includes('2027 기도회 음원')&&!slot.includes('새벽기도회 자율기도 음원'),'dawn audio label');
+    check(renderServiceSlotMusic({service:friday,item:{_worshipSlotKey:'prayer.meeting.free'}}).includes('2026 기도회 음원'),'historic Friday audio label');
+    check(renderServiceSlotMusic({service:currentFriday,item:{_worshipSlotKey:'prayer.meeting.free'}}).includes('2027 기도회 음원'),'current Friday audio label');
     const host=document.createElement('div');host.id='rail-proof';host.style.cssText='position:fixed;inset:0;overflow:auto;background:var(--bg);z-index:99999;padding:15px';document.body.append(host);
     const asset={url:'https://example.invalid/video.mp4',name:'영상'},key={original:{format:'key',sha256:'a'.repeat(64)},keynoteHtml:{pages:20}};
     const controls=[slot,renderPresenterInputAudioControls('https://example.invalid/a.mp3','연결 음원',dawn.id,'audio'),renderPresenterInputVideoControls(asset,[dawn.id,'video']),renderPresenterKeynoteHtmlControls(key,dawn.id,'key')];

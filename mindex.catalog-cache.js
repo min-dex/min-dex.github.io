@@ -11,13 +11,14 @@
     const bytes = typeof value === 'string' ? new TextEncoder().encode(value) : value;
     return Array.from(new Uint8Array(await root.crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
   }
-  async function key(client) {
+  async function key(client, scope = '') {
     if (!root.indexedDB || !root.crypto?.subtle || typeof client?.supabaseUrl !== 'string' || typeof client.supabaseKey !== 'string') return null;
     const url = new URL(client.supabaseUrl);
     if (!['https:','http:'].includes(url.protocol) || url.username || url.password) return null;
     url.search = ''; url.hash = '';
     // Connection keys are never persisted in plaintext or emitted in diagnostics.
-    return hash(url.href.replace(/\/$/,'')+'\n'+client.supabaseKey);
+    const accountScope = String(scope || '').trim();
+    return hash(url.href.replace(/\/$/,'')+'\n'+client.supabaseKey+(accountScope && accountScope !== 'public' ? `\n${accountScope}` : ''));
   }
   function access(id, mode, action) {
     return new Promise(resolve => {
@@ -42,9 +43,9 @@
       };
     });
   }
-  async function remove(client) {
+  async function remove(client, options = {}) {
     try {
-      const id=await key(client); if (!id) return false;
+      const id=await key(client, options.scope); if (!id) return false;
       const token=(generations.get(id)||0)+1; generations.set(id,token);
       return !!await access(id,'readwrite',(store,k)=>{
         if (generations.get(k)!==token) { store.transaction.abort(); return null; }
@@ -52,11 +53,11 @@
       });
     } catch { return false; }
   }
-  async function read(client,status,{allowPrevious=false}={}) {
+  async function read(client,status,{allowPrevious=false,scope=''}={}) {
     let timer;
     const task=(async()=>{
       try {
-        const expected=signature(status),id=await key(client);
+        const expected=signature(status),id=await key(client,scope);
         if (!expected || !id) return null;
         const result=await access(id,'readonly',(store,k)=>store.get(k));
         if (!result) { counters.failures++; return null; }
@@ -64,9 +65,9 @@
         if (entry?.schema !== 1 || (!allowPrevious && entry.signature !== expected) || typeof entry.body !== 'string' || entry.body.length > LIMIT) return null;
         const bytes=new TextEncoder().encode(entry.body);
         if (bytes.byteLength > LIMIT) return null;
-        if (entry.digest !== await hash(bytes)) { void remove(client); return null; }
+        if (entry.digest !== await hash(bytes)) { void remove(client,{scope}); return null; }
         const snapshot=JSON.parse(entry.body);
-        if (!signature(snapshot.status) || signature(snapshot.status)!==entry.signature || !Array.isArray(snapshot.records) || snapshot.records.length!==snapshot.status.recordCount) { void remove(client); return null; }
+        if (!signature(snapshot.status) || signature(snapshot.status)!==entry.signature || !Array.isArray(snapshot.records) || snapshot.records.length!==snapshot.status.recordCount) { void remove(client,{scope}); return null; }
         return snapshot.status.epoch===status.epoch && (allowPrevious || entry.signature===expected) ? snapshot : null;
       } catch { counters.failures++; return null; }
     })();
@@ -75,9 +76,9 @@
     if (snapshot && signature(snapshot.status)===signature(status)) counters.hits++; else counters.misses++;
     return snapshot;
   }
-  async function write(client,prepared) {
+  async function write(client,prepared,{scope=''}={}) {
     try {
-      const stamp=signature(prepared?.status),id=await key(client);
+      const stamp=signature(prepared?.status),id=await key(client,scope);
       if (!stamp || !id || !Array.isArray(prepared.records) || prepared.records.length!==prepared.status.recordCount) return false;
       const token=(generations.get(id)||0)+1; generations.set(id,token);
       const body=JSON.stringify({status:prepared.status,records:prepared.records});

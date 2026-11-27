@@ -5680,6 +5680,10 @@ other services, chromakey and stored slide content. Lyric titles remain note-fre
 
 ## Presenter emergency mode ·2026-11-03
 
+> 2026-11-27 결정으로 이 기능은 폐기됐다. 컨트롤러의 `배경 없이` 버튼과 action,
+> 새 presenter payload의 `emergencyMode` 전송을 제거하고 과거 payload의 같은 필드는
+> 무시한다. 암전·투명·실시간 말씀과 정상 배경 출력은 유지한다.
+
 The live service screen-management panel offers a reversible 비상 모드 toggle.
 It uses the existing chromakey caption layout over pure black, without service
 artwork, lyric BGV, generated waiting loops or clean-layout decorations. Explicit

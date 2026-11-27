@@ -1,5 +1,14 @@
 # Friday Prayer Music and Button States
 
+## 2026/2027 기도회 음원 이름과 전환 · 2026-11-27
+
+- 기존 `friday-free-prayer.m4a`는 사용자 화면에서 `2026 기도회 음원`으로 표시한다.
+- 새 AR 2회 + MR 1회 `dawn-free-prayer-9778d2abaf3d.mp3`는 `2027 기도회 음원`으로 표시한다.
+- 2026-11-27부터 금요기도회·월삭예배의 기본 자율기도 음원은 `2027 기도회 음원`이다.
+  그 이전 예배는 `2026 기도회 음원`을 유지한다. 날짜가 없는 신규 예배도 최신 기본값을 쓴다.
+- `free_prayer_audio_key`로 직접 고른 과거 음원과 예배 항목에 직접 첨부한 음원은 날짜 기본값보다
+  우선한다. 파일·가사·송폼·타이밍과 운영 예배 레코드는 이 코드 변경으로 다시 저장하지 않는다.
+
 ## Scope
 
 - Friday free-prayer items (slot `prayer.meeting.free` or exact label `자율기도`) offer a dedicated player at the element, separate from sidebar background music.

@@ -541,7 +541,6 @@ const state = {
     sourceItems: null,
     sourceSignature: "",
     index: 0,
-    emergencyMode: false,
     safetyBlank: false,
     jumpDraft: "",
     exitArmedAt: 0,
@@ -29899,8 +29898,9 @@ function renderLiveScriptureControl(serviceId) {
 }
 
 const SERVICE_SLOT_MUSIC = Object.freeze({
-  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3", label: "새벽기도 자율기도 음악", repeatAllowed: false },
-  "prayer.meeting.free": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "자율기도 음악", repeatAllowed: false },
+  "dawn.free": { source: "./assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3", label: "2027 기도회 음원", repeatAllowed: false },
+  "prayer.meeting.free": { source: "./assets/presenter/dawn-free-prayer-9778d2abaf3d.mp3", label: "2027 기도회 음원", repeatAllowed: false },
+  "prayer.meeting.2026": { source: "./assets/presenter/friday-free-prayer.m4a?v=faststart-20260919", label: "2026 기도회 음원", repeatAllowed: false },
 });
 
 let serviceMusicWarmup = null;

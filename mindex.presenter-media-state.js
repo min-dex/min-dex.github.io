@@ -251,11 +251,6 @@ function serviceItemIsFreePrayer(item = {}, service = null) {
     || (worshipAppServiceTypeId(service?.type_id || "") === "holy-week-dawn" && slot === "response.prayer");
 }
 
-function serviceFreePrayerAudioLabel(service) {
-  const serviceName = serviceNavigationName(service) || serviceDisplayTypeName(service) || "예배";
-  return `${serviceName} 자율기도 음원`;
-}
-
 function presenterSlotMusicConfig(context) {
   if (!context?.item || !serviceItemIsFreePrayer(context.item, context.service)) return "";
   if (hasServiceAsset(parseServiceItemMemo(context.item.memo).audioAsset)) return "";
@@ -265,7 +260,7 @@ function presenterSlotMusicConfig(context) {
 function renderServiceSlotMusic(context) {
   const config = presenterSlotMusicConfig(context);
   if (!config) return "";
-  return renderServiceMusicPlayer({ ...config, label: serviceFreePrayerAudioLabel(context.service), serviceId: context.service?.id || "" });
+  return renderServiceMusicPlayer({ ...config, serviceId: context.service?.id || "" });
 }
 
 // Audio and video stay with their inputs above the grid; decks use the side rail.

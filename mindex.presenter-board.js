@@ -1522,7 +1522,7 @@ function presenterPreviewBackgroundSource(source) {
 function renderPresenterSlideMiniPreview(slide, serviceId = state.presenter.serviceId) {
   const service = state.services.find((svc) => svc.id === serviceId);
   const serviceChromakey = presenterServiceUsesChromakey(service);
-  const emergencyMode = state.presenter.serviceId === serviceId && Boolean(state.presenter.emergencyMode);
+  const emergencyMode = false;
   const previewSlide = presenterEmergencySlideView(normalizePresenterMiniPreviewSlide(slide, serviceChromakey), emergencyMode);
   const backgroundImages = presenterBackgroundSourcesForService(service, {
     includeChromakeyCleanSlides: presenterSlideOutputContext(previewSlide, serviceChromakey) === "clean",

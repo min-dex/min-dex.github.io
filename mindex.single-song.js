@@ -257,22 +257,22 @@
   }
   // A cached snapshot is usable only after a fresh server manifest confirms it.
   const activationSnapshots = new WeakMap(), activationReads = new WeakMap();
-  async function loadActivation(client, {persistent = false} = {}) {
+  async function loadActivation(client, {persistent = false, cacheScope = ''} = {}) {
     if (!activationReads.has(client)) {
-      const pending = readActivation(client, activationSnapshots.get(client), persistent === true).then(prepared => {
+      const pending = readActivation(client, activationSnapshots.get(client), persistent === true, cacheScope).then(prepared => {
         if (prepared.phase === 'native') activationSnapshots.set(client, {
           // Prepared rows are private to this loader. Only detached copies leave it.
           status: copy(prepared.status), records: prepared.records,
         });
         else activationSnapshots.delete(client);
         if (persistent === true) {
-          if (prepared.phase === 'native' && !prepared.fromReadCache) void root.MindexCatalogCache?.write(client,prepared);
-          else if (prepared.phase !== 'native') void root.MindexCatalogCache?.remove(client);
+          if (prepared.phase === 'native' && !prepared.fromReadCache) void root.MindexCatalogCache?.write(client,prepared,{scope:cacheScope});
+          else if (prepared.phase !== 'native') void root.MindexCatalogCache?.remove(client,{scope:cacheScope});
         }
         return prepared;
       }).catch(error => {
         activationSnapshots.delete(client);
-        if (persistent === true) void root.MindexCatalogCache?.remove(client);
+        if (persistent === true) void root.MindexCatalogCache?.remove(client,{scope:cacheScope});
         throw error;
       });
       activationReads.set(client, pending);
@@ -286,7 +286,7 @@
     } finally { if (activationReads.get(client) === pending) activationReads.delete(client); }
   }
   // Read-only bootstrap. A missing rollout RPC is the only legacy fallback.
-  async function readActivation(client, cached, persistent) {
+  async function readActivation(client, cached, persistent, cacheScope = '') {
     const statusResponse = await client.rpc('get_praise_storage_status_v1');
     if (statusResponse.error) {
       if (statusResponse.error.code === 'PGRST202' && /get_praise_storage_status_v1/.test(statusResponse.error.message || '')) return {phase:'legacy',records:[]};
@@ -305,7 +305,7 @@
     let previous = cached?.status.epoch === status.epoch ? cached : null;
     if (!previous && persistent && root.MindexCatalogCache) {
       let snapshot;
-      try { snapshot = await root.MindexCatalogCache.read(client, status, {allowPrevious:status.catalogIndex === 1}); }
+      try { snapshot = await root.MindexCatalogCache.read(client, status, {allowPrevious:status.catalogIndex === 1,scope:cacheScope}); }
       catch { /* Disk failure falls back to a server read. */ }
       if (snapshot) {
         try {
@@ -319,7 +319,7 @@
             return {phase:'native',records:snapshot.records,status,fromReadCache:true};
           }
           previous = snapshot;
-        } catch { void root.MindexCatalogCache.remove(client); }
+        } catch { void root.MindexCatalogCache.remove(client,{scope:cacheScope}); }
       }
     }
     let records;

@@ -43,8 +43,12 @@ try:
     const before=JSON.stringify([state.forms,state.presenter,state.serviceMusic]);let blocked=false;
     try{await ensureSingleSongActivation()}catch{blocked=true}
     checkCache(blocked&&JSON.stringify([state.forms,state.presenter,state.serviceMusic])===before&&!state.singleSongRepository,'cache replaced dirty editor/transport');
-    state.dirty={};state.client=fixtureClient();state.config.authRequired=true;
-    await ensureSingleSongActivation();checkCache(state.client.calls.length===3,'authenticated mode reused disk cache');
+    state.dirty={};state.client=fixtureClient();state.config.authRequired=true;state.auth.user={id:'account-a'};
+    await ensureSingleSongActivation();checkCache(state.client.calls.length===3,'first account-scoped read skipped authoritative catalog');
+    await MindexCatalogCache.write(state.client,{status:fixtureStatus,records:fixtureRecords},{scope:'account:account-a'});
+    state.singleSongRepository=null;state.singleSongCatalog=null;state.client=fixtureClient();
+    await ensureSingleSongActivation();checkCache(state.client.calls.length===1,'authenticated reload redownloaded unchanged catalog');
+    checkCache(!await MindexCatalogCache.read(state.client,fixtureStatus,{scope:'account:account-b'}),'account cache leaked');
     // Accidental payload corruption must fail checksum and fall back to RPC.
     await new Promise((resolve,reject)=>{const req=indexedDB.open('mindex-native-read-cache-v1',1);req.onerror=reject;req.onsuccess=()=>{
      const db=req.result,tx=db.transaction('snapshots','readwrite'),store=tx.objectStore('snapshots'),cursor=store.openCursor();

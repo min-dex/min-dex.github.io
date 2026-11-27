@@ -72,7 +72,7 @@ async function main(){
    waitingAndFriday=await page.evaluate(async()=>{
     const sources=[
      ['video',PRESENTER_DEFAULT_CHROMAKEY_READY_LOOP_VIDEO,'chromakey-ready-loop-pingpong.mp4',39,41],
-     ['audio',SERVICE_SLOT_MUSIC['prayer.meeting.free'].source,'friday-free-prayer.m4a',2790,2820],
+     ['audio',SERVICE_SLOT_MUSIC['prayer.meeting.2026'].source,'friday-free-prayer.m4a',2790,2820],
     ];
     const results={};
     for(const [kind,source,filename,minDuration,maxDuration] of sources){

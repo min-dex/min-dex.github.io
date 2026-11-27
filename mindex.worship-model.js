@@ -685,10 +685,13 @@ function worshipFreePrayerTemplate(steps, service) {
 function worshipFreePrayerAudioKey(typeId) {
   const service = typeId && typeof typeId === 'object' ? typeId : {};
   const key = (service._worshipSourceRef || service.source_ref || {}).free_prayer_audio_key;
-  if (['dawn.free','prayer.meeting.free'].includes(key)) return key;
+  if (['dawn.free','prayer.meeting.free','prayer.meeting.2026'].includes(key)) return key;
   typeId = service.type_id || service.service_type_id || typeId;
   const type = WORSHIP_SERVICE_TYPE_ALIASES[typeId] || typeId;
-  return type === 'holy-week-dawn' ? 'dawn.free' : ['friday', 'monthly'].includes(type) ? 'prayer.meeting.free' : '';
+  if (type === 'holy-week-dawn') return 'dawn.free';
+  if (!['friday', 'monthly'].includes(type)) return '';
+  const date = String(service.date || service.service_date || '').slice(0, 10);
+  return date && date < '2026-11-27' ? 'prayer.meeting.2026' : 'prayer.meeting.free';
 }
 
 // Reuse one persisted worship aggregate across its annual date window.

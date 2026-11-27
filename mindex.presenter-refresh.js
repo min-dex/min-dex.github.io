@@ -22,10 +22,10 @@
     const frozen = current(value.serviceId);
     if (!frozen) return value;
     return { ...frozen.payload, outputFrozen: true, safetyBlank: value.safetyBlank, safetyBlankMode: value.safetyBlankMode,
-      emergencyMode: value.emergencyMode, updatedAt: value.updatedAt };
+      updatedAt: value.updatedAt };
   }
   function output(root, value) {
-    const key = JSON.stringify([value.outputSessionId, value.safetyBlank, value.safetyBlankMode, value.emergencyMode]);
+    const key = JSON.stringify([value.outputSessionId, value.safetyBlank, value.safetyBlankMode]);
     const unchanged = root._presenterFreezeSafetyKey === key;
     root._presenterFreezeSafetyKey = key;
     if (value.outputFrozen && unchanged && root.querySelector('.presenter-output-layer.is-active')) {
@@ -77,7 +77,7 @@
         if (hold === held && !held?.manual) hold = null;
         if (held && sameIdentity(expected) && live(id)) {
           if (!applied && !held.manual) publishPresenterPayload({ ...held.payload, outputFrozen: false,
-            safetyBlank: state.presenter.safetyBlank, safetyBlankMode: state.presenter.safetyBlankMode, emergencyMode: state.presenter.emergencyMode, updatedAt: Date.now() });
+            safetyBlank: state.presenter.safetyBlank, safetyBlankMode: state.presenter.safetyBlankMode, updatedAt: Date.now() });
           else publishPresenterState();
         }
         if (state.selectedServiceId === id) renderPresenterControlState(id);
