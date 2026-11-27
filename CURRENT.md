@@ -893,3 +893,12 @@ readback에서 파송곡(찬송가 358장, 두 판본)은 확인했지만 봉헌
 패킷은 전역 issue clock으로 폐기하며 같은 receipt에는 전체 snapshot을 다시 보내지
 않는다. Chromium/WebKit transport·receipt recovery·output latency·freeze/refresh와
 runtime/SOLID 검사를 통과했다. 운영 예배·송출·설정 쓰기와 공개 배포는 수행하지 않았다.
+
+## 보수적 Presenter 상태 위계 후보 · 2026-11-28
+
+기존 3단 구조·도구 위치·탭·검색·필터·단축키·atomic save를 유지한다. 썸네일
+metadata에 실제 화면은 `송출`, 별도 선택은 `선택`으로 구분하고, 항목 저장 옆의
+고정 60px 상태 영역은 `미저장 / 저장 중 / 저장됨 / 저장 실패`를 표시한다. 상태
+변경은 입력·저장 버튼 위치를 움직이지 않는다. Chromium/WebKit의 light/dark,
+520/1200px 저장 geometry와 basic/focus 390–1440px 상태·초안·음원 보존을 통과했다.
+운영 쓰기·실제 송출·공개 배포는 수행하지 않았다.

@@ -3737,8 +3737,6 @@ body:not(.presenter-output-body) .svc-volume-control input.svc-music-volume:focu
   white-space: nowrap;
 }
 
-/* Status remains announced without consuming editor width. */
-.svc-input-status { min-width: 0; margin: 0; padding: 0; border: 0; }
 .svc-board-subgroup-commit[aria-busy="true"] { cursor: progress; }
 #servicePresenterControls .svc-board-subgroup-flow[data-input-status="error"] .svc-board-subgroup-commit { border-color: var(--danger); color: var(--danger); }
 .svc-board-subgroup-control-label {

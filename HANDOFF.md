@@ -1894,3 +1894,10 @@ readback에서 파송곡(찬송가 358장, 두 판본)은 확인했지만 봉헌
 관련 Chromium/WebKit transport·recovery·latency·freeze 검사 및 runtime/SOLID는
 통과했다. 실제 송출·운영 저장·공개 배포는 하지 않았으며 다음 배포 후보가 최신
 main과 통합할 때 exact-SHA full gate가 필요하다.
+
+## 보수적 Presenter 상태 위계 후보 · 2026-11-28
+
+구조·기능 이동 없이 썸네일 `송출/선택`과 항목 `미저장/저장 중/저장됨/저장 실패`
+표시만 명확히 했다. 저장 상태는 고정 60px 슬롯이라 입력·버튼 geometry가 유지된다.
+Chromium/WebKit light/dark 및 basic/focus 반응형 회귀가 통과했다. 운영 쓰기·실제
+송출·배포는 없으며 다음 공동 후보에서 exact-SHA gate가 필요하다.

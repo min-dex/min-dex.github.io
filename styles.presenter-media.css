@@ -150,3 +150,33 @@
 .svc-board-inline-structure-actions > .icon-btn.danger:is(:hover, :focus-visible) {
   color: var(--danger);
 }
+
+/* Item status and slide state stay explicit without moving their controls. */
+.svc-input-status {
+  display: inline-flex;
+  width: 60px;
+  min-width: 60px;
+  height: 30px;
+  align-items: center;
+  justify-content: flex-end;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--ink-4);
+  font-size: var(--ui-label-size);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.svc-board-subgroup-flow[data-input-status="saving"] .svc-input-status { color: var(--warn); }
+.svc-board-subgroup-flow[data-input-status="saved"] .svc-input-status { color: var(--success); }
+.svc-board-subgroup-flow[data-input-status="error"] .svc-input-status { color: var(--danger); }
+.svc-slide-thumb-wrap.active .svc-slide-thumb-meta::before,
+.svc-slide-thumb-wrap.selected:not(.active) .svc-slide-thumb-meta::before {
+  flex: 0 0 auto;
+  font-size: var(--ui-label-size);
+  font-weight: 800;
+  line-height: 1;
+}
+.svc-slide-thumb-wrap.active .svc-slide-thumb-meta::before { content: "송출"; color: var(--success); }
+.svc-slide-thumb-wrap.selected:not(.active) .svc-slide-thumb-meta::before { content: "선택"; color: var(--ink-2); }

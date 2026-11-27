@@ -88,6 +88,11 @@ Read `HANDOFF.md` first. This file is the short UI contract for Codex threads so
 - Use accent for active/primary/data emphasis, such as selected rows, brand
   accent, enabled primary save/present actions, and linked/reference states.
 - Search shares the global field surface; focus uses the same visible accent outline as other editable controls.
+- Presenter item editors reserve one fixed 60px status slot beside their existing
+  save action. It reads `미저장`, `저장 중`, `저장됨`, or `저장 실패`; status changes
+  must not move the editor or save button. Thumbnail metadata distinguishes the
+  selected slide from the actual output with `선택` and `송출` without changing
+  jump, double-click, keyboard, output, or save behavior.
 
 ## Navigation
 

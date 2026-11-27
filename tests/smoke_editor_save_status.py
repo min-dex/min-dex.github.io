@@ -26,11 +26,13 @@ try:
      page.set_viewport_size({'width':width,'height':650})
      baseline=None
      for status in ['modified','saving','saved','error','modified']:
-      result=page.evaluate('''status=>{const e=document.querySelector('.svc-board-subgroup-control-item');setServiceInputFeedback(e,status);const rect=n=>{const r=n.getBoundingClientRect();return [r.x,r.y,r.width,r.height]};return {input:rect(e.querySelector('input')),button:rect(e.querySelector('[data-service-item-commit]')),busy:e.querySelector('[data-service-item-commit]').disabled}}''',status)
+      result=page.evaluate('''status=>{const e=document.querySelector('.svc-board-subgroup-control-item');setServiceInputFeedback(e,status);const rect=n=>{const r=n.getBoundingClientRect();return [r.x,r.y,r.width,r.height]},feedback=e.querySelector('[data-service-input-status]');return {input:rect(e.querySelector('input')),button:rect(e.querySelector('[data-service-item-commit]')),feedback:rect(feedback),text:feedback.textContent,color:getComputedStyle(feedback).color,busy:e.querySelector('[data-service-item-commit]').disabled}}''',status)
       geometry=[result['input'],result['button']]
       if baseline is None:baseline=geometry
       assert all(abs(a-b)<0.5 for now,old in zip(geometry,baseline) for a,b in zip(now,old)),(engine,theme,width,status,geometry,baseline)
       assert result['busy']==(status=='saving')
+      assert result['text']=={'modified':'미저장','saving':'저장 중','saved':'저장됨','error':'저장 실패'}[status],(engine,theme,width,status,result)
+      assert result['feedback'][2:]==[60,30],(engine,theme,width,status,result)
      page.screenshot(path=f'/tmp/mindex-save-status-{engine}-{theme}-{width}.png')
     page.locator('[data-service-medley-unlink]').click()
     assert page.evaluate("getServiceItems('fixture').every(i=>!serviceItemConnectedPraise(i))")

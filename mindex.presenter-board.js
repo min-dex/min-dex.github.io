@@ -1023,7 +1023,7 @@ function renderPresenterBoardItemActions(serviceId, context) {
     ? renderPresenterAssetUpload(context.item, context.index, inputContext.memo, serviceId) : "";
   return `
     <div class="svc-board-subgroup-flow" data-service-item-actions data-service-id="${escapeAttr(serviceId)}" data-service-item-index="${escapeAttr(String(context.index))}">
-      <span class="svc-input-status sr-only" data-service-input-status role="status" aria-live="polite"></span>
+      <span class="svc-input-status" data-service-input-status role="status" aria-live="polite"></span>
       ${serviceItemConnectedPraise(context.item)?.groupId ? `<button class="reference-new-btn secondary svc-medley-unlink" type="button" data-service-medley-unlink="${escapeAttr(context.item.id)}" data-service-id="${escapeAttr(serviceId)}" title="곡과 순서를 유지하고 메들리 묶음 해제">메들리 해제</button>` : ""}
       ${fileControls}
       ${photoTiming ? `<button class="btn secondary" type="button" data-song-timing-open data-song-timing-focus="photos"

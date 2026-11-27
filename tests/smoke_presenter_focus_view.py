@@ -96,6 +96,9 @@ try:
     }''')
     page.evaluate('renderPresenterControlState()')
     assert '현재 송출' in page.locator('.svc-focus-screens').inner_text()
+    assert page.evaluate("getComputedStyle(document.querySelector('.svc-slide-thumb-wrap.active .svc-slide-thumb-meta'),'::before').content") == '"송출"'
+    page.evaluate("state.presenterBoardSelection={serviceId:state.selectedServiceId,elementKey:presenterSlideElementGroupKey(state.presenter.slides[2]),indexes:[2]};renderPresenterControlState()")
+    assert page.evaluate("getComputedStyle(document.querySelector('.svc-slide-thumb-wrap.selected:not(.active) .svc-slide-thumb-meta'),'::before').content") == '"선택"'
     assert page.locator('.svc-focus-panel [data-presenter-action="emergency"]').count() == 0
     assert page.evaluate("state.serviceMusic.audio===focusAudio && focusAudio.currentTime===42 && !focusAudio.paused && focusItems===JSON.stringify(state.serviceItems) && focusDraft.value==='아직 저장하지 않은 제목'")
 
