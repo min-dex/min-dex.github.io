@@ -27,6 +27,13 @@ assert.deepEqual(praiseDefaults(revisedYoungAdult),[
 assert.equal(resolvePublicWorshipTemplateVersion('young-adult',{service:{type_id:'young-adult',date:'2026-11-22'}}).version,PUBLIC_WORSHIP_TEMPLATE_VERSION);
 assert.equal(resolvePublicWorshipTemplateVersion('young-adult',{service:{type_id:'young-adult',date:'2026-11-29'}}).version,'2026-q4-young-adult-praise');
 const songsBefore=state.songs;
+state.songs=[];
+const titleOnlyRows=buildWorshipServiceScaffold('young-adult-title-only','young-adult',{service:{id:'young-adult-title-only',type_id:'young-adult',date:'2026-11-29'}});
+const titleOnlyOffering=titleOnlyRows.elements.find(element=>element.source_ref.label==='봉헌찬양');
+assert.equal(titleOnlyOffering.title,'내게 있는 향유 옥합');
+assert.equal(titleOnlyOffering.song_id,null);
+assert.equal(titleOnlyOffering.song_version_id,null);
+assert.deepEqual(Array.from(titleOnlyOffering.config?.formPreset?.forms||[]),[]);
 state.songs=[
  {id:'offering-song',title:'내게 있는 향유 옥합',versions:[{id:'offering-version',name:'D',_worshipVersionPersisted:true}]},
  {id:'sending-song',title:'주의 진리 위해 십자가 군기',versions:[{id:'sending-version',name:'G',_worshipVersionPersisted:true}]},
