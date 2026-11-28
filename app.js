@@ -1467,6 +1467,8 @@ function bindStaticEvents() {
       return;
     }
 
+    if (handleServiceOutlineSectionAction(event)) return;
+
     const serviceOutlineItem = event.target.closest("[data-service-outline-slide]");
     if (serviceOutlineItem) {
       handleServiceOutlineSlideClick(serviceOutlineItem);
@@ -24490,7 +24492,7 @@ function renderServiceCurrentSidebar(service, slides = presenterSlidesForService
       <div class="service-outline-list svc-presenter-preparation-input">
         ${readyRow}
         ${items.length
-          ? outlineGroups.map((group, index) => renderServiceOutlineGroup(service, group, index, selectedIndex, slides, slideIndexByItemId, inlineFields)).join("")
+          ? outlineGroups.map((group, index) => renderServiceOutlineGroup(service, group, index, selectedIndex, slides, slideIndexByItemId, inlineFields, outlineGroups.length)).join("")
           : `<p class="service-no-results">순서가 없습니다.</p>`}
       </div>
     </section>
@@ -24541,41 +24543,6 @@ function renderServiceReadyOutlineRow(service, slides = [], items = getServiceIt
       </span>
       <span class="service-outline-start">${escapeHtml(serviceOutlineStartLabel(readyIndex))}</span>
     </button>`;
-}
-
-function renderServiceOutlineGroup(service, group, groupIndex, selectedIndex, slides = [], slideIndexByItemId = null, inlineFields = new Map()) {
-  if (!group?.items?.length) return "";
-  const firstEntry = group.items[0];
-  const childEntries = group.items.filter(({ item }) =>
-    (!isServiceSidebarSectionMarkerItem(item, group) || (inlineFields.get(item.id)?.length || 0) > 0)
-    && !isServiceConnectedPraiseSecondaryItem(item));
-  const firstSlideEntry = group.items.find(({ item }) => firstPresenterSlideIndexForServiceItem(item, slides, slideIndexByItemId) >= 0) || firstEntry;
-  const firstSlideIndex = firstPresenterSlideIndexForServiceItem(firstSlideEntry.item, slides, slideIndexByItemId);
-  const selected = group.items.some(({ index }) => index === selectedIndex);
-  const activeSlide = presenterControllerIsLive(service.id)
-    && group.items.some(({ item }) => presenterSlideBelongsToItem(state.presenter.slides[state.presenter.index], item));
-  const title = serviceSidebarSectionTitle(group, firstEntry.item);
-  const interactionHint = presenterSlideInteractionHint(service.id, title);
-  return `
-    <div class="service-outline-group${selected ? " selected" : ""}${activeSlide ? " active" : ""}">
-      <button class="service-outline-row service-outline-row--section${activeSlide ? " active" : ""}" type="button"
-        data-service-outline-slide="${escapeAttr(firstSlideIndex >= 0 ? firstSlideIndex : "")}"
-        data-service-outline-item-index="${escapeAttr(firstSlideEntry.index)}"
-        data-service-outline-item-id="${escapeAttr(firstSlideEntry.item?.id || "")}"
-        data-service-outline-service="${escapeAttr(service.id)}"
-        aria-label="${escapeAttr(interactionHint)}"
-        title="${escapeAttr(interactionHint)}"
-        >
-        <span class="service-outline-main">
-          <strong>${escapeHtml(title)}</strong>
-        </span>
-        <span class="service-outline-start">${escapeHtml(serviceOutlineStartLabel(firstSlideIndex))}</span>
-      </button>
-      ${childEntries.length ? `
-        <div class="service-outline-children">
-          ${childEntries.map(({ item, index }) => renderServiceOutlineChildRow(service, item, index, selectedIndex, slides, slideIndexByItemId, inlineFields.get(item.id) || [])).join("")}
-        </div>` : ""}
-    </div>`;
 }
 
 function renderServiceOutlineChildRow(service, item, index, selectedIndex, slides = [], slideIndexByItemId = null, inlineFields = []) {

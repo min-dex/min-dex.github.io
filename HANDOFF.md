@@ -1902,6 +1902,19 @@ main과 통합할 때 exact-SHA full gate가 필요하다.
 Chromium/WebKit light/dark 및 basic/focus 반응형 회귀가 통과했다. 운영 쓰기·실제
 송출·배포는 없으며 다음 공동 후보에서 exact-SHA gate가 필요하다.
 
+## 1.1.2 섹션 순서·컨트롤 스트로크 후보 · 2026-11-28
+
+- 왼쪽 예배 순서의 각 섹션 헤더에 전체 섹션 위·아래 이동을 추가한다.
+  내부 엘리멘트의 상대 순서와 내용·가사·송폼·음원 타이밍은 그대로이고,
+  구조 dirty 및 기존 atomic save/reopen 경로만 사용한다.
+- 첫/마지막 이동은 disabled로 공간을 유지한다. 섹션 이동과 엘리멘트 편집
+  컨트롤은 공통 30px/1px neutral stroke/field surface/focus ring을 쓴다.
+- `smoke_service_section_reorder.py`를 Cloud gate에 등록했다. Chromium/WebKit
+  신규 검사와 기존 11개 service type 구조 저장·재열기 검사가 통과했다.
+- 제품 1.1.2 / build `20261128-stable-112`. 운영 청년부 순서 변경은 공개
+  배포와 분리해 atomic save/readback 증빙을 남긴다. 기존 자료·설정·미저장
+  입력은 보존한다.
+
 ## 1.1.1 Stable 통합 배포 후보 · 2026-11-28
 
 1.1.0 `7aa682e52` 기준 후속 세 커밋 `a8b2c6835`, `2134b5db0`, `910382f5b`와

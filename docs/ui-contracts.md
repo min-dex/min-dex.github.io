@@ -164,6 +164,13 @@ Inactive module tabs should stay visually quiet. Active tabs may show a clearer 
 
 ## Sidebar
 
+- Worship section headers expose compact up/down controls beside the section
+  name. A move swaps the whole authored section, not individual elements, marks
+  the service structure dirty and is committed only through the existing atomic
+  save. Element content, song forms, audio timing, presenter selection/output
+  and unsaved field values remain unchanged. First/last boundary controls stay
+  visible but disabled for stable geometry and keyboard discovery.
+
 - At every width, the module strip and sidebar form one continuous
   left panel: same background and right boundary, with no horizontal divider
   between module navigation and search. Module controls and search remain fixed;

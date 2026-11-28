@@ -47,6 +47,10 @@ shell, navigation, buttons, labels, and shared UI copy.
 - Primary creation buttons may use accent fill; repeated inline add controls
   should stay visually quiet.
 - Danger buttons must remain visually distinct from primary actions.
+- Worship outline edit and section-order controls share the dense `30px` target,
+  neutral field surface, visible `1px` stroke, stronger neutral hover and the
+  standard `2px` accent keyboard focus. Disabled boundary arrows become quiet
+  without removing their reserved space, so section labels do not shift.
 
 ## Service Navigation Copy
 

@@ -1041,6 +1041,94 @@ function applyPresenterBackgroundVideo(root, source = "", options = {}) {
   start();
 }
 
+function renderServiceOutlineGroup(service, group, groupIndex, selectedIndex, slides = [], slideIndexByItemId = null, inlineFields = new Map(), groupCount = 0) {
+  if (!group?.items?.length) return "";
+  const firstEntry = group.items[0];
+  const childEntries = group.items.filter(({ item }) =>
+    (!isServiceSidebarSectionMarkerItem(item, group) || (inlineFields.get(item.id)?.length || 0) > 0)
+    && !isServiceConnectedPraiseSecondaryItem(item));
+  const firstSlideEntry = group.items.find(({ item }) => firstPresenterSlideIndexForServiceItem(item, slides, slideIndexByItemId) >= 0) || firstEntry;
+  const firstSlideIndex = firstPresenterSlideIndexForServiceItem(firstSlideEntry.item, slides, slideIndexByItemId);
+  const selected = group.items.some(({ index }) => index === selectedIndex);
+  const activeSlide = presenterControllerIsLive(service.id)
+    && group.items.some(({ item }) => presenterSlideBelongsToItem(state.presenter.slides[state.presenter.index], item));
+  const title = serviceSidebarSectionTitle(group, firstEntry.item);
+  const interactionHint = presenterSlideInteractionHint(service.id, title);
+  return `<div class="service-outline-group${selected ? " selected" : ""}${activeSlide ? " active" : ""}">
+    <div class="service-outline-section-heading">
+      <button class="service-outline-row service-outline-row--section${activeSlide ? " active" : ""}" type="button"
+        data-service-outline-slide="${escapeAttr(firstSlideIndex >= 0 ? firstSlideIndex : "")}" data-service-outline-item-index="${escapeAttr(firstSlideEntry.index)}"
+        data-service-outline-item-id="${escapeAttr(firstSlideEntry.item?.id || "")}" data-service-outline-service="${escapeAttr(service.id)}"
+        aria-label="${escapeAttr(interactionHint)}" title="${escapeAttr(interactionHint)}">
+        <span class="service-outline-main"><strong>${escapeHtml(title)}</strong></span>
+        <span class="service-outline-start">${escapeHtml(serviceOutlineStartLabel(firstSlideIndex))}</span>
+      </button>
+      <span class="service-outline-section-order" aria-label="${escapeAttr(`${title} 순서 변경`)}">
+        ${renderServiceOutlineSectionMoveButton(service.id, group.key, "up", groupIndex === 0, title)}
+        ${renderServiceOutlineSectionMoveButton(service.id, group.key, "down", groupIndex >= groupCount - 1, title)}
+      </span>
+    </div>
+    ${childEntries.length ? `<div class="service-outline-children">${childEntries.map(({ item, index }) => renderServiceOutlineChildRow(service, item, index, selectedIndex, slides, slideIndexByItemId, inlineFields.get(item.id) || [])).join("")}</div>` : ""}
+  </div>`;
+}
+
+function renderServiceOutlineSectionMoveButton(serviceId, groupKey, direction, disabled, title) {
+  const up = direction === "up";
+  const label = `${title} 섹션 ${up ? "위로" : "아래로"} 이동`;
+  return `<button class="icon-btn service-outline-section-move" type="button"
+    data-service-section-action="${direction}" data-service-section-key="${escapeAttr(groupKey)}"
+    data-service-id="${escapeAttr(serviceId)}" aria-label="${escapeAttr(label)}"
+    title="${escapeAttr(label)}" ${disabled ? "disabled" : ""}><i data-lucide="chevron-${direction}"></i></button>`;
+}
+
+function handleServiceOutlineSectionAction(event) {
+  const action = event.target.closest("[data-service-section-action]");
+  if (!action) return false;
+  moveServiceOutlineSection(action.dataset.serviceId || state.selectedServiceId,
+    action.dataset.serviceSectionKey || "", action.dataset.serviceSectionAction);
+  return true;
+}
+
+function moveServiceOutlineSection(serviceId, groupKey, direction) {
+  if (!serviceId || !groupKey || !["up", "down"].includes(direction)) return;
+  const service = state.services.find((candidate) => candidate.id === serviceId);
+  if (!service) return;
+  const current = normalizeServiceItemsInCurrentOrder(state.serviceItems[serviceId]);
+  const outline = groupServiceSidebarOutlineItems(getServiceOutlineItems(service));
+  const groupIndex = outline.findIndex((group) => group.key === groupKey);
+  const adjacentIndex = direction === "up" ? groupIndex - 1 : groupIndex + 1;
+  if (groupIndex < 0 || adjacentIndex < 0 || adjacentIndex >= outline.length) return;
+  const selectedIndexes = outline[groupIndex].items.map(({ index }) => index).filter((index) => current[index]);
+  const adjacentIndexes = outline[adjacentIndex].items.map(({ index }) => index).filter((index) => current[index]);
+  if (!selectedIndexes.length || !adjacentIndexes.length) return;
+  const selectedSet = new Set(selectedIndexes), adjacentSet = new Set(adjacentIndexes);
+  const first = Math.min(...selectedIndexes, ...adjacentIndexes), last = Math.max(...selectedIndexes, ...adjacentIndexes);
+  const selectedItems = current.filter((_, index) => selectedSet.has(index));
+  const adjacentItems = current.filter((_, index) => adjacentSet.has(index));
+  const untouchedBetween = current.slice(first, last + 1)
+    .filter((_, offset) => !selectedSet.has(first + offset) && !adjacentSet.has(first + offset));
+  const reorderedBlock = direction === "up"
+    ? [...selectedItems, ...untouchedBetween, ...adjacentItems]
+    : [...adjacentItems, ...untouchedBetween, ...selectedItems];
+  const beforeMove = serviceEditSnapshot(current, serviceMoveFields);
+  const next = [...current.slice(0, first), ...reorderedBlock, ...current.slice(last + 1)];
+  const sectionOrder = new Map();
+  next.forEach((item) => {
+    const key = String(item._worshipSectionId || item._worshipSectionKey || `item:${item.id || ""}`);
+    if (!sectionOrder.has(key)) sectionOrder.set(key, sectionOrder.size + 1);
+    item._worshipSectionOrder = sectionOrder.get(key);
+    item._worshipSectionTemplateModified = true;
+  });
+  state.serviceItems[serviceId] = normalizeServiceItemsInCurrentOrder(next);
+  state.dirty.service = true;
+  rememberServiceMove(serviceId, beforeMove);
+  markServiceStructureDirty(serviceId);
+  refreshPresenterForService(serviceId);
+  renderCurrentServiceModuleDetail();
+  renderServiceList();
+  updateSaveState();
+}
+
 // Inline controller item controls share the section editor action owner.
 function presenterSectionItemActionContext(service, itemIndex) {
   if (!service || !Number.isInteger(itemIndex)) return null;

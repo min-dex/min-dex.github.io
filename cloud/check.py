@@ -140,6 +140,7 @@ SMOKES = (
     "smoke_presenter_window_buttons.py",
     "smoke_presenter_freeze_refresh.py",
     "smoke_service_structural_order.py",
+    "smoke_service_section_reorder.py",
     "smoke_special_service_order.py",
     "smoke_title_songform.py",
     "smoke_form_default_placeholder.py",
