@@ -68,5 +68,29 @@ try:
     check(JSON.stringify({song,item})===before,'authored forms or audio mutated');
    }""")
    print('PASS',engine,'numbered display of unnumbered source choruses preserves all 15 audio pages/cues and blanks; changed manual sequence stays untimed',flush=True)
+   page.evaluate(r"""async()=>{
+    const saved={canUseClientData,shouldDeferPastWorshipServiceLoad,loadServiceItems,ensureFullServiceSourceRef,loadSongsForIds,preloadPresenterServiceScripturesBeforeOutput,refreshPresenterForService,preloadPresenterServiceAssetsBeforeOutput,prepareServiceAudio,renderLoadingStatus};
+    const sid=state.selectedServiceId;let release,started=false,warmed=[];
+    const before=JSON.stringify({songs:state.songs,items:state.serviceItems});
+    try{
+     canUseClientData=()=>true;shouldDeferPastWorshipServiceLoad=()=>false;
+     loadServiceItems=async()=>{};ensureFullServiceSourceRef=async()=>{};loadSongsForIds=async()=>{};
+     state.hymnScoreManifestLoaded=true;
+     preloadPresenterServiceScripturesBeforeOutput=()=>new Promise(resolve=>{release=resolve;started=true});
+     refreshPresenterForService=()=>{};preloadPresenterServiceAssetsBeforeOutput=()=>{};renderLoadingStatus=()=>{};
+     prepareServiceAudio=sources=>{warmed.push(...sources)};
+     const pending=hydratePresenterServiceData(sid);
+     for(let i=0;i<10&&!started;i++)await Promise.resolve();
+     if(!started||!warmed.some(s=>s===state.songs[0].versions[0].audio_set.audioUrl))throw Error('audio must warm before scripture hydration resolves');
+     release(false);await pending;
+     if(JSON.stringify({songs:state.songs,items:state.serviceItems})!==before)throw Error('early warming mutated authored data');
+    }finally{
+     canUseClientData=saved.canUseClientData;shouldDeferPastWorshipServiceLoad=saved.shouldDeferPastWorshipServiceLoad;
+     loadServiceItems=saved.loadServiceItems;ensureFullServiceSourceRef=saved.ensureFullServiceSourceRef;loadSongsForIds=saved.loadSongsForIds;
+     preloadPresenterServiceScripturesBeforeOutput=saved.preloadPresenterServiceScripturesBeforeOutput;refreshPresenterForService=saved.refreshPresenterForService;
+     preloadPresenterServiceAssetsBeforeOutput=saved.preloadPresenterServiceAssetsBeforeOutput;prepareServiceAudio=saved.prepareServiceAudio;renderLoadingStatus=saved.renderLoadingStatus;
+    }
+   }""")
+   print('PASS',engine,'audio warms before pending scripture hydration; authored data unchanged',flush=True)
    browser.close()
 finally:server.shutdown()

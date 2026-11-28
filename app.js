@@ -12385,6 +12385,8 @@ async function hydratePresenterServiceData(serviceId = state.selectedServiceId) 
     const outputItems = getServiceOutputItems(targetServiceId);
     const songIds = outputItems.map((item) => item.song_id).filter(Boolean);
     await loadSongsForIds(songIds);
+    // Audio sources are ready now; scripture/score hydration must not delay buffering.
+    warmSelectedServiceAudio(targetServiceId, state.services.find(service => service.id === targetServiceId), []);
     if (
       !state.hymnScoreManifestLoaded
       && presenterServiceNeedsHymnScoreManifest(targetServiceId)

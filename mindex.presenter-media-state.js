@@ -453,7 +453,7 @@ function prepareServiceAudio(sources) {
 }
 
 function warmSelectedServiceAudio(serviceId, service, slides) {
-  if (serviceId === state.selectedServiceId) {
+  if (service && serviceId === state.selectedServiceId) {
     const sources = [];
     for (const slide of slides) {
       if (presenterSlideIsHidden(slide)) continue;
@@ -461,7 +461,11 @@ function warmSelectedServiceAudio(serviceId, service, slides) {
     }
     for (const item of getServiceOutputItems(serviceId)) {
       const memo = parseServiceItemMemo(item.memo);
-      if (servicePraiseInputMode(item, memo) !== "children_audio") sources.push(memo.audioAsset?.url);
+      if (servicePraiseInputMode(item, memo) === "children_audio") {
+        const song = presenterSongForServiceItem(item, serviceItemDisplayText(item), item.label, service);
+        const version = getPresenterServiceItemVersion(song, item, service);
+        sources.push(version?.audio_set?.audioUrl);
+      } else sources.push(memo.audioAsset?.url);
       sources.push(presenterSlotMusicConfig({ service, item })?.source);
     }
     prepareServiceAudio(sources.filter(Boolean));
