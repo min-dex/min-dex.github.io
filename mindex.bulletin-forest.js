@@ -19,12 +19,18 @@
       const asset=value?.assets?.[key];
       if(typeof asset==='string'&&((asset===''&&!!defaults.assets)|| /^assets\/bulletin\/[a-z0-9_.-]+$/i.test(asset)||(/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(asset)&&asset.length<=700000)))result.assets[key]=asset;
     }
+    if(defaults.rules){
+      result.rules={...defaults.rules};
+      if(typeof value?.rules?.allPageBars==='boolean')result.rules.allPageBars=value.rules.allPageBars;
+      for(const key of ['hymnNumberSize','orderParenthesisSize','outlineNumberSize'])if([10,12.5].includes(value?.rules?.[key]))result.rules[key]=value.rules[key];
+    }
     return result;
   }
   const visibleFrame=(frame,appearance)=>normalizeAppearance(appearance).visible[frame.id]!==false;
   function controls(doc,selected,escape,defaults){
     const value=normalizeAppearance(doc.settings.appearance,defaults);
-    return `${Object.hasOwn(value.labels,selected)?`<label>고정 문구<input data-bulletin-design-label="${selected}" maxlength="200" value="${escape(value.labels[selected])}"></label>`:''}<details class="bulletin-property-section" data-bulletin-section="design-colors"><summary>색상</summary>${Object.entries(colorNames).map(([key,name])=>`<label>${name}<input type="color" data-bulletin-design-color="${key}" value="${value.palette[key]}"></label>`).join('')}</details><details class="bulletin-property-section" data-bulletin-section="design-images"><summary>로고와 그림</summary>${[['logo','로고'],['artwork','표지 그림']].map(([key,name])=>`<label>${name}<span class="bulletin-file-control"><span class="bulletin-file-button" aria-hidden="true"><i data-lucide="image-up"></i>파일 선택</span><input type="file" data-bulletin-design-image="${key}" accept="image/png,image/jpeg,image/webp" aria-label="${name} 이미지 선택"></span></label><button type="button" data-bulletin-design-image-reset="${key}">${name} 기본값</button>`).join('')}</details>`;
+    const rules=value.rules?`<details class="bulletin-property-section" data-bulletin-section="print-rules"><summary>인쇄 규칙</summary><label><input type="checkbox" data-bulletin-rule="allPageBars" ${value.rules.allPageBars?'checked':''}> 모든 페이지 상·하단 바</label>${[['hymnNumberSize','찬송가 번호 크기'],['orderParenthesisSize','예배 순서 괄호 크기'],['outlineNumberSize','대지 번호 크기']].map(([key,label])=>`<label>${label}<select data-bulletin-rule="${key}">${[10,12.5].map(size=>`<option value="${size}" ${value.rules[key]===size?'selected':''}>${size}pt</option>`).join('')}</select></label>`).join('')}</details>`:'';
+    return `${rules}${Object.hasOwn(value.labels,selected)?`<label>고정 문구<input data-bulletin-design-label="${selected}" maxlength="200" value="${escape(value.labels[selected])}"></label>`:''}<details class="bulletin-property-section" data-bulletin-section="design-colors"><summary>색상</summary>${Object.entries(colorNames).map(([key,name])=>`<label>${name}<input type="color" data-bulletin-design-color="${key}" value="${value.palette[key]}"></label>`).join('')}</details><details class="bulletin-property-section" data-bulletin-section="design-images"><summary>로고와 그림</summary>${[['logo','로고'],['artwork','표지 그림']].map(([key,name])=>`<label>${name}<span class="bulletin-file-control"><span class="bulletin-file-button" aria-hidden="true"><i data-lucide="image-up"></i>파일 선택</span><input type="file" data-bulletin-design-image="${key}" accept="image/png,image/jpeg,image/webp" aria-label="${name} 이미지 선택"></span></label><button type="button" data-bulletin-design-image-reset="${key}">${name} 기본값</button>`).join('')}</details>`;
   }
   const artwork='assets/bulletin/children-forest.svg';
   function frames(){

@@ -486,7 +486,7 @@
   }
   function renderSwiss(doc,mode,selected) {
     const department=swissDepartment(doc.settings.design),accent=doc.settings.appearance?.palette?.accent||swissAccent(department),issues=new Set(),pages=[];
-    const value=k=>String(fieldValue(doc,k)||'');
+    const value=k=>String(fieldValue(doc,k)||''),printRules=appearanceFor(doc).rules;
     const sermonTitle=t=>{const v=String(t||'').trim();return v?`「${v.replace(/^[「『]|[」』]$/g,'')}」`:'';};
     const month=k=>{const [y,m]=(doc.source?.[k]||'').split('-');return y&&m?`${y}년 ${+m}월`:'';};
     const groups=new Map();
@@ -499,11 +499,11 @@
     }
     function orderContentRuns(value,hymn) {
       return String(value).split('\n').flatMap((line,index)=>{
-        const chars=runs(line,12.5,true),plain=chars.map(c=>c.text).join(''),prefix=hymn&&plain.match(/^\s*(?:(통)\s*)?(\d+)(?=\s|$)/);
+        const chars=runs(line,12.5,true).map(c=>({...c,size:c.size===10?printRules.orderParenthesisSize:c.size})),plain=chars.map(c=>c.text).join(''),prefix=hymn&&plain.match(/^\s*(?:(통)\s*)?(\d+)(?=\s|$)/);
         if(prefix){
           if(prefix[1]){const start=plain.indexOf('통'),number=plain.indexOf(prefix[2],start+1);chars.splice(start+1,number-start-1,{text:' ',size:10,weight:chars[start].weight});}
           const end=chars.map(c=>c.text).join('').match(/^\s*(?:통 )?\d+/)[0].length;
-          chars.slice(0,end).forEach(c=>{c.size=10;});
+          chars.slice(0,end).forEach(c=>{c.size=printRules.hymnNumberSize;});
         }
         return [...(index?[{text:'\n',size:12.5,weight:500}]:[]),...chars];
       });
@@ -523,8 +523,8 @@
       const root=svg('svg',{viewBox:'0 0 297 210',width:'297mm',height:'210mm','data-bulletin-design':doc.settings.design,role:'img','aria-label':page?'안쪽':'겉면'});
       root.append(svg('rect',{width:297,height:210,fill:'#FFFFFF'}));pages.push(root);
       for(const x of [10,158.5]){
-        root.append(svg('rect',{x,y:10,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
-        root.append(svg('rect',{x,y:198.75,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
+        if(printRules.allPageBars||page===0||x===10)root.append(svg('rect',{x,y:10,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
+        if(printRules.allPageBars||page===0||x===158.5)root.append(svg('rect',{x,y:198.75,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
       }
     }
     for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideBrand',({'young-adult':'RIA 청년부',youth:'TOV 청소년부',children:'꿈꾸는 어린이부'})[department],10,15,'left'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),158.5,190,'right']]){
@@ -606,7 +606,7 @@
       if(!items.length){lines(g,158.5,top,bottom);return;}
       const heights=items.map(t=>Math.max(6.25,wrap(window.MindexInlineText.plain(t),128.5,12.5,500).length*6.25)),space=(bottom-top-heights.reduce((a,b)=>a+b,0)-(items.length-1)*2.5)/items.length;
       if(space<10)issues.add('outline');
-      let yy=top;items.forEach((t,i)=>{const row=svg('g',{'data-outline-item':i+1,'data-writing-height':space});g.append(row);text(row,'outline',t,158.5,yy,128.5,12.5,'left',500,false,yy+heights[i]+1);lines(row,158.5,yy+heights[i],yy+heights[i]+space);yy+=heights[i]+space+2.5;});
+      let yy=top;items.forEach((t,i)=>{const row=svg('g',{'data-outline-item':i+1,'data-writing-height':space});g.append(row);const chars=runs(t,12.5),prefix=chars.map(c=>c.text).join('').match(/^\s*(?:\d+[.)]|[①-⑳])(?=\s|$)/);if(prefix)chars.slice(0,prefix[0].length).forEach(c=>{c.size=printRules.outlineNumberSize;});writeStyled(row,chars,{x:158.5,y:yy,w:128.5,h:heights[i]+1,size:12.5,baselineY:yy+12.5/MM,leading:6.25*MM,weight:500,color:'#171717',family:'MindexBulletin'},issues,'outline');lines(row,158.5,yy+heights[i],yy+heights[i]+space);yy+=heights[i]+space+2.5;});
     }
     if(department==='children'){
       let yy=heading(1,'monthlyThemeTitle','이달의 주제',158.5,25,month('curriculumMonth'),'themeMonth');
@@ -1134,7 +1134,7 @@
     return bottom-f.y;
   }
   function appearanceDefaults(doc) {
-    if(swissDesign(doc.settings?.design))return {frames:swissFrames(doc.settings.design),palette:{paper:"#FFFFFF",cover:"#FFFFFF",ink:"#171717",accent:swissAccent(swissDepartment(doc.settings.design)),soft:"#FFFFFF",peach:"#FFFFFF",line:"#808080",muted:"#808080"},assets:{logo:"",artwork:""}};
+    if(swissDesign(doc.settings?.design))return {rules:{allPageBars:true,hymnNumberSize:10,orderParenthesisSize:10,outlineNumberSize:10},frames:swissFrames(doc.settings.design),palette:{paper:"#FFFFFF",cover:"#FFFFFF",ink:"#171717",accent:swissAccent(swissDepartment(doc.settings.design)),soft:"#FFFFFF",peach:"#FFFFFF",line:"#808080",muted:"#808080"},assets:{logo:"",artwork:""}};
     if(doc.settings?.design==="children-forest")return undefined;
     if(doc.settings?.design==="youth-tov"){const {tovFrames,tovPalette,tovArtwork}=window.MindexBulletinForest;return {frames:tovFrames(),palette:tovPalette,assets:{logo:"",artwork:tovArtwork}};}
     const simple=doc.settings?.design==="simple",modern=simple||doc.settings?.design==="editorial";
@@ -1916,6 +1916,7 @@
     });
     on(root,"change",event=>{
       const t=event.target;
+      if(t.dataset.bulletinRule){const key=t.dataset.bulletinRule;if(swissDesign(doc.settings.design)&&['allPageBars','hymnNumberSize','orderParenthesisSize','outlineNumberSize'].includes(key))changeAppearance(value=>{value.rules[key]=key==='allPageBars'?t.checked:Number(t.value);});return;}
       if(t.matches("[data-bulletin-editor-key]")){
         q("[data-bulletin-editor-label]").value=doc.settings.editorFields?.[t.value]?.label||fields[t.value];
         q("[data-bulletin-editor-visible]").checked=doc.settings.editorFields?.[t.value]?.visible!==false;return;

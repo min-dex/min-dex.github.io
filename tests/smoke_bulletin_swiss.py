@@ -68,6 +68,10 @@ try:
      for(const sheet of r.pages){const bars=[...sheet.querySelectorAll('[data-swiss-bar]')];if(bars.length!==4)throw Error('Every A5 page needs top and bottom bars without labels');for(const x of [10,158.5])for(const y of [10,198.75]){const bar=bars.find(b=>+b.getAttribute('x')===x&&+b.getAttribute('y')===y);if(!bar||+bar.getAttribute('width')!==128.5||+bar.getAttribute('height')!==1.25)throw Error('Shared page bar metrics');}}
      if(JSON.stringify(d)!==before)throw Error('Page bars changed authored document');
     }
+    for(const department of ['young-adult','children','youth']){
+     const d=structuredClone(samples[department]),rules={allPageBars:false,hymnNumberSize:12.5,orderParenthesisSize:12.5,outlineNumberSize:12.5};d.settings.appearance={...d.settings.appearance,rules};const stored=B.templateValue(d),fresh=structuredClone(samples[department]);B.applyTemplate(fresh,{template_key:B.TEMPLATE_KEYS[department],revision:2,...stored},{common:false});if(JSON.stringify(fresh.settings.appearance.rules)!==JSON.stringify(rules))throw Error('Server print rules roundtrip');const before=JSON.stringify(fresh),r=B.renderPages(fresh,'print');if(r.pages.flatMap(p=>[...p.querySelectorAll('[data-swiss-bar]')]).length!==6)throw Error('Server bar selection ignored');if(JSON.stringify(fresh)!==before)throw Error('Server rules mutated source');
+     if(department!=='children'){const normal=B.renderPages(samples[department],'print').pages[1].querySelector('[data-outline-item]'),full=r.pages[1].querySelector('[data-outline-item]');const first=n=>n.querySelector('tspan');if(Math.abs(+first(normal).getAttribute('font-size')*72/25.4-10)>.01||Math.abs(+first(full).getAttribute('font-size')*72/25.4-12.5)>.01)throw Error('Server outline number size ignored');if(normal.querySelector('text').getAttribute('y')!==full.querySelector('text').getAttribute('y')||JSON.stringify([...normal.querySelectorAll('[data-swiss-rule]')].map(n=>n.getAttribute('y')))!==JSON.stringify([...full.querySelectorAll('[data-swiss-rule]')].map(n=>n.getAttribute('y'))))throw Error('Outline number changed writing grid');}
+    }
     return results;
    }''')
    page.evaluate(r'''()=>{
@@ -87,6 +91,15 @@ try:
    page.locator('[data-bulletin-frame]').select_option('outline')
    assert page.locator('[data-bulletin-dimension=h]').is_visible() and page.locator('[data-bulletin-dimension=h]').is_enabled()
    assert not page.locator('[data-bulletin-dimension=x]').is_visible()
+   page.locator('[data-bulletin-section=print-rules] summary').click()
+   for key in ('hymnNumberSize','orderParenthesisSize','outlineNumberSize'):
+    page.locator('[data-bulletin-rule='+key+']').select_option('12.5')
+    assert page.evaluate('key=>documents.get("youth").settings.appearance.rules[key]',key)==12.5
+    page.locator('[data-bulletin-rule='+key+']').select_option('10')
+   page.locator('[data-bulletin-rule=allPageBars]').uncheck()
+   assert page.locator('[data-swiss-bar]').count()==6
+   page.locator('[data-bulletin-rule=allPageBars]').check()
+   assert page.locator('[data-swiss-bar]').count()==8
    page.locator('[data-bulletin-mode=content]').click()
 
    assert page.evaluate("JSON.stringify(MindexBulletin.storedValue(documents.get('youth')).content)===preserved")
