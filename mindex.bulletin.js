@@ -497,6 +497,17 @@
       if(paren){const stack=[],pairs=[];chars.forEach((c,i)=>{if('（('.includes(c.text))stack.push(i);else if('）)'.includes(c.text)&&stack.length){const start=stack.at(-1);if((chars[start].text==='('&&c.text===')')||(chars[start].text==='（'&&c.text==='）')){stack.pop();pairs.push([start,i]);}}});for(let i=0;i<chars.length;i++)if(pairs.some(([a,b])=>i>=a&&i<=b))chars[i].size=size*.8;}
       return chars;
     }
+    function orderContentRuns(value,hymn) {
+      return String(value).split('\n').flatMap((line,index)=>{
+        const chars=runs(line,12.5,true),plain=chars.map(c=>c.text).join(''),prefix=hymn&&plain.match(/^\s*(?:(통)\s*)?(\d+)(?=\s|$)/);
+        if(prefix){
+          if(prefix[1]){const start=plain.indexOf('통'),number=plain.indexOf(prefix[2],start+1);chars.splice(start+1,number-start-1,{text:' ',size:10,weight:chars[start].weight});}
+          const end=chars.map(c=>c.text).join('').match(/^\s*(?:통 )?\d+/)[0].length;
+          chars.slice(0,end).forEach(c=>{c.size=10;});
+        }
+        return [...(index?[{text:'\n',size:12.5,weight:500}]:[]),...chars];
+      });
+    }
     function text(g,id,t,x,y,w=128.5,size=12.5,align='left',weight=500,paren=false,max=210,exactBaseline=true){
       if(!t)return 0;
       const leading=size===10||size===8?5:size===12.5?6.25:size*1.2/MM;
@@ -585,7 +596,7 @@
       const cells=[{t:label,x:10,w:22.5,size:10},{t:content,x:35,w:76,size:12.5},{t:person,x:113.5,w:25,size:10,align:'right'}];
       const counts=cells.map(c=>wrap(c.t||'',c.w,c.size,500).length),h=Math.max(...counts,1)*6.25+2.5;
       const row=svg('g',{'data-order-row':r.id,'data-row-top':y,'data-row-height':h});order.append(row);
-      cells.forEach((c,i)=>{const top=y+1.25+(Math.max(...counts,1)-counts[i])*6.25/2,weight=r.label==='설교'&&i===1?700:500;writeStyled(row,runs(c.t||'',c.size).map(run=>({...run,weight:run.weight===700?700:weight})),{x:c.x,y:top,w:c.w,h:y+h-top,size:c.size,baselineY:top+4.5,leading:6.25*MM,weight,align:c.align||'left',color:'#171717',family:'MindexBulletin'},issues,'order');});
+      cells.forEach((c,i)=>{const top=y+1.25+(Math.max(...counts,1)-counts[i])*6.25/2,weight=r.label==='설교'&&i===1?700:500;writeStyled(row,(i===1?orderContentRuns(c.t||'',/찬양|찬송/.test(r.label)||!!doc.source.linkedPraiseTitles?.[r.id]):runs(c.t||'',c.size)).map(run=>({...run,weight:run.weight===700?700:weight})),{x:c.x,y:top,w:c.w,h:y+h-top,size:c.size,baselineY:top+4.5,leading:6.25*MM,weight,align:c.align||'left',color:'#171717',family:'MindexBulletin'},issues,'order');});
       y+=h;rule(order,10,y);
     }
     if(y>(department==='youth'?148:185))issues.add('order');
