@@ -1786,7 +1786,7 @@
       if(mode==="layout"){
         if(swissDesign(doc.settings.design)){
           p.insertAdjacentHTML("afterbegin",'<p class="bulletin-help">공통 그리드 · 좌우 10mm · 제목 20/15pt · 본문 12.5pt · 보조 10pt. 각 부서 내용에 따라 공간을 자동 배분합니다.</p>');
-          p.querySelectorAll('[data-bulletin-dimension],[data-bulletin-family],[data-bulletin-align],[data-bulletin-hidden],[data-bulletin-setting="outlineColumns"]').forEach(el=>{el.disabled=true;el.closest('label').hidden=true;});
+          p.querySelectorAll('[data-bulletin-dimension],[data-bulletin-family],[data-bulletin-align],[data-bulletin-hidden],[data-bulletin-setting="outlineColumns"]').forEach(el=>{const editable=doc.settings.design==='swiss-youth'&&(selected==='reflection'&&el.hasAttribute('data-bulletin-hidden')||selected==='outline'&&el.dataset.bulletinDimension==='h');el.disabled=!editable;el.closest('label').hidden=!editable;});
         }
         const background=p.querySelector('[data-bulletin-setting="theme"]')?.closest('label');if(background)background.hidden=swissDesign(doc.settings.design)||["children-forest","youth-tov"].includes(doc.settings.design);
         p.insertAdjacentHTML("beforeend",window.MindexBulletinForest.controls(doc,selected,escape,appearanceDefaults(doc)));

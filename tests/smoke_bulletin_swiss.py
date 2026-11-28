@@ -69,6 +69,14 @@ try:
    page.locator('[data-bulletin-use-swiss]').click()
    page.wait_for_function("document.querySelectorAll('[data-bulletin-design=swiss-youth]').length===2&&document.querySelector('[data-bulletin-print]').disabled===false")
    assert page.locator('[data-bulletin-field=reflection]').count()==0
+   page.locator('[data-bulletin-mode=layout]').click()
+   page.locator('[data-bulletin-frame]').select_option('reflection')
+   assert page.locator('[data-bulletin-hidden]').is_visible() and page.locator('[data-bulletin-hidden]').is_enabled()
+   page.locator('[data-bulletin-frame]').select_option('outline')
+   assert page.locator('[data-bulletin-dimension=h]').is_visible() and page.locator('[data-bulletin-dimension=h]').is_enabled()
+   assert not page.locator('[data-bulletin-dimension=x]').is_visible()
+   page.locator('[data-bulletin-mode=content]').click()
+
    assert page.evaluate("JSON.stringify(MindexBulletin.storedValue(documents.get('youth')).content)===preserved")
    assert page.evaluate("documents.get('youth').settings.appearance.assets.logo==='assets/bulletin/ria-mark.webp'")
    page.locator('[data-bulletin-field=scriptureNote]').fill('연결 본문에 대한 노트')
