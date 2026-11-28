@@ -2015,7 +2015,7 @@
       if(event.key==="ArrowUp")setDimension(f,"y",f.y-step);if(event.key==="ArrowDown")setDimension(f,"y",f.y+step);
       persist();properties();preview();
     });
-    let printFrame,printSession=false;
+    let printFrame,printSession=false,restorePrintTitle=()=>{};
     async function print(){
       if(q("[data-bulletin-print]").disabled)return;
       endDrag();
@@ -2025,7 +2025,9 @@
         await readyBackground(output);
         if(signal.aborted)return;
         const rendered=renderPages(output,"print",null);if(rendered.issues.size)throw new Error("내용이 편집 영역을 넘습니다. 크기나 간격을 조정해 주세요.");
-        printFrame?.remove();printFrame=document.createElement("iframe");
+        restorePrintTitle();printFrame?.remove();printFrame=document.createElement("iframe");
+        const issue=String(fieldValue(output,"issue")??"").trim();
+        const printTitle=`${departmentName(output.source.department)} 주보 ${output.source.date}${issue?` (제${issue}호)`:""}`;
         printFrame.title="주보 인쇄";printFrame.className="bulletin-print-frame";
         let fontCSS=[[500,"5Medium"],[700,"7Bold"],[800,"8ExtraBold"]].map(([w,n])=>`@font-face{font-family:MindexBulletin;font-weight:${w};src:url('${new URL(`vendor/fonts/freesentation/Freesentation-${n}.woff2`,document.baseURI)}')}`).join("")+`@font-face{font-family:MindexChildrenTheme;font-weight:400;src:url('${new URL("vendor/fonts/dnf-bitbit-v2/DNFBitBitv2.otf",document.baseURI)}')}`;
         const tov=output.settings.design==="youth-tov";
@@ -2036,22 +2038,24 @@
           signal.addEventListener("abort",abort,{once:true});
           frame.onload=()=>{signal.removeEventListener("abort",abort);resolve(true);};
         });
-        printFrame.srcdoc=`<!doctype html><html lang="ko"><meta charset="utf-8"><title>주보 ${escape(output.source.date)}</title><style>${fontCSS}@page{size:297mm 210mm;margin:0}body{margin:0}svg{display:block;width:297mm;height:210mm;break-after:page}svg:last-child{break-after:auto}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}</style><body>${rendered.pages.map(p=>p.outerHTML).join("")}</body></html>`;
+        printFrame.srcdoc=`<!doctype html><html lang="ko"><meta charset="utf-8"><title>${escape(printTitle)}</title><style>${fontCSS}@page{size:297mm 210mm;margin:0}body{margin:0}svg{display:block;width:297mm;height:210mm;break-after:page}svg:last-child{break-after:auto}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}</style><body>${rendered.pages.map(p=>p.outerHTML).join("")}</body></html>`;
         document.body.append(frame);if(!await loaded||signal.aborted)return;
         await Promise.all([500,700,800].map(w=>frame.contentDocument.fonts.load(`${w} 12.5pt MindexBulletin`)));
         await frame.contentDocument.fonts.load("400 15pt MindexChildrenTheme");
         if(tov)await frame.contentDocument.fonts.load("800 35pt Paperlogy","검단우리교회 토브 청소년부");
         await frame.contentDocument.fonts.ready;
         if(signal.aborted||!frame.isConnected)return;
+        const previousTitle=document.title;document.title=printTitle;
+        restorePrintTitle=()=>{if(document.title===printTitle)document.title=previousTitle;restorePrintTitle=()=>{};};
         printSession=true;
-        frame.contentWindow.addEventListener("afterprint",()=>{printSession=false;},{once:true});
+        frame.contentWindow.addEventListener("afterprint",()=>{printSession=false;restorePrintTitle();},{once:true});
         frame.contentWindow.focus();frame.contentWindow.print();
-      }catch(e){printSession=false;if(!signal.aborted)printError=e.message;}
+      }catch(e){printSession=false;restorePrintTitle();if(!signal.aborted)printError=e.message;}
       finally{printing=false;if(!signal.aborted)status();}
     }
     const observer=new MutationObserver(()=>{if(!root.isConnected)destroy();});
     observer.observe(document.body,{childList:true,subtree:true});
-    function destroy(){endDrag();serial++;controller.abort();observer.disconnect();previewResize.disconnect();inputResize.disconnect();printFrame?.remove();}
+    function destroy(){endDrag();restorePrintTitle();serial++;controller.abort();observer.disconnect();previewResize.disconnect();inputResize.disconnect();printFrame?.remove();}
 
     // Build the remote document off-screen; recheck every edit/interaction guard before adoption.
     let remoteBusy=false,interactionRevision=0;

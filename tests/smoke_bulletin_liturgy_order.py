@@ -63,5 +63,43 @@ try:
    }''')
    assert result=={'checks':32,'worshipUnchanged':True,'storedUnchanged':True},result
    print('PASS bulletin liturgy preview/print and iframe, two departments/four layouts, both compaction choices, publication/manual data and worship preservation',engine,flush=True)
+   # Exercise the real print entry point, without opening an OS print dialog.
+   page.evaluate("""()=>{
+    const create=document.createElement.bind(document);window.printCalls=[];
+    document.createElement=(tag,...args)=>{const el=create(tag,...args);if(tag==='iframe')el.addEventListener('load',()=>{
+     el.contentWindow.print=()=>{printCalls.push({parent:document.title,frame:el.contentDocument.title});if(window.failPrint)throw Error('fixture print failed');};
+    });return el;};
+   }""")
+   for department,label,issue in [('young-adult','청년부','32'),('youth','청소년부','36'),('children','어린이부','34'),('youth','청소년부','')]:
+    page.evaluate("""({department,issue})=>{
+     window.filenameEditor?.destroy();document.title='Mindex';document.querySelector('#rendered').replaceChildren();
+     const B=MindexBulletin,source=B.resolveSource({service:{id:'filename-'+department+issue,service_type_id:department,service_date:'2026-11-22'},sections:[],elements:[]});
+     source.order=[{id:'sermon',label:'설교',content:'인쇄 검사',person:'담당자'}];source.issue='99';
+     window.filenameEditor=B.mount(document.querySelector('#rendered'),{serviceId:source.id,scope:'filename-offline',services:[{id:source.id,label:department}],loadSource:async()=>source,
+      loadDraft:async()=>({revision:1,...B.storedValue({...B.normalizeSnapshot({fields:{issue,news:'',outline:''},settings:{design:'simple',theme:''}}),source})})});
+    }""",{'department':department,'issue':issue})
+    page.wait_for_function("document.querySelector('[data-bulletin-print]')?.disabled===false")
+    before=page.evaluate('printCalls.length')
+    page.locator('[data-bulletin-print]').evaluate('(button)=>button.click()')
+    try:page.wait_for_function('(n)=>printCalls.length===n+1',arg=before)
+    except Exception:
+     print('PRINT_DIAGNOSTIC',engine,department,issue,page.evaluate("({calls:printCalls,status:document.querySelector('.bulletin-status')?.textContent,title:document.title,frame:document.querySelector('.bulletin-print-frame')?.contentDocument?.title})"),flush=True)
+     raise
+    expected=f'{label} 주보 2026-11-22'+(f' (제{issue}호)' if issue else '')
+    assert page.evaluate('printCalls.at(-1)')=={'parent':expected,'frame':expected}
+    page.evaluate("document.querySelector('.bulletin-print-frame').contentWindow.dispatchEvent(new Event('afterprint'))")
+    assert page.title()=='Mindex'
+   # An exception or leaving the editor also restores the app title.
+   page.evaluate('window.failPrint=true')
+   page.locator('[data-bulletin-print]').evaluate('(button)=>button.click()')
+   page.wait_for_function("document.querySelector('.bulletin-status').textContent.includes('fixture print failed')")
+   assert page.title()=='Mindex'
+   page.evaluate('window.failPrint=false')
+   before=page.evaluate('printCalls.length')
+   page.locator('[data-bulletin-print]').evaluate('(button)=>button.click()')
+   page.wait_for_function('(n)=>printCalls.length===n+1',arg=before)
+   page.evaluate('filenameEditor.destroy()')
+   assert page.title()=='Mindex'
+   print('PASS PDF filename: three departments, explicit empty issue, parent/iframe title, afterprint/error/destroy restoration',engine,flush=True)
    browser.close()
 finally:server.shutdown()
