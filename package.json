@@ -105,6 +105,7 @@
       "mindex.legacy-state.mjs",
       "mindex.server-storage.js",
       "mindex.disclosure-state.js",
+      "mindex.page-tab-session.js",
       "mindex.editor-drafts.js",
       "styles*.css",
       "favicon.ico",
