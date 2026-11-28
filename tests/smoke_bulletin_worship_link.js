@@ -1,0 +1,36 @@
+async () => {
+ const B=window.MindexBulletin,id='11111111-1111-4111-8111-111111111111';
+ const aggregate={service:{id,service_type_id:'youth',service_date:'2026-11-29',title:'청소년부',worship_leader:'예배 인도',source_ref:{mindexServiceDocument:{sourceText:'STALE AUDIT'}}},sections:[],elements:[]};
+ const add=(key,title,type,body,extra={})=>{const n=aggregate.sections.length+1,sid=`22222222-2222-4222-8222-${String(n).padStart(12,'0')}`,eid=`33333333-3333-4333-8333-${String(n).padStart(12,'0')}`;aggregate.sections.push({id:sid,service_id:id,section_key:key,title,sort_order:n});aggregate.elements.push({id:eid,section_id:sid,element_type:type,title:body,sort_order:1,...extra});};
+ add('praise','찬양','praise','',{praise_record_id:'SONG-TEST-0001',source_ref:{slotKey:'praise.1'}});
+ add('scripture_reading','성경봉독','scripture_body','',{scripture_reference:'요한복음 1:9',source_ref:{slotKey:'scripture.reading'}});
+ add('sermon','설교','title','새 설교',{source_ref:{slotKey:'sermon.title'}});
+ add('announcements','광고','body','STALE BODY',{body:'STALE BODY',person:'광고 담당',config:{announcementRegions:{welcome:'새 환영',news:'① 새 소식',footer:'새 안내'}},source_ref:{slotKey:'announcements.body',label:'청소년부 광고'}});
+ const before=JSON.stringify(aggregate);window.linkFixture=aggregate;
+ worshipAtomicClient=async()=>({read:async(sid,options)=>{if(options.adopt!==false)throw Error('adopt');return structuredClone(aggregate);}});
+ loadBulletinReusableContent=async()=>[];
+ window.MindexBulletin=Object.freeze({...B,readLinkedSongs:async()=>[{id:'SONG-TEST-0001',title:'연결 찬양'}]});
+ state.client={from(table){return {select(){return this},in(){return this},gte(){return this},lte(){return this},order(){return this},then(resolve){return Promise.resolve({data:table==='mindex_worship_services'?[aggregate.service]:[],error:null}).then(resolve)}}}};
+ state.serviceItems[id]=[{id:'draft',raw_title:'UNSAVED',memo:''}];state.dirty.service=true;
+ const savedState=JSON.stringify({items:state.serviceItems,dirty:state.dirty,suppression:state.templateElementSuppressions});
+ const source=await loadServiceBulletinSource(id,{});
+ if(JSON.stringify(aggregate)!==before)throw Error('aggregate mutation');
+ if(JSON.stringify({items:state.serviceItems,dirty:state.dirty,suppression:state.templateElementSuppressions})!==savedState)throw Error('draft mutation');
+ const doc={...B.normalizeSnapshot({settings:{design:'swiss-youth',theme:''},fields:{issue:'37',outline:'1. 직접 대지',news:'OLD NEWS',welcome:'OLD WELCOME',notices:'OLD FOOTER',sermonReference:'OLD REFERENCE',outlineTitle:'OLD TITLE'}}),source};
+ const authored=JSON.stringify(doc.fields);
+ for(const [k,v] of Object.entries({news:'① 새 소식',welcome:'새 환영',notices:'◈ 새 안내',sermonReference:'요한복음 1:9',outlineTitle:'새 설교',issue:'37',outline:'1. 직접 대지'}))if(B.fieldValue(doc,k)!==v)throw Error(k+' mismatch: '+B.fieldValue(doc,k));
+ if(!source.order.some(r=>r.content.includes('연결 찬양')))throw Error('Native praise link lost before catalog hydration');
+ const order=source.order.map(r=>r.label);if(!order.includes('사도신경')&&!order.includes('신앙고백'))throw Error('Missing template creed: '+order);
+ if(!order.includes('결단기도'))throw Error('Missing template response: '+order);
+ if(source.order.find(r=>r.label==='주기도문')?.person.replace(/\s/g,'')!=='다같이')throw Error('Lords prayer assignee');
+ aggregate.elements.find(e=>e.source_ref?.slotKey==='sermon.title').title='바뀐 설교';
+ aggregate.elements.find(e=>e.config?.announcementRegions).config.announcementRegions.news='';
+ doc.source=await loadServiceBulletinSource(id,{});
+ if(B.fieldValue(doc,'outlineTitle')!=='바뀐 설교'||B.fieldValue(doc,'news')!=='')throw Error('Update/delete not followed');
+ if(JSON.stringify(doc.fields)!==authored)throw Error('Authored fields changed');
+ const host=document.createElement('div');document.body.replaceChildren(host);
+ const cache=new Map();window.MINDEX_SERVER_STORAGE={ready:true,getItem:(_,k)=>cache.get(k),keys:()=>[...cache.keys()],setItem:async(_,k,v)=>cache.set(k,v),queue:(_,k,v)=>{cache.set(k,v);return true}};
+ window.linkDocuments=new Map();window.linkSource=doc.source;
+ window.linkEditor=B.mount(host,{serviceId:id,scope:'linked-fixture',documents:linkDocuments,services:[{id,label:'청소년부'}],loadSource:async()=>structuredClone(window.linkSource),loadDraft:async()=>({revision:1,...B.storedValue(doc)}),saveDraft:async()=>{throw Error('Unexpected write')}});
+ return {order,pass:true};
+}

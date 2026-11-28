@@ -342,7 +342,7 @@
       return {id, title, hymn_no};
     })];
   }
-  function resolveSource({service, sections=[], elements=[], songs=[], scriptures=[], calendar=[], settings={}, services=[], history=[]}) {
+  function resolveSource({service, sections=[], elements=[], songs=[], scriptures=[], calendar=[], settings={}, services=[], history=[], linkedWorship=false}) {
     const compactOrder=settings.compactOrder!==false;
     const songById = new Map(songs.map(s=>[s.id,s]));
     const scriptureById = new Map(scriptures.map(s=>[s.id,s]));
@@ -352,6 +352,7 @@
     const today = calendar.find(r=>r.date===date) || {};
     const source = {id:service.id, date, department, leader:clean(service.worship_leader), praiseLeader:clean(service.praise_leader), worshipLeader:clean(service.worship_leader)||({children:'박소영 전도사님',youth:'허호범 선생님','young-adult':'이재희 청년'})[department], liturgicalSeason:clean(today.liturgical), commemoration:clean(today.note), liturgical:[clean(today.liturgical),clean(today.note)].filter(Boolean).join(" / "),
       sermon:"", scripture:"", news:"", order:[], orderSummaryOnly:Object.create(null), linkedPraiseTitles:Object.create(null), prayers:[], events:"", loadedAt:new Date().toISOString()};
+    const regions=[];
     const hasReading=elements.some(e=>sectionById.get(e.section_id)?.section_key==="scripture_reading");
     const ordered = elements.filter(e=>sectionById.has(e.section_id)).sort((a,b)=>
       (sectionById.get(a.section_id).sort_order-sectionById.get(b.section_id).sort_order) || (a.sort_order-b.sort_order));
@@ -368,7 +369,7 @@
         || /^(ready|preparation|closing|fellowship)$/.test(section.section_key)
         || /^(준비|폐회|실시간 성구 송출)$/.test(label)))
         || ["blank","image","video","audio","file","ppt","pdf","live_scripture"].includes(type)
-        || config.templateSuppressed || el.content_state?.status==="suppressed" || el.content_state?.state==="suppressed") continue;
+        || config.templateSuppressed || config.template_suppressed || config.hiddenInPresentation || config.hidden_in_presentation || el.content_state?.status==="suppressed" || el.content_state?.state==="suppressed") continue;
       if(compactOrder)label=label.replace(/^(찬양|찬송)\s*\d+(?:\s*[–~-]\s*\d+)?$/, "$1");
       const linked = songById.get(el.praise_record_id || el.song_id);
       const scripture = scriptureById.get(el.scripture_id);
@@ -384,13 +385,17 @@
       }
       if (slot==="sermon.title" || label==="설교") {source.sermon=content;label="설교";}
       if (/announcements/.test(section.section_key) && ["body","plain_text","editable"].includes(type)) {
+        const parts=config.announcementRegions;
+        regions.push(parts && typeof parts === "object" && !Array.isArray(parts)
+          ? {welcome:clean(parts.welcome),news:clean(parts.news),notices:clean(parts.footer)}
+          : announcementParts(clean(el.body||el.title)));
         source.news=[source.news,clean(el.body||el.title)].filter(Boolean).join("\n");
         source.order.push({id:el.id,label:"광고",content:"",person:clean(el.person)});
         continue;
       }
       let person=clean(el.person);
       if (label.replace(/\s/g,"")==="대표기도"||(department==="children"&&label.replace(/\s/g,"")==="봉헌기도")) person=clean(today[department==="children"?"children_prayer":department==="youth"?"youth_prayer":"young_adult_prayer"])||person;
-      if(compactOrder&&!person&&["사도신경","찬양","찬송","기도","성경봉독","결단찬양","결단기도","봉헌찬양","봉헌","파송찬양"].includes(label))person="다같이";
+      if(compactOrder&&!person&&["사도신경","주기도문","공동체고백","공동체 고백","찬양","찬송","기도","성경봉독","결단찬양","결단기도","봉헌찬양","봉헌","파송찬양"].includes(label))person="다같이";
       if (content===label||(compactOrder&&["title_person","title_assignee"].includes(type)&&content===person)) content="";
       const summaryOnly = source.orderSummaryOnly[el.id];
       if(compactOrder&&summaryOnly&&["사도신경","주기도문","공동체 고백"].includes(label))content="";
@@ -400,6 +405,11 @@
     }
     source.announcements=source.news;
     Object.assign(source,announcementParts(source.news));
+    if(linkedWorship) {
+      source.linkedWorship=true;
+      for(const key of ["welcome","news","notices"])source[key]=regions.map(part=>part[key]||"").filter(Boolean).join("\n");
+      source.announcements=[source.welcome,source.news,source.notices].filter(Boolean).join("\n");
+    }
     Object.assign(source,monthlyView(calendar,date,settings,services,department));
     const reused=reusableContent(date,source.eventsMonth,history,department);
     source.common=reused.common;source.commonOverrides=reused.commonOverrides;
@@ -420,7 +430,7 @@
     // All reviewed 2026 youth issues include prayer between praise and the reading.
     const printPrayer=["young_adult","young-adult"].includes(service.service_type_id)&&date>="2026-01-18";
     const suppressedPrayer=ordered.some(e=>sectionById.get(e.section_id)?.section_key==="praise"&&clean(e.source_ref?.label)==="기도"&&(e.config?.templateSuppressed||e.content_state?.state==="suppressed"||e.content_state?.status==="suppressed"));
-    if(compactOrder&&printPrayer&&!suppressedPrayer){
+    if(compactOrder&&printPrayer&&!suppressedPrayer&&!linkedWorship){
       const lastPraise=source.order.findLastIndex(r=>["찬양","찬송"].includes(r.label));
       if(lastPraise>=0&&source.order[lastPraise+1]?.label==="성경봉독")source.order.splice(lastPraise+1,0,{id:"bulletin-communal-prayer",label:"기도",content:"",person:"다같이"});
     }
@@ -1064,7 +1074,12 @@
     verse:"하나님이 지으신 그 모든 것을 보시니\n보시기에 심히 좋았더라 (창 1:31a)",
     meeting:"주일 오전 11시 · 1층 베데스다홀"
   });
+  const worshipLinkedFields=new Set(["news","welcome","notices","leader","announcer","sermonReference","outlineTitle","coverTitle"]);
+  function linkedWorshipField(doc,key){return doc.source?.linkedWorship===true&&worshipLinkedFields.has(key);}
   function rawFieldValue(doc,key) {
+    if(linkedWorshipField(doc,key))return key==="leader"?(doc.source.worshipLeader||doc.source.leader||"")
+      :key==="sermonReference"?doc.source.scripture||""
+      :["outlineTitle","coverTitle"].includes(key)?doc.source.sermon||"":doc.source[key]||"";
     if(key==="brand"&&!Object.hasOwn(doc.fields,key)&&!Object.hasOwn(doc.inherited?.common||{},key))return doc.source?.department==="youth"?departmentName("youth"):"RIA\n청년부";
     if(key==="eventsText") {
       const month=doc.settings.eventsMonth||doc.source?.eventsMonth;
@@ -1662,7 +1677,7 @@
           const saved=bulletinDrafts(doc.key).find(v=>v.templateDirty!==undefined);
           if(saved?.templateDirty&&saved?.templateRevision===(templateRow?.revision||0)){Object.assign(doc,normalizeSnapshot(saved));doc.dirty=true;}
         }
-        doc.source=weekly.source;doc.backgrounds=weekly.backgrounds;
+        doc.source={...weekly.source,linkedWorship:false};doc.backgrounds=weekly.backgrounds;
         templateDraft=doc;templateDrafts.set(key,doc);assetLoaded=false;await readyBackground(doc);assetLoaded=true;mode="layout";saveError=doc.saveError||"";templateError="";
       }catch(e){saveError=e.message;}finally{loading=false;properties();preview();status();}
     }
@@ -1753,7 +1768,7 @@
       if(!doc){p.replaceChildren();return;}
       if(mode==="content") {
         const child=doc.source?.department==="children",tov=["youth-tov","swiss-youth"].includes(doc.settings.design);
-        const field=key=>doc.settings.editorFields?.[key]?.visible===false?"":`<label ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(doc.settings.editorFields?.[key]?.label||(key==="leader"&&swissDesign(doc.settings.design)?"예배 인도자":tov&&key==="staff"?"섬김이 · 임원진":fields[key]))}</span>${["issue","church","website","memoryReference"].includes(key)?
+        const field=key=>doc.settings.editorFields?.[key]?.visible===false?"":linkedWorshipField(doc,key)?`<div class="bulletin-connected" data-bulletin-linked="${key}"><span>${escape(fields[key]||key)} · 예배 연동</span><strong>${escape(fieldValue(doc,key)||"예배에서 미입력")}</strong></div>`:`<label ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold-editor':''}><span class="bulletin-field-label">${escape(doc.settings.editorFields?.[key]?.label||(key==="leader"&&swissDesign(doc.settings.design)?"예배 인도자":tov&&key==="staff"?"섬김이 · 임원진":fields[key]))}</span>${["issue","church","website","memoryReference"].includes(key)?
           `<input data-bulletin-field="${key}" value="${escape(fieldValue(doc,key))}" ${key==="issue"?'inputmode="numeric"':''}>`:
           `${["news","outline","notices","welcome"].includes(key)?'<button type="button" data-inline-bold-button aria-label="선택한 문구 굵게" title="굵게 (⌘B / Ctrl+B)"><b>B</b></button>':''}<textarea ${["news","outline","notices","welcome"].includes(key)?'data-inline-bold':''} data-bulletin-field="${key}" ${key==="news"?'data-announcement-numbered aria-describedby="bulletin-news-help"':''} rows="1">${escape(fieldValue(doc,key))}</textarea>`}${key==='leader'&&swissDesign(doc.settings.design)?`<small class="bulletin-input-help">찬양 인도자: ${escape(doc.source?.praiseLeader||'미입력')} · 운영 탭에서 연동</small>`:''}${key==="news"?'<small id="bulletin-news-help" class="bulletin-input-help">Enter 다음 번호 · Shift+Enter 이어 쓰기</small>':''}</label>`;
         const modern=swissDesign(doc.settings.design)||["editorial","simple"].includes(doc.settings.design);

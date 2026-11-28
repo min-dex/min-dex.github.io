@@ -120,3 +120,5 @@ body:has(.bulletin-workbench) .right-sidebar{display:none}
   .bulletin-toolbar :is([data-bulletin-template-edit],[data-bulletin-template-exit]){grid-column:1/-1;justify-self:start}
   .bulletin-toolbar select{min-width:0}
 }
+
+.bulletin-connected[data-bulletin-linked] strong{white-space:pre-wrap;font-weight:400;overflow-wrap:anywhere}

@@ -15056,9 +15056,19 @@ async function loadServiceBulletinSource(serviceId, settings = {}) {
     read(state.client.from("mindex_worship_services").select("id,service_type_id,service_date,title,service_alias,source_ref").gte("service_date", monthStart).lte("service_date", rangeEnd).order("service_date")),
     loadBulletinReusableContent(aggregate.service),
   ]);
-  const source = window.MindexBulletin.resolveSource({...aggregate, songs: songs || [], scriptures: scriptures || [], calendar: calendar || [], settings, history,
+  const linkedWorship = normalized.date >= "2026-11-22";
+  const storedItems = groupWorshipElements(aggregate.sections, aggregate.elements.map(row => ({...row, song_id:row.praise_record_id || row.song_id})))[serviceId] || [];
+  const projectedItems = projectWorshipServiceItemsFromTemplate(normalized, storedItems, {storedOnly:true});
+  const outputItems = getServiceOutputItems(serviceId, {service:normalized, items:projectedItems})
+    .map(item => ({...item, assignee:serviceItemEditableAssigneeValue(item, normalized)}));
+  const rows = buildWorshipPersistenceRows(normalized, outputItems,
+    Object.fromEntries(aggregate.sections.map(row => [row.id,row])),
+    Object.fromEntries(aggregate.elements.map(row => [row.id,row])),
+    {singleSongCatalog:state.singleSongCatalog, singleSongStorage:"native"});
+  const source = window.MindexBulletin.resolveSource({...aggregate, ...(linkedWorship ? rows : {}), linkedWorship, songs: songs || [], scriptures: scriptures || [], calendar: calendar || [], settings, history,
     services: (bulletinServices || []).map(normalizeWorshipService).filter(s => worshipAppServiceTypeId(s.type_id) === worshipAppServiceTypeId(normalized.type_id))
       .map(s => ({date: s.date, noGathering: serviceIsNoGathering(s), label: s.alias || (serviceIsNoGathering(s) ? (/연합|헌신예배/.test(s._worshipSourceRef?.no_gathering_reason||"")?"연합예배":"집회 없음") : s.title) || "집회 없음"}))});
+  source.linkedWorship = linkedWorship;
   source.autoBackground = bulletinBackgroundForService(normalized, (calendar || []).find(row => row.date === normalized.date));
   return source;
 }
@@ -22255,7 +22265,7 @@ function recoverAllGenerationsOfferingItems(service, items = []) {
   });
 }
 
-function projectWorshipServiceItemsFromTemplate(service, items = []) {
+function projectWorshipServiceItemsFromTemplate(service, items = [], options = {}) {
   items = normalizeLegacyWorshipRoleItems(items);
   const appTypeId = worshipAppServiceTypeId(service?.type_id);
   if (!TEMPLATE_PROJECTED_SERVICE_TYPES.has(appTypeId)) {
@@ -22264,7 +22274,7 @@ function projectWorshipServiceItemsFromTemplate(service, items = []) {
     return items.some(isTemplateSuppressedServiceItem)
       ? items.filter(item => !isTemplateSuppressedServiceItem(item)) : items;
   }
-  const sourceItems = mergeMonthlyCorporatePrayerItems(mergeRememberedTemplateSuppressionItems(service?.id, recoverAllGenerationsOfferingItems(service, items)));
+  const sourceItems = mergeMonthlyCorporatePrayerItems(options.storedOnly ? recoverAllGenerationsOfferingItems(service, items) : mergeRememberedTemplateSuppressionItems(service?.id, recoverAllGenerationsOfferingItems(service, items)));
 
   // Migrate legacy section ownership before hierarchy normalization. Otherwise
   // normalization recognizes the entrance-praise label but preserves its old

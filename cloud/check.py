@@ -183,6 +183,7 @@ SMOKES = (
     "smoke_bulletin_forest.py",
     "smoke_bulletin_tov.py",
     "smoke_bulletin_swiss.py",
+    "smoke_bulletin_worship_link.py",
     "smoke_bulletin_server_design.py",
     "smoke_bulletin_live_template.py",
     "smoke_bulletin_liturgy_order.py",
