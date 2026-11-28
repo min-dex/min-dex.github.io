@@ -253,8 +253,18 @@
   function audioSetMatchesFormPlan(profile, version, fallback = []) {
     if (!validSet(profile, version)) return false;
     const blank = '__audio_blank__';
-    const expected = fallback.filter(form => !form?._presenterTitle)
-      .map(form => form?._presenterBlank ? blank : audioFormOwnerKey(form));
+    const sourceById = new Map((version.forms || []).map(form => [audioFormOwnerId(form), form]));
+    const expected = fallback.filter(form => !form?._presenterTitle).map(form => {
+      if (form?._presenterBlank) return blank;
+      const source = sourceById.get(audioFormOwnerId(form));
+      // normalizeForms numbers repeated unnumbered blocks for display. An exact
+      // full-source match keeps its stored identity; selections/splits still differ.
+      if (source && source.part_number == null
+          && audioFormOwnerKey({...form, part_number: null}) === audioFormOwnerKey(source)) {
+        return audioFormOwnerKey(source);
+      }
+      return audioFormOwnerKey(form);
+    });
     const actual = audioSetFormSequence(profile, version);
     if (!expected.length || !expected.every(Boolean) || !Array.isArray(actual)) return false;
     let cursor = 0;

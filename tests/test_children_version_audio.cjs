@@ -65,6 +65,29 @@ require('../mindex.song-timing.js');const T=global.MindexSongTiming;
  assert.equal(T.outputForms(item,song,sequenceVersion,{forms:[title,...sequenceForms]}).length,1+audioPages.length,'a leading authored T keeps reviewed audio pages and cues');
  const titleInMiddle=[sequenceForms[0],{_presenterTitle:true,id:'title',lyrics:''},sequenceForms[1]];
  assert.deepEqual(T.outputForms(item,song,sequenceVersion,{forms:titleInMiddle}),titleInMiddle,'a middle authored T keeps its exact position without guessed cues');
+ // Display numbering of stored unnumbered choruses must not discard audio blanks.
+ const unnumbered=[
+  {id:'u-v1',part_type:'Verse',part_number:1,lyrics:'가나다라'},
+  {id:'u-c1',part_type:'Chorus',part_number:null,lyrics:'후렴'},
+  {id:'u-v2',part_type:'Verse',part_number:2,lyrics:'마바사아'},
+  {id:'u-c2',part_type:'Chorus',part_number:null,lyrics:'후렴'},
+ ];
+ const uAudioPages=[
+  {lyrics:'가나',audioSourceRange:[0,2]},{lyrics:'다라',audioSourceRange:[2,4]},
+  {lyrics:'후렴',audioSourceRange:[4,6]},
+  {_presenterBlank:true,lyrics:''},
+  {lyrics:'마바',audioSourceRange:[6,8]},{lyrics:'사아',audioSourceRange:[8,10]},
+  {lyrics:'후렴',audioSourceRange:[10,12]},
+  {_presenterBlank:true,lyrics:''},
+ ];
+ const uVersion={forms:unnumbered,audio_set:{...version.audio_set,forms:uAudioPages,sourceSignature:T.sourceSignature({forms:unnumbered})}};
+ const numbered=unnumbered.map((f,i)=>f.part_type==='Chorus'?{...f,part_number:(i+1)/2,label:'Chorus '+((i+1)/2)}:f);
+ const untouched=JSON.stringify(uVersion);
+ assert.deepEqual(T.formsFor(item,song,uVersion,numbered),uAudioPages,'display-only chorus numbering preserves split pages, interlude and outro');
+ for(const altered of [numbered.slice(0,2),[...numbered,numbered[3]],[numbered[2],numbered[3],numbered[0],numbered[1]],numbered.map((f,i)=>i===1?{...f,lyrics:'다른 후렴'}:f),numbered.map((f,i)=>i===1?{...f,part_variant:'@'}:f),numbered.map((f,i)=>i===1?{...f,lyrics:'후'}:f)]) {
+  assert.deepEqual(T.formsFor(item,song,uVersion,altered),altered,'changed selection, repetition, order, text, variant or split keeps timing stale');
+ }
+ assert.equal(JSON.stringify(uVersion),untouched,'audio and source immutable');
  const declaredSource=global.presenterServiceItemDeclaredFormSource;
  global.presenterServiceItemDeclaredFormSource=()=>null;
  const inferredPlan={forms:[title,{id:'heuristic',part_type:'Verse',lyrics:'추정 가사'}]};
