@@ -10432,7 +10432,8 @@ const deferredServiceTextPreviewTimers = new Map();
 
 function deferredServiceTextPreviewKey(field) {
   const referenceKey = field.dataset.scriptureReferenceIndex === undefined ? "" : `:${field.dataset.scriptureReferenceIndex}`;
-  return `${field.dataset.serviceId || state.selectedServiceId}:${field.dataset.serviceItemIndex || ""}:${field.dataset.serviceItemField || ""}${referenceKey}`;
+  const prayerKey = field.dataset.corporatePrayerTopicIndex === undefined ? "" : `:prayer-${field.dataset.corporatePrayerTopicIndex}`;
+  return `${field.dataset.serviceId || state.selectedServiceId}:${field.dataset.serviceItemIndex || ""}:${field.dataset.serviceItemField || ""}${referenceKey}${prayerKey}`;
 }
 
 function deferredServiceScriptureReferenceDraftValue(serviceId, index) {
@@ -10456,8 +10457,10 @@ function clearDeferredServiceScriptureReferenceDraft(field) {
   deferredServiceScriptureReferenceDrafts.delete(key);
 }
 
-function findDeferredServiceTextInput(serviceId, index, fieldKey) {
-  const selector = `[data-service-item-field="${CSS.escape(fieldKey)}"][data-service-item-index="${CSS.escape(String(index))}"]`;
+function findDeferredServiceTextInput(serviceId, index, fieldKey, sourceField = null) {
+  const prayerSelector = sourceField?.dataset.corporatePrayerTopicIndex === undefined ? ""
+    : `[data-corporate-prayer-topic-index="${CSS.escape(sourceField.dataset.corporatePrayerTopicIndex)}"]`;
+  const selector = `[data-service-item-field="${CSS.escape(fieldKey)}"][data-service-item-index="${CSS.escape(String(index))}"]${prayerSelector}`;
   return [...document.querySelectorAll(selector)]
     .find((candidate) => (candidate.dataset.serviceId || state.selectedServiceId) === serviceId) || null;
 }
@@ -10500,7 +10503,7 @@ function scheduleDeferredServiceScriptureReferenceCommit(field) {
     deferredServiceScriptureReferenceTimers.delete(key);
     const currentField = field.isConnected
       ? field
-      : findDeferredServiceTextInput(serviceId, index, field.dataset.serviceItemField);
+      : findDeferredServiceTextInput(serviceId, index, field.dataset.serviceItemField, field);
     if (!currentField) return;
     commitDeferredServiceTextInput(currentField, { save: true });
   };
@@ -14907,10 +14910,10 @@ async function closePageTab(index) {
     const returnIndex = state.pageTabs.findIndex((candidate) => candidate.id === (closingActive ? tab.openerTabId : activeId));
     state.pageTabIndex = returnIndex >= 0 ? returnIndex : Math.max(0, Math.min(index, state.pageTabs.length - 1));
     persistPageTabsState();
+    // Closing is complete before the destination module finishes loading.
+    // Reflect that immediately so the X never appears stuck.
+    renderPageTabs();
     if (closingActive) await applyPageTabSnapshot(state.pageTabIndex);
-    else {
-      renderPageTabs();
-    }
   } finally {
     pageTabClosePending = false;
   }

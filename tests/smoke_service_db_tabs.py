@@ -48,6 +48,14 @@ def main():
               await closePageTab(0);
               if(state.pageTabs.length!==1 || state.module!=='calendar') throw Error('Missing opener fallback');
               if(opened.includes('home')) throw Error('Unnecessary home render');
+              let releaseSnapshot;
+              applyPageTabSnapshot=()=>new Promise(resolve=>{releaseSnapshot=resolve});
+              state.pageTabs=[newPageTab({module:'service'}),newPageTab({module:'calendar'})];state.pageTabIndex=0;
+              renderPageTabs();
+              const closing=closePageTab(0);
+              await new Promise(resolve=>setTimeout(resolve,0));
+              if(state.pageTabs.length!==1 || document.querySelectorAll('.page-tab').length!==1) throw Error('Close waits for destination load before updating tabs');
+              releaseSnapshot();await closing;
               const markup=renderServicePraiseLinkControl({label:'찬양',song_id:'fixture-song'},0);
               if(!markup.includes('data-service-db-song') || !markup.includes('새 탭')) throw Error('Button contract');
               return {tabs:state.pageTabs.length,opened};

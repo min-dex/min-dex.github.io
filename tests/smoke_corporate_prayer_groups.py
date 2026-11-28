@@ -53,6 +53,24 @@ def main():
               check(slides[1].title===presenterCorporatePrayerTopicTitle(topics[3]) && slides[1].assignee==='담당 4','output missing second person');
               const html=renderPresenterMonthlyCorporatePrayerInputs(merged[2],2,parseServiceItemMemo(merged[2].memo),service.id);
               check((html.match(/data-service-item-field="corporate_prayer_assignee"/g)||[]).length===2,'missing assignee inputs');
+              const editor=document.createElement('div');
+              editor.innerHTML=html;
+              document.body.append(editor);
+              const assigneeInputs=[...editor.querySelectorAll('[data-service-item-field="corporate_prayer_assignee"]')];
+              check(deferredServiceTextPreviewKey(assigneeInputs[0])!==deferredServiceTextPreviewKey(assigneeInputs[1]),'paired assignees share draft identity');
+              check(findDeferredServiceTextInput(service.id,2,'corporate_prayer_assignee',assigneeInputs[1])===assigneeInputs[1],'second assignee resolves to first input');
+              state.module='presenter';
+              let inputRefreshes=0;
+              const previousRefresh=refreshPresenterForService;
+              refreshPresenterForService=()=>{inputRefreshes+=1};
+              bindDetailInteractionRoot(editor,{calendarEdit:true});
+              assigneeInputs[1].focus();
+              assigneeInputs[1].value='타이핑 중 담당';
+              assigneeInputs[1].dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:'당'}));
+              check(inputRefreshes===0,'assignee typing rerenders presenter');
+              check(assigneeInputs[1].value==='타이핑 중 담당','assignee typing replaces the field');
+              refreshPresenterForService=previousRefresh;
+              editor.remove();
               // Linked songs must resolve in the catalog before save rows are built.
               state.songs=[{id:song.song_id,title:song.raw_title,versions:[]}];
               const rows=buildWorshipPersistenceRows(service,merged);
@@ -81,6 +99,7 @@ def main():
                 updateServiceItemField({dataset:{serviceId:service.id,serviceItemIndex:String(groupIndex),serviceItemField:'corporate_prayer_assignee',corporatePrayerTopicIndex:'1'},value:'새 담당'});
                 const current=state.serviceItems[service.id].find(x=>x.label==='공동기도 3·4');
                 check(parseServiceItemMemo(current.memo).corporatePrayers[1].assignee==='새 담당','input handler does not save assignee');
+                check(parseServiceItemMemo(current.memo).corporatePrayers[0].assignee==='담당 3','second assignee overwrites first');
               } finally {refreshPresenterForService=oldRefresh;updateSaveState=oldSave;}
               const duplicate=[...original,{...prayers[0],id:'duplicate'}];
               check(mergeMonthlyCorporatePrayerItems(duplicate).some(x=>x.id==='duplicate'),'ambiguous duplicate lost');
