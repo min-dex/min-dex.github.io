@@ -512,8 +512,8 @@
       const root=svg('svg',{viewBox:'0 0 297 210',width:'297mm',height:'210mm','data-bulletin-design':doc.settings.design,role:'img','aria-label':page?'안쪽':'겉면'});
       root.append(svg('rect',{width:297,height:210,fill:'#FFFFFF'}));pages.push(root);
       for(const x of [10,158.5]){
-        if(page===0||x===10)root.append(svg('rect',{x,y:10,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
-        if(page===0||x===158.5)root.append(svg('rect',{x,y:198.75,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
+        root.append(svg('rect',{x,y:10,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
+        root.append(svg('rect',{x,y:198.75,width:128.5,height:1.25,fill:accent,'data-swiss-bar':'true'}));
       }
     }
     for(const [page,id,t,x,y,align] of [[0,'website',value('website'),10,15,'left'],[0,'address',value('address').replace(/로\s+(\d+번)/g,'로$1'),10,190,'left'],[0,'church',value('church'),158.5,15,'right'],[0,'meeting',value('meeting'),158.5,190,'right'],[1,'insideBrand',({'young-adult':'RIA 청년부',youth:'TOV 청소년부',children:'꿈꾸는 어린이부'})[department],10,15,'left'],[1,'insideChurch',value('church').replace(/^기독교대한성결교회\s+/,''),158.5,190,'right']]){
