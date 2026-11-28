@@ -86,10 +86,16 @@ function bindElectronDesktopEvents() {
   const broadcast = document.getElementById("desktopBroadcastBtn");
   if (update && typeof desktop.checkForUpdates === "function") {
     update.hidden = false;
+    update.disabled = false;
+    update.setAttribute?.("aria-label", "업데이트 확인");
+    update.setAttribute?.("title", "업데이트 확인");
     update.addEventListener("click", checkUpdate);
   }
   if (broadcast && typeof desktop.openBroadcast === "function") {
     broadcast.hidden = false;
+    broadcast.disabled = false;
+    broadcast.setAttribute?.("aria-label", "유튜브 송출");
+    broadcast.setAttribute?.("title", "유튜브 송출");
     broadcast.addEventListener("click", async () => {
       try {
         if ((await desktop.openBroadcast())?.ok) return;

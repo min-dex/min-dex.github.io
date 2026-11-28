@@ -8,7 +8,8 @@ function fixture(initial, platform, isDesktop = true){
  let status=initial || {status:'available',version:'1.2.3',presenterOpen:false};let live=false,dirty=false,accept=true;
  let confirms=0,installs=0,downloads=0,broadcasts=0;const messages=[];
  const buttons=Object.fromEntries(['desktopUpdateBtn','desktopBroadcastBtn'].map(id=>[id,{
-  hidden:true,addEventListener(_name,callback){this.click=callback;},
+  hidden:false,disabled:true,attrs:{},addEventListener(_name,callback){this.click=callback;},
+  setAttribute(name,value){this.attrs[name]=value;},
  }]));
  const bridge={isDesktop,platform,onUpdateState:cb=>bridge.event=cb,
  getUpdateState:async()=>({ok:true,state:status}),checkForUpdates:async()=>({ok:true,state:status}),
@@ -26,6 +27,8 @@ test(platform+' toolbar reuses update guards and opens only the broadcast window
  f.live(true);await tick();
  assert.equal(f.buttons.desktopUpdateBtn.hidden,false);
  assert.equal(f.buttons.desktopBroadcastBtn.hidden,false);
+ assert.equal(f.buttons.desktopUpdateBtn.disabled,false);
+ assert.equal(f.buttons.desktopBroadcastBtn.disabled,false);
  await f.buttons.desktopUpdateBtn.click();
  assert.equal(f.counts().installs,0);
  f.live(false);f.dirty(true);f.set({status:'downloaded',version:'1.2.3'});
@@ -37,9 +40,9 @@ test(platform+' toolbar reuses update guards and opens only the broadcast window
  assert.equal(f.counts().installs,1);
 });
 }
-test('web does not expose native toolbar actions',()=>{
+test('web preserves disabled native toolbar actions',()=>{
  const web=fixture({status:'current'},undefined,false);
- assert(Object.values(web.buttons).every(button=>button.hidden));
+ assert(Object.values(web.buttons).every(button=>!button.hidden&&button.disabled));
 });
 test('declined update remains reachable from the toolbar',async()=>{
  const f=fixture();f.accept(false);await tick();assert.equal(f.counts().confirms,1);
