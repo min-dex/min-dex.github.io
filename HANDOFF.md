@@ -1921,3 +1921,16 @@ Chromium/WebKit light/dark 및 basic/focus 반응형 회귀가 통과했다. 운
 버전 1.1.1(`20261128-stable-111`)을 한 배치로 준비한다. journal은
 `02c6e772cc214e08977382d48125c678`. 운영 쓰기 없이 exact-SHA web/native full
 gate·3OS 설치 보존·Pages/공개 파일 readback 후에만 완료 처리한다.
+## 1.1.3 탭 작업 보존·주보·음원 복구 후보 · 2026-11-28
+
+- 1.1.2 exact `cf319b272`는 web/Pages와 Mac ARM·Intel·Windows 설치/보존을
+  통과했으나 installer publish에서 package 1.1.2와 `internal-release.json`
+  1.1.1 불일치로 중단됐다. 공개 1.1.2 웹은 불변으로 두고 1.1.3 full gate로
+  복구한다.
+- 탭별 memory session은 미저장 model/DOM 입력·선택·세 패널 scroll·focus/caret을
+  복원하고 전환 자체는 저장/폐기를 강요하지 않는다. 실제 저장·송출은 바꾸지 않는다.
+- 풀스크린은 현재 송폼 토큰 하나만 표시한다. 구 섹션 popup은 제거하고 inline
+  이동/삭제를 유지한다. 추천 overlay와 무선택 bold, 명시 섹션 순서 재열기를 보호한다.
+- 주보 PDF 파일명, 청소년 설교노트 한 페이지 및 서버 visibility/height, 음원
+  15장 cue 보존을 함께 검증한다. 제품 1.1.3 / build `20261128-stable-113`.
+

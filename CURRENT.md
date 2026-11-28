@@ -923,3 +923,17 @@ focus를 사용한다. 제품 버전은 1.1.2, 웹 build ID는
 `20261128-stable-111`이다. 운영 자료·설정·미저장 입력은 재작성하지 않는다.
 release journal은 `02c6e772cc214e08977382d48125c678`이며 exact-SHA full gate,
 3OS 설치 보존, Pages와 공개 readback 전에는 배포 완료로 보고하지 않는다.
+## 1.1.3 탭 작업 보존·주보·음원 복구 후보 · 2026-11-28
+
+1.1.2는 동일 SHA web/Pages와 세 플랫폼 설치·업그레이드 보존 검사를 통과했지만
+`internal-release.json`이 1.1.1에 남아 마지막 installer publish assertion이
+실패했다. 이미 공개된 1.1.2 웹 SHA를 다른 SHA로 바꾸지 않고, 게시 계약을
+1.1.3으로 바로잡아 전체 same-SHA gate를 다시 수행한다.
+
+후보는 탭별 미저장 편집값·선택·스크롤·focus/caret 보존, 현재 송폼 토큰만
+표시, 구 섹션 팝업 제거와 inline 이동·삭제, 추천 overlay·무선택 bold 보호,
+청년부 명시 섹션 순서 재열기 보존을 포함한다. 주보 PDF 파일명과 청소년부
+설교노트 한 페이지/공통 양식 visibility·height, 검증된 음원 15장 cue 보존도
+같은 배치다. 운영 예배·주보 원문·음원·타이밍 DB는 이 소스 배포에서 쓰지 않는다.
+제품 1.1.3 / build `20261128-stable-113`이다.
+
