@@ -14,6 +14,9 @@ c.Event=class Event {};
 assert.equal(toggle('첫 **강조**와 일반 문장').value,'**첫 강조와 일반 문장**','Whole mixed selection must not nest bold markers');
 assert.equal(toggle('**첫 강조와 일반 문장**').value,'첫 강조와 일반 문장');
 assert.equal(B.plain(toggle('첫 **강조**와 일반 문장').value),'첫 강조와 일반 문장');
+const untouched=toggle('선택하지 않은 문장',4,4);
+assert.equal(untouched.value,'선택하지 않은 문장');
+assert.deepEqual([untouched.selectionStart,untouched.selectionEnd],[4,4]);
 console.log('PASS mixed bold selection remains readable and toggles off');
 
 assert.equal(B.numbered('**1. 첫 안내**\n**2. 둘째**').value,'① **첫 안내**\n② **둘째**');

@@ -1674,10 +1674,6 @@ function handleServiceOutlineSlideClick(serviceOutlineItem) {
     // Empty optional items still have an editor anchor, even though they do not
     // contribute a slide to output navigation.
     state.selectedServiceItemIndex = itemIndex;
-    openPresenterSectionEditor(serviceId, {
-      itemId: item.id,
-      sectionKey: item._worshipSectionKey || "",
-    });
     renderServiceList();
     void scrollPresenterBoardToServiceItem(serviceId, itemIndex, {
       force: true,
@@ -9083,14 +9079,6 @@ function handlePresenterDetailClick(event) {
 
   if (isPresenterPreparationInputEvent(event)) return true;
 
-  const sectionEditButton = event.target.closest("[data-presenter-section-edit]");
-  if (sectionEditButton) {
-    openPresenterSectionEditor(sectionEditButton.dataset.serviceId || state.selectedServiceId, {
-      sectionKey: sectionEditButton.dataset.presenterSectionEdit,
-    });
-    return true;
-  }
-
   const presenterSectionEditorClose = event.target.closest("[data-presenter-section-editor-close]");
   if (presenterSectionEditorClose) {
     closePresenterSectionEditor();
@@ -14881,7 +14869,9 @@ async function handlePageTabKeydown(event) {
 }
 
 async function openNewPageTab(snapshot = defaultPageTabSnapshot(), { openerTabId = "" } = {}) {
+  window.MINDEX_PAGE_TAB_SESSION?.capture();
   syncActivePageTabState();
+  clearDirtyState();
   state.pageTabs.splice(state.pageTabIndex + 1, 0, { ...newPageTab(snapshot), openerTabId });
   state.pageTabIndex += 1;
   persistPageTabsState();
@@ -14901,11 +14891,18 @@ async function closePageTab(index) {
       if (tab.snapshot?.module !== "home") await goHome();
       return;
     }
+    if (!closingActive && window.MINDEX_PAGE_TAB_SESSION?.isDirty(tab.id)) {
+      pageTabClosePending = false;
+      await activatePageTab(index);
+      await closePageTab(state.pageTabIndex);
+      return;
+    }
     if (closingActive && tab.snapshot?.module !== "bulletin" && !tab.snapshot?.presenterBulletinServiceId && !(await confirmSaveBeforeLeaving())) return;
     if (state.pageTabs[state.pageTabIndex]?.id !== activeId) return;
     index = state.pageTabs.findIndex((candidate) => candidate.id === tab.id);
     if (index < 0) return;
     bulletinTabSessions.delete(tab.id);
+    window.MINDEX_PAGE_TAB_SESSION?.remove(tab.id);
     state.pageTabs.splice(index, 1);
     const returnIndex = state.pageTabs.findIndex((candidate) => candidate.id === (closingActive ? tab.openerTabId : activeId));
     state.pageTabIndex = returnIndex >= 0 ? returnIndex : Math.max(0, Math.min(index, state.pageTabs.length - 1));
@@ -14923,8 +14920,9 @@ async function activatePageTab(index, { force = false } = {}) {
   if (!Number.isInteger(index) || index < 0 || index >= state.pageTabs.length) return;
   if (!force && index === state.pageTabIndex) return;
   window.MINDEX_SERVICE_ENTRY?.invalidate();
-  if (!(state.module === "bulletin" || (state.module === "presenter" && state.presenterBulletinServiceId)) && !(await confirmSaveBeforeLeaving())) return;
+  window.MINDEX_PAGE_TAB_SESSION?.capture();
   syncActivePageTabState();
+  clearDirtyState();
   state.pageTabIndex = index;
   await applyPageTabSnapshot(index);
 }
@@ -14937,6 +14935,7 @@ async function applyPageTabSnapshot(index) {
     state.applyingPageTab = false;
   }
   state.pageTabs[index].label = pageTabTitleForSnapshot(state.pageTabs[index].snapshot);
+  window.MINDEX_PAGE_TAB_SESSION?.restore(state.pageTabs[index]);
   persistPageTabsState();
   renderPageTabs();
   syncBrowserHistory({ replace: true });
@@ -23071,13 +23070,19 @@ function canonicalizeServiceItemForTemplateHierarchy(item = {}, meta = null, sec
     : shouldUsePrayerDefaultLabel
       ? (metaLabel || "대표기도")
       : item.label;
+  // A service-level section move is an authored override, just like an
+  // authored section title.  Reopening a template-projected service must not
+  // silently replace that persisted order with the blueprint order.
+  const authoredSectionOrder = item._worshipSectionTemplateModified
+    ? Number(item._worshipSectionOrder) || 0
+    : 0;
   return {
     ...item,
     label: canonicalElementLabel || item.label,
     _worshipSectionId: sectionIdByGroup.get(meta.groupKey) || item._worshipSectionId || "",
     _worshipSectionKey: meta.key,
     _worshipSectionTitle: sectionTitleByGroup.get(meta.groupKey) || meta.title,
-    _worshipSectionOrder: meta.order,
+    _worshipSectionOrder: authoredSectionOrder || meta.order,
     _worshipElementOrder: item._worshipElementTemplateModified
       ? (Number(item._worshipElementOrder) || Number(meta.elementOrder) || 0)
       : (Number(meta.elementOrder) || Number(item._worshipElementOrder) || 0),
@@ -25861,7 +25866,6 @@ function renderPresenterDetailUnscoped() {
   setPresenterDetailContent(`
     <div class="service-viewer presenter-viewer">
       ${renderServicePresenterControls(svc, presenterSlides, presenterActive, presenterIndex)}
-      ${renderPresenterSectionEditorLayer(svc)}
       ${renderServicePraiseDatalist()}
       ${renderServiceScriptureDatalist()}
     </div>`, serviceId);
@@ -26460,13 +26464,11 @@ function requestPresenterSectionEditor(serviceId = state.selectedServiceId, opti
 }
 
 function openPresenterSectionEditor(serviceId = state.selectedServiceId, options = {}) {
-  if (!serviceId) return;
-  state.presenterSectionEditor = {
-    serviceId,
-    itemId: options.itemId || "",
-    sectionKey: options.sectionKey || "",
-  };
-  renderCurrentServiceModuleDetail();
+  // Section and element actions now live inline in the controller. Keep this
+  // compatibility entry point inert so stale shortcuts cannot reopen the
+  // retired full-screen editor.
+  state.presenterSectionEditor = null;
+  return false;
 }
 
 function closePresenterSectionEditor() {
@@ -26516,41 +26518,7 @@ function presenterSectionEditorTitle(items = []) {
 }
 
 function renderPresenterSectionEditorLayer(service) {
-  const context = presenterSectionEditorContext(service);
-  if (!context) return "";
-  return `
-    <div class="presenter-section-editor-layer" data-presenter-section-editor>
-      <section class="presenter-section-editor" role="dialog" aria-label="${escapeAttr(`${context.sectionTitle} 수정`)}">
-        <header class="presenter-section-editor-head">
-          <div>
-            <span class="svc-prep-editor-kicker">섹션</span>
-            <h3>${escapeHtml(context.sectionTitle)}</h3>
-          </div>
-          <button class="icon-btn" type="button" data-presenter-section-editor-close aria-label="편집기 닫기" title="편집기 닫기">
-            <i data-lucide="x"></i>
-          </button>
-        </header>
-        <div class="presenter-section-editor-body">
-          <label class="presenter-section-editor-field">
-            <span>섹션 이름</span>
-            <input type="text" data-presenter-section-field="label" value="${escapeAttr(context.sectionTitle)}" />
-          </label>
-          <div class="presenter-section-editor-list">
-            ${context.sectionItems.map((item, localIndex) => renderPresenterSectionEditorItem(item, localIndex, context)).join("")}
-          </div>
-          <div class="presenter-section-editor-add">
-            <select data-presenter-section-new-type aria-label="새 엘리멘트 타입">
-              ${renderServiceElementTypeOptions("")}
-            </select>
-            <input type="text" data-presenter-section-new-name placeholder="새 엘리멘트 이름" aria-label="새 엘리멘트 이름" />
-            <button class="reference-new-btn" type="button" data-presenter-section-add>
-              <i data-lucide="plus"></i>
-              <span>추가</span>
-            </button>
-          </div>
-        </div>
-      </section>
-    </div>`;
+  return "";
 }
 
 function renderServiceItemMoveButton(options = {}) {
@@ -26626,7 +26594,6 @@ function renderServicePrepEditorDialog(service) {
             </div>
           </section>
         </div>
-        ${renderPresenterSectionEditorLayer(service)}
       </section>
     </div>`;
 }

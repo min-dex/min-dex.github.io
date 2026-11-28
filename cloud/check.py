@@ -257,6 +257,7 @@ SMOKES = (
     "smoke_scripture_live.py",
     "smoke_department_assignees.py",
     "smoke_service_entry.py",
+    "smoke_page_tab_session.py",
     "smoke_form_label_spacing.py",
     "smoke_monitor_session.py",
     "smoke_monitor.py",

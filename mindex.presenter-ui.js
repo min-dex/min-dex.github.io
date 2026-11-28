@@ -720,9 +720,9 @@ function renderPresenterSongPosition(slide, options = {}) {
   const heading = position.title ? `<div class="presenter-lyric-song-name">♬ ${escapeHtml(position.title)}</div>` : "";
   if (slide.syncTimeline?.localTiming) return heading;
   if (position.index < 0 || position.labels.every(label => canonicalServiceFormToken(label) === "L")) return heading;
-  const steps = position.labels.map((label, i) =>
-    `<span${i === position.index ? ' aria-current="step"' : ""}>${escapeHtml(label)}</span>`);
-  return heading + `<div class="presenter-lyric-song-steps" aria-label="송폼">${steps.join('<i aria-hidden="true">-</i>')}</div>`;
+  const current = canonicalServiceFormToken(position.labels[position.index]);
+  if (!current || current === "L") return heading;
+  return heading + `<div class="presenter-lyric-song-steps" aria-label="현재 송폼"><span aria-current="step">${escapeHtml(current)}</span></div>`;
 }
 
 function presenterControlBoardKey(service, slides = [], active = false, chromakey = true) {

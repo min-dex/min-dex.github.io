@@ -1319,3 +1319,19 @@ name save status is separate from heartbeat status, preserves later typing and
 provides retry after failure. Enter/blur of the same pending name coalesces; server
 refresh must not replace an unsaved name. Closing restores focus to the launcher.
 No worship, permission, PIN-validation or remote command semantics change.
+
+## Stable suggestions and inline structure controls · 2026-11-28
+
+Song recommendations open as an anchored overlay below the title field. Showing,
+replacing or clearing recommendations must not change the field width, height,
+radius or its row geometry. A bold command with no selected text keeps the value,
+caret and input history unchanged; raw `****` markers are never inserted.
+
+The former full-screen section editor is retired. Section order and element
+move/delete actions live in the controller beside their target. Empty order rows
+scroll to their inline control instead of opening a dialog, and legacy entry
+points remain inert. These controls keep the existing atomic save, confirmation,
+template suppression and undo behavior.
+- 예배 좌측 순서에서 사용자가 섹션 단위로 이동한 순서는 해당 예배의 명시적 override다. 템플릿 예배를 다시 열거나 새로고침해도 기본 템플릿 순서로 되돌리지 않으며, 다른 날짜의 예배·기본 템플릿에는 전파하지 않는다.
+- 열린 Mindex 탭은 서로 독립된 작업 화면이다. 다른 탭으로 이동할 때 현재 탭의 미저장 편집값, 선택, 목록·본문·우측 패널 스크롤과 입력 포커스·caret을 메모리에 보존하고, 돌아오면 저장이나 실제 송출 상태를 바꾸지 않은 채 복원한다. 탭 전환 자체는 저장·폐기를 강요하지 않는다.
+- 가사 풀스크린 하단의 송폼 표시는 전체 순서를 반복하지 않고 현재 구간 토큰 하나만 표시한다. 이 표시는 presentation-only이며 저장 송폼, 슬라이드 순서, 음원 cue·자동 넘김에는 관여하지 않는다.

@@ -56,6 +56,9 @@ def main():
                   clickAction('up');
                   if(JSON.stringify(order())!==JSON.stringify(before)) throw Error('Move up failed');
                   if(refs.detailPane.querySelector('[data-presenter-section-editor]')) throw Error('Retired popup remains');
+                  state.presenterSectionEditor={serviceId:service.id,itemId:target.id};
+                  if(openPresenterSectionEditor(service.id,{itemId:target.id})!==false || state.presenterSectionEditor) throw Error('Legacy popup entry point remains active');
+                  if(renderPresenterSectionEditorLayer(service)!=='') throw Error('Legacy popup markup remains');
                   const thumb=document.createElement('button');
                   thumb.className='svc-slide-thumb';
                   thumb.dataset.presenterIndex='0';

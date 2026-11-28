@@ -33,7 +33,7 @@ try:
       const host=document.createElement('div');host.innerHTML=renderPresenterSlideFrame(s,{noChromakey:true});
       check(host.querySelector('.presenter-lyric-song-name')?.textContent==='♬ '+native.title,'lyric heading');
       const nodes=[...host.querySelectorAll('.presenter-lyric-song-steps span')];
-      check(nodes.map(n=>n.textContent).join('-')==='C-V1-C-C' && nodes[i].getAttribute('aria-current')==='step' && nodes.filter(n=>n.hasAttribute('aria-current')).length===1,'lyric occurrence '+i);
+      check(nodes.length===1 && nodes[0].textContent===['C','V1','C','C'][i] && nodes[0].getAttribute('aria-current')==='step','lyric occurrence '+i);
       check(!renderPresenterSlideFrame(s,{noChromakey:false}).includes('presenter-lyric-song-steps'),'chromakey label');
     });
     const audioItem = {...nativeItem, id:'audio-lyrics', song_id:null, version_id:null,
@@ -65,11 +65,10 @@ try:
     };
     check(!swap(repeated[0]),'first song transition');
     const stable=swap(repeated[2]);
-    check(stable && stable.querySelector('.presenter-lyric-song-steps').textContent==='C-V1-C-C'
+    check(stable && stable.querySelector('.presenter-lyric-song-steps').textContent==='C'
       && getComputedStyle(stable.querySelector('.presenter-lyric-song-name')).textAlign==='center'
       && stage.querySelector('.is-active.is-entering'),'metadata stays while lyric layer transitions');
-    check(swap(repeated[3]).querySelector('span[aria-current]').previousElementSibling
-      && stage.querySelector('.presenter-lyric-song-steps span:last-child[aria-current]'),'last repeated occurrence');
+    check(swap(repeated[3]).querySelector('.presenter-lyric-song-steps span:only-child[aria-current]')?.textContent==='C','last repeated occurrence');
     check(!swap({...repeated[0],songPosition:{...repeated[0].songPosition,versionId:'other'}}),'different edition transitions');
     check(!swap({...repeated[0],elementId:'another-song'}),'different song transitions');
     check(!swap(repeated[0],false) && !stage.querySelector('.is-active .presenter-lyric-song-name'),'chromakey clean');

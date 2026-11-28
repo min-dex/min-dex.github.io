@@ -40,9 +40,29 @@ try:
                   document.body.innerHTML=`<main>${html}</main>`;refreshIcons(document.body);
                   const buttons=[...document.querySelectorAll('[data-service-section-action]')];
                   const style=getComputedStyle(buttons.find(button=>!button.disabled));
+                  const templateService={id:sid,type_id:'young-adult',date:'2026-11-29',title:'청년부 예배'};
+                  const scaffold=buildWorshipServiceScaffold(sid,'young-adult',{service:templateService});
+                  const templateItems=groupWorshipElements(scaffold.sections,scaffold.elements)[sid];
+                  const desired=['praise','offering','scripture_reading','sermon','response_song'];
+                  const otherKeys=[];
+                  templateItems.forEach(item=>{if(!desired.includes(item._worshipSectionKey)&&!otherKeys.includes(item._worshipSectionKey))otherKeys.push(item._worshipSectionKey)});
+                  const firstPraise=otherKeys.findIndex(key=>{
+                    const templateIndex=templateItems.findIndex(item=>item._worshipSectionKey===key);
+                    return templateIndex>templateItems.findIndex(item=>item._worshipSectionKey==='praise');
+                  });
+                  const reorderedKeys=[...otherKeys.slice(0,firstPraise),...desired,...otherKeys.slice(firstPraise)];
+                  const orderByKey=new Map(reorderedKeys.map((key,index)=>[key,index+1]));
+                  const authored=templateItems.map(item=>({...item,
+                    _worshipSectionOrder:orderByKey.get(item._worshipSectionKey)||item._worshipSectionOrder,
+                    _worshipSectionTemplateModified:true,
+                  }));
+                  const reopened=normalizeServiceItemsForTemplateHierarchy(templateService,authored);
+                  const reopenedKeys=[];
+                  reopened.forEach(item=>{if(!reopenedKeys.includes(item._worshipSectionKey))reopenedKeys.push(item._worshipSectionKey)});
                   return {before,after,afterUp,afterDown,dirty:state.dirty.service,
                     structureDirty:state.dirtyServiceStructureIds.has(sid),buttons:buttons.length,
-                    width:style.width,height:style.height,border:style.borderTopWidth};
+                    width:style.width,height:style.height,border:style.borderTopWidth,
+                    reopenedTargetOrder:reopenedKeys.filter(key=>desired.includes(key))};
                 }""")
                 assert result["afterUp"] == ["offering", "praise", "scripture", "sermon", "decision"]
                 assert result["afterDown"] == ["praise", "scripture", "offering", "sermon", "decision"]
@@ -50,6 +70,7 @@ try:
                 assert result["dirty"] and result["structureDirty"]
                 assert result["buttons"] == 10
                 assert result["width"] == "30px" and result["height"] == "30px" and result["border"] == "1px"
+                assert result["reopenedTargetOrder"] == ["praise", "offering", "scripture_reading", "sermon", "response_song"]
                 print(engine, "PASS whole-section order, content preservation, save dirtiness and shared dense stroke")
             finally:
                 browser.close()

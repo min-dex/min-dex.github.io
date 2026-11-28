@@ -33,8 +33,11 @@ try:
                 }''')
                 field = page.locator('.svc-prep-editor [data-service-item-field="raw_title"][data-service-item-index="1"]')
                 buttons = page.locator('.svc-prep-editor [data-service-song-index="1"]')
+                stable_input = field.evaluate("e=>{const r=e.getBoundingClientRect(),row=e.closest('.svc-edit-item').getBoundingClientRect(),s=getComputedStyle(e);return {x:r.x,y:r.y,width:r.width,height:r.height,radius:s.borderRadius,rowHeight:row.height}}")
                 field.fill('엡 5:19')
                 page.wait_for_function("document.querySelectorAll('.svc-prep-editor [data-service-song-index=\"1\"]').length===2")
+                suggested_input = field.evaluate("e=>{const r=e.getBoundingClientRect(),row=e.closest('.svc-edit-item').getBoundingClientRect(),s=getComputedStyle(e);return {x:r.x,y:r.y,width:r.width,height:r.height,radius:s.borderRadius,rowHeight:row.height}}")
+                assert suggested_input == stable_input, (stable_input, suggested_input)
                 assert field.evaluate('(e)=>e===document.activeElement')
                 assert page.evaluate("beforeItems===JSON.stringify(getServiceItems('picker-test')) && beforePresenter===JSON.stringify(state.presenter)")
                 field.fill('마 22:38')
@@ -80,7 +83,7 @@ try:
                   markServiceElementDirty(sid,item);attempt(Promise.resolve(true));
                   if(await consumeSongSelectionSave(sid,1))throw Error('new edit suppressed');
                 }""")
-                print(engine, 'PASS multiple results, range, focus, draft/output isolation, click selection, linked replacement, empty search and cold-load latest query')
+                print(engine, 'PASS stable input geometry, multiple results, range, focus, draft/output isolation, click selection, linked replacement, empty search and cold-load latest query')
             finally:
                 browser.close()
 finally:

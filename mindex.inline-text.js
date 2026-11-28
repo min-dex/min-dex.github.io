@@ -16,6 +16,9 @@
     if(!input||input.disabled||input.readOnly)return;
     const before=typeof document!=='undefined'&&numberedInput(input)?snapshot(input):null;
     const {value,selectionStart:start,selectionEnd:end}=input;
+    // A formatting command without a selection must not write raw Markdown
+    // markers into the document. Keep the caret and editor focus unchanged.
+    if(start===end){input.focus({preventScroll:true});return;}
     let from=start,to=end;
     // Include markers around the retained selection before toggling line by line.
     if(start>=2&&value.slice(start-2,start)==="**"&&value.slice(end,end+2)==="**") {from-=2;to+=2;}
@@ -28,7 +31,7 @@
     const isBold=line=>/^\*\*[^*\r\n]+\*\*$/.test(line);
     const nonempty=parts.map(part=>part.body).filter(line=>line.trim());
     const remove=nonempty.length>0&&nonempty.every(isBold);
-    const replacement=selected==='****'?'':parts.map(({prefix,body:line})=>prefix+(!line.trim()?line:remove?line.slice(2,-2):isBold(line)?line:`**${runs(line).map(r=>r.text).join('')}**`)).join('\n')||(!selected?'****':'');
+    const replacement=selected==='****'?'':parts.map(({prefix,body:line})=>prefix+(!line.trim()?line:remove?line.slice(2,-2):isBold(line)?line:`**${runs(line).map(r=>r.text).join('')}**`)).join('\n');
     const offset=!remove&&lines.length===1&&replacement.startsWith('**')?2:0;
     input.focus({preventScroll:true});input.setRangeText(replacement,from,to,'select');
     input.setSelectionRange(from+offset,from+replacement.length-offset);
