@@ -64,16 +64,16 @@ try:
    # A clean editor follows the new presentation, without writing the saved issue.
    page.wait_for_function("docs.get('old').settings.appearance?.palette.cover==='#dceafb'")
    assert page.evaluate("sent.length===0&&docs.get('old').fields.news==='직접 작성한 소식'")
-   page.locator('[data-bulletin-template-apply]').click();page.wait_for_function("docs.get('old').settings.appearance?.palette.cover==='#dceafb'&&document.querySelector('[data-bulletin-print]')?.disabled===false")
+   assert page.locator('[data-bulletin-template-apply]').count()==0;page.evaluate("window.dispatchEvent(new Event('focus'))");page.wait_for_function("docs.get('old').settings.appearance?.palette.cover==='#dceafb'&&document.querySelector('[data-bulletin-print]')?.disabled===false")
    assert page.evaluate("docs.get('old').fields.welcome==='직접 쓴 환영'&&docs.get('old').fields.coverTitle===''&&docs.get('old').fields.news==='직접 작성한 소식'&&docs.get('old').fields.memoryVerse==='직접 쓴 말씀'")
-   page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===1')
+   assert page.locator('[data-bulletin-save]').is_disabled();assert page.evaluate('sent.length===0')
    page.evaluate('editor.reload()');page.wait_for_function("document.querySelector('[data-bulletin-field=news]')?.disabled===false")
    assert page.evaluate("docs.get('old').settings.appearance.palette.cover==='#dceafb'&&docs.get('old').fields.news==='직접 작성한 소식'")
    # The next new issue inherits the server template, but not the previous weekly copy.
    page.locator('[data-bulletin-service]').select_option('future');page.wait_for_function("docs.get('future')?.settings.appearance?.palette.cover==='#dceafb'")
    assert page.locator('[data-bulletin-field=news]').input_value()!='직접 작성한 소식'
    assert page.evaluate("docs.get('future').settings.templateKey==='children-forest'&&docs.get('future').settings.templateRevision===1")
-   page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===2')
+   page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===1')
    # Conflicts retain edits in the separate template draft and keep the issue untouched.
    page.locator('[data-bulletin-template-edit]').click();page.wait_for_function("document.querySelector('[data-bulletin-design-color=cover]')?.disabled===false")
    page.locator('[data-bulletin-frame]').select_option('readingHelp')
@@ -89,7 +89,7 @@ try:
    page.locator('[data-bulletin-save]').click();page.wait_for_function("document.querySelector('.bulletin-status').textContent.includes('다른 곳에서')")
    assert page.locator('[data-bulletin-design-color=cover]').input_value()=='#eef0dd'
    page.locator('[data-bulletin-template-exit]').click();page.wait_for_function("document.querySelector('[data-bulletin-field=news]')?.disabled===false")
-   assert page.evaluate("docs.get('future').settings.appearance.palette.cover==='#dceafb'&&template.revision===2&&sent.length===2&&!docs.get('future').dirty&&!editor.canApplyUpdate()")
+   assert page.evaluate("docs.get('future').settings.appearance.palette.cover==='#dceafb'&&template.revision===2&&sent.length===1&&!docs.get('future').dirty&&!editor.canApplyUpdate()")
    page.locator('[data-bulletin-service]').select_option('youth');page.wait_for_function("docs.get('youth')?.source?.department==='young-adult'")
    page.locator('[data-bulletin-template-edit]').click();page.wait_for_function("document.querySelector('[data-bulletin-setting=itemGap]')?.disabled===false")
    assert page.locator('[data-bulletin-design-color]').count()==8
@@ -101,10 +101,10 @@ try:
    assert page.locator('[data-bulletin-design-color=cover]').input_value()=='#eef0dd'
    page.locator('[data-bulletin-frame]').select_option('readingHelp')
    assert page.locator('[data-bulletin-design-label=readingHelp]').input_value()=='저장 중 새 안내'
-   assert page.evaluate('template.revision===2&&youthTemplate.revision===1&&sent.length===2')
+   assert page.evaluate('template.revision===2&&youthTemplate.revision===1&&sent.length===1')
    # Untrusted persisted style keys cannot inject markup, CSS or executable assets.
    assert page.evaluate("(()=>{const a=MindexBulletinForest.normalizeAppearance({palette:{ink:'url(javascript:evil)'},assets:{logo:'javascript:evil'},visible:{unknown:true}});return a.palette.ink==='#294b3b'&&a.assets.logo.startsWith('assets/')&&!Object.hasOwn(a.visible,'unknown')})()")
-   print('PASS server children design: appearance/labels/visibility/frames CAS, issue isolation, explicit apply, reload, future inheritance, conflict retention, safe schema',engine,flush=True)
+   print('PASS server children design: appearance/labels/visibility/frames CAS, issue isolation, automatic apply, reload, future inheritance, conflict retention, safe schema',engine,flush=True)
    # Every supported department and old/new renderer uses the same server design workflow.
    for design in ('simple','editorial','ink','panels','children','children-forest'):
     page.evaluate(r'''design=>{
@@ -143,13 +143,13 @@ try:
     assert page.locator('[data-bulletin-save]').is_disabled()
     page.locator('[data-bulletin-template-exit]').click();page.wait_for_function("document.querySelector('[data-bulletin-template-edit]')?.disabled===false")
     page.evaluate("window.copyBefore=JSON.stringify({fields:docs.get('saved').fields,inherited:docs.get('saved').inherited,months:docs.get('saved').months,sourceSnapshot:docs.get('saved').sourceSnapshot})")
-    page.locator('[data-bulletin-template-apply]').click();page.wait_for_function("docs.get('saved').settings.templateRevision===1&&document.querySelector('[data-bulletin-print]')?.disabled===false")
-    assert page.evaluate("copyBefore===JSON.stringify({fields:docs.get('saved').fields,inherited:docs.get('saved').inherited,months:docs.get('saved').months,sourceSnapshot:docs.get('saved').sourceSnapshot})"),'Explicit apply must preserve every authored/blank/inherited/month/source value'
-    page.locator('[data-bulletin-save]').click();page.wait_for_function('sent.length===1')
+    assert page.locator('[data-bulletin-template-apply]').count()==0;page.evaluate("window.dispatchEvent(new Event('focus'))");page.wait_for_function("docs.get('saved').settings.templateRevision===1&&document.querySelector('[data-bulletin-print]')?.disabled===false")
+    assert page.evaluate("copyBefore===JSON.stringify({fields:docs.get('saved').fields,inherited:docs.get('saved').inherited,months:docs.get('saved').months,sourceSnapshot:docs.get('saved').sourceSnapshot})"),'Automatic apply must preserve every authored/blank/inherited/month/source value'
+    assert page.locator('[data-bulletin-save]').is_disabled();assert page.evaluate('sent.length===0')
     page.evaluate('editor.reload()');page.wait_for_function("document.querySelector('[data-bulletin-print]')?.disabled===false")
     assert page.evaluate("docs.get('saved').settings.appearance.palette.ink==='#123456'&&docs.get('saved').fields.welcome===''&&docs.get('saved').frames.find(f=>f.id==='newsTitle').family==='MindexChildrenTheme'&&docs.get('saved').frames.find(f=>f.id==='newsTitle').verticalAlign==='middle'")
     page.locator('[data-bulletin-service]').select_option('new');page.wait_for_function("docs.get('new')?.settings.templateRevision===1&&document.querySelector('[data-bulletin-print]')?.disabled===false")
-    assert page.evaluate("docs.get('new').settings.appearance.palette.ink==='#123456'&&docs.get('new').frames.find(f=>f.id==='newsTitle').verticalAlign==='middle'&&JSON.stringify(rows.saved.content)!==original")
+    assert page.evaluate("docs.get('new').settings.appearance.palette.ink==='#123456'&&docs.get('new').frames.find(f=>f.id==='newsTitle').verticalAlign==='middle'&&JSON.stringify(rows.saved.content)===original")
     print('PASS all-department design: seed/save/reopen/layout-only apply/content preservation/reload/new inheritance',design,engine,flush=True)
    geometry=page.evaluate(r'''()=>{
     const B=MindexBulletin,container=document.createElement('div');document.body.append(container);let cases=0;

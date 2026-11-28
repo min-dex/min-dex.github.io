@@ -116,15 +116,15 @@ try:
    assert page.evaluate("editor.refreshSourceRemote()") is True
    assert page.evaluate("documents.get('youth').source.sermon==='갱신된 설교'&&documents.get('youth').fields.news==='직접 쓴 광고'&&documents.get('youth').revision===4&&saved.length===1")
    page.evaluate("samples.youth.source.sermon='편집 중 원본 변경';documents.get('youth').dirty=true")
-   assert page.evaluate("editor.refreshSourceRemote()") is False
-   assert page.evaluate("documents.get('youth').source.sermon==='갱신된 설교'")
+   assert page.evaluate("editor.refreshSourceRemote()") is True
+   assert page.evaluate("documents.get('youth').source.sermon==='편집 중 원본 변경'&&documents.get('youth').dirty")
    page.evaluate("documents.get('youth').dirty=false")
    assert page.evaluate("editor.refreshSourceRemote()") is True
    page.evaluate("window.holdSource=true;window.pendingSource=editor.refreshSourceRemote();void 0")
    page.wait_for_function("typeof releaseSource==='function'")
    page.locator('[data-bulletin-field=scriptureNote]').fill('조회 중 새 입력')
    page.evaluate("window.holdSource=false;releaseSource()")
-   assert page.evaluate("pendingSource") is False
+   assert page.evaluate("pendingSource") is True
    assert page.evaluate("documents.get('youth').fields.scriptureNote==='조회 중 새 입력'")
    page.evaluate("documents.get('youth').dirty=false;document.activeElement.blur();window.rejectSource=true")
    assert page.evaluate("editor.refreshSourceRemote()") is False

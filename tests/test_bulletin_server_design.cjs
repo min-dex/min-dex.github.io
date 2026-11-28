@@ -64,7 +64,7 @@ console.log('PASS frame vertical alignment enum, issue/template roundtrip and un
  const before=JSON.stringify(doc.fields);
  assert(B.followTemplate(doc,next));
  assert.equal(JSON.stringify(doc.fields),before);
- assert.equal(doc.frames.find(f=>f.id==='outline').x,170);
+ assert.equal(doc.frames.find(f=>f.id==='outline').x,180);
  assert.equal(doc.frames.find(f=>f.id==='outline').size,15);
  assert.equal(doc.settings.editorFields.outline.label,'말씀 정리');
  assert.equal(doc.settings.editorFields.outline.visible,false);
@@ -77,9 +77,14 @@ console.log('PASS frame vertical alignment enum, issue/template roundtrip and un
  assert.equal(loaded.settings.templateBaseline.frames.find(f=>f.id==='outline').x,180);
  assert.equal(B.followTemplate(doc,next),false);
  const old={...doc,source:{...source,date:'2026-10-25'}};
- assert.equal(B.followTemplate(old,{...next,revision:3}),false);
+ assert.equal(B.followTemplate(old,{...next,revision:3}),true);
+ assert.equal(JSON.stringify(old.fields),before);
+ const other={...B.normalizeSnapshot({settings:{design:'simple'}}),revision:2,source};
+ const preserved=JSON.stringify(other);
+ assert.equal(B.followTemplate(other,next),false);
+ assert.equal(JSON.stringify(other),preserved);
 }
-console.log('PASS live template metadata, three-way layout merge, typed text preservation, dated boundaries and persistence');
+console.log('PASS live template metadata, same-design historical layout propagation, typed text preservation, other-design isolation and persistence');
 
 assert.equal(B.normalizeSnapshot({settings:{design:'youth-tov',appearance:{labels:{tovOutlineTitle:'말씀 이해'}}}}).settings.appearance.labels.tovOutlineTitle,'설교 요점');
 assert.equal(B.normalizeSnapshot({settings:{design:'youth-tov',appearance:{labels:{tovOutlineTitle:'직접 쓴 제목'}}}}).settings.appearance.labels.tovOutlineTitle,'직접 쓴 제목');

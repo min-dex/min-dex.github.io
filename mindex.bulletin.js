@@ -1504,33 +1504,20 @@
   }
   function followTemplate(doc,row) {
     row=normalizeTemplate(row);
-    if(doc.source?.date<row.effective_from)return false;
     if(doc.source?.department!==row.department)throw Error("다른 부서의 공통 양식은 적용할 수 없습니다.");
-    if(doc.settings.templateKey===row.template_key&&Number(doc.settings.templateRevision)>=row.revision)return false;
     const incoming=normalizeSnapshot({settings:{...row.layout,theme:row.layout.background},frames:row.layout.frames});
-    const baseline=doc.settings.templateBaseline||normalizeSnapshot({settings:{design:doc.settings.design}});
-    const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
-    // Only untouched layout properties follow a template. Authored text is never a layout property.
-    const merge=(current,previous,next)=>{
-      const result=clone(current||{});
-      for(const [key,value] of Object.entries(next||{})){
-        if(isRecord(value))result[key]=merge(current?.[key],previous?.[key],value);
-        else if(!Object.hasOwn(current||{},key)||equal(current[key],previous?.[key]))result[key]=clone(value);
-      }
-      return result;
-    };
-    doc.frames=incoming.frames.map(frame=>{
-      const current=doc.frames.find(f=>f.id===frame.id);
-      const previous=baseline.frames.find(f=>f.id===frame.id);
-      return current?merge(current,previous,frame):clone(frame);
-    });
-    const next=merge(doc.settings,baseline.settings,incoming.settings);
-    // Editor labels/visibility are server policy, while field values retain their original keys.
-    next.editorFields=clone(incoming.settings.editorFields||{});
+    const sameDesign=doc.settings.design===incoming.settings.design;
+    // A date chooses the initial design. Later edits belong to that design,
+    // including already-issued weeks, never to a different saved design.
+    if(!sameDesign&&(doc.revision||doc.hasLocal||doc.source?.date<row.effective_from))return false;
+    const before=JSON.stringify([doc.settings,doc.frames,doc.inherited.common]);
+    const next=clone(incoming.settings);
+    for(const key of ["eventsMonth","rosterMonth","archiveReference"])delete next[key];
     Object.assign(doc.settings,next,{templateKey:row.template_key,templateRevision:row.revision,
       templateBaseline:{settings:clone(incoming.settings),frames:clone(incoming.frames)}});
+    doc.frames=clone(incoming.frames);
     doc.inherited.common={...doc.inherited.common,...row.common};
-    return true;
+    return before!==JSON.stringify([doc.settings,doc.frames,doc.inherited.common]);
   }
   function storedValue(doc) {
     const {theme,compactOrder,eventsMonth,rosterMonth}=doc.settings;
@@ -1562,7 +1549,7 @@
       <button type="button" data-bulletin-template-edit hidden>공통 양식 편집</button><button type="button" data-bulletin-template-exit hidden>주보로 돌아가기</button><span class="bulletin-spacer"></span><div class="bulletin-history" role="group" aria-label="편집 기록">
       <button type="button" data-bulletin-undo aria-label="주보 실행 취소" title="실행 취소"><i data-lucide="undo-2"></i></button><button type="button" data-bulletin-redo aria-label="주보 다시 실행" title="다시 실행"><i data-lucide="redo-2"></i></button></div>
       <button type="button" data-bulletin-save><span>저장</span></button><button class="bulletin-primary" type="button" data-bulletin-print disabled><span>인쇄 / PDF</span></button></header>
-      <div class="bulletin-meta"><div class="bulletin-status" role="status"></div><div class="bulletin-source-actions" role="group" aria-label="주보 자료"><button type="button" data-bulletin-local title="서버에 보관된 복구 초안을 불러옵니다">임시 초안</button><button type="button" data-bulletin-reload title="DB에 저장한 주보 내용과 양식을 다시 불러옵니다">저장본 불러오기</button><button type="button" data-bulletin-refresh title="연결된 예배·교회력에서 최신 자료를 가져옵니다"><span>예배 자료 갱신</span></button></div></div>
+      <div class="bulletin-meta"><div class="bulletin-status" role="status"></div><div class="bulletin-source-actions" role="group" aria-label="주보 자료"><button type="button" data-bulletin-local title="서버에 보관된 복구 초안을 불러옵니다">임시 초안</button><button type="button" data-bulletin-reload title="DB에 저장한 주보 내용과 양식을 다시 불러옵니다">저장본 불러오기</button><span class="bulletin-linked-status">예배 자료 자동 연동</span></div></div>
       <div class="bulletin-body"><aside class="bulletin-inspector" aria-label="주보 편집 도구">
       <div class="bulletin-modes" role="group" aria-label="편집 방식"><button type="button" data-bulletin-mode="content">내용</button><button type="button" data-bulletin-mode="layout">양식</button></div>
       <div class="bulletin-properties"></div></aside><section class="bulletin-preview" aria-label="인쇄 미리보기"><div class="bulletin-preview-head"><strong>미리보기</strong><div class="bulletin-page-nav" role="group" aria-label="주보 면 이동"><button type="button" data-bulletin-page="0">겉면</button><button type="button" data-bulletin-page="1">안쪽</button></div><span>A4 가로 · 2쪽</span></div><div class="bulletin-canvas" tabindex="0" aria-label="주보 페이지"></div></section></div></section>`;
@@ -1728,7 +1715,6 @@
       q("[data-bulletin-print]").disabled=printing||loading||!assetLoaded||!!error||!doc?.source?.order.length||issues.size>0;
       q("[data-bulletin-undo]").disabled=loading||!doc?.history.length;
       q("[data-bulletin-redo]").disabled=loading||!doc?.future.length;
-      q("[data-bulletin-refresh]").disabled=loading||!!doc?.saving||!!templateSession;
       q("[data-bulletin-save]").disabled=loading||!!error||!!doc?.saving||!doc?.dbLoaded||(!doc?.dirty&&!!doc?.revision);
       const saveLabel=q("[data-bulletin-save] span"),saveText=doc?.saving?"저장 중…":templateSession?"공통 양식 저장":"주보 저장";
       if(saveLabel.textContent!==saveText)saveLabel.textContent=saveText;
@@ -1775,7 +1761,7 @@
           p.innerHTML=`<section class="bulletin-property-section"><h3>${escape(templateTitle(doc))} · 문구</h3><p class="bulletin-help">새 주보에 사용할 문구입니다.</p>${profileKeys.map(field).join("")}</section>`;
           fitInputs();return;
         }
-        p.innerHTML=`${!swissDesign(doc.settings.design)?'<button type="button" data-bulletin-use-swiss title="문구와 연결 자료를 유지하고 공통 그리드를 적용합니다.">공통 그리드 양식 적용</button>':""}${child&&doc.settings.design!=="children-forest"?'<button type="button" data-bulletin-use-forest title="작성한 내용은 유지하고 배치만 바꿉니다.">작은 숲 양식 적용</button>':""}${options.loadTemplate&&TEMPLATE_KEYS[doc.source?.department]?child?'<button type="button" data-bulletin-template-apply title="작성한 문구는 유지하고 양식만 가져옵니다.">최신 공통 양식 가져오기</button>':`<div class="bulletin-connected"><strong>${escape(templateTitle(doc))}</strong><button type="button" data-bulletin-template-apply title="작성한 문구는 유지하고 양식만 가져옵니다.">최신 공통 양식 가져오기</button></div>`:""}${doc.source?.department==="youth"&&!tov?'<button type="button" data-bulletin-use-tov title="작성한 내용은 유지하고 배치만 바꿉니다.">토브 양식 적용</button>':""}${!child&&doc.source?.department!=="youth"&&doc.settings.design!=="simple"?'<button type="button" data-bulletin-use-simple title="내용은 유지하고 배치만 바꿉니다.">새 청년부 양식 적용</button>':""}${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section" aria-label="이번 주 내용">${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label>`:""}${(child?[...(["children-forest","swiss-children"].includes(doc.settings.design)?["coverTitle"]:[]),"news","memoryVerse","memoryReference","readingPlan","leader","issue"]:tov?["news","leader",...(swissDesign(doc.settings.design)?["scriptureNote"]:[]),"outline","nextPrayer","worshipPoint",...(!swissDesign(doc.settings.design)||!doc.frames.find(f=>f.id==="reflection")?.hidden?["reflection"]:[]),"issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"weekly"])||""}><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
+        p.innerHTML=`${!swissDesign(doc.settings.design)?'<button type="button" data-bulletin-use-swiss title="문구와 연결 자료를 유지하고 공통 그리드를 적용합니다.">공통 그리드 양식 적용</button>':""}${child&&doc.settings.design!=="children-forest"?'<button type="button" data-bulletin-use-forest title="작성한 내용은 유지하고 배치만 바꿉니다.">작은 숲 양식 적용</button>':""}${options.loadTemplate&&TEMPLATE_KEYS[doc.source?.department]?`<div class="bulletin-connected"><strong>${escape(templateTitle(doc))}</strong><small>예배 날짜에 맞춰 자동 적용</small></div>`:""}${doc.source?.department==="youth"&&!tov?'<button type="button" data-bulletin-use-tov title="작성한 내용은 유지하고 배치만 바꿉니다.">토브 양식 적용</button>':""}${!child&&doc.source?.department!=="youth"&&doc.settings.design!=="simple"?'<button type="button" data-bulletin-use-simple title="내용은 유지하고 배치만 바꿉니다.">새 청년부 양식 적용</button>':""}${modern?`<div class="bulletin-connected"><span>예배에서 연결됨</span><strong>${escape(doc.source?.sermon||"설교 제목 미입력")}</strong><small>${escape(doc.source?.scripture||"본문 미입력")}</small></div>`:""}<section class="bulletin-property-section" aria-label="이번 주 내용">${doc.source?.hasArchiveReference?`<label><input type="checkbox" data-bulletin-setting="archiveReference" ${doc.settings.archiveReference!==false?"checked":""}> 발행 원본의 담당·요점·위원표 사용</label>`:""}${(child?[...(["children-forest","swiss-children"].includes(doc.settings.design)?["coverTitle"]:[]),"news","memoryVerse","memoryReference","readingPlan","leader","issue"]:tov?["news","leader",...(swissDesign(doc.settings.design)?["scriptureNote"]:[]),"outline","nextPrayer","worshipPoint",...(!swissDesign(doc.settings.design)||!doc.frames.find(f=>f.id==="reflection")?.hidden?["reflection"]:[]),"issue"]:modern?["news","outline"]:["news","outline","leader","issue"]).map(field).join("")}<details class="bulletin-property-section" data-bulletin-section="weekly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"weekly"])||""}><summary>담당·발행 정보</summary>${(child?["announcer"]:modern?["leader","issue","announcer","sermonReference","outlineTitle"]:["announcer","sermonReference","outlineTitle"]).map(field).join("")}</details></section>
           ${modern?`<details class="bulletin-property-section" data-bulletin-section="greetings" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"greetings"])||""}><summary>환영 문구 · 정기 안내</summary><p class="bulletin-help">${doc.settings.templateKey?"이번 주에만 적용됩니다.":"새 주보에도 이어지는 문구입니다."}</p>${field("welcome")}${field("notices")}</details>`:""}
           <details class="bulletin-property-section" data-bulletin-section="monthly" ${window.MindexDisclosure?.attrs(["bulletin",doc.id,"monthly"])||""}><summary>이번 달 · ${child?"일정과 주제":"일정과 위원"}</summary><p class="bulletin-help">일정 변경은 같은 달의 새 주보에도 적용됩니다.</p>${child?field("monthlyTheme"):""}${field("eventsText")}<button type="button" data-bulletin-calendar-events>교회력 일정 불러오기</button><div class="bulletin-number-grid">
           <label>교회 일정<input type="month" data-bulletin-setting="eventsMonth" value="${escape(doc.settings.eventsMonth||doc.source?.eventsMonth||"")}"></label>
@@ -1856,7 +1842,7 @@
             const row=await options.loadTemplate(templateKey());if(request!==serial||signal.aborted)return;
             templateRow=row?normalizeTemplate(row):null;templateError="";
             if(templateRow&&!target.revision&&!target.hasLocal&&!target.settings.templateKey&&source.date>=templateRow.effective_from){applyTemplate(target,templateRow);}
-            else if(templateRow&&!target.dirty)followTemplate(target,templateRow);
+            else if(templateRow)followTemplate(target,templateRow);
           }catch(e){templateError=e.message;}
           target.templateChecked=true;
         }
@@ -1967,13 +1953,6 @@
         if(templateSession){try{const target=doc,before=JSON.stringify(snapshot(target));await retainRecovery(target,snapshot(target));if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");await writeLocal(target,target.key,{version:3,...snapshot(target),templateDirty:false,templateRevision:target.revision,savedAt:Date.now()});if(doc!==target||JSON.stringify(snapshot(target))!==before)throw Error("입력이 바뀌어 현재 초안을 유지했습니다.");exitTemplate();templateDrafts.delete(templateKey());templateDraft=null;void editTemplate();}catch(e){saveError=e.message;status();}}return;
       }
       if(b.hasAttribute("data-bulletin-template-exit")){exitTemplate();return;}
-      if(b.hasAttribute("data-bulletin-template-apply")){
-        const target=doc;loading=true;status();
-        void options.loadTemplate(templateKey()).then(row=>{
-          if(doc!==target||signal.aborted)return;if(!row)throw new Error("공통 양식을 먼저 저장해 주세요.");
-          row=normalizeTemplate(row);remember();applyTemplate(doc,row,{common:false});persist();templateError="";assetLoaded=false;return readyBackground(doc).then(()=>{if(doc===target)assetLoaded=true;});
-        }).catch(e=>{if(doc===target)saveError=e.message;}).finally(()=>{if(!signal.aborted){loading=false;properties();preview();status();}});return;
-      }
       if(b.hasAttribute("data-bulletin-use-swiss")){remember();const logo=doc.settings.appearance?.assets?.logo;doc.settings.design="swiss-"+doc.source.department;doc.frames=defaultFrames(doc.settings.design);delete doc.settings.appearance;if(logo)doc.settings.appearance={assets:{logo}};persist();properties();void designImages();return;}
       if(b.hasAttribute("data-bulletin-use-forest")){remember();doc.settings.design="children-forest";doc.frames=defaultFrames("children-forest");assetLoaded=false;persist();properties();preview();void readyBackground(doc).then(()=>{assetLoaded=true;preview();}).catch(e=>{error=e.message;status();});return;}
       if(b.hasAttribute("data-bulletin-use-tov")&&doc.source?.department==="youth"){remember();doc.settings.design="youth-tov";delete doc.settings.appearance;doc.frames=defaultFrames("youth-tov");persist();properties();void designImages();return;}
@@ -1994,7 +1973,6 @@
         reviewLocalDraft();return;
       }
       if(b.dataset.bulletinMode){mode=b.dataset.bulletinMode;properties();preview();}
-      if(b.hasAttribute("data-bulletin-refresh")){remember();doc.inherited={common:doc.settings.templateKey?doc.inherited.common:{},months:{}};doc.sourceSnapshot=null;doc.settings.archiveReference=false;persist();void load(q("[data-bulletin-service]").value);}
       if(b.hasAttribute("data-bulletin-undo"))history();
       if(b.hasAttribute("data-bulletin-redo"))history(true);
       if(b.hasAttribute("data-bulletin-print"))void print();
@@ -2076,6 +2054,7 @@
     for(const event of ["input","change","pointerdown","keydown"])on(root,event,()=>interactionRevision++);
     const remoteBlocked=()=>signal.aborted||!root.isConnected||!doc||loading||printing||printSession||drag||doc.dirty||doc.saving||!!doc.saveError||!!error
       ||root.contains(document.activeElement)&&document.activeElement.matches("input,textarea,select,[contenteditable]")||options.remoteBlocked?.();
+    const projectionBlocked=()=>signal.aborted||!root.isConnected||!doc||loading||printing||printSession||drag||doc.saving||!!error||!!(options.projectionBlocked||options.remoteBlocked)?.();
     async function refreshRemote(kind,id){
       if(kind==="worship"&&id===doc?.id||kind==="calendar"||kind==="praise")return refreshSourceRemote();
       if(kind==="bulletin-template"&&!templateSession)return refreshTemplateRemote(id);
@@ -2105,12 +2084,12 @@
     }
     async function refreshTemplateRemote(id=templateKey()){
       if(templateSession||!options.loadTemplate||!TEMPLATE_KEYS[doc?.source?.department]||id!==templateKey())return true;
-      if(remoteBusy||remoteBlocked()||document.hidden)return false;
+      if(remoteBusy||projectionBlocked()||root.contains(document.activeElement)&&document.activeElement.matches("input,textarea,select,[contenteditable]")||document.hidden)return false;
       const target=doc,request=serial,edit=interactionRevision,before=JSON.stringify(snapshot(target));
       remoteBusy=true;
       try{
         const row=await options.loadTemplate(id);
-        const stale=()=>remoteBlocked()||doc!==target||request!==serial||edit!==interactionRevision||JSON.stringify(snapshot(target))!==before;
+        const stale=()=>projectionBlocked()||root.contains(document.activeElement)&&document.activeElement.matches("input,textarea,select,[contenteditable]")||doc!==target||request!==serial||edit!==interactionRevision||JSON.stringify(snapshot(target))!==before;
         if(stale())return false;
         if(!row){if(templateError){templateError="";status();}return true;}
         const next={...target,...normalizeSnapshot(snapshot(target))};
@@ -2126,14 +2105,14 @@
       finally{remoteBusy=false;}
     }
     async function refreshSourceRemote(){
-      if(templateSession||remoteBusy||remoteBlocked()||document.hidden||doc.source?.date<"2026-11-22")return false;
-      const target=doc,request=serial,edit=interactionRevision,before=JSON.stringify(snapshot(target));remoteBusy=true;
+      if(templateSession||remoteBusy||projectionBlocked()||document.hidden||doc.source?.date<"2026-11-22")return false;
+      const target=doc,request=serial,settings=JSON.stringify(target.settings);remoteBusy=true;
       try{
         const source=await options.loadSource(target.id,target.settings);
-        if(remoteBlocked()||doc!==target||request!==serial||edit!==interactionRevision||JSON.stringify(snapshot(target))!==before)return false;
+        if(projectionBlocked()||doc!==target||request!==serial||JSON.stringify(target.settings)!==settings)return false;
         const signature=s=>JSON.stringify({...s,loadedAt:undefined});
         const changed=signature(source)!==signature(target.source);sourceRefreshError="";
-        if(changed){const positions=[".bulletin-canvas",".bulletin-inspector"].map(s=>[s,q(s).scrollTop,q(s).scrollLeft]);target.source=source;properties();preview();for(const [s,top,left] of positions){q(s).scrollTop=top;q(s).scrollLeft=left;}}
+        if(changed){const positions=[".bulletin-canvas",".bulletin-inspector"].map(s=>[s,q(s).scrollTop,q(s).scrollLeft]);target.source=source;if(!root.contains(document.activeElement)||!document.activeElement.matches("input,textarea,select,[contenteditable]"))properties();preview();for(const [s,top,left] of positions){q(s).scrollTop=top;q(s).scrollLeft=left;}}
         status();return true;
       }catch(e){if(doc===target){sourceRefreshError="연동 자료 갱신 실패 · "+e.message;status();}return false;}
       finally{remoteBusy=false;}
@@ -2141,6 +2120,7 @@
     const refreshTemplate=()=>void refreshTemplateRemote().then(()=>refreshSourceRemote());
     const templateTimer=setInterval(refreshTemplate,15000);
     on(window,"focus",refreshTemplate);on(window,"online",refreshTemplate);
+    on(root,"focusout",()=>queueMicrotask(refreshTemplate));
     on(document,"visibilitychange",refreshTemplate);
     signal.addEventListener("abort",()=>clearInterval(templateTimer),{once:true});
     function remoteIdentity(){return doc?{kind:templateSession?"bulletin-template":"bulletin",recordId:templateSession?templateKey():q("[data-bulletin-service]").value}:null;}

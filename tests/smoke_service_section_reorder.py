@@ -13,7 +13,7 @@ try:
                 page.route("**/*", lambda route: route.continue_()
                            if urlsplit(route.request.url).netloc == urlsplit(url).netloc else route.abort())
                 page.goto(url + "?output=presenter&mindexSmokeRaw=1")
-                page.wait_for_function("typeof moveServiceOutlineSection === 'function'")
+                page.wait_for_function("() => { try { return typeof state === 'object' && typeof moveServiceOutlineSection === 'function'; } catch { return false; } }")
                 result = page.evaluate("""() => {
                   const sid='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
                   const keys=['praise','offering','scripture','sermon','decision'];

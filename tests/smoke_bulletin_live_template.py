@@ -68,9 +68,10 @@ try:
     page.evaluate("blocked=true")
     assert not page.evaluate("(key)=>editor.refreshRemote('bulletin-template',key)",key)
     page.evaluate("blocked=false")
-    assert page.evaluate("(key)=>editor.refreshRemote('bulletin-template',key)",key)
+    page.evaluate("window.dispatchEvent(new Event('focus'))")
+    page.wait_for_function("docs.get('fixture').settings.templateRevision===row.revision")
     assert page.locator("[data-bulletin-field="+field+"]").input_value()=="지금 작성 중"
-    assert "새 이름" in page.locator("[data-bulletin-field="+field+"]").locator("..").inner_text()
+    assert "새 이름" in page.locator("[data-bulletin-field="+field+"]").locator("..").inner_text(), page.evaluate("({field})=>({field,settings:docs.get('fixture').settings.editorFields,remote:row.layout.editorFields,revision:docs.get('fixture').settings.templateRevision,remoteRevision:row.revision,design:docs.get('fixture').settings.design,remoteDesign:row.layout.design,refreshError:document.querySelector('.bulletin-status').textContent})",{"field":field})
     assert page.evaluate("docs.get('fixture').fields.welcome")== "직접 쓴 환영"
     page.evaluate("editor.destroy()")
     print("PASS",engine,department,"server labels/visibility, common save, delayed live adoption and original text",flush=True)

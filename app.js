@@ -5332,13 +5332,13 @@ function publishDepartmentTabChange(calendar, serviceIds = [], { calendarOnly = 
   try { departmentTabSync?.channel?.postMessage(message); } catch {}
 
 }
-function departmentRefreshBlocked() {
+function departmentRefreshBlocked({projection=false}={}) {
   const playingMedia = [...document.querySelectorAll("audio,video")].some(media => !media.paused && !media.ended);
   const dialogOpen = [...document.querySelectorAll('dialog[open],[aria-modal="true"]')].some(node => node.getClientRects().length);
   return dialogOpen || serviceMusicHasActivePlayback() || state.serviceMusic.pending || playingMedia || !canUseClientData() || document.hidden || state.calendarLoading || state.calendarCellSaves.size || departmentCalendarWrites.size
     || state.saving || state.loading || isPresenterOutputWindowOpen() || state.presenter.outputPendingAt
-    || document.activeElement?.matches('input,textarea,select,[contenteditable="true"]')
-    || (["service", "presenter"].includes(state.module) && sundayEditSyncHasLocalDraft(state.selectedServiceId));
+    || (!projection && document.activeElement?.matches('input,textarea,select,[contenteditable="true"]'))
+    || (!projection && ["service", "presenter"].includes(state.module) && sundayEditSyncHasLocalDraft(state.selectedServiceId));
 }
 function connectDepartmentRealtime() {
   const sync = departmentTabSync;
@@ -15141,6 +15141,7 @@ function mountServiceBulletinWorkbench(service) {
   const bulletinClient = state.client;
   host.bulletinController = window.MindexBulletin.mount(host, {
     remoteBlocked: () => state.client !== bulletinClient || departmentRefreshBlocked(),
+    projectionBlocked: () => state.client !== bulletinClient || departmentRefreshBlocked({projection:true}),
     documents: bulletinTabSessions.get(tabId),
     onStateChange: () => syncSaveButtonChrome(),
     serviceId: service.id,
